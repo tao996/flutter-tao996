@@ -109,7 +109,7 @@ abstract class ModelHelper<T> implements IModelHelper<T> {
   Future<void> init(String language) async {
     _logService.d('[ModelHelper]: Initializing $tableName...');
     if (useCache) {
-      await _loadAllFromDb();
+      await loadAllFromDb();
       _logService.d(
         '[ModelHelper]: $tableName cache loaded with ${_cache.length} items.',
       );
@@ -120,14 +120,14 @@ abstract class ModelHelper<T> implements IModelHelper<T> {
   /// 获取全部的记录（可能使用缓存）
   Future<List<T>> getAll() async {
     if (this.useCache) {
-      return _cache.isNotEmpty ? Future.value(_cache) : await _loadAllFromDb();
+      return _cache.isNotEmpty ? Future.value(_cache) : await loadAllFromDb();
     } else {
-      return await _loadAllFromDb();
+      return await loadAllFromDb();
     }
   }
 
   /// 从数据库中查询全部的记录并更新缓存。
-  Future<List<T>> _loadAllFromDb() async {
+  Future<List<T>> loadAllFromDb() async {
     try {
       final List<Map<String, dynamic>> maps = await _dbService.query(tableName);
       final rows = maps.map((map) => fromMap(map)).toList();
@@ -204,7 +204,7 @@ abstract class ModelHelper<T> implements IModelHelper<T> {
               _logService.d(
                 '[ModelHelper]: Updated entity not found in cache. Consider reloading cache for $tableName.',
               );
-              await _loadAllFromDb(); // 确保缓存最新
+              await loadAllFromDb(); // 确保缓存最新
             }
           }
           _logService.d(

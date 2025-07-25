@@ -25,6 +25,29 @@ export 'src/services/webview_service.dart';
 
 export 'src/translation/translation.dart';
 
+
+export 'src/ui/page/image_viewer.dart';
+export 'src/ui/page/network_controller.dart';
+export 'src/ui/page/network_widget.dart';
+export 'src/ui/page/qrcode_view.dart';
+export 'src/ui/page/search_controller.dart';
+export 'src/ui/page/search_widget.dart';
+export 'src/ui/page/smart_refresher_controller.dart';
+export 'src/ui/page/smart_refresher_widget.dart';
+
+export 'src/ui/widgets/avatar.dart';
+export 'src/ui/widgets/buttons.dart';
+export 'src/ui/widgets/dialog.dart';
+export 'src/ui/widgets/event.dart';
+export 'src/ui/widgets/image.dart';
+export 'src/ui/widgets/loading.dart';
+export 'src/ui/widgets/padding.dart';
+export 'src/ui/widgets/scaffold.dart';
+export 'src/ui/widgets/separator_line.dart';
+export 'src/ui/widgets/text.dart';
+
+export 'src/ui/app.dart';
+
 import 'package:get_it/get_it.dart';
 import 'package:tao996/tao996.dart';
 import 'tao996_platform_interface.dart';
@@ -106,6 +129,7 @@ IPathService getIPathService() {
   return GetIt.instance<IPathService>();
 }
 
+/// 注意：你需要在项目中为其注册
 ISettingsService getISettingsService() {
   return GetIt.instance<ISettingsService>();
 }
