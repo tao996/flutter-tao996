@@ -45,6 +45,11 @@ abstract class MySmartRefresherController<T>
     items.assignAll(newItems);
   }
 
+  void loadNoData() {
+    refreshController.loadNoData();
+    hasMore.value = false;
+  }
+
   Future<void> smartRefresh({bool isRefresh = false}) async {
     if (isRefresh) {
       currentPage = 1;
@@ -59,7 +64,7 @@ abstract class MySmartRefresherController<T>
         } else {
           refreshController.loadComplete();
         }
-        refreshController.loadNoData();
+        loadNoData();
         assignItems([]);
       } else {
         assignItems(newItems);
@@ -75,7 +80,7 @@ abstract class MySmartRefresherController<T>
       }
     } else {
       if (!isRefresh) {
-        refreshController.loadNoData();
+        loadNoData();
       } else {
         refreshController.refreshCompleted();
       }

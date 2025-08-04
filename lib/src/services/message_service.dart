@@ -22,6 +22,7 @@ abstract class IMessageService {
     String message, {
     SnackPosition? snackPosition,
     bool? success,
+    int seconds = 4,
   });
 
   SnackbarController success(String message);
@@ -99,18 +100,19 @@ class MessageService implements IMessageService {
     String message, {
     SnackPosition? snackPosition,
     bool? success,
+    int seconds = 4,
   }) {
     return Get.snackbar(
       title,
       message,
       snackPosition: snackPosition ?? SnackPosition.BOTTOM,
       margin: const EdgeInsets.all(12),
-      icon:
-          success == null
-              ? null
-              : (success
-                  ? Icon(Icons.check_circle_outline)
-                  : Icon(Icons.close_outlined)),
+      duration: seconds == 0 ? null : Duration(seconds: seconds),
+      icon: success == null
+          ? null
+          : (success
+                ? Icon(Icons.check_circle_outline)
+                : Icon(Icons.close_outlined)),
     );
   }
 
@@ -121,6 +123,6 @@ class MessageService implements IMessageService {
 
   @override
   SnackbarController error(String message) {
-    return snackbar('error'.tr, message, success: false);
+    return snackbar('error'.tr, message, success: false, seconds: 8);
   }
 }

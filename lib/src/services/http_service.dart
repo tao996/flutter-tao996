@@ -23,6 +23,9 @@ abstract class IHttpService {
     Dio? dio,
     Map<String, dynamic>? queryParameters,
     CancelToken? cancelToken,
+    Object? data,
+    Options? options,
+    void Function(int, int)? onReceiveProgress,
   });
 
   Future<HttpResponse> post(
@@ -30,9 +33,20 @@ abstract class IHttpService {
     Dio? dio,
     Map<String, dynamic>? data,
     CancelToken? cancelToken,
+    Map<String, dynamic>? queryParameters,
+    Options? options,
+    void Function(int, int)? onSendProgress,
+    void Function(int, int)? onReceiveProgress,
   });
 
-  Future<HttpResponse> head(String url, {Dio? dio});
+  Future<HttpResponse> head(
+    String url, {
+    Dio? dio,
+    Object? data,
+    Map<String, dynamic>? queryParameters,
+    Options? options,
+    CancelToken? cancelToken,
+  });
 
   Future<bool> download(
     String url,
@@ -42,8 +56,6 @@ abstract class IHttpService {
     Options? options,
     CancelToken? cancelToken,
   });
-
-  Dio createDio();
 }
 
 class DioHttpClient implements IHttpService {
@@ -52,13 +64,45 @@ class DioHttpClient implements IHttpService {
   final ISettingsService _settingSer = GetIt.instance.get<ISettingsService>();
   final IDebugService _debugSer = GetIt.instance.get<IDebugService>();
 
-  DioHttpClient() {
-    _dio = createDio();
+  DioHttpClient({BaseOptions? options}) {
+    _dio = createDio(options: options);
   }
 
-  @override
-  Dio createDio() {
-    final dio = Dio();
+  /*
+  final BaseOptions options = BaseOptions(
+    baseUrl: 'https://api.example.com',
+    // 你的 API 基础 URL
+    connectTimeout: const Duration(seconds: 10),
+    // 连接超时时间
+    receiveTimeout: const Duration(seconds: 15),
+    // 接收超时时间
+
+    // 定义请求头
+    headers: {
+      // User-Agent: 标识客户端类型和版本。
+      // 对于 Flutter 应用，可以包含应用名称、版本、操作系统信息。
+      'User-Agent': 'YourAppName/1.0.0 (Flutter; Android/iOS)',
+
+      // Accept: 客户端能够处理的响应内容类型。
+      // 通常用于指定接受 JSON 数据。
+      'Accept': 'application/json',
+
+      // Accept-Encoding: 客户端支持的内容编码方式，用于数据压缩。
+      // gzip 和 deflate 是常见的压缩算法。
+      'Accept-Encoding': 'gzip, deflate',
+
+      // 还可以添加其他自定义头，例如认证 token
+      // 'Authorization': 'Bearer your_token_here',
+      // 'X-Custom-Header': 'some_value',
+    },
+    contentType: Headers.jsonContentType,
+    // 设置默认请求体内容类型为 JSON
+    responseType: ResponseType.json, // 期望的响应类型为 JSON
+  );
+*/
+
+  Dio createDio({BaseOptions? options}) {
+    final dio = Dio(options);
     String proxyAddress = _settingSer.proxyAddress;
     String proxyPort = _settingSer.proxyPort;
     bool isProxy = _settingSer.useProxy;
@@ -80,19 +124,71 @@ class DioHttpClient implements IHttpService {
     return dio;
   }
 
+  /// 创建一个打印日志的 dio
+  ///
+  /// [request] 是否打印请求信息, [requestHeader] 是否打印请求头信息, [requestBody] 是否打印请求体（body),
+  /// [responseHeader] 是否打印响应头信息,[responseBody] 是否打印响应体信息,
+  /// [error] 是否打印错误信息
+  /// [all] 全部设置为 true; [allRequest] 将 request 全部设置为 ture; [allResponse] 将 response 全部设置为 true
+  Dio createLogDio({
+    bool request = false,
+    bool requestHeader = false,
+    bool requestBody = false,
+    bool responseHeader = false,
+    bool responseBody = false,
+    bool error = true,
+    // 快捷设置
+    bool all = true,
+    bool allRequest = false,
+    bool allResponse = false,
+  }) {
+    final dio = createDio();
+
+    // 只要有一个设置，即关闭 all
+    if (allRequest ||
+        allResponse ||
+        request ||
+        requestHeader ||
+        requestBody ||
+        responseHeader ||
+        responseBody) {
+      all = false;
+    }
+    dio.interceptors.add(
+      LogInterceptor(
+        request: all || allRequest || request,
+        requestHeader: all || allRequest || requestHeader,
+        requestBody: all || allRequest || requestBody,
+        responseHeader: all || allResponse || responseHeader,
+        responseBody: all || allResponse || responseBody,
+        error: error,
+      ),
+    );
+    return dio;
+  }
+
+  Dio _getDio(Dio? dio) {
+    return (dio ?? _dio);
+  }
+
   @override
   Future<HttpResponse> get(
     String url, {
     Dio? dio,
     Map<String, dynamic>? queryParameters,
     CancelToken? cancelToken,
+    Object? data,
+    Options? options,
+    void Function(int, int)? onReceiveProgress,
   }) async {
-    _debugSer.d('dio.get: $url');
-    _debugSer.d('dio.get queryParameters: $queryParameters');
-    final response = await (dio ?? _dio).get(
+    _debugSer.d('dio.get:[$url]');
+    final response = await _getDio(dio).get(
       url,
       queryParameters: queryParameters,
       cancelToken: cancelToken,
+      data: data,
+      options: options,
+      onReceiveProgress: onReceiveProgress,
     );
     return HttpResponse(data: response.data, statusCode: response.statusCode);
   }
@@ -103,20 +199,42 @@ class DioHttpClient implements IHttpService {
     Dio? dio,
     Map<String, dynamic>? data,
     CancelToken? cancelToken,
+    Map<String, dynamic>? queryParameters,
+    Options? options,
+    void Function(int, int)? onSendProgress,
+    void Function(int, int)? onReceiveProgress,
   }) async {
-    _debugSer.d('dio.post: $url',args: data);
-    final response = await (dio ?? _dio).post(
+    _debugSer.d('dio.post:[$url]', args: data);
+    final response = await _getDio(dio).post(
       url,
       data: data == null ? null : FormData.fromMap(data),
       cancelToken: cancelToken,
+      queryParameters: queryParameters,
+      options: options,
+      onSendProgress: onSendProgress,
+      onReceiveProgress: onReceiveProgress,
     );
     return HttpResponse(data: response.data, statusCode: response.statusCode);
   }
 
   @override
-  Future<HttpResponse> head(String url, {Dio? dio}) async {
-    _debugSer.d('dio.header: $url');
-    final response = await (dio ?? _dio).head(url);
+  Future<HttpResponse> head(
+    String url, {
+    Dio? dio,
+    bool? log,
+    Object? data,
+    Map<String, dynamic>? queryParameters,
+    Options? options,
+    CancelToken? cancelToken,
+  }) async {
+    _debugSer.d('dio.header:[$url]');
+    final response = await _getDio(dio).head(
+      url,
+      data: data,
+      queryParameters: queryParameters,
+      options: options,
+      cancelToken: cancelToken,
+    );
     return HttpResponse(data: response.data, statusCode: response.statusCode);
   }
 
@@ -125,11 +243,12 @@ class DioHttpClient implements IHttpService {
     String url,
     String savePath, {
     Dio? dio,
+    bool? log,
     void Function(int, int)? onReceiveProgress,
     Options? options,
     CancelToken? cancelToken,
   }) async {
-    final Response response = await (dio ?? _dio).download(
+    final Response response = await _getDio(dio).download(
       url,
       savePath,
       onReceiveProgress: onReceiveProgress,
@@ -192,7 +311,7 @@ class NetworkInterceptor extends Interceptor {
   @override
   void onError(DioException err, ErrorInterceptorHandler handler) {
     // 处理网络相关的错误
-    _debugService.d('拦截器：错误处理(网络连接错误或网络异常) ${err.message}');
+    _debugService.d('拦截器：错误处理(网络连接错误或网络异常)', args: err);
     // throw NoNetworkException('网络连接错误或无网络异常');
     // if (err.type == DioExceptionType.connectionError ||
     //     err.type == DioExceptionType.unknown &&

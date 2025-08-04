@@ -7,7 +7,6 @@ class MyText {
   }
 
   static Widget h1(BuildContext context, String text) {
-
     return Text(text, style: getTheme(context).displayLarge);
   }
 
@@ -29,5 +28,16 @@ class MyText {
 
   static Widget h6(BuildContext context, String text) {
     return Text(text, style: getTheme(context).bodyMedium);
+  }
+
+  static Widget groupText(
+    String title, {
+    double horizontal = 18,
+    double vertical = 10,
+  }) {
+    return Padding(
+      padding: EdgeInsets.symmetric(horizontal: horizontal, vertical: vertical),
+      child: Text(title),
+    );
   }
 }

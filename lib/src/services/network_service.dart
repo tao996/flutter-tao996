@@ -45,6 +45,12 @@ abstract class INetworkService {
 
   /// 监听网络变化
   Stream<List<ConnectivityResult>> get onConnectivityChanged;
+
+  bool get isNoNetwork;
+
+  bool get isMobileNetwork;
+
+  bool get isWifi;
 }
 
 /// https://pub.dev/packages/connectivity_plus
@@ -75,10 +81,10 @@ class NetworkService extends INetworkService {
     _subscription = _connectivity.onConnectivityChanged.listen((
       List<ConnectivityResult> result,
     ) async {
+      _updateNetworkState(result);
       if (isDebugMode) {
         getIDebugService().d('网络状态变化:[${state.value.name}]:$result;');
       }
-      _updateNetworkState(result);
       if (callback != null) {
         await callback();
       }
@@ -102,4 +108,13 @@ class NetworkService extends INetworkService {
   void dispose() {
     _subscription.cancel();
   }
+
+  @override
+  bool get isMobileNetwork => state.value.isCellular;
+
+  @override
+  bool get isNoNetwork => state.value.isNoNetwork;
+
+  @override
+  bool get isWifi => state.value.isWifi;
 }

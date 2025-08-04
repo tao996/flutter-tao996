@@ -23,7 +23,7 @@ class MyPadding extends StatelessWidget {
     if (padding == null && vertical == null && horizontal == null) {
       return Padding(padding: EdgeInsets.all(valueAll), child: child);
     }
-    if (padding == null) {
+    if (padding != null) {
       return Padding(padding: padding!, child: child);
     } else {
       return Padding(

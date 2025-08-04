@@ -118,7 +118,7 @@ class ApiResponseHandler {
     try {
       response = await apiRequest(); // 调用传入的回调函数执行网络请求
     } catch (error, stackTrace) {
-      _debugService.exception(error, stackTrace, log: true);
+      _debugService.exception(error, stackTrace);
       throw ApiException(
         'Network connection failed. Please check your internet connection.'.tr,
       );
@@ -165,7 +165,7 @@ class ApiResponseHandler {
         'Failed to parse ApiResponse from HTTP data.',
         args: {'httpData': httpData, 'error': e},
       );
-      _debugService.exception(e, StackTrace.current, log: true);
+      _debugService.exception(e, StackTrace.current);
       // 如果是 ApiException（如网络错误），直接抛出
       if (e is ApiException) rethrow;
       throw ApiException(
@@ -191,7 +191,7 @@ class ApiResponseHandler {
       }
       return itemBuilder(apiResponse.data as Map<String, dynamic>);
     } catch (error, stackTrace) {
-      _debugService.exception(error, stackTrace, log: true);
+      _debugService.exception(error, stackTrace);
       _debugService.d(
         'Failed to convert API data to type $T.',
         args: {'apiData': apiResponse.data, 'error': error},
@@ -228,7 +228,7 @@ class ApiResponseHandler {
       // 2. 将 HTTP 响应数据解析为 ApiResponse
       apiResponse = ApiResponse.fromJson(httpData);
     } catch (e) {
-      _debugService.exception(e, StackTrace.current, log: true);
+      _debugService.exception(e, StackTrace.current);
       _debugService.d(
         'Failed to parse ApiResponse from HTTP data for paginated response.',
         args: {'httpData': httpData, 'error': e},
@@ -265,7 +265,7 @@ class ApiResponseHandler {
         itemBuilder,
       );
     } catch (error, stackTrace) {
-      _debugService.exception(error, stackTrace, log: true);
+      _debugService.exception(error, stackTrace);
       _debugService.d(
         'Failed to convert API paginated data to type PaginatedResponse<$T>.',
         args: {'apiData': apiResponse.data, 'error': error},

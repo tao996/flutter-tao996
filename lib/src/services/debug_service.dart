@@ -3,10 +3,13 @@ import 'package:flutter/foundation.dart';
 
 import '../../tao996.dart';
 
-
 const isDebugMode = kDebugMode;
 
 abstract class IDebugService {
+  IDebugService begin();
+
+  IDebugService end();
+
   IDebugService d(
     Object? object, {
     Object? args,
@@ -15,74 +18,68 @@ abstract class IDebugService {
     String? successMessage,
   });
 
-  IDebugService dd(
-    Object? object, {
-    Object? args,
-    bool begin = false,
-    bool end = false,
-  });
-
+  /// 捕获异常
   IDebugService exception(
     Object error,
     StackTrace stackTrace, {
-    bool? log,
+    Object? args,
+    bool log = true,
     String? errorMessage,
   });
 
-  IDebugService stack(dynamic object);
+  /// 打印当前的堆栈信息
+  IDebugService stack();
 
-  IDebugService stackList(List<dynamic> items);
+  IDebugService printList(List<dynamic> items);
 
-  IDebugService stackLists(List<List<dynamic>> items);
-}
-
-// 定义一些常用的颜色常量，方便使用
-class ConsoleColor {
-  static const String reset = '\x1B[0m'; // 重置/默认
-  static const String black = '\x1B[30m';
-  static const String red = '\x1B[31m'; // 红色
-  static const String green = '\x1B[32m'; // 绿色
-  static const String yellow = '\x1B[33m'; // 黄色
-  static const String blue = '\x1B[34m'; // 蓝色
-  static const String magenta = '\x1B[35m'; // 紫色/品红
-  static const String cyan = '\x1B[36m'; // 青色
-  static const String white = '\x1B[37m';
-
-  // 背景色
-  static const String bgBlack = '\x1B[40m';
-  static const String bgRed = '\x1B[41m';
-  static const String bgGreen = '\x1B[42m';
-  static const String bgYellow = '\x1B[43m';
-  static const String bgBlue = '\x1B[44m';
-  static const String bgMagenta = '\x1B[45m';
-  static const String bgCyan = '\x1B[46m';
-  static const String bgWhite = '\x1B[47m';
-
-  // 样式
-  static const String bold = '\x1B[1m'; // 粗体/高亮
-  static const String faint = '\x1B[2m';
-  static const String italic = '\x1B[3m'; // 斜体
-  static const String underline = '\x1B[4m'; // 下划线
+  IDebugService printLists(List<List<dynamic>> items);
 }
 
 class DebugService implements IDebugService {
-  static const List<String> colors = [
-    ConsoleColor.red,
-    ConsoleColor.green,
-    ConsoleColor.yellow,
-    ConsoleColor.blue,
-    ConsoleColor.magenta,
-    ConsoleColor.cyan,
-  ];
+  final ILogService logService = getILogService();
+  final IMessageService messageService = getIMessageService();
 
-  void _message(String? message, bool success){
-    if (message == null || message.isEmpty){
+  void _message(String? message, bool success, {bool? log}) {
+    if (message == null || message.isEmpty) {
       return;
     }
     if (success) {
       messageService.success(message);
+      if (log == true) {
+        logService.i(message);
+      }
     } else {
       messageService.error(message);
+      if (log == true) {
+        logService.e(message);
+      }
+    }
+  }
+
+  String _color = '';
+
+  String get color => _color.isNotEmpty ? _color : ColorUtil.random();
+
+  @override
+  IDebugService begin() {
+    _color = ColorUtil.random();
+    ColorUtil.print('[[[----------', _color);
+    return this;
+  }
+
+  @override
+  IDebugService end() {
+    ColorUtil.print('----------]]]', _color);
+    _color = '';
+    return this;
+  }
+
+  void printCaller() {
+    for (String line in getStackTraceString()) {
+      if (!filterFile(line)) {
+        ColorUtil.print(line, color);
+        break;
+      }
     }
   }
 
@@ -94,156 +91,122 @@ class DebugService implements IDebugService {
     String? errorMessage,
     String? successMessage,
   }) {
-    _message(errorMessage, false);
-    _message(successMessage, true);
+    _message(errorMessage, false, log: log);
+    _message(successMessage, true, log: log);
     if (kDebugMode) {
-      String color = _blockColor.isEmpty ? _randomColor() : _blockColor;
-      final hasArgs = args != null;
-      if (hasArgs) {
-        printColored('|----------', color);
-      }
-      printColored(object.toString(), color);
-      if (hasArgs) {
-        printColored(args.toString(), color);
-      }
-      if (hasArgs) {
-        printColored('----------|', color);
-      }
-    }
-    return this;
-  }
-
-  final ILogService logService = getILogService();
-  final IMessageService messageService = getIMessageService();
-
-  String _randomColor() {
-    return colors[Random().nextInt(6)];
-  }
-
-  String _blockColor = '';
-
-  @override
-  IDebugService dd(
-    Object? object, {
-    Object? args,
-    bool begin = false,
-    bool end = false,
-  }) {
-    if (kDebugMode) {
-      String color = _blockColor.isEmpty ? _randomColor() : _blockColor;
-      if (begin) {
-        _blockColor = color;
-        // printColored('(((--------------------', color);
-      }
-      printColored(object.toString(), color);
+      printCaller();
+      ColorUtil.print('|__\t\t $object', color);
       if (args != null) {
-        printColored(args.toString(), color);
+        ColorUtil.print('|__\t\t $args', color);
       }
-
-      if (end) {
-        // printColored(')))', color);
-        _blockColor = '';
+    }
+    if (log == true) {
+      if (object != null) {
+        logService.i(object.toString());
+      }
+      if (args != null) {
+        logService.i(args.toString());
       }
     }
     return this;
+  }
+
+  void _printBlock(String tag, List<dynamic> items, {String? color}) {
+    final pColor = color ?? ColorUtil.random();
+    ColorUtil.print('$tag----------', pColor);
+    for (final item in items) {
+      ColorUtil.print(item, pColor);
+    }
+    ColorUtil.print('----------$tag', pColor);
   }
 
   @override
   IDebugService exception(
     Object error,
     StackTrace stackTrace, {
-    bool? log,
+    Object? args,
+    bool log = true,
     String? errorMessage,
   }) {
     if (errorMessage != null && errorMessage.isNotEmpty) {
-      messageService.error(errorMessage);
+      _message(errorMessage, false, log: log);
     }
     if (kDebugMode) {
-      String color = _randomColor();
-      printColored(stackTrace.toString(), color);
-      stack(error);
+      _printBlock('(((', [
+        error.toString(),
+        stackTrace.toString(),
+      ], color: color);
+      if (args != null) {
+        ColorUtil.print(args, color);
+      }
+    }
+    if (log == true) {
+      logService.e(error);
+      if (args != null) {
+        logService.e(args.toString());
+      }
+      for (String line in getStackTraceString(stackTrace: stackTrace)) {
+        if (!filterFile(line)) {
+          ColorUtil.print(line, color);
+        }
+      }
+    }
+    return this;
+  }
+
+  bool filterFile(String line) {
+    return line.contains('debug_service.dart') ||
+        line.contains('log_service.dart');
+  }
+
+  List<String> getStackTraceString({StackTrace? stackTrace}) {
+    StackTrace st = stackTrace ?? StackTrace.current;
+    String stackTraceString = st.toString();
+    return stackTraceString.split('\n');
+  }
+
+  @override
+  IDebugService stack() {
+    if (kDebugMode) {
+      ColorUtil.print('<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<', color);
+      for (String line in getStackTraceString()) {
+        if (!filterFile(line)) {
+          ColorUtil.print(line, color);
+        }
+      }
+      ColorUtil.print('>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>', color);
     }
     return this;
   }
 
   @override
-  IDebugService stack(object) {
+  IDebugService printList(List items) {
     if (kDebugMode) {
-      StackTrace stackTrace = StackTrace.current;
-      String stackTraceString = stackTrace.toString();
-      List<String> stackTraceLines = stackTraceString.split('\n');
-
-      debugPrint('<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<');
-      for (String line in stackTraceLines) {
-        if (!line.contains('debug_service.dart')) {
-          debugPrint(line);
-        }
-      }
-      debugPrint('~~~~');
-      debugPrint(object.toString());
-      debugPrint('>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>');
+      _printBlock('<<<<<<', items, color: color);
     }
     return this;
   }
 
   @override
-  IDebugService stackList(List items) {
+  IDebugService printLists(List<List> items) {
     if (kDebugMode) {
+      ColorUtil.print('<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<', color);
       StackTrace stackTrace = StackTrace.current;
       String stackTraceString = stackTrace.toString();
       List<String> stackTraceLines = stackTraceString.split('\n');
 
       for (String line in stackTraceLines) {
-        if (!line.contains('debug_service.dart')) {
-          debugPrint(line);
+        if (!filterFile(line)) {
+          ColorUtil.print(line, color);
         }
       }
-      debugPrint('<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<');
-      for (var item in items) {
-        debugPrint(item.toString());
-      }
-      debugPrint('>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>');
-    }
-    return this;
-  }
-
-  @override
-  IDebugService stackLists(List<List> items) {
-    if (kDebugMode) {
-      StackTrace stackTrace = StackTrace.current;
-      String stackTraceString = stackTrace.toString();
-      List<String> stackTraceLines = stackTraceString.split('\n');
-
-      for (String line in stackTraceLines) {
-        if (!line.contains('debug_service.dart')) {
-          debugPrint(line);
-        }
-      }
-      debugPrint('<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<');
       for (var item in items) {
         for (var e in item) {
-          debugPrint(e.toString());
+          ColorUtil.print(e.toString(), color);
         }
       }
-      debugPrint('>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>');
+      ColorUtil.print('>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>', color);
     }
     return this;
-  }
-
-  // 封装成一个函数方便使用
-  void printColored(
-    String text,
-    String colorCode, {
-    String? bgColorCode,
-    bool bold = false,
-  }) {
-    String prefix = colorCode;
-    if (bgColorCode != null) {
-      prefix += bgColorCode;
-    }
-    if (bold) {
-      prefix += ConsoleColor.bold;
-    }
-    debugPrint('$prefix$text${ConsoleColor.reset}');
   }
 }

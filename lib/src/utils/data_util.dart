@@ -1,5 +1,3 @@
-
-
 import '../../tao996.dart';
 
 class DataUtil {
@@ -12,8 +10,7 @@ class DataUtil {
     try {
       return v as bool;
     } catch (e, stackTrace) {
-      _debugService.stack(e);
-      _debugService.d(stackTrace);
+      _debugService.exception(e, stackTrace);
     }
     return defaultValue;
   }
@@ -25,8 +22,19 @@ class DataUtil {
     try {
       return (v as num).toInt();
     } catch (e, stackTrace) {
-      _debugService.stack(e);
-      _debugService.d(stackTrace);
+      _debugService.exception(e, stackTrace);
+    }
+    return defaultValue;
+  }
+
+  static double getDouble(dynamic v, {double defaultValue = 0.0}) {
+    if (v == null) {
+      return defaultValue;
+    }
+    try {
+      return (v as num).toDouble();
+    } catch (e, stackTrace) {
+      _debugService.exception(e, stackTrace);
     }
     return defaultValue;
   }
@@ -38,8 +46,7 @@ class DataUtil {
     try {
       return (v as String);
     } catch (e, stackTrace) {
-      _debugService.stack(e);
-      _debugService.d(stackTrace);
+      _debugService.exception(e, stackTrace);
     }
     return defaultValue;
   }
@@ -55,8 +62,7 @@ class DataUtil {
     try {
       return DatetimeUtil.parse(v, formatPattern: formatPattern);
     } catch (e, stackTrace) {
-      _debugService.stack(e);
-      _debugService.d(stackTrace);
+      _debugService.exception(e, stackTrace);
     }
     return defaultValue;
   }
@@ -75,7 +81,17 @@ class DataUtil {
           .toList();
     } catch (e, stackTrace) {
       _debugService.exception(e, stackTrace);
-      return defaultValue;
     }
+    return defaultValue;
+  }
+
+  /// 获取第一个不为 null 的值
+  static dynamic firstValue(Map<String, dynamic> json, List<String> keys){
+    for (var key in keys) {
+      if (json.containsKey(key)) {
+        return json[key];
+      }
+    }
+    return null;
   }
 }

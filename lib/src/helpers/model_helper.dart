@@ -68,7 +68,6 @@ abstract class IModelHelper<T> {
 /// 模型服务
 abstract class ModelHelper<T> implements IModelHelper<T> {
   final IDatabaseService _dbService = getIDatabaseService();
-  final ILogService _logService = getILogService();
   final IDebugService _debugService = getIDebugService();
 
   final String tableName;
@@ -107,10 +106,10 @@ abstract class ModelHelper<T> implements IModelHelper<T> {
   // --- IModelHelper 接口的实现 ---
   @override
   Future<void> init(String language) async {
-    _logService.d('[ModelHelper]: Initializing $tableName...');
+    _debugService.d('[ModelHelper]: Initializing $tableName...');
     if (useCache) {
       await loadAllFromDb();
-      _logService.d(
+      _debugService.d(
         '[ModelHelper]: $tableName cache loaded with ${_cache.length} items.',
       );
     }
@@ -136,10 +135,7 @@ abstract class ModelHelper<T> implements IModelHelper<T> {
       }
       return rows;
     } catch (e, st) {
-      _logService.e(
-        '[ModelHelper]: Failed to load all records from $tableName: $e',
-      );
-      _debugService.exception(e, st, log: true);
+      _debugService.exception(e, st, errorMessage: '加载表 $tableName 失败！');
       return []; // 加载失败返回空列表
     }
   }
@@ -160,10 +156,12 @@ abstract class ModelHelper<T> implements IModelHelper<T> {
         );
         return maps.isNotEmpty ? fromMap(maps.first) : null;
       } catch (e, st) {
-        _logService.e(
-          '[ModelHelper]: Failed to get record by $fieldName=$value from $tableName: $e',
+        _debugService.exception(
+          e,
+          st,
+          errorMessage:
+              'Failed to get record by $fieldName=$value from $tableName',
         );
-        _debugService.exception(e, st, log: true);
         return null;
       }
     }
@@ -201,18 +199,18 @@ abstract class ModelHelper<T> implements IModelHelper<T> {
               _cache[index] = entity;
             } else {
               // 如果缓存中没有，可能是因为缓存尚未完全加载或实体是新加载的，考虑重新加载缓存
-              _logService.d(
+              _debugService.d(
                 '[ModelHelper]: Updated entity not found in cache. Consider reloading cache for $tableName.',
               );
               await loadAllFromDb(); // 确保缓存最新
             }
           }
-          _logService.d(
+          _debugService.d(
             '[ModelHelper]: Updated record in $tableName with $primaryName: $primaryValue',
           );
           return true;
         } else {
-          _logService.d(
+          _debugService.d(
             '[ModelHelper]: Updated record in $tableName with $primaryName: $primaryValue failed, not any row updated',
           );
           return false;
@@ -228,20 +226,23 @@ abstract class ModelHelper<T> implements IModelHelper<T> {
           if (useCache) {
             _cache.add(updatedEntity); // 添加到缓存
           }
-          _logService.d(
+          _debugService.d(
             '[ModelHelper]: Inserted new record into $tableName with new ID: $newId',
           );
           return true;
         } else {
-          _logService.e(
+          _debugService.d(
             '[ModelHelper]: Failed to insert new record into $tableName.',
           );
           return false;
         }
       }
     } catch (e, st) {
-      _debugService.exception(e, st, log: true);
-      _logService.e('[ModelHelper]: Failed to save record in $tableName: $e');
+      _debugService.exception(
+        e,
+        st,
+        errorMessage: 'Failed to save record in $tableName: $e',
+      );
       return false;
     }
   }
@@ -262,25 +263,27 @@ abstract class ModelHelper<T> implements IModelHelper<T> {
           _cache.removeWhere(
             (element) => getByFieldValue(element, fieldName) == value,
           );
-          _logService.d(
+          _debugService.d(
             '[ModelHelper]: Removed $count records from cache for $tableName.',
           );
         }
-        _logService.d(
+        _debugService.d(
           '[ModelHelper]: Deleted $count records from $tableName where $fieldName = $value.',
         );
         return true;
       } else {
-        _logService.d(
+        _debugService.d(
           '[ModelHelper]: No records deleted from $tableName where $fieldName = $value.',
         );
         return false;
       }
     } catch (e, st) {
-      _logService.e(
-        '[ModelHelper]: Failed to delete record by $fieldName=$value from $tableName: $e',
+      _debugService.exception(
+        e,
+        st,
+        errorMessage:
+            'Failed to delete record by $fieldName=$value from $tableName',
       );
-      _debugService.exception(e, st, log: true);
       return false;
     }
   }
@@ -306,10 +309,12 @@ abstract class ModelHelper<T> implements IModelHelper<T> {
           whereArgs: [value],
         );
       } catch (e, st) {
-        _logService.e(
-          '[ModelHelper]: Failed to check existence of record in $tableName for $fieldName=$value: $e',
+        _debugService.exception(
+          e,
+          st,
+          errorMessage:
+              'Failed to check existence of record in $tableName for $fieldName=$value',
         );
-        _debugService.exception(e, st, log: true);
         return false;
       }
     }
@@ -327,8 +332,11 @@ abstract class ModelHelper<T> implements IModelHelper<T> {
         arguments: arguments,
       );
     } catch (e, st) {
-      _logService.e('[ModelHelper]: Failed to get count for $tableName: $e');
-      _debugService.exception(e, st, log: true);
+      _debugService.exception(
+        e,
+        st,
+        errorMessage: 'Failed to get count for $tableName',
+      );
       return 0;
     }
   }
@@ -366,10 +374,11 @@ abstract class ModelHelper<T> implements IModelHelper<T> {
       );
       return result.map((map) => fromMap(map)).toList();
     } catch (e, st) {
-      _logService.e(
-        '[ModelHelper]: Failed to get paged data for $tableName: $e',
+      _debugService.exception(
+        e,
+        st,
+        errorMessage: 'Failed to get paged data for $tableName',
       );
-      _debugService.exception(e, st, log: true);
       return [];
     }
   }
@@ -389,10 +398,11 @@ abstract class ModelHelper<T> implements IModelHelper<T> {
       );
       return result.map((map) => fromMap(map)).toList();
     } catch (e, st) {
-      _logService.e(
-        '[ModelHelper]: Failed to findManyBy data for $tableName: $e',
+      _debugService.exception(
+        e,
+        st,
+        errorMessage: 'Failed to findManyBy data for $tableName',
       );
-      _debugService.exception(e, st, log: true);
       return [];
     }
   }
@@ -401,8 +411,12 @@ abstract class ModelHelper<T> implements IModelHelper<T> {
     try {
       await _dbService.execute(sql, arguments);
     } catch (e, st) {
-      _logService.e('[ModelHelper]: Failed to execute SQL for $tableName: $e');
-      _debugService.exception(e, st, log: true);
+      _debugService.exception(
+        e,
+        st,
+        errorMessage: 'Failed to execute SQL for $tableName',
+        args: {'sql': sql, 'arguments': arguments},
+      );
       rethrow;
     }
   }
@@ -415,10 +429,12 @@ abstract class ModelHelper<T> implements IModelHelper<T> {
     try {
       return await _dbService.rawQuery(sql, arguments);
     } catch (e, st) {
-      _logService.e(
-        '[ModelHelper]: Failed to execute raw query for $tableName: $e',
+      _debugService.exception(
+        e,
+        st,
+        errorMessage: 'Failed to execute raw query for $tableName',
+        args: {'sql': sql, 'arguments': arguments},
       );
-      _debugService.exception(e, st, log: true);
       rethrow; // 重新抛出以便上层处理
     }
   }
@@ -453,10 +469,12 @@ abstract class ModelHelper<T> implements IModelHelper<T> {
     try {
       return await _dbService.insert(tableName, values);
     } catch (e, st) {
-      _logService.e(
-        '[ModelHelper]: Failed to insert record into $tableName: $e',
+      _debugService.exception(
+        e,
+        st,
+        errorMessage: 'Failed to insert record into $tableName',
+        args: values,
       );
-      _debugService.exception(e, st, log: true);
       rethrow; // 重新抛出以便上层处理
     }
   }
@@ -475,8 +493,11 @@ abstract class ModelHelper<T> implements IModelHelper<T> {
         whereArgs: whereArgs,
       );
     } catch (e, st) {
-      _logService.e('[ModelHelper]: Failed to update record in $tableName: $e');
-      _debugService.exception(e, st, log: true);
+      _debugService.exception(
+        e,
+        st,
+        errorMessage: 'Failed to update record in $tableName',
+      );
       rethrow; // 重新抛出以便上层处理
     }
   }
@@ -490,10 +511,11 @@ abstract class ModelHelper<T> implements IModelHelper<T> {
       );
       return count > 0;
     } catch (e, st) {
-      _logService.e(
-        '[ModelHelper]: Failed to delete record from $tableName: $e',
+      _debugService.exception(
+        e,
+        st,
+        errorMessage: ' Failed to delete record from $tableName',
       );
-      _debugService.exception(e, st, log: true);
       rethrow; // 重新抛出以便上层处理
     }
   }
@@ -511,9 +533,11 @@ abstract class ModelHelper<T> implements IModelHelper<T> {
         idColumn: idColumn,
       );
     } catch (e, st) {
-      _debugService.exception(e, st, log: true);
-      _logService.e(
-        '[ModelHelper]: Failed to get first record ID for $tableName: $e',
+      _debugService.exception(
+        e,
+        st,
+        log: true,
+        errorMessage: 'Failed to get first record ID for $tableName',
       );
       return null;
     }

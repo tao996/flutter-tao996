@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
 
-
 abstract class MySmartRefresherBodyController extends GetxController {
   late final RefreshController refreshController;
 
@@ -38,19 +37,18 @@ class MySmartRefresher {
     return CustomFooter(
       builder: (BuildContext context, LoadStatus? mode) {
         Widget body;
-        if (mode == LoadStatus.idle) {
+        if (mode == LoadStatus.noMore) {
+          body = Text("noMoreData".tr);
+          // body = Container(); // Text("noMoreData".tr);
+        } else if (mode == LoadStatus.failed) {
+          body = Text("loadFailedRetry".tr);
+        } else if (mode == LoadStatus.idle) {
           body = Text("pullUpLoadMore".tr);
         } else if (mode == LoadStatus.loading) {
           body = CircularProgressIndicator();
-        } else if (mode == LoadStatus.failed) {
-          body = Text("loadFailedRetry".tr);
-        } else if (mode == LoadStatus.noMore) {
-          // body = Text("noMoreData".tr);
-          body = Container(); // Text("noMoreData".tr);
         } else {
           body = Text("pullUpLoadMore".tr);
         }
-        // getIDebugService().d('body:LoadStatus?:$mode');
         return SizedBox(height: 30.0, child: Center(child: body));
       },
     );

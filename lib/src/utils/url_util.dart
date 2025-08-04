@@ -20,6 +20,10 @@ class UrlUtil {
     return Uri.parse(host).resolveUri(Uri.parse(url));
   }
 
+  static String host(String url) {
+    return Uri.parse(url).host;
+  }
+
   /// 辅助函数，用于编码 URL 查询参数
   /// 因为 Uri 构造函数的 queryParameters 参数会将 Map 值进行自动编码
   /// 但对于 mailto: 链接，其主题和正文部分需要手动编码

@@ -1,6 +1,10 @@
+export 'src/const/color.dart';
+
+export 'src/utils/color_util.dart';
 export 'src/utils/data_util.dart';
 export 'src/utils/datetime_util.dart';
 export 'src/utils/fn_util.dart';
+export 'src/utils/json_util.dart';
 export 'src/utils/url_util.dart';
 
 export 'src/helpers/api_response_handler.dart';
@@ -25,7 +29,6 @@ export 'src/services/webview_service.dart';
 
 export 'src/translation/translation.dart';
 
-
 export 'src/ui/page/image_viewer.dart';
 export 'src/ui/page/network_controller.dart';
 export 'src/ui/page/network_widget.dart';
@@ -39,6 +42,7 @@ export 'src/ui/widgets/avatar.dart';
 export 'src/ui/widgets/buttons.dart';
 export 'src/ui/widgets/dialog.dart';
 export 'src/ui/widgets/event.dart';
+export 'src/ui/widgets/group_checkbox.dart';
 export 'src/ui/widgets/image.dart';
 export 'src/ui/widgets/loading.dart';
 export 'src/ui/widgets/padding.dart';
@@ -69,7 +73,8 @@ void registerTao996Dependencies(GetIt locator) {
   final ILogService logService = LogService();
   locator.registerSingleton<ILogService>(logService);
   locator.registerLazySingleton<IFontService>(() => FontService());
-  locator.registerLazySingleton<IHttpService>(() => DioHttpClient());
+  locator.registerLazySingleton<DioHttpClient>(() => DioHttpClient());
+  // locator.registerLazySingleton<IHttpService>(() => DioHttpClient());
   locator.registerLazySingleton<ILocaleService>(() => LocaleService());
   locator.registerLazySingleton<INetworkService>(() => NetworkService());
   locator.registerLazySingleton<IPathService>(() => PathService());
@@ -106,7 +111,11 @@ IFontService getIFontService() {
 }
 
 IHttpService getIHttpService() {
-  return GetIt.instance<IHttpService>();
+  return GetIt.instance<DioHttpClient>();
+}
+
+DioHttpClient getDioHttpClient() {
+  return GetIt.instance<DioHttpClient>();
 }
 
 ILocaleService getILocaleService() {
