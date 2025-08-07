@@ -10,8 +10,7 @@ abstract class IDebugService {
 
   IDebugService end();
 
-  IDebugService d(
-    Object? object, {
+  IDebugService d(Object? object, {
     Object? args,
     bool? log,
     String? errorMessage,
@@ -19,13 +18,12 @@ abstract class IDebugService {
   });
 
   /// 捕获异常
-  IDebugService exception(
-    Object error,
-    StackTrace stackTrace, {
-    Object? args,
-    bool log = true,
-    String? errorMessage,
-  });
+  IDebugService exception(Object error,
+      StackTrace stackTrace, {
+        Object? args,
+        bool log = true,
+        String? errorMessage,
+      });
 
   /// 打印当前的堆栈信息
   IDebugService stack();
@@ -84,8 +82,7 @@ class DebugService implements IDebugService {
   }
 
   @override
-  IDebugService d(
-    Object? object, {
+  IDebugService d(Object? object, {
     Object? args,
     bool? log,
     String? errorMessage,
@@ -93,19 +90,18 @@ class DebugService implements IDebugService {
   }) {
     _message(errorMessage, false, log: log);
     _message(successMessage, true, log: log);
-    if (kDebugMode) {
-      printCaller();
-      ColorUtil.print('|__\t\t $object', color);
-      if (args != null) {
-        ColorUtil.print('|__\t\t $args', color);
-      }
-    }
     if (log == true) {
       if (object != null) {
         logService.i(object.toString());
       }
       if (args != null) {
         logService.i(args.toString());
+      }
+    } else if (kDebugMode) {
+      printCaller();
+      ColorUtil.print('|__\t\t $object', color);
+      if (args != null) {
+        ColorUtil.print('|__\t\t $args', color);
       }
     }
     return this;
@@ -121,25 +117,16 @@ class DebugService implements IDebugService {
   }
 
   @override
-  IDebugService exception(
-    Object error,
-    StackTrace stackTrace, {
-    Object? args,
-    bool log = true,
-    String? errorMessage,
-  }) {
+  IDebugService exception(Object error,
+      StackTrace stackTrace, {
+        Object? args,
+        bool log = true,
+        String? errorMessage,
+      }) {
     if (errorMessage != null && errorMessage.isNotEmpty) {
       _message(errorMessage, false, log: log);
     }
-    if (kDebugMode) {
-      _printBlock('(((', [
-        error.toString(),
-        stackTrace.toString(),
-      ], color: color);
-      if (args != null) {
-        ColorUtil.print(args, color);
-      }
-    }
+
     if (log == true) {
       logService.e(error);
       if (args != null) {
@@ -149,6 +136,14 @@ class DebugService implements IDebugService {
         if (!filterFile(line)) {
           ColorUtil.print(line, color);
         }
+      }
+    } else if (kDebugMode) {
+      _printBlock('(((', [
+        error.toString(),
+        stackTrace.toString(),
+      ], color: color);
+      if (args != null) {
+        ColorUtil.print(args, color);
       }
     }
     return this;

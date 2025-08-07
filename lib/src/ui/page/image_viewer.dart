@@ -37,7 +37,7 @@ class _ImageViewerPageState extends State<ImageViewerPage> {
     if (file.existsSync()) {
       _debugService.d('图片已经存在本地: $filePath');
     } else {
-      final success = await getIHttpService().download(
+      final success = await getIDioHttpService().download(
         widget.imageUrl,
         filePath,
       );

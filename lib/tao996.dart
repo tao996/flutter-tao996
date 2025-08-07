@@ -8,6 +8,7 @@ export 'src/utils/json_util.dart';
 export 'src/utils/url_util.dart';
 
 export 'src/helpers/api_response_handler.dart';
+export 'src/helpers/form_helper.dart';
 export 'src/helpers/model_helper.dart';
 
 export 'src/services/database_service.dart';
@@ -15,7 +16,8 @@ export 'src/services/debug_service.dart';
 export 'src/services/device_service.dart';
 export 'src/services/file_picker_service.dart';
 export 'src/services/font_service.dart';
-export 'src/services/http_service.dart';
+export 'src/services/http_getx_service.dart';
+export 'src/services/http_dio_service.dart';
 export 'src/services/locale_service.dart';
 export 'src/services/log_service.dart';
 export 'src/services/message_service.dart';
@@ -29,6 +31,7 @@ export 'src/services/webview_service.dart';
 
 export 'src/translation/translation.dart';
 
+export 'src/ui/page/easy_refresh.dart';
 export 'src/ui/page/image_viewer.dart';
 export 'src/ui/page/network_controller.dart';
 export 'src/ui/page/network_widget.dart';
@@ -42,7 +45,8 @@ export 'src/ui/widgets/avatar.dart';
 export 'src/ui/widgets/buttons.dart';
 export 'src/ui/widgets/dialog.dart';
 export 'src/ui/widgets/event.dart';
-export 'src/ui/widgets/group_checkbox.dart';
+export 'src/ui/widgets/list_checkbox.dart';
+export 'src/ui/widgets/grid_checkbox.dart';
 export 'src/ui/widgets/image.dart';
 export 'src/ui/widgets/loading.dart';
 export 'src/ui/widgets/padding.dart';
@@ -73,7 +77,7 @@ void registerTao996Dependencies(GetIt locator) {
   final ILogService logService = LogService();
   locator.registerSingleton<ILogService>(logService);
   locator.registerLazySingleton<IFontService>(() => FontService());
-  locator.registerLazySingleton<DioHttpClient>(() => DioHttpClient());
+  locator.registerLazySingleton<DioHttpService>(() => DioHttpService());
   // locator.registerLazySingleton<IHttpService>(() => DioHttpClient());
   locator.registerLazySingleton<ILocaleService>(() => LocaleService());
   locator.registerLazySingleton<INetworkService>(() => NetworkService());
@@ -110,12 +114,12 @@ IFontService getIFontService() {
   return GetIt.instance<IFontService>();
 }
 
-IHttpService getIHttpService() {
-  return GetIt.instance<DioHttpClient>();
+IDioHttpService getIDioHttpService() {
+  return GetIt.instance<DioHttpService>();
 }
 
-DioHttpClient getDioHttpClient() {
-  return GetIt.instance<DioHttpClient>();
+DioHttpService getDioHttpClient() {
+  return GetIt.instance<DioHttpService>();
 }
 
 ILocaleService getILocaleService() {

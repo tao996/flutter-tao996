@@ -3,7 +3,6 @@ import 'package:get/get.dart';
 
 import '../../tao996.dart';
 
-
 abstract class ILocaleService {
   Future<void> changeLocale(String locale);
 
@@ -27,13 +26,13 @@ class LocaleService implements ILocaleService {
   Locale? _locale;
 
   LocaleService() {
-    _locale =
-        settingsService.language == 'system'
-            ? Get.deviceLocale
-            : Locale(
-              settingsService.language.split('_').first,
-              settingsService.language.split('_').last,
-            );
+    _locale = settingsService.language == 'system'
+        ? Get.deviceLocale
+        : Locale(
+            settingsService.language.split('_').first,
+            settingsService.language.split('_').last,
+          );
+    Get.updateLocale(_locale!);
   }
 
   @override
@@ -45,6 +44,7 @@ class LocaleService implements ILocaleService {
     settingsService.language = language;
     if (ll.length == 2) {
       _locale = Locale(language.split('_').first, language.split('_').last);
+      Get.updateLocale(_locale!);
     } else {
       _locale = Get.deviceLocale;
     }

@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:tao996/src/services/debug_service.dart';
 import 'package:tao996/tao996.dart';
 
 /// 一个用于筛选独立名称的 Widget。
 /// 用户可以选中或取消选中列表中的每个名称。
-class GroupCheckbox extends StatefulWidget {
+class GridCheckbox extends StatefulWidget {
   /// 所有的可选名称列表。
   final List<String> items;
 
@@ -20,7 +19,7 @@ class GroupCheckbox extends StatefulWidget {
 
   final double horizontal;
 
-  const GroupCheckbox({
+  const GridCheckbox({
     super.key,
     required this.items,
     required this.onSelectionChanged,
@@ -30,10 +29,10 @@ class GroupCheckbox extends StatefulWidget {
   });
 
   @override
-  State<GroupCheckbox> createState() => _GroupCheckboxState();
+  State<GridCheckbox> createState() => _GridCheckboxState();
 }
 
-class _GroupCheckboxState extends State<GroupCheckbox> {
+class _GridCheckboxState extends State<GridCheckbox> {
   // 用于存储当前选中的名称集合，使用 Set 保证唯一性且查找效率高
   final Set<String> _selectedNames = {};
   final IDebugService _debugService = getIDebugService();

@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:get/get.dart';
 
 import '../../tao996.dart';
 
@@ -54,5 +55,10 @@ abstract class ThemeService implements IThemeService {
       );
     }
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
+  }
+  /// 修改主题
+  /// Get.changeTheme(Get.isDarkMode? ThemeData.light(): ThemeData.dark());
+  void changeTheme(ThemeData theme) {
+    Get.changeTheme(theme);
   }
 }

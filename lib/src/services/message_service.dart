@@ -100,7 +100,7 @@ class MessageService implements IMessageService {
     String message, {
     SnackPosition? snackPosition,
     bool? success,
-    int seconds = 4,
+    int seconds = 3,
   }) {
     return Get.snackbar(
       title,
@@ -123,6 +123,6 @@ class MessageService implements IMessageService {
 
   @override
   SnackbarController error(String message) {
-    return snackbar('error'.tr, message, success: false, seconds: 8);
+    return snackbar('error'.tr, message, success: false, seconds: 4);
   }
 }

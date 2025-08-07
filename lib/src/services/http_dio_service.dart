@@ -17,7 +17,7 @@ class HttpResponse {
   HttpResponse({required this.data, this.statusCode});
 }
 
-abstract class IHttpService {
+abstract class IDioHttpService{
   Future<HttpResponse> get(
     String url, {
     Dio? dio,
@@ -58,13 +58,13 @@ abstract class IHttpService {
   });
 }
 
-class DioHttpClient implements IHttpService {
+class DioHttpService implements IDioHttpService {
   static late Dio _dio;
   final ILogService _logger = GetIt.instance.get<ILogService>();
   final ISettingsService _settingSer = GetIt.instance.get<ISettingsService>();
   final IDebugService _debugSer = GetIt.instance.get<IDebugService>();
 
-  DioHttpClient({BaseOptions? options}) {
+  DioHttpService({BaseOptions? options}) {
     _dio = createDio(options: options);
   }
 

@@ -7,13 +7,30 @@ class DeviceService {
   static double statusBarHeight = 0;
 
   static void calScreenSize(BuildContext context) {
-    screenWidth = MediaQuery.of(context).size.width;
-    screenHeight = MediaQuery.of(context).size.height;
+    screenWidth = MediaQuery.of(context).size.width; // Get.width
+    screenHeight = MediaQuery.of(context).size.height; // Get.height
     statusBarHeight = MediaQuery.of(context).padding.top;
   }
 
   /// 获取平台（小写）
+  /// https://github.com/jonataslaw/getx?tab=readme-ov-file#other-advanced-apis
   static String platform() {
     return defaultTargetPlatform.toString().toLowerCase();
+    /*
+GetPlatform.isAndroid
+GetPlatform.isIOS
+GetPlatform.isMacOS
+GetPlatform.isWindows
+GetPlatform.isLinux
+GetPlatform.isFuchsia
+
+//Check the device type
+GetPlatform.isMobile
+GetPlatform.isDesktop
+//All platforms are supported independently in web!
+//You can tell if you are running inside a browser
+//on Windows, iOS, OSX, Android, etc.
+GetPlatform.isWeb
+     */
   }
 }
