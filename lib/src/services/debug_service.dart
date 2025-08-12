@@ -10,7 +10,8 @@ abstract class IDebugService {
 
   IDebugService end();
 
-  IDebugService d(Object? object, {
+  IDebugService d(
+    Object? object, {
     Object? args,
     bool? log,
     String? errorMessage,
@@ -18,12 +19,13 @@ abstract class IDebugService {
   });
 
   /// 捕获异常
-  IDebugService exception(Object error,
-      StackTrace stackTrace, {
-        Object? args,
-        bool log = true,
-        String? errorMessage,
-      });
+  IDebugService exception(
+    Object error,
+    StackTrace stackTrace, {
+    Object? args,
+    bool log = true,
+    String? errorMessage,
+  });
 
   /// 打印当前的堆栈信息
   IDebugService stack();
@@ -33,9 +35,20 @@ abstract class IDebugService {
   IDebugService printLists(List<List<dynamic>> items);
 }
 
+abstract class IDebugMessageService {
+  dynamic success(String message);
+
+  dynamic error(String message);
+}
+
 class DebugService implements IDebugService {
-  final ILogService logService = getILogService();
-  final IMessageService messageService = getIMessageService();
+  final ILogService logService;
+
+  final IDebugMessageService messageService;
+
+  DebugService({IDebugMessageService? messageSer, ILogService? logSer})
+    : messageService = messageSer ?? getIMessageService(),
+      logService = logSer ?? getILogService();
 
   void _message(String? message, bool success, {bool? log}) {
     if (message == null || message.isEmpty) {
@@ -82,7 +95,8 @@ class DebugService implements IDebugService {
   }
 
   @override
-  IDebugService d(Object? object, {
+  IDebugService d(
+    Object? object, {
     Object? args,
     bool? log,
     String? errorMessage,
@@ -117,12 +131,13 @@ class DebugService implements IDebugService {
   }
 
   @override
-  IDebugService exception(Object error,
-      StackTrace stackTrace, {
-        Object? args,
-        bool log = true,
-        String? errorMessage,
-      }) {
+  IDebugService exception(
+    Object error,
+    StackTrace stackTrace, {
+    Object? args,
+    bool log = true,
+    String? errorMessage,
+  }) {
     if (errorMessage != null && errorMessage.isNotEmpty) {
       _message(errorMessage, false, log: log);
     }

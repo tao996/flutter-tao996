@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:tao996/tao996.dart';
 
-abstract class IMessageService {
+abstract class IMessageService extends IDebugMessageService {
   // 操作确认
   Future<bool?> confirm({
     String? title,

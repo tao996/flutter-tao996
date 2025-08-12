@@ -9,6 +9,7 @@ export 'src/utils/url_util.dart';
 
 export 'src/helpers/api_response_handler.dart';
 export 'src/helpers/form_helper.dart';
+export 'src/helpers/model.dart';
 export 'src/helpers/model_helper.dart';
 
 export 'src/services/database_service.dart';
@@ -66,16 +67,22 @@ class Tao996 {
   }
 }
 
+/// 注册无依赖的服务
 void registerTao996Dependencies(GetIt locator) {
+  locator.registerLazySingleton<IMessageService>(() => MessageService());
+  final ILogService logService = LogService();
+  locator.registerSingleton<ILogService>(logService);
+  locator.registerLazySingleton<IDebugService>(() => DebugService());
+}
+
+/// 注册有依赖的服务
+void registerTao996Services(GetIt locator) {
   // final locator = GetIt.instance;
   // 用户需要自己注册
   // ISettingsService, IThemeService, IDatabaseService, ITranslationService,IRouteService
   // locator.registerLazySingleton<IThemeService>(() => ThemeService());
   // locator.registerLazySingleton<IDatabaseService>(() => SqfliteDatabaseService());
 
-  locator.registerLazySingleton<IDebugService>(() => DebugService());
-  final ILogService logService = LogService();
-  locator.registerSingleton<ILogService>(logService);
   locator.registerLazySingleton<IFontService>(() => FontService());
   locator.registerLazySingleton<DioHttpService>(() => DioHttpService());
   // locator.registerLazySingleton<IHttpService>(() => DioHttpClient());
@@ -84,7 +91,6 @@ void registerTao996Dependencies(GetIt locator) {
   locator.registerLazySingleton<IPathService>(() => PathService());
   locator.registerLazySingleton<IShareService>(() => ShareService());
   locator.registerLazySingleton<IFilePickerService>(() => FilePickerService());
-  locator.registerLazySingleton<IMessageService>(() => MessageService());
   locator.registerLazySingleton<IWebviewService>(() => WebviewService());
 
   // 设置全局异常捕获
