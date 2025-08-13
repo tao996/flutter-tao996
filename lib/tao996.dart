@@ -22,6 +22,7 @@ export 'src/services/http_dio_service.dart';
 export 'src/services/locale_service.dart';
 export 'src/services/log_service.dart';
 export 'src/services/message_service.dart';
+export 'src/services/model_service.dart';
 export 'src/services/network_service.dart';
 export 'src/services/path_service.dart';
 export 'src/services/route_service.dart';

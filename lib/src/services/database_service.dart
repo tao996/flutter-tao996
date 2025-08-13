@@ -68,7 +68,7 @@ abstract class IDatabaseService {
     String tableName, {
     required String where,
     required List<dynamic> whereArgs,
-    String idColumn = 'id',
+    String key = 'id',
   });
 }
 
@@ -158,16 +158,16 @@ class SqfliteDatabaseService implements IDatabaseService {
     String tableName, {
     required String where,
     required List<dynamic> whereArgs,
-    String idColumn = 'id',
+    String key = 'id',
   }) async {
     final List<Map<String, dynamic>> result = await _database!.query(
       tableName,
-      columns: [idColumn],
+      columns: [key],
       where: where,
       whereArgs: whereArgs,
       limit: 1,
     );
-    return result.first[idColumn] as int? ?? 0;
+    return result.first[key] as int? ?? 0;
   }
 
   @override

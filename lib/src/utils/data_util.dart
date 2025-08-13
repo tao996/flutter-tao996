@@ -67,6 +67,7 @@ class DataUtil {
     return defaultValue;
   }
 
+
   static List<T>? getList<T>(
     dynamic v,
     T Function(Map<String, dynamic>) fromJson, {

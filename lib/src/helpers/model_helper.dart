@@ -1,7 +1,7 @@
 import 'package:get/get.dart';
 
 import '../../tao996.dart';
-
+/// @description: 模型帮助类
 abstract class IModelHelper<T> {
   /// 初始化数据源。
   /// 对于有缓存的实现，这可能包括从数据库加载初始数据。
@@ -530,7 +530,7 @@ abstract class ModelHelper<T> implements IModelHelper<T> {
         tableName,
         where: where,
         whereArgs: whereArgs,
-        idColumn: idColumn,
+        key: idColumn,
       );
     } catch (e, st) {
       _debugService.exception(
