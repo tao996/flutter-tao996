@@ -6,11 +6,11 @@ class MyScaffold extends StatelessWidget {
   final AppBar? appBar;
   final Widget body;
   final Widget? floatingActionButton;
-
-  /// 可垂直滚动的简单页面
   final bool singleChildScrollView;
 
   /// 集成 SafeArea
+  ///
+  /// [singleChildScrollView] 可垂直滚动的简单页面，默认为 true
   const MyScaffold({
     super.key,
     this.appBar,
@@ -41,10 +41,11 @@ class MyScaffold2 extends StatelessWidget {
   final Widget? bottomSheet;
   final Color? backgroundColor;
 
-  /// 定义一个宽度区域，在这个区域内水平拖动（滑动）手势可以触发打开 drawer (侧边栏)。可以指定为 0.3
   final double? drawerEdgeDragWidthPercent;
 
   /// 集成 SafeArea
+  ///
+  /// [drawerEdgeDragWidthPercent] 定义一个宽度区域，在这个区域内水平拖动（滑动）手势可以触发打开 drawer (侧边栏)。可以指定为 0.3
   const MyScaffold2({
     super.key,
     this.appBar,
@@ -61,8 +62,9 @@ class MyScaffold2 extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    Widget child =
-        singleChildScrollView ? SingleChildScrollView(child: body) : body;
+    Widget child = singleChildScrollView
+        ? SingleChildScrollView(child: body)
+        : body;
     if (useSafeArea) {
       child = SafeArea(child: child);
     }
@@ -75,10 +77,39 @@ class MyScaffold2 extends StatelessWidget {
       bottomSheet: bottomSheet,
       backgroundColor: backgroundColor,
       body: child,
-      drawerEdgeDragWidth:
-          drawerEdgeDragWidthPercent != null
-              ? Get.width * drawerEdgeDragWidthPercent!
-              : null,
+      drawerEdgeDragWidth: drawerEdgeDragWidthPercent != null
+          ? Get.width * drawerEdgeDragWidthPercent!
+          : null,
+    );
+  }
+}
+
+class MyScaffold3Body extends StatelessWidget {
+  final Widget? top;
+  final Widget center;
+  final Widget? bottom;
+
+  /// 上下固定，中间为可滚动区域
+  const MyScaffold3Body({
+    super.key,
+    this.top,
+    required this.center,
+    this.bottom,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        // 上部固定区域
+        if (top != null) top!,
+
+        // 中部滚动区域
+        Expanded(child: SingleChildScrollView(child: center)),
+
+        // 下部固定区域
+        if (bottom != null) bottom!,
+      ],
     );
   }
 }

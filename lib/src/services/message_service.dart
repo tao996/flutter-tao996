@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:fluttertoast/fluttertoast.dart';
@@ -26,8 +28,10 @@ abstract class IMessageService extends IDebugMessageService {
     int seconds = 4,
   });
 
+  @override
   SnackbarController success(String message);
 
+  @override
   SnackbarController error(String message);
 }
 
@@ -64,6 +68,9 @@ class MessageService implements IMessageService {
 
   @override
   Future<bool?> showToast({required String msg}) async {
+    if (Platform.isWindows || Platform.isLinux || Platform.isMacOS){
+      throw 'Fluttertoast is not supported on Windows, Linux and MacOS';
+    }
     Fluttertoast.cancel();
     if (msg.startsWith('DioException')) {
       msg = msg.substring(msg.lastIndexOf(':') + 1).trim();

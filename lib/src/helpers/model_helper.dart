@@ -1,77 +1,17 @@
 import 'package:get/get.dart';
+import 'package:tao996/tao996.dart';
 
-import '../../tao996.dart';
-/// @description: 模型帮助类
-abstract class IModelHelper<T> {
-  /// 初始化数据源。
-  /// 对于有缓存的实现，这可能包括从数据库加载初始数据。
-  /// [language] 系统语言
-  Future<void> init(String language);
-
-  /// 查询全部的记录
-  Future<List<T>> getAll();
-
-  /// 根据指定字段和值查询单条记录。
-  /// 如果存在多条匹配记录，返回第一条。
-  Future<T?> getBy({required String fieldName, required dynamic value});
-
-  /// 根据 [id] 查询记录
-  Future<T?> getById(int id);
-
-  /// 保存或更新记录。
-  /// 如果实体存在主键，则更新；否则插入新记录。
-  /// [values] 可选，如果只更新部分字段，可以传入要更新的键值对。
-  /// 返回保存操作是否成功。
-  Future<bool> save(
-    T entity, {
-    Map<String, Object?>? values,
-    String primaryName = 'id',
-  });
-
-  /// 根据指定字段和值删除记录。
-  /// 返回删除操作是否成功。
-  Future<bool> deleteBy({required String fieldName, required dynamic value});
-
-  /// 根据主键 ID 删除记录。
-  /// 返回删除操作是否成功。
-  Future<bool> deleteById(int id);
-
-  /// 检查记录是否存在
-  Future<bool> exists(dynamic value, {required String fieldName});
-
-  /// 获取记录总数。
-  Future<int> count();
-
-  /// 获取分页数据。
-  Future<List<T>> getPagedData({
-    required int pageSize,
-    WhereClauseBuilder? clauseBuilder, // 用于构建 WHERE 子句的函数
-    List<String>? columns,
-    String? orderBy,
-    int? offset,
-  });
-
-  /// 执行自定义 SQL 查询并返回 Map 列表。
-  Future<List<Map<String, dynamic>>> rawQuery(
-    String sql, [
-    List<Object?>? arguments,
-  ]);
-
-  /// 根据字段查询多条记录
-  Future<List<T>> findManyBy({
-    required String fieldName,
-    required dynamic value,
-    List<String>? columns,
-  });
-}
-
-/// 模型服务
-abstract class ModelHelper<T> implements IModelHelper<T> {
+abstract class ModelHelper<T extends IModel> {
   final IDatabaseService _dbService = getIDatabaseService();
   final IDebugService _debugService = getIDebugService();
 
-  final String tableName;
+  final String _tableName;
+
+  /// 是否启用缓存
   final bool useCache;
+
+  /// 是否开启软删除
+  final bool useDeleteAt;
 
   /// 缓存全部的记录，通常用于小表使用
   /// 使用 `RxList` (如果使用 GetX) 或其他响应式列表，方便 UI 自动刷新
@@ -81,70 +21,101 @@ abstract class ModelHelper<T> implements IModelHelper<T> {
   /// 提供对缓存的只读访问
   List<T> get cache => List.unmodifiable(_cache);
 
-  /// 构造函数。
-  /// [tableName] 数据库表名。
-  /// [useCache] 是否启用内存缓存。
-  ModelHelper(this.tableName, {this.useCache = false});
+  /// 获取表名
+  String get tableName => _tableName;
+
+  ModelHelper(
+    this._tableName, {
+    this.useCache = false,
+    this.useDeleteAt = false,
+  });
+
+  Future<void> init(String language) async {
+    _debugService.d('Initializing $tableName...');
+    if (useCache) {
+      await getAllFromDb();
+      _debugService.d(' $tableName cache loaded with ${_cache.length} items.');
+    }
+  }
 
   /// 将 Map 数据转换为实体对象 [T]。
   T fromMap(Map<String, dynamic> map);
 
-  /// 将实体对象 [T] 转换为 Map&lt;String, dynamic>。
-  Map<String, dynamic> toMap(T entity);
+  /// 通常用在 getBy 中，用于获取实体的特定字段值，通常用于检查实体是否已存在
+  dynamic getValueByField(T entity, String fieldName);
 
-  /// 检查实体对象是否拥有有效的主键 ID。
-  /// 通常用于判断是插入 (ID 为空/0) 还是更新 (ID 非空/非0)。
-  bool hasId(T entity);
-
-  /// 更新实体对象的主键 ID。
-  /// 在插入新记录后，数据库通常会返回新生成的 ID，需要更新到实体对象中。
-  T updateId(T entity, dynamic id);
-
-  /// 用于获取实体的特定字段值，通常用于检查实体是否已存在
-  dynamic getByFieldValue(T entity, String fieldName);
-
-  // --- IModelHelper 接口的实现 ---
-  @override
-  Future<void> init(String language) async {
-    _debugService.d('[ModelHelper]: Initializing $tableName...');
-    if (useCache) {
-      await loadAllFromDb();
-      _debugService.d(
-        '[ModelHelper]: $tableName cache loaded with ${_cache.length} items.',
-      );
+  dynamic getMsValueByField(T entity, String fieldName) {
+    switch (fieldName) {
+      case 'id':
+        return entity.id;
+      case 'createdAt':
+        return entity.createdAt;
+      case 'updatedAt':
+        return entity.updatedAt;
+      case 'deletedAt':
+        return entity.deletedAt;
+      default:
+        return getValueByField(entity, fieldName);
     }
   }
 
-  @override
+  void setValueByField(T entity, String fieldName, dynamic value);
+
+  void setMsValueByField(T entity, String fieldName, dynamic value) {
+    switch (fieldName) {
+      case 'id':
+        entity.id = value;
+        break;
+      case 'createdAt':
+        entity.createdAt = value;
+        break;
+      case 'updatedAt':
+        entity.updatedAt = value;
+        break;
+      case 'deletedAt':
+        entity.deletedAt = value;
+        break;
+      default:
+        setValueByField(entity, fieldName, value);
+    }
+  }
+
   /// 获取全部的记录（可能使用缓存）
   Future<List<T>> getAll() async {
     if (this.useCache) {
-      return _cache.isNotEmpty ? Future.value(_cache) : await loadAllFromDb();
+      return _cache.isNotEmpty ? Future.value(_cache) : await getAllFromDb();
     } else {
-      return await loadAllFromDb();
+      return await getAllFromDb();
     }
   }
 
   /// 从数据库中查询全部的记录并更新缓存。
-  Future<List<T>> loadAllFromDb() async {
+  Future<List<T>> getAllFromDb() async {
     try {
-      final List<Map<String, dynamic>> maps = await _dbService.query(tableName);
+      final List<Map<String, dynamic>> maps = await _dbService.query(
+        tableName,
+        where: useDeleteAt ? 'deletedAt IS NULL' : null,
+      );
       final rows = maps.map((map) => fromMap(map)).toList();
       if (useCache) {
         _cache = rows; // 直接赋值以更新缓存
       }
       return rows;
     } catch (e, st) {
-      _debugService.exception(e, st, errorMessage: '加载表 $tableName 失败！');
-      return []; // 加载失败返回空列表
+      _debugService.exception(e, st);
+      throw '加载表 $tableName 失败！';
     }
   }
 
-  @override
-  Future<T?> getBy({required String fieldName, required dynamic value}) async {
-    if (useCache) {
+  /// 获取指定字段和值的第一个记录
+  Future<T?> getFirstBy({
+    required String fieldName,
+    required dynamic value,
+    bool tryCache = true,
+  }) async {
+    if (tryCache && useCache) {
       return _cache.firstWhereOrNull(
-        (element) => getByFieldValue(element, fieldName) == value,
+        (element) => getMsValueByField(element, fieldName) == value,
       );
     } else {
       try {
@@ -156,148 +127,70 @@ abstract class ModelHelper<T> implements IModelHelper<T> {
         );
         return maps.isNotEmpty ? fromMap(maps.first) : null;
       } catch (e, st) {
-        _debugService.exception(
-          e,
-          st,
-          errorMessage:
-              'Failed to get record by $fieldName=$value from $tableName',
-        );
-        return null;
+        _debugService.exception(e, st, log: true);
+        throw 'Failed to get record by $fieldName=$value from $tableName';
       }
     }
   }
 
-  @override
-  Future<T?> getById(int id) async {
-    return await getBy(fieldName: 'id', value: id);
+  Future<T?> getById(int id, {bool tryCache = true}) async {
+    return await getFirstBy(fieldName: 'id', value: id, tryCache: tryCache);
   }
 
-  @override
-  Future<bool> save(
-    T entity, {
-    Map<String, Object?>? values,
-    String primaryName = 'id',
-  }) async {
+  /// 删除符合条件的记录，自动更新缓存
+  Future<bool> delete({String? where, List<Object?>? whereArgs}) async {
     try {
-      if (hasId(entity)) {
-        // 更新记录
-        final primaryValue = getByFieldValue(entity, primaryName);
-        final updatedRows = await _dbService.update(
-          tableName,
-          values ?? toMap(entity),
-          where: '$primaryName = ?',
-          whereArgs: [primaryValue],
+      var count = 0;
+      if (useDeleteAt) {
+        count = await update(
+          {"deletedAt": DateTime.now().toIso8601String()},
+          where: where,
+          whereArgs: whereArgs,
         );
-        if (updatedRows > 0) {
-          if (useCache) {
-            final index = _cache.indexWhere(
-              (element) =>
-                  getByFieldValue(element, primaryName) ==
-                  getByFieldValue(entity, primaryName),
-            );
-            if (index != -1) {
-              _cache[index] = entity;
-            } else {
-              // 如果缓存中没有，可能是因为缓存尚未完全加载或实体是新加载的，考虑重新加载缓存
-              _debugService.d(
-                '[ModelHelper]: Updated entity not found in cache. Consider reloading cache for $tableName.',
-              );
-              await loadAllFromDb(); // 确保缓存最新
-            }
-          }
-          _debugService.d(
-            '[ModelHelper]: Updated record in $tableName with $primaryName: $primaryValue',
-          );
-          return true;
-        } else {
-          _debugService.d(
-            '[ModelHelper]: Updated record in $tableName with $primaryName: $primaryValue failed, not any row updated',
-          );
-          return false;
-        }
+        _debugService.d(
+          'softDeleted result',
+          args: {"where": where, "whereArgs": whereArgs, "count": count},
+        );
       } else {
-        // 添加新的记录
-        final newId = await _dbService.insert(
+        count = await _dbService.delete(
           tableName,
-          toMap(entity)..remove(primaryName),
+          where: where,
+          whereArgs: whereArgs,
         );
-        if (newId > 0) {
-          final updatedEntity = updateId(entity, newId); // 更新实体对象的 ID
-          if (useCache) {
-            _cache.add(updatedEntity); // 添加到缓存
-          }
-          _debugService.d(
-            '[ModelHelper]: Inserted new record into $tableName with new ID: $newId',
-          );
-          return true;
-        } else {
-          _debugService.d(
-            '[ModelHelper]: Failed to insert new record into $tableName.',
-          );
-          return false;
-        }
+        _debugService.d(
+          'deleted result',
+          args: {"where": where, "whereArgs": whereArgs, "count": count},
+        );
       }
+      if (useCache) {
+        await getAllFromDb();
+      }
+
+      return count > 0;
     } catch (e, st) {
-      _debugService.exception(
-        e,
-        st,
-        errorMessage: 'Failed to save record in $tableName: $e',
-      );
-      return false;
+      _debugService.exception(e, st, log: true);
+      throw 'Failed to delete record from $tableName';
     }
   }
 
-  @override
+  /// 根据指定字段和值删除记录。返回删除操作是否成功。
   Future<bool> deleteBy({
-    required String fieldName,
     required dynamic value,
+    String fieldName = 'id',
   }) async {
-    try {
-      final count = await _dbService.delete(
-        tableName,
-        where: '$fieldName = ?',
-        whereArgs: [value],
-      );
-      if (count > 0) {
-        if (useCache) {
-          _cache.removeWhere(
-            (element) => getByFieldValue(element, fieldName) == value,
-          );
-          _debugService.d(
-            '[ModelHelper]: Removed $count records from cache for $tableName.',
-          );
-        }
-        _debugService.d(
-          '[ModelHelper]: Deleted $count records from $tableName where $fieldName = $value.',
-        );
-        return true;
-      } else {
-        _debugService.d(
-          '[ModelHelper]: No records deleted from $tableName where $fieldName = $value.',
-        );
-        return false;
-      }
-    } catch (e, st) {
-      _debugService.exception(
-        e,
-        st,
-        errorMessage:
-            'Failed to delete record by $fieldName=$value from $tableName',
-      );
-      return false;
-    }
+    return await delete(where: '$fieldName = ?', whereArgs: [value]);
   }
 
-  @override
+  /// 根据主键 ID 删除记录。
   Future<bool> deleteById(int id) async {
     return await deleteBy(fieldName: 'id', value: id);
   }
 
-  @override
+  /// 检查记录是否存在
   Future<bool> exists(dynamic value, {required String fieldName}) async {
     if (useCache) {
       return _cache.any((element) {
-        final elementValue = getByFieldValue(element, fieldName);
+        final elementValue = getMsValueByField(element, fieldName);
         // 注意：这里需要考虑 value 的类型，以及 elementValue 是否可空
         return elementValue == value;
       });
@@ -309,18 +202,13 @@ abstract class ModelHelper<T> implements IModelHelper<T> {
           whereArgs: [value],
         );
       } catch (e, st) {
-        _debugService.exception(
-          e,
-          st,
-          errorMessage:
-              'Failed to check existence of record in $tableName for $fieldName=$value',
-        );
-        return false;
+        _debugService.exception(e, st, log: true);
+        throw 'Failed to check existence of record in $tableName for $fieldName=$value';
       }
     }
   }
 
-  @override
+  /// 获取记录总数。
   Future<int> count({String? where, List<Object?>? arguments}) async {
     if (useCache) {
       return _cache.length;
@@ -332,12 +220,8 @@ abstract class ModelHelper<T> implements IModelHelper<T> {
         arguments: arguments,
       );
     } catch (e, st) {
-      _debugService.exception(
-        e,
-        st,
-        errorMessage: 'Failed to get count for $tableName',
-      );
-      return 0;
+      _debugService.exception(e, st, log: true);
+      throw 'Failed to get count for $tableName';
     }
   }
 
@@ -349,8 +233,7 @@ abstract class ModelHelper<T> implements IModelHelper<T> {
   /// [isAscending]: 排序方向，true 为升序（加载更多），false 为降序（下拉刷新）。
   ///
   /// 返回一个 Map 列表，其中包含查询到的记录。
-  @override
-  Future<List<T>> getPagedData({
+  Future<List<T>> getPaginationData({
     required int pageSize,
     WhereClauseBuilder? clauseBuilder,
     List<String>? columns,
@@ -374,17 +257,13 @@ abstract class ModelHelper<T> implements IModelHelper<T> {
       );
       return result.map((map) => fromMap(map)).toList();
     } catch (e, st) {
-      _debugService.exception(
-        e,
-        st,
-        errorMessage: 'Failed to get paged data for $tableName',
-      );
-      return [];
+      _debugService.exception(e, st, log: true);
+      throw 'Failed to get paged data for $tableName';
     }
   }
 
-  @override
-  Future<List<T>> findManyBy({
+  /// 获取指定字段和值的所有记录。
+  Future<List<T>> getManyBy({
     required String fieldName,
     required dynamic value,
     List<String>? columns,
@@ -398,15 +277,12 @@ abstract class ModelHelper<T> implements IModelHelper<T> {
       );
       return result.map((map) => fromMap(map)).toList();
     } catch (e, st) {
-      _debugService.exception(
-        e,
-        st,
-        errorMessage: 'Failed to findManyBy data for $tableName',
-      );
-      return [];
+      _debugService.exception(e, st, log: true);
+      throw 'Failed to getManyBy data for $tableName';
     }
   }
 
+  /// 执行原生 SQL 语句
   Future<void> execute(String sql, [List<Object?>? arguments]) async {
     try {
       await _dbService.execute(sql, arguments);
@@ -414,14 +290,14 @@ abstract class ModelHelper<T> implements IModelHelper<T> {
       _debugService.exception(
         e,
         st,
-        errorMessage: 'Failed to execute SQL for $tableName',
         args: {'sql': sql, 'arguments': arguments},
+        log: true,
       );
-      rethrow;
+      throw 'Failed to execute SQL for $tableName';
     }
   }
 
-  @override
+  /// 执行原生 SQL 查询
   Future<List<Map<String, dynamic>>> rawQuery(
     String sql, [
     List<Object?>? arguments,
@@ -432,13 +308,13 @@ abstract class ModelHelper<T> implements IModelHelper<T> {
       _debugService.exception(
         e,
         st,
-        errorMessage: 'Failed to execute raw query for $tableName',
         args: {'sql': sql, 'arguments': arguments},
       );
-      rethrow; // 重新抛出以便上层处理
+      throw 'Failed to execute raw query for $tableName';
     }
   }
 
+  /// 查询记录
   Future<List<Map<String, dynamic>>> query({
     bool? distinct,
     List<String>? columns,
@@ -450,96 +326,115 @@ abstract class ModelHelper<T> implements IModelHelper<T> {
     int? limit,
     int? offset,
   }) async {
-    return await _dbService.query(
-      tableName,
-      distinct: distinct,
-      columns: columns,
-      where: where,
-      whereArgs: whereArgs,
-      groupBy: groupBy,
-      having: having,
-      orderBy: orderBy,
-      limit: limit,
-      offset: offset,
-    );
-  }
-
-  /// 添加记录并返回 ID，你可能需要从 values 中移除  id 列，如 post.toMap()..remove('id')
-  Future<int> insert(Map<String, Object?> values) async {
     try {
-      return await _dbService.insert(tableName, values);
-    } catch (e, st) {
-      _debugService.exception(
-        e,
-        st,
-        errorMessage: 'Failed to insert record into $tableName',
-        args: values,
+      return await _dbService.query(
+        tableName,
+        distinct: distinct,
+        columns: columns,
+        where: where,
+        whereArgs: whereArgs,
+        groupBy: groupBy,
+        having: having,
+        orderBy: orderBy,
+        limit: limit,
+        offset: offset,
       );
-      rethrow; // 重新抛出以便上层处理
+    } catch (e, st) {
+      _debugService.exception(e, st, log: true);
+      throw 'Failed to query for $tableName';
     }
   }
 
-  /// 返回记录的更新数量
+  /// 添加记录并返回新记录，已经自动从 [values] 中移除 id 列；
+  /// 如果使用缓存，则自动添加到缓存中
+  Future<T> insert(Map<String, Object?> values) async {
+    try {
+      values['createdAt'] = DateTime.now().toIso8601String();
+      values['updatedAt'] = DateTime.now().toIso8601String();
+      final newId = await _dbService.insert(tableName, values..remove('id'));
+      if (newId > 0) {
+        final record = await getById(newId, tryCache: false);
+        if (record == null) {
+          throw 'Failed to get record by id=$newId from $tableName';
+        }
+        if (useCache) {
+          await getAllFromDb();
+        }
+        _debugService.d(
+          'Inserted new record into $tableName with new ID: $newId',
+        );
+        return record;
+      } else {
+        throw 'Failed to insert record into $tableName';
+      }
+    } catch (e, st) {
+      _debugService.exception(e, st, args: values, log: true);
+      throw 'Failed to insert record into $tableName';
+    }
+  }
+
+  /// 更新符合条件的记录，并返回影响行数；如果提供 [entity] 则会更新缓存
   Future<int> update(
     Map<String, Object?> values, {
     String? where,
     List<Object?>? whereArgs,
+    T? entity,
   }) async {
     try {
-      return await _dbService.update(
+      values['updatedAt'] = DateTime.now().toIso8601String();
+      final updatedRows = await _dbService.update(
         tableName,
         values,
         where: where,
         whereArgs: whereArgs,
       );
+      if (entity != null && entity.hasRecord()) {
+        for (final key in values.keys) {
+          setMsValueByField(entity, key, values[key]);
+        }
+        // 如果提供了实体，则更新缓存中的记录
+        if (useCache) {
+          await getAllFromDb(); // 确保缓存最新
+        }
+      }
+      if (updatedRows == 0) {
+        _debugService.d(
+          'No record updated in $tableName. Check your where clause and values.',
+          args: values,
+        );
+      }
+
+      return updatedRows;
     } catch (e, st) {
-      _debugService.exception(
-        e,
-        st,
-        errorMessage: 'Failed to update record in $tableName',
-      );
-      rethrow; // 重新抛出以便上层处理
+      _debugService.exception(e, st, log: true);
+      throw 'Failed to update record in $tableName';
     }
   }
 
-  Future<bool> delete({String? where, List<Object?>? whereArgs}) async {
-    try {
-      final count = await _dbService.delete(
-        tableName,
-        where: where,
-        whereArgs: whereArgs,
-      );
-      return count > 0;
-    } catch (e, st) {
-      _debugService.exception(
-        e,
-        st,
-        errorMessage: ' Failed to delete record from $tableName',
-      );
-      rethrow; // 重新抛出以便上层处理
-    }
+  Future<int> updateWithId(
+    int id,
+    Map<String, Object?> values, {
+    T? entity,
+  }) async {
+    return update(values, entity: entity, where: "id=?", whereArgs: [id]);
   }
 
-  Future<int?> firstRecordId({
+  /// 从数据库中获取第1条符合条件的记录的字段 [key]值
+  Future<int> getFirstRecordKey({
     required String where,
     required List<dynamic> whereArgs,
-    String idColumn = 'id',
+    String key = 'id',
   }) async {
     try {
       return await _dbService.firstRecordId(
         tableName,
         where: where,
         whereArgs: whereArgs,
-        key: idColumn,
+        key: key,
       );
     } catch (e, st) {
-      _debugService.exception(
-        e,
-        st,
-        log: true,
-        errorMessage: 'Failed to get first record ID for $tableName',
-      );
-      return null;
+      _debugService.exception(e, st, log: true);
+      throw 'Failed to get first record ID for $tableName';
     }
   }
 }

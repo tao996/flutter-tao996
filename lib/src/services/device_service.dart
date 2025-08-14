@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
@@ -32,5 +34,9 @@ GetPlatform.isDesktop
 //on Windows, iOS, OSX, Android, etc.
 GetPlatform.isWeb
      */
+  }
+
+  static bool isPc(){
+    return Platform.isWindows || Platform.isLinux || Platform.isMacOS;
   }
 }

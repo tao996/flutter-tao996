@@ -8,6 +8,8 @@ await db.execute('''CREATE TABLE $_tableName(
 )
 ''');
  */
+import 'package:tao996/tao996.dart';
+
 abstract class IModel<T> {
   int id = 0;
 
@@ -38,9 +40,9 @@ abstract class IModel<T> {
     };
   }
 
-  String get createdAtText => createdAt?.toIso8601String() ?? '';
-  String get updatedAtText => updatedAt?.toIso8601String() ?? '';
-  String get deletedAtText => deletedAt?.toIso8601String() ?? '';
+  String get createdAtText => DatetimeUtil.formatYMDHMS(dateTime: createdAt);
+  String get updatedAtText => DatetimeUtil.formatYMDHMS(dateTime: updatedAt);
+  String get deletedAtText => DatetimeUtil.formatYMDHMS(dateTime: deletedAt);
 
   // 抽象方法，强制子类实现其特有字段的 toMap 逻辑
   Map<String, dynamic> toObjectMap();

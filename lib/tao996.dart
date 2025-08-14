@@ -10,7 +10,10 @@ export 'src/utils/url_util.dart';
 export 'src/helpers/api_response_handler.dart';
 export 'src/helpers/form_helper.dart';
 export 'src/helpers/model.dart';
+export 'src/helpers/model_action_helper.dart';
 export 'src/helpers/model_helper.dart';
+
+export 'src/mixin/base_controller.dart';
 
 export 'src/services/database_service.dart';
 export 'src/services/debug_service.dart';
@@ -22,7 +25,6 @@ export 'src/services/http_dio_service.dart';
 export 'src/services/locale_service.dart';
 export 'src/services/log_service.dart';
 export 'src/services/message_service.dart';
-export 'src/services/model_service.dart';
 export 'src/services/network_service.dart';
 export 'src/services/path_service.dart';
 export 'src/services/route_service.dart';
@@ -80,7 +82,7 @@ void registerTao996Dependencies(GetIt locator) {
 void registerTao996Services(GetIt locator) {
   // final locator = GetIt.instance;
   // 用户需要自己注册
-  // ISettingsService, IThemeService, IDatabaseService, ITranslationService,IRouteService
+  // ISettingsService, IThemeService, IDatabaseService, ITranslationService,IRouteService,ModelActionHelper
   // locator.registerLazySingleton<IThemeService>(() => ThemeService());
   // locator.registerLazySingleton<IDatabaseService>(() => SqfliteDatabaseService());
 
@@ -172,4 +174,8 @@ IRouteService getIRouteService() {
 
 IWebviewService getIWebviewService() {
   return GetIt.instance<IWebviewService>();
+}
+
+ModelActionHelper getModelActionHelper() {
+  return GetIt.instance<ModelActionHelper>();
 }
