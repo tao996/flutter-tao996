@@ -1,7 +1,7 @@
 import 'package:get/get.dart';
 import 'package:tao996/tao996.dart';
 
-mixin BaseController {
+mixin BaseControllerMixin {
   final IMessageService messageService = getIMessageService();
   final IDebugService debugService = getIDebugService();
 

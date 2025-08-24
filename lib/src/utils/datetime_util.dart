@@ -2,10 +2,13 @@ import 'package:intl/intl.dart';
 
 import '../../tao996.dart';
 
-
 enum DateTimeFormat { ymd, ymdHm, ymdHms }
 
 class DatetimeUtil {
+  static String getNowTime({String pattern = 'yyyy-MM-dd HH:mm:ss'}) {
+    return DateFormat(pattern).format(DateTime.now());
+  }
+
   static String format({
     int timestamp = 0,
     DateTime? dateTime,

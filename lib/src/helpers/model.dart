@@ -41,7 +41,9 @@ abstract class IModel<T> {
   }
 
   String get createdAtText => DatetimeUtil.formatYMDHMS(dateTime: createdAt);
+
   String get updatedAtText => DatetimeUtil.formatYMDHMS(dateTime: updatedAt);
+
   String get deletedAtText => DatetimeUtil.formatYMDHMS(dateTime: deletedAt);
 
   // 抽象方法，强制子类实现其特有字段的 toMap 逻辑
@@ -144,3 +146,46 @@ keyPassword: $keyPassword, privateKey: $privateKey,
 }
 
  */
+class KV<T> {
+  String label;
+  T value;
+
+  KV({required this.label, required this.value});
+
+  @override
+  String toString() {
+    return 'KV{label: $label, value: $value}';
+  }
+}
+
+List<KV<T>> kvCreateList<T>(Map<T, String> maps) {
+  final List<KV<T>> list = [];
+  maps.forEach((key, label) {
+    list.add(KV(label: label, value: key));
+  });
+  return list;
+}
+
+/// 查询列表中指定值的键
+/// [kvs] 键值对列表;
+/// [value] 枚举属性的字符中,对于枚举类型必须使用 toString() 而不是 .name, name 比 toString 少了一个类型前辍
+/// [firstIfNotFound] 如果找不到，是否返回第一个键
+T kvGetValue<T>(
+  final List<KV<T>> kvs,
+  String? value, {
+  bool firstIfNotFound = true,
+}) {
+  for (var kv in kvs) {
+    if (kv.value.toString() == value) {
+      return kv.value;
+    }
+  }
+  if (firstIfNotFound) {
+    ColorUtil.print(
+      'warning:could not find value $value in kvs, return first value',
+      MyColor.yellow,
+    );
+    return kvs.first.value;
+  }
+  throw 'could not find value $value in kvs';
+}

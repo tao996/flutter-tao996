@@ -7,12 +7,11 @@ class ModelActionHelper {
 
   void actionWith(
     bool condition, {
+    String successMessageText = '操作成功',
+    Future<void> Function()? success,
+    String errorMessageText = '操作失败',
+    Future<void> Function()? error,
     bool showSuccessMessage = true,
-    required String successMessageText,
-    void Function()? success,
-    bool showErrorMessage = true,
-    required String errorMessageText,
-    void Function()? error,
   }) {
     if (condition) {
       if (success != null) {
@@ -21,95 +20,77 @@ class ModelActionHelper {
         messageService.success(successMessageText);
       }
     } else {
-      if (error != null) {
-        error();
-      } else if (showErrorMessage) {
-        messageService.error(errorMessageText);
-      }
+      messageService.error(errorMessageText);
     }
   }
 
-  void insert(
-    Future<dynamic> Function() action, {
-    void Function()? success,
+  Future<void> insert(
+    Future<IModel> Function() action, {
+    Future<void> Function()? success,
   }) async {
     try {
-      await action();
-    } catch (e) {
-      messageService.error(e.toString());
-    }
-  }
-
-  void update(
-    Future<int> Function() action, {
-    int get = 1,
-    void Function()? success,
-  }) async {
-    try {
+      final result = await action();
       actionWith(
-        await action() >= get,
+        result.id > 0,
+        successMessageText: '插入成功',
+        errorMessageText: '插入失败, 请检查数据是否正确',
+        success: success,
+      );
+    } catch (e) {
+      messageService.error('插入失败: ${e.toString()}');
+    }
+  }
+
+  Future<void> insertLastId(
+    Future<int> Function() action, {
+    Future<void> Function()? success,
+  }) async {
+    try {
+      final result = await action();
+      actionWith(
+        result > 0,
+        successMessageText: '插入成功',
+        errorMessageText: '插入失败, 请检查数据是否正确',
+        success: success,
+      );
+    } catch (e) {
+      messageService.error('插入失败: ${e.toString()}');
+    }
+  }
+
+  Future<void> update(
+    Future<int> Function() action, {
+    int expectedRows = 1,
+    Future<void> Function()? success,
+  }) async {
+    try {
+      final rowsAffected = await action();
+      actionWith(
+        rowsAffected >= expectedRows,
         successMessageText: '更新成功',
-        errorMessageText: '更新失败',
+        errorMessageText: '更新失败, 请检查数据是否正确',
         success: success,
       );
     } catch (e) {
-      messageService.error(e.toString());
+      messageService.error('更新失败: ${e.toString()}');
     }
   }
 
-  void delete(
+  Future<void> delete(
     Future<int> Function() action, {
-    int get = 1,
-    void Function()? success,
+    int expectedRows = 1,
+    Future<void> Function()? success,
   }) async {
     try {
+      final rowsAffected = await action();
       actionWith(
-        await action() >= get,
+        rowsAffected >= expectedRows,
         successMessageText: '删除成功',
-        errorMessageText: '删除失败',
+        errorMessageText: '删除失败, 请检查数据是否正确',
         success: success,
       );
     } catch (e) {
-      messageService.error(e.toString());
+      messageService.error('删除失败: ${e.toString()}');
     }
-  }
-}
-
-class ModelAction {
-  final ModelActionHelper helper = getModelActionHelper();
-  void Function()? _success;
-  Future<int> Function()?  _updateAction;
-  Future<dynamic> Function()? _insertAction;
-
-  ModelAction addSuccess(void Function()? value) {
-    _success = value;
-    return this;
-  }
-
-  ModelAction addUpdate(Future<int> Function() action) {
-    _updateAction = action;
-    return this;
-  }
-
-  ModelAction addInsert(Future<dynamic> Function() action) {
-    _insertAction = action;
-    return this;
-  }
-
-  ModelAction execute({
-    bool insertCondition = false,
-    bool updateCondition = false,
-  }) {
-    if (insertCondition) {
-      if (_insertAction != null) {
-        helper.insert(_insertAction!, success: _success);
-      }
-    }
-    if (updateCondition) {
-      if (_updateAction != null) {
-        helper.update(_updateAction!, success: _success);
-      }
-    }
-    return this;
   }
 }

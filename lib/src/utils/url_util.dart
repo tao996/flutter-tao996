@@ -15,11 +15,11 @@ class UrlUtil {
     final uri = Uri.tryParse(uriString);
     return uri != null && uri.hasScheme && uri.hasAuthority;
   }
-
-  static Uri concat(String host, String url) {
-    return Uri.parse(host).resolveUri(Uri.parse(url));
+  /// 连接主机与路径 [host] 主机；[path] 路径
+  static Uri concat(String host, String path) {
+    return Uri.parse(host).resolveUri(Uri.parse(path));
   }
-
+  /// 获取 url 的主机
   static String host(String url) {
     return Uri.parse(url).host;
   }
