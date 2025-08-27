@@ -68,9 +68,13 @@ abstract class IModel<T> {
 
   // 通用的工具方法
   static DateTime? _dateTimeParse(dynamic dt) {
-    if (dt == null) return null;
-    if (dt is String) return DateTime.parse(dt);
-    if (dt is int) return DateTime.fromMillisecondsSinceEpoch(dt);
+    if (dt == null || dt == '') return null;
+    try {
+      if (dt is String) return DateTime.parse(dt);
+      if (dt is int) return DateTime.fromMillisecondsSinceEpoch(dt);
+    } catch (e, st) {
+      getIDebugService().exception(e, st, args: dt);
+    }
     return null;
   }
 }
@@ -146,46 +150,3 @@ keyPassword: $keyPassword, privateKey: $privateKey,
 }
 
  */
-class KV<T> {
-  String label;
-  T value;
-
-  KV({required this.label, required this.value});
-
-  @override
-  String toString() {
-    return 'KV{label: $label, value: $value}';
-  }
-}
-
-List<KV<T>> kvCreateList<T>(Map<T, String> maps) {
-  final List<KV<T>> list = [];
-  maps.forEach((key, label) {
-    list.add(KV(label: label, value: key));
-  });
-  return list;
-}
-
-/// 查询列表中指定值的键
-/// [kvs] 键值对列表;
-/// [value] 枚举属性的字符中,对于枚举类型必须使用 toString() 而不是 .name, name 比 toString 少了一个类型前辍
-/// [firstIfNotFound] 如果找不到，是否返回第一个键
-T kvGetValue<T>(
-  final List<KV<T>> kvs,
-  String? value, {
-  bool firstIfNotFound = true,
-}) {
-  for (var kv in kvs) {
-    if (kv.value.toString() == value) {
-      return kv.value;
-    }
-  }
-  if (firstIfNotFound) {
-    ColorUtil.print(
-      'warning:could not find value $value in kvs, return first value',
-      MyColor.yellow,
-    );
-    return kvs.first.value;
-  }
-  throw 'could not find value $value in kvs';
-}

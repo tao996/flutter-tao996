@@ -139,7 +139,7 @@ class DebugService implements IDebugService {
     String? errorMessage,
   }) {
     if (errorMessage != null && errorMessage.isNotEmpty) {
-      _message(errorMessage, false, log: log);
+      _message(errorMessage, false, log: false);
     }
 
     if (log == true) {

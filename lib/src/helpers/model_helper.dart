@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:get/get.dart';
 import 'package:tao996/tao996.dart';
 
@@ -8,10 +10,10 @@ abstract class ModelHelper<T extends IModel> {
   final String _tableName;
 
   /// 是否启用缓存
-  final bool useCache;
+  final bool enableCache;
 
-  /// 是否开启软删除
-  final bool useDeleteAt;
+  /// 是否开启软删除 soft delete
+  final bool enableSoftDelete;
 
   /// 缓存全部的记录，通常用于小表使用
   /// 使用 `RxList` (如果使用 GetX) 或其他响应式列表，方便 UI 自动刷新
@@ -24,17 +26,17 @@ abstract class ModelHelper<T extends IModel> {
   /// 获取表名
   String get tableName => _tableName;
 
-  /// [useCache] 是否使用缓存，通常用于小表使用;
-  /// [useDeleteAt] 是否使用软删除功能，注意：如果你的表中包含了 unique 索引，请不要使用软删除功能
+  /// [enableCache] 是否使用缓存，通常用于小表使用;
+  /// [enableSoftDelete] 是否使用软删除功能，注意：如果你的表中包含了 unique 索引，请不要使用软删除功能
   ModelHelper(
     this._tableName, {
-    this.useCache = false,
-    this.useDeleteAt = false,
+    this.enableCache = false,
+    this.enableSoftDelete = false,
   });
 
   Future<void> init(String language) async {
     debugService.d('Initializing $tableName...');
-    if (useCache) {
+    if (enableCache) {
       await getAllFromDb();
       debugService.d(' $tableName cache loaded with ${_cache.length} items.');
     }
@@ -46,6 +48,7 @@ abstract class ModelHelper<T extends IModel> {
   /// 通常用在 getBy 中，用于获取实体的特定字段值，通常用于检查实体是否已存在
   dynamic getValueByField(T entity, String fieldName);
 
+  /// 用在查询记录中
   dynamic getMsValueByField(T entity, String fieldName) {
     switch (fieldName) {
       case 'id':
@@ -61,6 +64,7 @@ abstract class ModelHelper<T extends IModel> {
     }
   }
 
+  /// 用在 update 操作中，会将修改的值同步到实体中
   void setValueByField(T entity, String fieldName, dynamic value);
 
   void setMsValueByField(T entity, String fieldName, dynamic value) {
@@ -84,7 +88,7 @@ abstract class ModelHelper<T extends IModel> {
 
   /// 获取全部的记录（可能使用缓存）
   Future<List<T>> getAll() async {
-    if (this.useCache) {
+    if (this.enableCache) {
       return _cache.isNotEmpty ? Future.value(_cache) : await getAllFromDb();
     } else {
       return await getAllFromDb();
@@ -96,17 +100,17 @@ abstract class ModelHelper<T extends IModel> {
     try {
       final List<Map<String, dynamic>> maps = await dbService.query(
         tableName,
-        where: useDeleteAt ? 'deletedAt IS NULL' : null,
+        where: enableSoftDelete ? 'deletedAt IS NULL' : null,
         orderBy: 'id DESC',
       );
       final rows = maps.map((map) => fromMap(map)).toList();
-      if (useCache) {
+      if (enableCache) {
         _cache = rows; // 直接赋值以更新缓存
       }
       return rows;
     } catch (e, st) {
       debugService.exception(e, st);
-      throw '加载表 $tableName 失败！';
+      throw '加载表 $tableName 失败！原因: ${e.toString()}';
     }
   }
 
@@ -116,7 +120,7 @@ abstract class ModelHelper<T extends IModel> {
     required dynamic value,
     bool tryCache = true,
   }) async {
-    if (tryCache && useCache) {
+    if (tryCache && enableCache) {
       return _cache.firstWhereOrNull(
         (element) => getMsValueByField(element, fieldName) == value,
       );
@@ -131,7 +135,7 @@ abstract class ModelHelper<T extends IModel> {
         return maps.isNotEmpty ? fromMap(maps.first) : null;
       } catch (e, st) {
         debugService.exception(e, st, log: true);
-        throw 'Failed to get record by $fieldName=$value from $tableName';
+        throw 'Failed to get record by $fieldName=$value from $tableName; because: $e';
       }
     }
   }
@@ -144,7 +148,7 @@ abstract class ModelHelper<T extends IModel> {
   Future<int> delete({String? where, List<Object?>? whereArgs}) async {
     try {
       var count = 0;
-      if (useDeleteAt) {
+      if (enableSoftDelete) {
         count = await update(
           {"deletedAt": DateTime.now().toIso8601String()},
           where: where,
@@ -165,14 +169,14 @@ abstract class ModelHelper<T extends IModel> {
           args: {"where": where, "whereArgs": whereArgs, "count": count},
         );
       }
-      if (useCache && count > 0) {
+      if (enableCache && count > 0) {
         await getAllFromDb();
       }
 
       return count;
     } catch (e, st) {
       debugService.exception(e, st, log: true);
-      throw 'Failed to delete record from $tableName';
+      throw 'Failed to delete record from $tableName; because: $e';
     }
   }
 
@@ -205,13 +209,13 @@ abstract class ModelHelper<T extends IModel> {
       );
     } catch (e, st) {
       debugService.exception(e, st, log: true);
-      throw 'Failed to check existence of record in $tableName for $fieldName=$value';
+      throw 'Failed to check existence of record in $tableName for $fieldName=$value; because: $e';
     }
   }
 
   /// 获取记录总数。
   Future<int> count({String? where, List<Object?>? arguments}) async {
-    if (useCache) {
+    if (enableCache) {
       return _cache.length;
     }
     try {
@@ -222,16 +226,15 @@ abstract class ModelHelper<T extends IModel> {
       );
     } catch (e, st) {
       debugService.exception(e, st, log: true);
-      throw 'Failed to get count for $tableName';
+      throw 'Failed to get count for $tableName; because: $e';
     }
   }
 
   /// 通用的分页查询方法，基于自增主键ID
   ///
-  /// [pageSize]: 每页的记录数。
-  /// [lastItemId]: 上一页的最后一条记录的ID。如果是第一次加载或下拉刷新，传入 null。
-  /// [orderByColumn]: 用于排序的列名，通常是 'id'。
-  /// [isAscending]: 排序方向，true 为升序（加载更多），false 为降序（下拉刷新）。
+  /// [pageSize]: 每页的记录数。[columns] 查询的字段; [orderBy] 排序；
+  ///
+  /// [offset] 偏移量，优先使用；[pageIndex] 当前页码，默认为1
   ///
   /// 返回一个 Map 列表，其中包含查询到的记录。
   Future<List<T>> getPaginationData({
@@ -240,6 +243,7 @@ abstract class ModelHelper<T extends IModel> {
     List<String>? columns,
     String? orderBy,
     int? offset,
+    int? pageIndex,
   }) async {
     try {
       final List<String> conditions = [];
@@ -254,12 +258,14 @@ abstract class ModelHelper<T extends IModel> {
         whereArgs: whereArgs,
         orderBy: orderBy,
         limit: pageSize,
-        offset: offset,
+        offset:
+            offset ??
+            (pageIndex == null ? null : (max(1, pageIndex) - 1) * pageSize),
       );
       return result.map((map) => fromMap(map)).toList();
     } catch (e, st) {
       debugService.exception(e, st, log: true);
-      throw 'Failed to get paged data for $tableName';
+      throw 'Failed to get paged data for $tableName; because: $e';
     }
   }
 
@@ -279,7 +285,7 @@ abstract class ModelHelper<T extends IModel> {
       return result.map((map) => fromMap(map)).toList();
     } catch (e, st) {
       debugService.exception(e, st, log: true);
-      throw 'Failed to getManyBy data for $tableName';
+      throw 'Failed to getManyBy data for $tableName; because: $e';
     }
   }
 
@@ -294,7 +300,7 @@ abstract class ModelHelper<T extends IModel> {
         args: {'sql': sql, 'arguments': arguments},
         log: true,
       );
-      throw 'Failed to execute SQL for $tableName';
+      throw 'Failed to execute SQL for $tableName; because: $e';
     }
   }
 
@@ -307,7 +313,7 @@ abstract class ModelHelper<T extends IModel> {
       return await dbService.rawQuery(sql, arguments);
     } catch (e, st) {
       debugService.exception(e, st, args: {'sql': sql, 'arguments': arguments});
-      throw 'Failed to execute raw query for $tableName';
+      throw 'Failed to execute raw query for $tableName; because: $e';
     }
   }
 
@@ -338,7 +344,7 @@ abstract class ModelHelper<T extends IModel> {
       );
     } catch (e, st) {
       debugService.exception(e, st, log: true);
-      throw 'Failed to query for $tableName';
+      throw 'Failed to query for $tableName; because: $e';
     }
   }
 
@@ -357,7 +363,7 @@ abstract class ModelHelper<T extends IModel> {
         debugService.d(
           'Inserted new record into $tableName with new ID: $newId',
         );
-        if (useCache) {
+        if (enableCache) {
           await getAllFromDb();
         }
         return record;
@@ -366,7 +372,7 @@ abstract class ModelHelper<T extends IModel> {
       }
     } catch (e, st) {
       debugService.exception(e, st, args: values, log: true);
-      throw 'Failed to insert record into $tableName';
+      throw 'Failed to insert record into $tableName; because: $e';
     }
   }
 
@@ -396,14 +402,14 @@ abstract class ModelHelper<T extends IModel> {
           args: values,
         );
       }
-      if (useCache && updatedRows > 0) {
+      if (enableCache && updatedRows > 0) {
         await getAllFromDb(); // 确保缓存最新
       }
 
       return updatedRows;
     } catch (e, st) {
       debugService.exception(e, st, log: true);
-      throw 'Failed to update record in $tableName';
+      throw 'Failed to update record in $tableName; because: $e';
     }
   }
 
@@ -431,7 +437,7 @@ abstract class ModelHelper<T extends IModel> {
       );
     } catch (e, st) {
       debugService.exception(e, st, log: true);
-      throw 'Failed to get first record ID for $tableName';
+      throw 'Failed to get first record ID for $tableName; because: $e';
     }
   }
 }

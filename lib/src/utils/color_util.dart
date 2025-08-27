@@ -18,6 +18,14 @@ class ColorUtil {
     return colors[Random().nextInt(6)];
   }
 
+  static String success(String content) {
+    return '${MyColor.green}$content${MyColor.reset}';
+  }
+
+  static String error(String content) {
+    return '${MyColor.red}$content${MyColor.reset}';
+  }
+
   // 封装成一个函数方便使用
   static void print(
     Object? data,

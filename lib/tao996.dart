@@ -1,6 +1,6 @@
 export 'src/const/color.dart';
 
-export 'src/utils/cast_util.dart';
+export 'src/utils/typecast_util.dart';
 export 'src/utils/color_util.dart';
 export 'src/utils/data_util.dart';
 export 'src/utils/datetime_util.dart';
@@ -11,12 +11,13 @@ export 'src/utils/url_util.dart';
 
 export 'src/helpers/api_response_handler.dart';
 export 'src/helpers/form_helper.dart';
+export 'src/helpers/kv.dart';
 export 'src/helpers/model.dart';
 export 'src/helpers/model_action.dart';
 export 'src/helpers/model_action_helper.dart';
 export 'src/helpers/model_helper.dart';
 
-export 'src/mixin/base_controller.dart';
+export 'src/mixin/mixin_service.dart';
 
 export 'src/services/database_service.dart';
 export 'src/services/debug_service.dart';

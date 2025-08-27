@@ -121,6 +121,9 @@ class MessageService implements IMessageService {
           : (success
                 ? Icon(Icons.check_circle_outline)
                 : Icon(Icons.close_outlined)),
+      onTap: (snack) {
+        Get.back();
+      },
     );
   }
 

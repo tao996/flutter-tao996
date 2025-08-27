@@ -19,9 +19,9 @@ class DataUtil {
   static final IDebugService _debugService = getIDebugService();
 
   static bool getBool(dynamic v, {bool defaultValue = false}) {
-    if (v == null) {
+    if (v == null || v == '') {
       return defaultValue;
-    } else if (v is num){
+    } else if (v is num) {
       return v > 0;
     }
     try {
@@ -33,7 +33,7 @@ class DataUtil {
   }
 
   static int getInt(dynamic v, {int defaultValue = 0}) {
-    if (v == null) {
+    if (v == null || v == '') {
       return defaultValue;
     }
     try {
@@ -55,7 +55,7 @@ class DataUtil {
   }
 
   static double getDouble(dynamic v, {double defaultValue = 0.0}) {
-    if (v == null) {
+    if (v == null || v == '') {
       return defaultValue;
     }
     try {
@@ -93,7 +93,7 @@ class DataUtil {
     DateTime? defaultValue,
     String? formatPattern,
   }) {
-    if (v == null) {
+    if (v == null || v == '') {
       return defaultValue;
     }
     try {
@@ -138,5 +138,52 @@ class DataUtil {
 
   static bool getBoolFromInt(int value) {
     return value == 1;
+  }
+
+  /// 验证字符串 [input] 是否符合指定的正则表达式 [pattern]
+  static bool hasMatch(String input, String pattern) {
+    return RegExp(pattern).hasMatch(input);
+  }
+
+  /// 从字符串 [input] 中获取所有匹配项，匹配项的格式为 [pattern]
+  static List<String> getAllMatches(String pattern, String input) {
+    // 使用 allMatches() 来获取所有匹配项的迭代器
+    final Iterable<RegExpMatch> matches = RegExp(pattern).allMatches(input);
+    final List<String> result = [];
+    if (matches.isNotEmpty) {
+      for (final match in matches) {
+        result.add(match.group(0)!);
+      }
+    }
+    return result;
+  }
+
+  /// 从字符串 [input] 中获取第一个匹配项，匹配项的格式为 [pattern]
+  static String? getFirstMatch(String pattern, String input) {
+    final match = RegExp(pattern).firstMatch(input);
+    return match?.group(0);
+  }
+
+  /// 验证用户输入的 [pattern] 是否为一个有效的正则表达式；注意跟原始字符串的区别
+  static bool isValidUserInputRegexPattern(String pattern) {
+    return (pattern.startsWith('r"') && pattern.endsWith('"')) ||
+        (pattern.startsWith("r'") && pattern.endsWith("'"));
+  }
+
+  /// 清除用户输入的正则表达式，返回一个可用户的系统正则表达式
+  static String getUserInputRegexPattern(String input) {
+    // 1. 移除字符串两端的空白符
+    String cleaned = input.trim();
+    // 2. 检查是否为原始字符串字面量格式 (r'...' 或 r"...")
+    if (cleaned.length >= 3 && cleaned.startsWith('r')) {
+      String firstQuote = cleaned[1];
+      String lastQuote = cleaned[cleaned.length - 1];
+      if (firstQuote == lastQuote && (firstQuote == "'" || firstQuote == '"')) {
+        // 如果是，直接剥离 'r' 和引号，返回中间的内容
+        // 这里不对内容做任何处理，因为 r'' 的作用就是保留所有字符的字面量
+        return cleaned.substring(2, cleaned.length - 1);
+      }
+    }
+    return cleaned;
   }
 }

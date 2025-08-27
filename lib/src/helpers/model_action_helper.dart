@@ -26,7 +26,7 @@ class ModelActionHelper {
 
   Future<void> insert(
     Future<IModel> Function() action, {
-    Future<void> Function()? success,
+    Future<void> Function(dynamic)? success,
   }) async {
     try {
       final result = await action();
@@ -34,10 +34,13 @@ class ModelActionHelper {
         result.id > 0,
         successMessageText: '插入成功',
         errorMessageText: '插入失败, 请检查数据是否正确',
-        success: success,
+        success: () async {
+          success?.call(result);
+        },
       );
     } catch (e) {
       messageService.error('插入失败: ${e.toString()}');
+      rethrow;
     }
   }
 
