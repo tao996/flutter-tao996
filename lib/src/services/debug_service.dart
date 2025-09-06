@@ -33,6 +33,9 @@ abstract class IDebugService {
   IDebugService printList(List<dynamic> items);
 
   IDebugService printLists(List<List<dynamic>> items);
+
+  /// 设置需要记录的包名，注意：包名不需要添加 package:前缀
+  void logPackages(List<String> packages, {bool append = true});
 }
 
 abstract class IDebugMessageService {
@@ -43,8 +46,8 @@ abstract class IDebugMessageService {
 
 class DebugService implements IDebugService {
   final ILogService logService;
-
   final IDebugMessageService messageService;
+  bool filterLine = true;
 
   DebugService({IDebugMessageService? messageSer, ILogService? logSer})
     : messageService = messageSer ?? getIMessageService(),
@@ -87,9 +90,8 @@ class DebugService implements IDebugService {
 
   void printCaller() {
     for (String line in getStackTraceString()) {
-      if (!filterFile(line)) {
+      if (inPackageLine(line)) {
         ColorUtil.print(line, color);
-        break;
       }
     }
   }
@@ -105,6 +107,7 @@ class DebugService implements IDebugService {
     _message(errorMessage, false, log: log);
     _message(successMessage, true, log: log);
     if (log == true) {
+      // 需要记录日志
       if (object != null) {
         logService.i(object.toString());
       }
@@ -112,11 +115,11 @@ class DebugService implements IDebugService {
         logService.i(args.toString());
       }
     } else if (kDebugMode) {
-      printCaller();
-      ColorUtil.print('|__\t\t $object', color);
+      ColorUtil.print('|== $object', color);
       if (args != null) {
-        ColorUtil.print('|__\t\t $args', color);
+        ColorUtil.print('|==|== $args', color);
       }
+      printCaller();
     }
     return this;
   }
@@ -135,7 +138,7 @@ class DebugService implements IDebugService {
     Object error,
     StackTrace stackTrace, {
     Object? args,
-    bool log = true,
+    bool log = true, // 是否需要记录日志
     String? errorMessage,
   }) {
     if (errorMessage != null && errorMessage.isNotEmpty) {
@@ -143,15 +146,13 @@ class DebugService implements IDebugService {
     }
 
     if (log == true) {
-      logService.e(error);
-      if (args != null) {
-        logService.e(args.toString());
-      }
+      List<String> data = ['ERROR:$error', 'ARGUS:$args'];
       for (String line in getStackTraceString(stackTrace: stackTrace)) {
-        if (!filterFile(line)) {
-          ColorUtil.print(line, color);
+        if (inPackageLine(line)) {
+          data.add(line);
         }
       }
+      logService.e(data);
     } else if (kDebugMode) {
       _printBlock('(((', [
         error.toString(),
@@ -162,11 +163,6 @@ class DebugService implements IDebugService {
       }
     }
     return this;
-  }
-
-  bool filterFile(String line) {
-    return line.contains('debug_service.dart') ||
-        line.contains('log_service.dart');
   }
 
   List<String> getStackTraceString({StackTrace? stackTrace}) {
@@ -180,7 +176,7 @@ class DebugService implements IDebugService {
     if (kDebugMode) {
       ColorUtil.print('<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<', color);
       for (String line in getStackTraceString()) {
-        if (!filterFile(line)) {
+        if (inPackageLine(line)) {
           ColorUtil.print(line, color);
         }
       }
@@ -206,7 +202,7 @@ class DebugService implements IDebugService {
       List<String> stackTraceLines = stackTraceString.split('\n');
 
       for (String line in stackTraceLines) {
-        if (!filterFile(line)) {
+        if (inPackageLine(line)) {
           ColorUtil.print(line, color);
         }
       }
@@ -218,5 +214,42 @@ class DebugService implements IDebugService {
       ColorUtil.print('>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>', color);
     }
     return this;
+  }
+
+  final List<String> debugPackages = ['package:tao996'];
+
+  bool inPackageLine(String line) {
+    if (line.contains('debug_service.dart') ||
+        line.contains('log_service.dart')) {
+      return false;
+    }
+    for (String package in debugPackages) {
+      if (line.contains(package)) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  @override
+  void logPackages(List<String> packages, {bool append = true}) {
+    if (append) {
+      packages.forEach((package) {
+        package = package.startsWith('package:') ? package : 'package:$package';
+        if (!debugPackages.contains(package)) {
+          debugPackages.add(package);
+        }
+      });
+    } else {
+      debugPackages.clear();
+      debugPackages.addAll(
+        packages
+            .map(
+              (package) =>
+                  package.startsWith('package:') ? package : 'package:$package',
+            )
+            .toList(),
+      );
+    }
   }
 }

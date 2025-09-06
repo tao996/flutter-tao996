@@ -1,15 +1,22 @@
 import 'package:tao996/tao996.dart';
 
-class ModelAction {
-  final ModelActionHelper helper = getModelActionHelper();
+enum IModelAction { insert, insertLastId, update, delete }
 
-  Future<void> Function(dynamic)? _successAction;
+class IModelActionResult {
+  final IModelAction name;
+  final dynamic data;
+
+  IModelActionResult(this.name, {this.data});
+}
+
+class ModelAction<T extends IModel> {
+  Future<void> Function(IModelActionResult)? _successAction;
   Future<int> Function()? _updateAction;
-  Future<IModel> Function()? _insertAction;
+  Future<T> Function()? _insertAction;
   Future<int> Function()? _insertLastIdAction;
   Future<int> Function()? _deleteAction;
 
-  ModelAction addSuccess(Future<void> Function(dynamic) action) {
+  ModelAction addSuccess(Future<void> Function(IModelActionResult) action) {
     _successAction = action;
     return this;
   }
@@ -19,7 +26,7 @@ class ModelAction {
     return this;
   }
 
-  ModelAction addInsert(Future<IModel> Function() action) {
+  ModelAction addInsert(Future<T> Function() action) {
     _insertAction = action;
     return this;
   }
@@ -35,29 +42,38 @@ class ModelAction {
   }
 
   Future<void> execute() async {
-    if (_insertAction != null) {
-      await helper.insert(_insertAction!, success: _successAction);
-    } else if (_insertLastIdAction != null) {
-      await helper.insertLastId(
-        _insertLastIdAction!,
-        success: () async {
-          _successAction?.call(null);
-        },
-      );
-    } else if (_updateAction != null) {
-      await helper.update(
-        _updateAction!,
-        success: () async {
-          _successAction?.call(null);
-        },
-      );
-    } else if (_deleteAction != null) {
-      await helper.delete(
-        _deleteAction!,
-        success: () async {
-          _successAction?.call(null);
-        },
-      );
+    try {
+      if (_insertAction != null) {
+        final result = await _insertAction!();
+        await _successAction?.call(
+          IModelActionResult(IModelAction.insert, data: result),
+        );
+      } else if (_insertLastIdAction != null) {
+        final id = await _insertLastIdAction!();
+        if (id > 0) {
+          await _successAction?.call(
+            IModelActionResult(IModelAction.insertLastId, data: id),
+          );
+        } else {
+          getIMessageService().error('添加数据失败');
+        }
+      } else if (_updateAction != null) {
+        final result = await _updateAction!();
+        if (result > 0) {
+          await _successAction?.call(IModelActionResult(IModelAction.update));
+        } else {
+          getIMessageService().error('没有任务记录被更新');
+        }
+      } else if (_deleteAction != null) {
+        final result = await _deleteAction!();
+        if (result > 0) {
+          await _successAction?.call(IModelActionResult(IModelAction.delete));
+        } else {
+          getIMessageService().error('没有任务记录被删除');
+        }
+      }
+    } catch (e, st) {
+      getIDebugService().exception(e, st, errorMessage: e.toString());
     }
   }
 }

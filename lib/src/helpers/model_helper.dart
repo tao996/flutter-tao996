@@ -95,12 +95,21 @@ abstract class ModelHelper<T extends IModel> {
     }
   }
 
+  /// 如果启用了软删除，则在 where 条件中自动添加 `deletedAt IS NULL AND`
+  String? appendWhere(String? where) {
+    if (where == null || where == '') {
+      return enableSoftDelete ? 'deletedAt IS NULL ' : null;
+    }
+
+    return enableSoftDelete ? 'deletedAt IS NULL AND $where' : where;
+  }
+
   /// 从数据库中查询全部的记录并更新缓存。
   Future<List<T>> getAllFromDb() async {
     try {
       final List<Map<String, dynamic>> maps = await dbService.query(
         tableName,
-        where: enableSoftDelete ? 'deletedAt IS NULL' : null,
+        where: appendWhere(null),
         orderBy: 'id DESC',
       );
       final rows = maps.map((map) => fromMap(map)).toList();
@@ -128,7 +137,7 @@ abstract class ModelHelper<T extends IModel> {
       try {
         final maps = await dbService.query(
           tableName,
-          where: '$fieldName = ?',
+          where: appendWhere('$fieldName = ?'),
           whereArgs: [value],
           limit: 1, // 只查询一条
         );
@@ -151,7 +160,7 @@ abstract class ModelHelper<T extends IModel> {
       if (enableSoftDelete) {
         count = await update(
           {"deletedAt": DateTime.now().toIso8601String()},
-          where: where,
+          where: appendWhere(where),
           whereArgs: whereArgs,
         );
         debugService.d(
@@ -200,11 +209,12 @@ abstract class ModelHelper<T extends IModel> {
     int? excludeId,
   }) async {
     try {
+      final where = excludeId != null
+          ? '$fieldName = ? AND id != ?'
+          : '$fieldName = ?';
       return await dbService.exists(
         tableName,
-        where: excludeId != null
-            ? '$fieldName = ? AND id != ?'
-            : '$fieldName = ?',
+        where: appendWhere(where),
         whereArgs: excludeId != null ? [value, excludeId] : [value],
       );
     } catch (e, st) {
@@ -221,7 +231,7 @@ abstract class ModelHelper<T extends IModel> {
     try {
       return await dbService.count(
         tableName,
-        where: where,
+        where: appendWhere(where),
         arguments: arguments,
       );
     } catch (e, st) {
@@ -236,9 +246,13 @@ abstract class ModelHelper<T extends IModel> {
   ///
   /// [offset] 偏移量，优先使用；[pageIndex] 当前页码，默认为1
   ///
+  /// [where] 查询条件；[whereArgs] 条件参数; [clauseBuilder] 复合查询条件（优先级比 [where] 和 [whereArgs] 低）
+  ///
   /// 返回一个 Map 列表，其中包含查询到的记录。
   Future<List<T>> getPaginationData({
     required int pageSize,
+    String? where,
+    List<Object?>? whereArgs,
     WhereClauseBuilder? clauseBuilder,
     List<String>? columns,
     String? orderBy,
@@ -247,15 +261,17 @@ abstract class ModelHelper<T extends IModel> {
   }) async {
     try {
       final List<String> conditions = [];
-      final List<Object> whereArgs = [];
+      final List<Object> whereArgs1 = [];
       if (clauseBuilder != null) {
-        clauseBuilder(conditions, whereArgs);
+        clauseBuilder(conditions, whereArgs1);
       }
+      final baseWhere =
+          where ?? (conditions.isNotEmpty ? conditions.join(' AND ') : null);
       final result = await dbService.query(
         tableName,
         columns: columns,
-        where: conditions.isNotEmpty ? conditions.join(' AND ') : null,
-        whereArgs: whereArgs,
+        where: appendWhere(baseWhere),
+        whereArgs: whereArgs ?? whereArgs1,
         orderBy: orderBy,
         limit: pageSize,
         offset:
@@ -279,7 +295,7 @@ abstract class ModelHelper<T extends IModel> {
       final result = await dbService.query(
         tableName,
         columns: columns,
-        where: '$fieldName = ?',
+        where: appendWhere('$fieldName = ?'),
         whereArgs: [value],
       );
       return result.map((map) => fromMap(map)).toList();
@@ -334,7 +350,7 @@ abstract class ModelHelper<T extends IModel> {
         tableName,
         distinct: distinct,
         columns: columns,
-        where: where,
+        where: appendWhere(where),
         whereArgs: whereArgs,
         groupBy: groupBy,
         having: having,
@@ -388,7 +404,7 @@ abstract class ModelHelper<T extends IModel> {
       final updatedRows = await dbService.update(
         tableName,
         values,
-        where: where,
+        where: appendWhere(where),
         whereArgs: whereArgs,
       );
       if (entity != null && entity.hasRecord()) {
@@ -431,7 +447,7 @@ abstract class ModelHelper<T extends IModel> {
     try {
       return await dbService.firstRecordId(
         tableName,
-        where: where,
+        where: appendWhere(where),
         whereArgs: whereArgs,
         key: key,
       );

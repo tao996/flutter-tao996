@@ -40,4 +40,18 @@ class MyText {
       child: Text(title),
     );
   }
+
+  static Widget warning(BuildContext context, String text) {
+    return Text(
+      text,
+      style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold),
+    );
+  }
+
+  static Widget info(BuildContext context, String text) {
+    return Text(
+      text,
+      style: TextStyle(color: Colors.lightBlue, fontWeight: FontWeight.bold),
+    );
+  }
 }

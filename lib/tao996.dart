@@ -14,7 +14,6 @@ export 'src/helpers/form_helper.dart';
 export 'src/helpers/kv.dart';
 export 'src/helpers/model.dart';
 export 'src/helpers/model_action.dart';
-export 'src/helpers/model_action_helper.dart';
 export 'src/helpers/model_helper.dart';
 
 export 'src/mixin/mixin_service.dart';
@@ -55,12 +54,15 @@ export 'src/ui/widgets/dialog.dart';
 export 'src/ui/widgets/event.dart';
 export 'src/ui/widgets/list_checkbox.dart';
 export 'src/ui/widgets/grid_checkbox.dart';
+export 'src/ui/widgets/grid_view.dart';
+export 'src/ui/widgets/icon.dart';
 export 'src/ui/widgets/image.dart';
 export 'src/ui/widgets/input.dart';
 export 'src/ui/widgets/loading.dart';
 export 'src/ui/widgets/padding.dart';
 export 'src/ui/widgets/scaffold.dart';
 export 'src/ui/widgets/separator_line.dart';
+export 'src/ui/widgets/table.dart';
 export 'src/ui/widgets/text.dart';
 
 export 'src/ui/app.dart';

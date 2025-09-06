@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:tao996/tao996.dart';
 
-/// 一个用于筛选独立名称的 Widget。
+/// 网格布局的 checkbox 按钮组
 /// 用户可以选中或取消选中列表中的每个名称。
 class GridCheckbox extends StatefulWidget {
   /// 所有的可选名称列表。

@@ -44,6 +44,18 @@ T kvGetValue<T>(
   throw 'could not find value $valueString in kvs';
 }
 
+T? kvTryGetValue<T>(final List<KV<T>> kvs, String? valueString) {
+  if (valueString == null || valueString.isEmpty) {
+    return null;
+  }
+  for (var kv in kvs) {
+    if (kv.value.toString() == valueString) {
+      return kv.value;
+    }
+  }
+  return null;
+}
+
 String kvGetLabel<T>(List<KV<T>> kvs, T value, {String defaultLabel = ''}) {
   for (var kv in kvs) {
     if (kv.value == value) {

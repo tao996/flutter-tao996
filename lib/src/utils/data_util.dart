@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import '../../tao996.dart';
 
 // 使用泛型优化的通用转换方法
@@ -140,9 +142,9 @@ class DataUtil {
     return value == 1;
   }
 
-  /// 验证字符串 [input] 是否符合指定的正则表达式 [pattern]
-  static bool hasMatch(String input, String pattern) {
-    return RegExp(pattern).hasMatch(input);
+  /// 验证字符串 [data] 是否符合指定的正则表达式 [pattern]
+  static bool hasMatch(String data, String pattern) {
+    return RegExp(pattern).hasMatch(data);
   }
 
   /// 从字符串 [input] 中获取所有匹配项，匹配项的格式为 [pattern]
@@ -170,7 +172,7 @@ class DataUtil {
         (pattern.startsWith("r'") && pattern.endsWith("'"));
   }
 
-  /// 清除用户输入的正则表达式，返回一个可用户的系统正则表达式
+  /// 清除用户输入的正则表达式，返回一个可用户的系统正则表达式；
   static String getUserInputRegexPattern(String input) {
     // 1. 移除字符串两端的空白符
     String cleaned = input.trim();
@@ -185,5 +187,9 @@ class DataUtil {
       }
     }
     return cleaned;
+  }
+
+  dynamic copy(dynamic data) {
+    return jsonDecode(jsonEncode(data));
   }
 }

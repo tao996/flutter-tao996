@@ -66,8 +66,8 @@ abstract class IDatabaseService {
 
   Future<int> firstRecordId(
     String tableName, {
-    required String where,
-    required List<dynamic> whereArgs,
+    String? where,
+    List<dynamic> whereArgs,
     String key = 'id',
   });
 }
@@ -156,8 +156,8 @@ class SqfliteDatabaseService implements IDatabaseService {
   @override
   Future<int> firstRecordId(
     String tableName, {
-    required String where,
-    required List<dynamic> whereArgs,
+    String? where,
+    List<dynamic>? whereArgs,
     String key = 'id',
   }) async {
     final List<Map<String, dynamic>> result = await _database!.query(

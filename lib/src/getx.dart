@@ -113,7 +113,3 @@ IRouteService getIRouteService() {
 IWebviewService getIWebviewService() {
   return GetIt.instance<IWebviewService>();
 }
-
-ModelActionHelper getModelActionHelper() {
-  return GetIt.instance<ModelActionHelper>();
-}

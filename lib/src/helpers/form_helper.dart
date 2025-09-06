@@ -32,10 +32,10 @@ class FormHelper {
     );
   }
 
-  /// 水平布局的 checkbox(FilterChip) 按钮组
-  static Widget horizontalCheckbox<T>({
+  /// 水平布局的 按钮组
+  static Widget filterChipCheckbox<T>({
     required List<KV<T>> items,
-    required void Function(bool, T) onSelectionChanged,
+    required void Function(bool selected, T item)? onSelectionChanged,
     List<T>? initItems,
   }) {
     return Wrap(
@@ -46,11 +46,27 @@ class FormHelper {
         return FilterChip(
           label: Text(item.label),
           selected: isSelected,
-          onSelected: (selected) {
-            onSelectionChanged(selected, item.value);
-          },
+          onSelected: onSelectionChanged != null
+              ? (selected) {
+                  onSelectionChanged(selected, item.value);
+                }
+              : null,
         );
       }).toList(),
+    );
+  }
+  /// 分段按钮，可用于多选或单选
+  static Widget segmentedButton<T>({
+    required List<KV<T>> items,
+    required void Function(Set<T> items) onSelectionChanged,
+    required Set<T> initItems,
+  }) {
+    return SegmentedButton<T>(
+      segments: items.map((kv) {
+        return ButtonSegment<T>(value: kv.value, label: Text(kv.label));
+      }).toList(),
+      selected: initItems.toSet(),
+      onSelectionChanged: onSelectionChanged,
     );
   }
 
@@ -79,15 +95,18 @@ class FormHelper {
     required TextEditingController controller,
     String? hintText,
     bool isPassword = false,
+    int? maxLines,
   }) {
-    return InputWithClearButton(
+    return MyInput(
       label,
       controller: controller,
       hintText: hintText,
       isPassword: isPassword,
+      maxLines: maxLines,
     );
   }
 
+  /// 一个普通的简单复选组件
   static Widget checkbox(
     String label, {
     required bool? value,
