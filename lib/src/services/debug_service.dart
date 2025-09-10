@@ -104,6 +104,10 @@ class DebugService implements IDebugService {
     String? errorMessage,
     String? successMessage,
   }) {
+    final hasColor = _color.isNotEmpty;
+    if (!hasColor) {
+      _color = ColorUtil.random();
+    }
     _message(errorMessage, false, log: log);
     _message(successMessage, true, log: log);
     if (log == true) {
@@ -115,11 +119,14 @@ class DebugService implements IDebugService {
         logService.i(args.toString());
       }
     } else if (kDebugMode) {
-      ColorUtil.print('|== $object', color);
+      ColorUtil.print('|== $object', _color);
       if (args != null) {
-        ColorUtil.print('|==|== $args', color);
+        ColorUtil.print('|==|== $args', _color);
       }
       printCaller();
+    }
+    if (!hasColor) {
+      _color = '';
     }
     return this;
   }

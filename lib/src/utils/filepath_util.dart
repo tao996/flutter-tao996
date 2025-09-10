@@ -4,10 +4,11 @@ import 'package:path_provider/path_provider.dart';
 import 'package:file_picker/file_picker.dart';
 
 class FilepathUtil {
+  /// 警告：你只能在本地系统中使用本方法，（如果你的路径需要指向远程服务器，则不能使用它）
   /// 标准化用户输入的文件或目录路径。
   /// 该函数能处理不同操作系统（如 Windows 的 \）的路径分隔符，
   /// 并移除多余的 . 和 ..，返回一个在当前系统上有效的、规范化的路径。
-  static String normalizeUserPath(String userPath) {
+  static String normalizeLocalPath(String userPath) {
     // 如果输入为空，直接返回空字符串
     if (userPath.isEmpty) {
       return '';
@@ -29,6 +30,43 @@ class FilepathUtil {
     final normalizedPath = p.normalize(tempPath);
 
     return normalizedPath;
+  }
+
+  String toPosixPath(List<String> pathSegments) {
+    // 使用 p.posix.joinAll() 来连接路径，并确保使用 '/' 作为分隔符。
+    return p.posix.joinAll(pathSegments);
+  }
+
+  /// 标准化用户输入的文件或目录路径，并统一使用 '/' 作为分隔符。
+  static String normalizeToPosixPath(String userPath) {
+    // 如果输入为空，直接返回空字符串
+    if (userPath.isEmpty) {
+      return '';
+    }
+    final normalizedPath = p.normalize(userPath);
+    if (normalizedPath.startsWith('\\') || isWindowsPath(normalizedPath)) {
+      return normalizedPath.replaceAll(r'\', '/');
+    }
+
+    return normalizedPath;
+  }
+
+  static bool isWindowsPath(String path) {
+    if (path.isEmpty) {
+      return false;
+    }
+
+    // 使用正则表达式检查路径格式
+    // 1. 检查盘符开头，例如：C:\Users\
+    // 2. 检查 UNC 路径，例如：\\Server\Share\
+    // 3. 检查相对或绝对路径，例如：\Users\ 或 path\to\file
+    // 注意：这个正则表达式是一个近似判断，无法覆盖所有边缘情况
+    final RegExp windowsPathRegex = RegExp(
+      r'^([a-zA-Z]:\\|\\\\|[a-zA-Z0-9_\-.]+[\\/])',
+      caseSensitive: false,
+    );
+
+    return windowsPathRegex.hasMatch(path);
   }
 
   /// 获取用户的家目录
@@ -85,7 +123,12 @@ class FilepathUtil {
     }
   }
 
-  /// 路径拼接，并需要提供 '/' 或者 '\'
+  /// 使用 path.posix.joinAll 来拼接路径，确保使用 '/' 分隔符;
+  /// 注意，如果 [parts] 内部成员包含了 \\ ，并不会自动替换为 /
+  static String joinAll(Iterable<String> parts) {
+    return p.posix.joinAll(parts);
+  }
+
   static String join(
     String part1, [
     String? part2,
@@ -104,7 +147,7 @@ class FilepathUtil {
     String? part15,
     String? part16,
   ]) {
-    return p.join(
+    return p.posix.join(
       part1,
       part2,
       part3,
@@ -128,9 +171,47 @@ class FilepathUtil {
     // 使用 typeSync() 获取路径的类型
     return FileSystemEntity.typeSync(path);
   }
+
+  static String relative(String path, String from) {
+    return p.relative(path, from: from);
+  }
+
   /// 获取文件或目录所在的目录
   static String dirname(String filePath) {
     File file = File(filePath);
     return p.dirname(file.path);
+  }
+
+  static String basename(String filePath) {
+    File file = File(filePath);
+    return p.basename(file.path);
+  }
+
+  static bool isAbsolute(String path) {
+    return p.isAbsolute(path);
+  }
+
+  /// 如果 [filepath] 是一个绝对路径，则直接返回 [filepath]，否则检查 [dir]
+  /// 如果 [dir] 是一个目录，则将 [dir] 与 [filepath] 组合为文件路径返回
+  /// 如果 [dir] 不是一个目录，抛出异常
+  static String resolvePath(String filepath, {String? dir}) {
+    // 检查 filepath 是否为绝对路径
+    if (isAbsolute(filepath)) {
+      return filepath;
+    }
+    if (dir == null || dir.isEmpty) {
+      throw Exception('$filepath 不是一个绝对路径，请提供有效的目录路径以拼接路径');
+    }
+    // 检查 dir 是否为目录
+    if (isAbsolute(dir)) {
+      // 将 dir 与 filepath 组合
+      return join(dir, filepath);
+    } else {
+      throw Exception('提供的目录路径 "$dir" 无效或不是一个目录');
+    }
+  }
+
+  static String fromUri(Object? uri){
+    return p.fromUri(uri);
   }
 }

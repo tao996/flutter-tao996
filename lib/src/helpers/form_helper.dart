@@ -55,6 +55,7 @@ class FormHelper {
       }).toList(),
     );
   }
+
   /// 分段按钮，可用于多选或单选
   static Widget segmentedButton<T>({
     required List<KV<T>> items,
@@ -90,19 +91,25 @@ class FormHelper {
     );
   }
 
-  static Widget input(
-    String label, {
+  static Widget input({
     required TextEditingController controller,
+    String? labelText,
     String? hintText,
+    String? helperText,
     bool isPassword = false,
+    bool isRequired = false,
     int? maxLines,
+    void Function(String)? onChanged,
   }) {
     return MyInput(
-      label,
       controller: controller,
+      labelText: labelText,
       hintText: hintText,
+      helperText: helperText,
       isPassword: isPassword,
+      isRequired: isRequired,
       maxLines: maxLines,
+      onChanged: onChanged,
     );
   }
 
@@ -111,35 +118,49 @@ class FormHelper {
     String label, {
     required bool? value,
     required void Function(bool?)? onChanged,
+    String? helperText,
   }) {
     bool initValue = value ?? false;
-    return InkWell(
-      borderRadius: BorderRadius.circular(4.0),
-      // 监听点击事件
-      onTap: () {
-        initValue = !initValue;
-        onChanged?.call(initValue);
-      },
-      child: MyPadding(
-        padding: const EdgeInsets.only(right: 10),
-        child: Row(
-          // 将 Row 的主轴对齐方式设置为 start，以保证内容靠左
-          mainAxisAlignment: MainAxisAlignment.start,
-          // 将 Row 的交叉轴对齐方式设置为 center，以保证 Checkbox 和文字垂直居中
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            Checkbox(
-              value: value,
-              onChanged: (yes) {
-                initValue = yes ?? false;
-                onChanged?.call(yes);
-              },
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        InkWell(
+          borderRadius: BorderRadius.circular(4.0),
+          // 监听点击事件
+          onTap: () {
+            initValue = !initValue;
+            onChanged?.call(initValue);
+          },
+          child: MyPadding(
+            padding: const EdgeInsets.only(right: 10),
+            child: Row(
+              // 将 Row 的主轴对齐方式设置为 start，以保证内容靠左
+              mainAxisAlignment: MainAxisAlignment.start,
+              // 将 Row 的交叉轴对齐方式设置为 center，以保证 Checkbox 和文字垂直居中
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Checkbox(
+                  value: value,
+                  onChanged: (yes) {
+                    initValue = yes ?? false;
+                    onChanged?.call(yes);
+                  },
+                ),
+                Text(label),
+              ],
             ),
-            const SizedBox(width: 4.0), // 添加一些间距
-            Text(label),
-          ],
+          ),
         ),
-      ),
+        if (helperText != null && helperText.isNotEmpty)
+          Padding(
+            padding: EdgeInsets.only(left: 40),
+            child: Text(
+              helperText,
+              style: TextStyle(fontSize: 12, color: Colors.grey),
+            ),
+          ),
+      ],
     );
   }
 }

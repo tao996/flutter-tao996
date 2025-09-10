@@ -1,6 +1,9 @@
 import 'dart:async';
 import 'dart:math';
-import 'dart:ui';
+
+import 'package:flutter/foundation.dart';
+
+void dprint(dynamic message) => debugPrint(message.toString());
 
 class FnUtil {
   static Timer? _debounce;
