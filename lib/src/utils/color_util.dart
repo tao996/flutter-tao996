@@ -5,17 +5,21 @@ import 'package:flutter/foundation.dart';
 import '../../tao996.dart';
 
 class ColorUtil {
-  static const List<String> colors = [
-    MyColor.red,
+  static const List<String> commonColors = [
     MyColor.green,
     MyColor.yellow,
     MyColor.blue,
     MyColor.magenta,
     MyColor.cyan,
   ];
+  static const List<String> colors = [MyColor.red, ...commonColors];
 
   static String random() {
     return colors[Random().nextInt(6)];
+  }
+
+  static String randomConsoleColor() {
+    return commonColors[Random().nextInt(5)];
   }
 
   static String success(String content) {

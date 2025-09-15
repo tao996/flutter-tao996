@@ -28,6 +28,12 @@ abstract class IModel<T> {
     return id > 0;
   }
 
+  String get createdAtText => DatetimeUtil.formatYMDHMS(dateTime: createdAt);
+
+  String get updatedAtText => DatetimeUtil.formatYMDHMS(dateTime: updatedAt);
+
+  String get deletedAtText => DatetimeUtil.formatYMDHMS(dateTime: deletedAt);
+
   /// 将实例转换为 Map，通常用于 JSON 序列化
   // ========== 通用 toMap 实现 ==========
   // 负责将 IModel 的基础字段转换为 Map
@@ -39,22 +45,6 @@ abstract class IModel<T> {
       'deletedAt': deletedAt?.toIso8601String(),
     };
   }
-
-  String get createdAtText => DatetimeUtil.formatYMDHMS(dateTime: createdAt);
-
-  String get updatedAtText => DatetimeUtil.formatYMDHMS(dateTime: updatedAt);
-
-  String get deletedAtText => DatetimeUtil.formatYMDHMS(dateTime: deletedAt);
-
-  // 抽象方法，强制子类实现其特有字段的 toMap 逻辑
-  Map<String, dynamic> toObjectMap();
-
-  // 最终的 toMap() 方法，合并基础字段和子类字段
-  Map<String, dynamic> toMap() {
-    return {..._baseToMap(), ...toObjectMap()};
-  }
-
-  // ========== 通用 fromMap 实现 ==========
   // 负责从 Map 中解析 IModel 的基础字段
   void fromBaseMap(Map<String, dynamic> map) {
     id = map['id'] as int? ?? 0;
@@ -62,8 +52,18 @@ abstract class IModel<T> {
     updatedAt = _dateTimeParse(map['updatedAt']);
     deletedAt = _dateTimeParse(map['deletedAt']);
   }
+  // 抽象方法，实体字段转 Map
+  // Map<String, dynamic> toEntityMap();
+  Map<String, dynamic> toObjectMap();
+
+  // 最终的 toMap() 方法，合并基础字段和子类字段
+  Map<String, dynamic> toMap() {
+    return {..._baseToMap(), ...toObjectMap()};
+  }
+
 
   // 抽象方法，强制子类实现其特有字段的 fromMap 逻辑
+  // T fromEntityMap(Map<String, dynamic> map);
   T fromObjectMap(Map<String, dynamic> map);
 
   // 通用的工具方法

@@ -69,6 +69,10 @@ class FilepathUtil {
     return windowsPathRegex.hasMatch(path);
   }
 
+  static String separator() {
+    return p.posix.separator;
+  }
+
   /// 获取用户的家目录
   static Future<String> homeDir() async {
     // 1. 获取用户的家目录
@@ -129,6 +133,55 @@ class FilepathUtil {
     return p.posix.joinAll(parts);
   }
 
+  static List<String> split(String path) {
+    return p.split(path);
+  }
+
+  static String joinAllPosixPath(Iterable<String> parts) {
+    return normalizeToPosixPath(p.posix.joinAll(parts));
+  }
+
+  static String joinPosixPath(
+    String part1, [
+    String? part2,
+    String? part3,
+    String? part4,
+    String? part5,
+    String? part6,
+    String? part7,
+    String? part8,
+    String? part9,
+    String? part10,
+    String? part11,
+    String? part12,
+    String? part13,
+    String? part14,
+    String? part15,
+    String? part16,
+  ]) {
+    return normalizeToPosixPath(
+      p.posix.join(
+        part1,
+        part2,
+        part3,
+        part4,
+        part5,
+        part6,
+        part7,
+        part8,
+        part9,
+        part10,
+        part11,
+        part12,
+        part13,
+        part14,
+        part15,
+        part16,
+      ),
+    );
+  }
+
+  /// 注意，如果 [parts] 内部成员包含了 \\ ，并不会自动替换为 /
   static String join(
     String part1, [
     String? part2,
@@ -167,8 +220,8 @@ class FilepathUtil {
     );
   }
 
-  static FileSystemEntityType checkPathType(String path) {
-    // 使用 typeSync() 获取路径的类型
+  /// 获取路径类型，可以使用 FileSystemEntityType.file 来进行比较
+  static FileSystemEntityType getFileType(String path) {
     return FileSystemEntity.typeSync(path);
   }
 
@@ -195,6 +248,12 @@ class FilepathUtil {
   /// 如果 [dir] 是一个目录，则将 [dir] 与 [filepath] 组合为文件路径返回
   /// 如果 [dir] 不是一个目录，抛出异常
   static String resolvePath(String filepath, {String? dir}) {
+    if (filepath.isEmpty) {
+      if (dir != null && dir.isNotEmpty) {
+        return resolvePath(dir);
+      }
+      throw Exception('请提供有效的文件路径');
+    }
     // 检查 filepath 是否为绝对路径
     if (isAbsolute(filepath)) {
       return filepath;
@@ -211,7 +270,12 @@ class FilepathUtil {
     }
   }
 
-  static String fromUri(Object? uri){
+  static String fromUri(Object? uri) {
     return p.fromUri(uri);
+  }
+
+  /// 获取当前脚本目录
+  static String scriptDir() {
+    return p.dirname(Platform.script.toFilePath());
   }
 }

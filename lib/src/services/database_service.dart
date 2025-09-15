@@ -5,11 +5,12 @@ import 'package:path/path.dart' as path;
 
 import '../../tao996.dart';
 
-
 typedef WhereClauseBuilder =
     void Function(List<String> conditions, List<Object> whereArgs);
 
 abstract class IDatabaseService {
+
+  Database getDatabase();
   /// 更新数据库
   /// https://github.com/tekartik/sqflite/blob/master/sqflite/doc/migration_example.md
   Future<void> migrate(Future<Database> Function(String path) createDatabase);
@@ -97,6 +98,8 @@ class SqfliteDatabaseService implements IDatabaseService {
     _debugService.d('[SQLite]: database path: $databasePath.');
     return databasePath;
   }
+
+  Database getDatabase() => _database!;
 
   @override
   Future<void> migrate(
@@ -197,10 +200,9 @@ class SqfliteDatabaseService implements IDatabaseService {
     int? offset,
   }) async {
     if (printSQL) {
-      var sql =
-          columns != null
-              ? 'SELECT ${columns.join(', ')} FROM $table WHERE $where ORDER BY $orderBy LIMIT $limit'
-              : 'SELECT * FROM $table WHERE $where ORDER BY $orderBy LIMIT $limit';
+      var sql = columns != null
+          ? 'SELECT ${columns.join(', ')} FROM $table WHERE $where ORDER BY $orderBy LIMIT $limit'
+          : 'SELECT * FROM $table WHERE $where ORDER BY $orderBy LIMIT $limit';
       if (offset != null) {
         sql = '$sql OFFSET $offset';
       }

@@ -72,11 +72,11 @@ class DebugService implements IDebugService {
 
   String _color = '';
 
-  String get color => _color.isNotEmpty ? _color : ColorUtil.random();
+  String get color => _color.isNotEmpty ? _color : ColorUtil.randomConsoleColor();
 
   @override
   IDebugService begin() {
-    _color = ColorUtil.random();
+    _color = ColorUtil.randomConsoleColor();
     ColorUtil.print('[[[----------', _color);
     return this;
   }
@@ -106,7 +106,7 @@ class DebugService implements IDebugService {
   }) {
     final hasColor = _color.isNotEmpty;
     if (!hasColor) {
-      _color = ColorUtil.random();
+      _color = ColorUtil.randomConsoleColor();
     }
     _message(errorMessage, false, log: log);
     _message(successMessage, true, log: log);
@@ -132,7 +132,7 @@ class DebugService implements IDebugService {
   }
 
   void _printBlock(String tag, List<dynamic> items, {String? color}) {
-    final pColor = color ?? ColorUtil.random();
+    final pColor = color ?? ColorUtil.randomConsoleColor();
     ColorUtil.print('$tag----------', pColor);
     for (final item in items) {
       ColorUtil.print(item, pColor);

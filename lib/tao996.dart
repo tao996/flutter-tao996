@@ -15,6 +15,7 @@ export 'src/helpers/kv.dart';
 export 'src/helpers/model.dart';
 export 'src/helpers/model_action.dart';
 export 'src/helpers/model_helper.dart';
+export 'src/helpers/query_builder.dart';
 
 export 'src/mixin/mixin_service.dart';
 
