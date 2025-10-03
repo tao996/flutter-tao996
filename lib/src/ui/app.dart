@@ -1,3 +1,4 @@
+import 'package:bot_toast/bot_toast.dart';
 import 'package:flutter/material.dart';
 
 import 'package:dynamic_color/dynamic_color.dart';
@@ -10,11 +11,15 @@ import '../../tao996.dart';
 class MyTao996App extends StatelessWidget {
   final ISettingsService settingService;
   final Function? beforeBuild;
+  final Locale? fallbackLocale;
+  final Iterable<Locale>? supportedLocales;
 
   const MyTao996App({
     super.key,
     required this.settingService,
     this.beforeBuild,
+    this.fallbackLocale,
+    this.supportedLocales,
   });
 
   @override
@@ -36,6 +41,7 @@ class MyTao996App extends StatelessWidget {
     // }
     return DynamicColorBuilder(
       builder: (ColorScheme? lightDynamic, ColorScheme? darkDynamic) {
+        final botToastBuilder = BotToastInit();  //1.调用BotToastInit
         return GetMaterialApp(
           debugShowCheckedModeBanner: false,
           title: 'appTitle'.tr,
@@ -45,10 +51,11 @@ class MyTao996App extends StatelessWidget {
             GlobalMaterialLocalizations.delegate,
             GlobalCupertinoLocalizations.delegate,
           ],
-          supportedLocales: const [Locale('zh', 'CN'), Locale('en', 'US')],
+          navigatorObservers: [BotToastNavigatorObserver()], //2.注册路由观察者
+          supportedLocales:supportedLocales ?? const [Locale('zh', 'CN'), Locale('en', 'US')],
           // locale: getILocaleService().locale,
           locale: Get.deviceLocale,
-          fallbackLocale: const Locale('en', 'US'),
+          fallbackLocale: fallbackLocale ?? const Locale('en', 'US'),
           translations: getITranslationService(),
           theme: themeService.buildLightTheme(lightDynamic),
           darkTheme: themeService.buildDarkTheme(darkDynamic),
@@ -64,16 +71,17 @@ class MyTao996App extends StatelessWidget {
             'fade': Transition.fade,
           }[settingService.transition],
           builder: (context, child) {
+            child = botToastBuilder(context,child);
             // 在主题构建时设置 System UI 样式
-            themeService.systemUIOverlayStyle(
-              Theme.of(context).appBarTheme.backgroundColor!,
-              Theme.of(context).brightness,
-            );
+            // themeService.systemUIOverlayStyle(
+            //   Theme.of(context).appBarTheme.backgroundColor!,
+            //   Theme.of(context).brightness,
+            // );
             return MediaQuery(
               data: MediaQuery.of(context).copyWith(
                 textScaler: TextScaler.linear(settingService.textScaleFactor),
               ),
-              child: child!,
+              child: child,
             );
           },
         );

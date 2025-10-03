@@ -48,6 +48,8 @@ export 'src/ui/page/search_controller.dart';
 export 'src/ui/page/search_widget.dart';
 export 'src/ui/page/smart_refresher_controller.dart';
 export 'src/ui/page/smart_refresher_widget.dart';
+export 'src/ui/page/pagination_controller.dart';
+export 'src/ui/page/pagination_widget.dart';
 
 export 'src/ui/widgets/avatar.dart';
 export 'src/ui/widgets/buttons.dart';

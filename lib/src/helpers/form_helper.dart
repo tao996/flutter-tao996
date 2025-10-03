@@ -91,6 +91,7 @@ class FormHelper {
     );
   }
 
+  /// 注意 [onChanged] 里不需要再次更新 controller.text，否则会触发 auto Fours
   static Widget input({
     required TextEditingController controller,
     String? labelText,
@@ -99,6 +100,7 @@ class FormHelper {
     bool isPassword = false,
     bool isRequired = false,
     int? maxLines,
+    int? minLines,
     void Function(String)? onChanged,
   }) {
     return MyInput(
@@ -109,6 +111,7 @@ class FormHelper {
       isPassword: isPassword,
       isRequired: isRequired,
       maxLines: maxLines,
+      minLines: minLines,
       onChanged: onChanged,
     );
   }
@@ -119,6 +122,7 @@ class FormHelper {
     required bool? value,
     required void Function(bool?)? onChanged,
     String? helperText,
+    bool helperTextBottom = true,
   }) {
     bool initValue = value ?? false;
     return Column(
@@ -148,11 +152,21 @@ class FormHelper {
                   },
                 ),
                 Text(label),
+                if (helperText != null &&
+                    helperText.isNotEmpty &&
+                    !helperTextBottom)
+                  Padding(
+                    padding: EdgeInsets.only(left: 20),
+                    child: Text(
+                      helperText,
+                      style: TextStyle(fontSize: 12, color: Colors.grey),
+                    ),
+                  ),
               ],
             ),
           ),
         ),
-        if (helperText != null && helperText.isNotEmpty)
+        if (helperText != null && helperText.isNotEmpty && helperTextBottom)
           Padding(
             padding: EdgeInsets.only(left: 40),
             child: Text(

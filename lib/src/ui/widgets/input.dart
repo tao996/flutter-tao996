@@ -7,10 +7,11 @@ class MyInput extends StatefulWidget {
   final String? hintText;
   final String? helperText;
   final bool isPassword;
-  final bool autoDispose;
   final bool isRequired;
   final int? maxLines;
+  final int? minLines;
   final void Function(String)? onChanged;
+  final void Function(String)? onFieldSubmitted;
 
   const MyInput({
     required this.controller,
@@ -18,10 +19,11 @@ class MyInput extends StatefulWidget {
     this.hintText,
     this.helperText,
     this.isPassword = false,
-    this.autoDispose = false,
     this.isRequired = false,
     this.maxLines,
+    this.minLines,
     this.onChanged,
+    this.onFieldSubmitted,
     super.key,
   });
 
@@ -31,6 +33,13 @@ class MyInput extends StatefulWidget {
 
 class _MyInputState extends State<MyInput> {
   bool isPassword = false;
+  final FocusNode _focusNode = FocusNode();
+
+  @override
+  void dispose() {
+    _focusNode.dispose();
+    super.dispose();
+  }
 
   @override
   void initState() {
@@ -43,20 +52,14 @@ class _MyInputState extends State<MyInput> {
   }
 
   @override
-  void dispose() {
-    if (widget.autoDispose) {
-      widget.controller.dispose();
-    }
-    super.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) {
     return TextFormField(
       controller: widget.controller,
+      focusNode: _focusNode,
       obscureText: isPassword,
-      maxLines: widget.maxLines ?? 1,
-      onChanged: (value){
+      maxLines: widget.maxLines,
+      minLines: widget.minLines,
+      onChanged: (value) {
         widget.onChanged?.call(value);
       },
       decoration: InputDecoration(
@@ -68,7 +71,10 @@ class _MyInputState extends State<MyInput> {
         helperText: widget.helperText,
         border: const OutlineInputBorder(),
         suffixIcon: widget.controller.text.isNotEmpty ? _suffix() : null,
+        isDense: true,
+        alignLabelWithHint: widget.minLines != null && widget.minLines! > 1, // 标签与输入内容对齐
       ),
+      onFieldSubmitted: widget.onFieldSubmitted,
     );
   }
 
@@ -95,28 +101,6 @@ class _MyInputState extends State<MyInput> {
     return null;
   }
 
-  // Widget? _helperWidget() {
-  //   if (widget.helperText != null && widget.helperText!.isNotEmpty) {
-  //     final child = Text(
-  //       widget.helperText!,
-  //       style: TextStyle(fontSize: 12, color: Colors.grey),
-  //     );
-  //     if (widget.isRequired) {
-  //       return Row(
-  //         mainAxisAlignment: MainAxisAlignment.start,
-  //         crossAxisAlignment: CrossAxisAlignment.center,
-  //         children: [
-  //           const Icon(Icons.circle, size: 6, color: Colors.red),
-  //           const SizedBox(width: 4),
-  //           child,
-  //         ],
-  //       );
-  //     }
-  //     return child;
-  //   }
-  //   return null;
-  // }
-
   Widget _suffix() {
     return Row(
       mainAxisSize: MainAxisSize.min,
@@ -136,6 +120,7 @@ class _MyInputState extends State<MyInput> {
           icon: const Icon(Icons.clear),
           onPressed: () {
             widget.controller.clear();
+            widget.onChanged?.call('');
           },
         ),
       ],

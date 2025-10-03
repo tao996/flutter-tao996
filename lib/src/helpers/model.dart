@@ -1,3 +1,4 @@
+import 'package:json_annotation/json_annotation.dart';
 /*
 await db.execute('''CREATE TABLE $_tableName(
   id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -10,7 +11,16 @@ await db.execute('''CREATE TABLE $_tableName(
  */
 import 'package:tao996/tao996.dart';
 
-abstract class IModel<T> {
+abstract class DbTypeModel<T> {
+  Map<String, dynamic> toJson();
+
+  Map<String, dynamic> toMap();
+
+  /// 统一调用工厂方法 => T.fromMap(map);
+  T fromMap(Map<String, dynamic> map);
+}
+
+abstract class IModel<T> extends DbTypeModel<T> {
   int id = 0;
 
   /// 创建时间
@@ -28,125 +38,41 @@ abstract class IModel<T> {
     return id > 0;
   }
 
+  Map<String, dynamic> toInsertMap({
+    bool addCreatedAt = true,
+    bool addUpdatedAt = true,
+  }) {
+    if (addCreatedAt) {
+      createdAt = createdAt ?? DateTime.now();
+    }
+    if (addUpdatedAt) {
+      updatedAt = updatedAt ?? DateTime.now();
+    }
+    final data = toMap();
+    data.remove('id');
+    return data;
+  }
+
   String get createdAtText => DatetimeUtil.formatYMDHMS(dateTime: createdAt);
 
   String get updatedAtText => DatetimeUtil.formatYMDHMS(dateTime: updatedAt);
 
   String get deletedAtText => DatetimeUtil.formatYMDHMS(dateTime: deletedAt);
-
-  /// 将实例转换为 Map，通常用于 JSON 序列化
-  // ========== 通用 toMap 实现 ==========
-  // 负责将 IModel 的基础字段转换为 Map
-  Map<String, dynamic> _baseToMap() {
-    return {
-      'id': id,
-      'createdAt': createdAt?.toIso8601String(),
-      'updatedAt': updatedAt?.toIso8601String(),
-      'deletedAt': deletedAt?.toIso8601String(),
-    };
-  }
-  // 负责从 Map 中解析 IModel 的基础字段
-  void fromBaseMap(Map<String, dynamic> map) {
-    id = map['id'] as int? ?? 0;
-    createdAt = _dateTimeParse(map['createdAt']);
-    updatedAt = _dateTimeParse(map['updatedAt']);
-    deletedAt = _dateTimeParse(map['deletedAt']);
-  }
-  // 抽象方法，实体字段转 Map
-  // Map<String, dynamic> toEntityMap();
-  Map<String, dynamic> toObjectMap();
-
-  // 最终的 toMap() 方法，合并基础字段和子类字段
-  Map<String, dynamic> toMap() {
-    return {..._baseToMap(), ...toObjectMap()};
-  }
-
-
-  // 抽象方法，强制子类实现其特有字段的 fromMap 逻辑
-  // T fromEntityMap(Map<String, dynamic> map);
-  T fromObjectMap(Map<String, dynamic> map);
-
-  // 通用的工具方法
-  static DateTime? _dateTimeParse(dynamic dt) {
-    if (dt == null || dt == '') return null;
-    try {
-      if (dt is String) return DateTime.parse(dt);
-      if (dt is int) return DateTime.fromMillisecondsSinceEpoch(dt);
-    } catch (e, st) {
-      getIDebugService().exception(e, st, args: dt);
-    }
-    return null;
-  }
 }
 
-/*
-
-class Credential extends IModel<Credential> {
-  String name;
-  String username;
-  String authMethod;
-  String password;
-  String privateKey;
-  String keyPassword;
-
-  Credential({
-    super.id,
-    super.createdAt,
-    super.updatedAt,
-    super.deletedAt,
-    required this.name,
-    required this.username,
-    required this.authMethod,
-    required this.password,
-    required this.privateKey,
-    required this.keyPassword,
-  });
-
-  factory Credential.fromMap(Map<String, dynamic> map) {
-    final m = Credential(
-      name: '',
-      username: '',
-      authMethod: '',
-      password: '',
-      privateKey: '',
-      keyPassword: '',
-    );
-    m.fromBaseMap(map);
-    return m.fromObjectMap(map);
-  }
-
-
+abstract class INoTimeModel<T> extends IModel<T> {
+  /// 创建时间
+  @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  String toString() {
-    return '''Credential{id: $id, name: $name, username: $username,
-authMethod: $authMethod
-password: $password,
-keyPassword: $keyPassword, privateKey: $privateKey,
-}''';
-  }
+  DateTime? createdAt;
 
+  /// 更新时间
+  @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  Credential fromObjectMap(Map<String, dynamic> map) {
-    name = map['name'];
-    username = map['username'];
-    authMethod = map['authMethod'];
-    password = map['password'];
-    privateKey = map['privateKey'];
-    keyPassword = map['keyPassword'];
-    return this;
-  }
+  DateTime? updatedAt;
 
+  /// 删除时间
+  @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  Map<String, dynamic> toObjectMap() {
-    return {
-      'name': name,
-      'username': username,
-      'authMethod': authMethod,
-      'password': password,
-      'privateKey': privateKey,
-      'keyPassword': keyPassword,
-    };
-  }
+  DateTime? deletedAt;
 }
-
- */

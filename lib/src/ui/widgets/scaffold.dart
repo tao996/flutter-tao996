@@ -10,13 +10,13 @@ class MyScaffold extends StatelessWidget {
 
   /// 集成 SafeArea
   ///
-  /// [singleChildScrollView] 可垂直滚动的简单页面，默认为 true
+  /// [singleChildScrollView] 可垂直滚动的简单页面，默认为 false
   const MyScaffold({
     super.key,
     this.appBar,
     required this.body,
     this.floatingActionButton,
-    this.singleChildScrollView = true,
+    required this.singleChildScrollView,
   });
 
   @override

@@ -19,6 +19,8 @@ abstract class ITranslationService extends Translations {
       'no': '否',
       'search': '搜索',
       'paramError': '参数错误',
+      'success': '成功',
+      'failed': '失败',
 
       'confirmDelete': '删除?',
       'delete success': '删除成功',
@@ -64,7 +66,7 @@ abstract class ITranslationService extends Translations {
       'Permission storage deny': '没有存储权限',
       // URL
       'openUrlFailed': '打开 @title 链接失败',
-      'urlIsEmpty': '@title 链接为空'
+      'urlIsEmpty': '@title 链接为空',
     },
     'en_US': {},
   };

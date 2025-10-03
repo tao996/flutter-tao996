@@ -2,14 +2,28 @@ import 'package:flutter/material.dart';
 
 class MyEvents {
   static Widget inkWell({
-    required Widget child,
     GestureTapCallback? onTap,
     GestureLongPressCallback? onLongPress,
+    required Widget child,
   }) {
-    return Material( // 提供 Material 环境给 InkWell
-      color: Colors.transparent, // 防止 Material 产生背景色
+    return InkWell(
+      onTap: onTap, // 处理简单的点击事件
+      onDoubleTap: onLongPress,
+      child: child,
+    );
+  }
+
+  static Widget tooltip({
+    required String message,
+    GestureTapCallback? onTap,
+    GestureLongPressCallback? onLongPress,
+    required Widget child,
+  }) {
+    return Tooltip(
+      message: message,
       child: InkWell(
         onTap: onTap, // 处理简单的点击事件
+        onLongPress: onLongPress,
         child: child,
       ),
     );

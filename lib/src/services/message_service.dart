@@ -1,8 +1,8 @@
-import 'dart:io';
+import 'dart:async';
 
+import 'package:bot_toast/bot_toast.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:fluttertoast/fluttertoast.dart';
 import 'package:tao996/tao996.dart';
 
 abstract class IMessageService extends IDebugMessageService {
@@ -12,27 +12,32 @@ abstract class IMessageService extends IDebugMessageService {
     String? content,
     String? cancelText,
     String? confirmText,
+    void Function()? yes,
+    void Function()? no,
   });
 
   // 删除确认
-  Future<bool?> deleteConfirm(String title);
+  Future<bool?> deleteConfirm(String title, [void Function()? yes]);
 
-  Future<bool?> showToast({required String msg});
+  void toast(String message);
 
-  /// [success] 如果为 true，则显示一个正确的图标，如果为 false 则显示一个错误的图标
-  SnackbarController snackbar(
-    String title,
+  /// 成功提示，如果使用 [snackBar]，则不会有 Future 效果
+  @override
+  Future<void> success(
     String message, {
-    SnackPosition? snackPosition,
-    bool? success,
-    int seconds = 4,
+    Duration? duration = const Duration(seconds: 3),
+    double offsetY = -0.2, // 核心：向上偏移（默认比正中央上移 20% 屏幕高度
+    bool snackBar = false,
   });
 
+  /// 错误提示，如果使用 [snackBar]，则不会有 Future 效果
   @override
-  SnackbarController success(String message);
-
-  @override
-  SnackbarController error(String message);
+  Future<void> error(
+    String message, {
+    Duration? duration = const Duration(seconds: 4),
+    double offsetY = -0.2, // 核心：向上偏移（默认比正中央上移 20% 屏幕高度
+    bool snackBar = false,
+  });
 }
 
 class MessageService implements IMessageService {
@@ -42,6 +47,8 @@ class MessageService implements IMessageService {
     String? content,
     String? cancelText,
     String? confirmText,
+    void Function()? yes,
+    void Function()? no,
   }) async {
     return Get.dialog(
       AlertDialog(
@@ -51,12 +58,14 @@ class MessageService implements IMessageService {
         actions: [
           TextButton(
             onPressed: () {
+              no?.call();
               Get.back(result: false);
             },
             child: Text((cancelText ?? 'cancel').tr),
           ),
           ElevatedButton(
             onPressed: () {
+              yes?.call();
               Get.back(result: true);
             },
             child: Text((confirmText ?? 'confirm').tr),
@@ -67,19 +76,7 @@ class MessageService implements IMessageService {
   }
 
   @override
-  Future<bool?> showToast({required String msg}) async {
-    if (Platform.isWindows || Platform.isLinux || Platform.isMacOS){
-      throw 'Fluttertoast is not supported on Windows, Linux and MacOS';
-    }
-    Fluttertoast.cancel();
-    if (msg.startsWith('DioException')) {
-      msg = msg.substring(msg.lastIndexOf(':') + 1).trim();
-    }
-    return Fluttertoast.showToast(msg: msg);
-  }
-
-  @override
-  Future<bool?> deleteConfirm(String title) async {
+  Future<bool?> deleteConfirm(String title, [void Function()? yes]) async {
     return Get.dialog(
       AlertDialog(
         title: Text('deleteConfirmTitle'.tr),
@@ -92,8 +89,9 @@ class MessageService implements IMessageService {
             child: Text('cancel'.tr),
           ),
           ElevatedButton(
-            onPressed: () {
-              Get.back(result: true);
+            onPressed: () async {
+              Get.back(result: true); // 必须提前关闭
+              yes?.call();
             },
             child: Text('confirm'.tr),
           ),
@@ -103,37 +101,173 @@ class MessageService implements IMessageService {
   }
 
   @override
-  SnackbarController snackbar(
-    String title,
+  void toast(
     String message, {
-    SnackPosition? snackPosition,
-    bool? success,
-    int seconds = 3,
+    Duration duration = const Duration(seconds: 3),
+    double offsetY = -0.2, // 核心：向上偏移（默认比正中央上移 20% 屏幕高度
+    VoidCallback? onClose,
+  }) async {
+    if (message.startsWith('DioException')) {
+      message = message.substring(message.lastIndexOf(':') + 1).trim();
+    }
+    // 显示成功 Toast（居中弹窗，无 SnackBar 悬浮）
+    BotToast.showCustomText(
+      // 自定义 Toast 内容（图标+文字）
+      toastBuilder: (cancelFunc) => _buildToastContent(message: message),
+      align: Alignment(0, offsetY),
+      // x=0（水平居中），y=offsetY（垂直偏移）
+      // 显示时长
+      duration: duration,
+      // 点击空白处是否关闭（可选，false 表示仅自动关闭）
+      clickClose: true,
+    );
+  }
+
+  /// 私有方法：构建 Toast 通用样式（避免重复代码）
+  Widget _buildToastContent({
+    required String message,
+    IconData? icon,
+    Color? iconColor,
+    Color? textColor,
   }) {
-    return Get.snackbar(
-      title,
-      message,
-      snackPosition: snackPosition ?? SnackPosition.BOTTOM,
-      margin: const EdgeInsets.all(12),
-      duration: seconds == 0 ? null : Duration(seconds: seconds),
-      icon: success == null
-          ? null
-          : (success
-                ? Icon(Icons.check_circle_outline)
-                : Icon(Icons.close_outlined)),
-      onTap: (snack) {
-        Get.back();
-      },
+    return Container(
+      // 半透明背景+圆角，区分于 SnackBar 的扁平样式
+      decoration: BoxDecoration(
+        color: Colors.white.withAlpha(255),
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black12,
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
+      // 图标+文字横向排列
+      child: Row(
+        mainAxisSize: MainAxisSize.min, // 宽度适应内容，不占满屏幕
+        children: [
+          if (icon != null) ...[
+            Icon(icon, size: 24, color: iconColor),
+            const SizedBox(width: 12), // 图标与文字间距
+          ],
+          Text(
+            message,
+            style: TextStyle(
+              fontSize: 16,
+              color: textColor,
+              fontWeight: FontWeight.w500,
+            ),
+            maxLines: 2, // 限制最多2行，避免内容过长
+            overflow: TextOverflow.ellipsis,
+          ),
+        ],
+      ),
     );
   }
 
   @override
-  SnackbarController success(String message) {
-    return snackbar('success'.tr, message, success: true);
+  // 使用 BotToast 显示成功提示，自带动画结束回调
+  Future<void> success(
+    String message, {
+    Duration? duration = const Duration(seconds: 3),
+    double offsetY = -0.2, // 核心：向上偏移（默认比正中央上移 20% 屏幕高度
+    bool snackBar = false,
+  }) async {
+    if (snackBar) {
+      Get.snackbar(
+        'success'.tr,
+        message,
+        snackPosition: SnackPosition.TOP,
+        margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        duration: duration,
+        icon: Icon(Icons.check_circle_outline, color: Colors.green),
+        onTap: (snack) {
+          Get.back();
+        },
+      );
+      return;
+    }
+    final completer = Completer<void>();
+
+    // 显示成功 Toast（居中弹窗，无 SnackBar 悬浮）
+    BotToast.showCustomText(
+      // 自定义 Toast 内容（图标+文字）
+      toastBuilder: (cancelFunc) => _buildToastContent(
+        message: message,
+        icon: Icons.check_circle_outline,
+        iconColor: Colors.green,
+        textColor: Colors.green[800]!,
+      ),
+      align: Alignment(0, offsetY),
+      // x=0（水平居中），y=offsetY（垂直偏移）
+      // 显示时长
+      duration: duration,
+      // 点击空白处是否关闭（可选，false 表示仅自动关闭）
+      clickClose: false,
+      // Toast 关闭后触发（包括自动关闭/手动关闭）
+      onClose: () {
+        if (!completer.isCompleted) {
+          completer.complete();
+        }
+      },
+    );
+
+    // 等待 Toast 关闭（外部可通过 await 等待）
+    await completer.future;
   }
 
   @override
-  SnackbarController error(String message) {
-    return snackbar('error'.tr, message, success: false, seconds: 4);
+  Future<void> error(
+    String message, {
+    Duration? duration = const Duration(seconds: 4),
+    double offsetY = -0.2, // 统一向上偏移，保持样式一致
+    bool snackBar = false,
+  }) async {
+    if (snackBar) {
+      Get.snackbar(
+        'failed'.tr,
+        message,
+        snackPosition: SnackPosition.TOP,
+        margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        duration: duration,
+        icon: Icon(Icons.error_outline, color: Colors.red),
+        colorText: Colors.red[800],
+        mainButton: TextButton(
+          onPressed: () {
+            Get.back();
+          },
+          child: Text('close'.tr),
+        ),
+        onTap: (snack) {
+          Get.back();
+        },
+      );
+      return;
+    }
+    final completer = Completer<void>();
+
+    // 显示错误 Toast（居中弹窗，无 SnackBar 悬浮）
+    BotToast.showCustomText(
+      toastBuilder: (cancelFunc) => _buildToastContent(
+        message: message,
+        icon: Icons.error_outline,
+        iconColor: Colors.red,
+        textColor: Colors.red[800]!,
+      ),
+      align: Alignment(0, offsetY),
+      // 与成功提示保持相同偏移
+      duration: duration,
+      clickClose: true,
+      onClose: () {
+        if (!completer.isCompleted) {
+          completer.complete();
+        }
+      },
+    );
+
+    await completer.future;
+    return;
   }
 }

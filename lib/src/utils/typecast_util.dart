@@ -70,6 +70,24 @@ class TypeCastUtil {
     return castMap<String, dynamic>(decoded);
   }
 
+  /// 将 JSON 字符串还原为 Map<String, T>
+  ///
+  /// [jsonString]: 从数据库中读取的 JSON 字符串。
+  /// [fromData]: 一个从 Map 中的值（dynamic 类型）构造 T 实例的函数。通常是类型的 fromMap 方法；如果是基础类型 (value) => value as int;
+  ///
+  /// 返回值：恢复后的 Map<String, T>。
+  static Map<String, T> mapObjectFromJson<T>(
+    String jsonString,
+    T Function(dynamic) fromData,
+  ) {
+    if (jsonString.isEmpty) {
+      return {};
+    }
+    final Map<String, dynamic> decoded = mapFromJson(jsonString);
+
+    return decoded.map((key, value) => MapEntry(key, fromData(value)));
+  }
+
   /// 将 json string 还原为 `Map<String,String>`
   static Map<String, String> mapStringFromJson(String? jsonString) {
     final dynamic decoded = safeJsonDecode(jsonString, isList: false);
@@ -110,7 +128,6 @@ class TypeCastUtil {
     }
     return [];
   }
-
 
   static List<int> listIntFromDynamicList(
     dynamic data, {

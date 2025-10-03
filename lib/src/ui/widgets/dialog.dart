@@ -2,7 +2,62 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 class MyDialog {
-  /// 单选列表，通常用在 onTab 回调内部
+  /// 全屏对话框
+  static void fullScreenDialog(
+    BuildContext context, {
+    required Widget child,
+    double? horizontalPadding = 20.0,
+    double? verticalPadding = 20.0,
+  }) {
+    double? width;
+    if (horizontalPadding != null) {
+      final screenWidth = MediaQuery.of(context).size.width;
+      width = screenWidth - horizontalPadding; // 比父窗口宽度小 20
+    }
+    double? height;
+    if (verticalPadding != null) {
+      final screenHeight = MediaQuery.of(context).size.height;
+      height = screenHeight - verticalPadding; // 比父窗口高度小 20
+    }
+
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          // backgroundColor: const Color(0xFF1F2937),
+          contentPadding: EdgeInsets.zero,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12.0),
+          ),
+          content: SizedBox(
+            // 将计算出的动态尺寸应用于对话框的内容
+            width: width,
+            height: height,
+            child: child,
+          ),
+        );
+      },
+    );
+  }
+
+  /// 打开一个普通的对话框
+  static void open(BuildContext context, {required Widget child}) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          // backgroundColor: const Color(0xFF1F2937),
+          contentPadding: EdgeInsets.zero,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12.0),
+          ),
+          content: child,
+        );
+      },
+    );
+  }
+
+  /// 单选列表对话框，通常用在 onTab 回调内部
   static void radioList({
     Widget? icon,
     required String title,
@@ -65,6 +120,7 @@ class MyDialog {
     );
   }
 
+  /// 在点击位置旁边弹出窗口，通常是在 PC 上使用
   static void window(
     BuildContext context, {
     required String label,

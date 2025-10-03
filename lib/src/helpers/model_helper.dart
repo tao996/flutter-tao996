@@ -1,9 +1,56 @@
 import 'dart:math';
 
 import 'package:get/get.dart';
+import 'package:sqflite/sqflite.dart';
 import 'package:tao996/tao996.dart';
-typedef DbValue = String? Function(dynamic value); // 数据库值转换函数
-typedef EntityField<T> = dynamic Function(T entity); // 实体字段提取函数
+
+// 封装工具类处理类型转换
+class DbTypeConverter {
+  static bool boolFromJson(int value) => value == 1;
+
+  static int boolToJson(bool value) => value ? 1 : 0;
+
+  static String mapStringStringToJson(Map<String, String>? data) {
+    return TypeCastUtil.mapToJson(data);
+  }
+
+  static Map<String, String> mapStringStringFromJson(String? json) {
+    if (json == null || json.isEmpty) {
+      return {};
+    }
+    return TypeCastUtil.mapStringFromJson(json);
+  }
+
+  /// 调用 toMap 来生成字符串
+  static String listToJson<T extends DbTypeModel<T>>(List<T>? items) {
+    if (items == null || items.isEmpty) {
+      return '';
+    }
+    return TypeCastUtil.listToJsonString<T>(items, (e) {
+      return e.toMap();
+    });
+  }
+
+  static List<T> listFromJson<T extends DbTypeModel<T>>(
+    String? json, {
+    required T Function(Map<String, dynamic>) fromMap,
+  }) {
+    if (json == null || json.isEmpty) {
+      return [];
+    }
+    return TypeCastUtil.listFromJsonString<T>(json, (data) {
+      return fromMap(data); // 这里是错误的，应该如何改写
+    });
+  }
+}
+
+class ModelTransaction {
+  final Transaction _txn;
+
+  Transaction get txn => _txn;
+
+  ModelTransaction(Transaction txn) : _txn = txn;
+}
 
 abstract class ModelHelper<T extends IModel<T>> {
   final IDatabaseService dbService = getIDatabaseService();
@@ -34,6 +81,12 @@ abstract class ModelHelper<T extends IModel<T>> {
   /// 获取表名
   String get tableName => _tableName;
 
+  // 1. 扩展 getFirstBy 的缓存支持（支持任意字段，需子类注册缓存字段）
+  // 新增：缓存字段映射（子类可重写，指定需要缓存的字段）
+  Map<String, dynamic Function(T)> get cacheFieldGetters => {
+    'id': (entity) => entity.id,
+  };
+
   /// [enableCache] 是否使用缓存，通常用于小表使用;
   /// [enableSoftDelete] 是否使用软删除功能，注意：如果你的表中包含了 unique 索引，请不要使用软删除功能
   ModelHelper(
@@ -55,103 +108,41 @@ abstract class ModelHelper<T extends IModel<T>> {
   /// 将 Map 数据转换为实体对象 [T]。
   T fromMap(Map<String, dynamic> map);
 
-  /// 通常用在 getBy 中，用于获取实体的特定字段值，通常用于检查实体是否已存在
-  dynamic getValueByField(T entity, String fieldName);
-
-  /// 用在查询记录中
-  dynamic getMsValueByField(T entity, String fieldName) {
-    switch (fieldName) {
-      case 'id':
-        return entity.id;
-      case 'createdAt':
-        return _hasCreatedAt(() {
-          return entity.createdAt;
-        });
-      case 'updatedAt':
-        return _hasUpdatedAt(() {
-          return entity.updatedAt;
-        });
-      case 'deletedAt':
-        return entity.deletedAt;
-      default:
-        return getValueByField(entity, fieldName);
-    }
-  }
-
   /// 插入前调用：返回 false 中断插入，返回 true 继续
   /// [entity]：待插入的实体（关联具体数据，替代原 Map 参数）
-  bool beforeInsert(T entity) => true;
+  Future<bool> beforeInsert(T entity) async => true;
 
   /// 插入后调用：返回值可用于传递额外数据（如关联ID）
   /// [entity]：插入成功后的实体（含数据库生成的 id）
-  dynamic afterInsert(T entity) => null;
+  Future<dynamic> afterInsert(T entity) async => null;
 
   /// 更新前调用：返回 false 中断更新
   /// [entity]：待更新的实体；[updateFields]：本次要更新的字段名（避免全量判断）
-  bool beforeUpdate(T entity, List<String> updateFields) => true;
+  Future<bool> beforeUpdate(T entity) async => true;
 
   /// 更新后调用：返回值可用于传递额外数据
   /// [entity]：更新后的实体（非 null，更新操作必关联实体）
-  dynamic afterUpdate(T entity) => null;
+  Future<dynamic> afterUpdate(T entity) async => null;
 
   /// 保存前调用（插入/更新通用）：返回 false 中断保存
   /// [entity]：待保存的实体；[isInsert]：标识是插入还是更新
-  bool beforeSave(T entity, bool isInsert) => true;
+  Future<bool> beforeSave(T entity, bool isInsert) async => true;
 
   /// 保存后调用（插入/更新通用）：返回值可用于传递额外数据
   /// [entity]：保存后的实体；[isInsert]：标识是插入还是更新
-  dynamic afterSave(T entity, bool isInsert) => null;
+  Future<dynamic> afterSave(T entity, bool isInsert) async => null;
 
   /// 删除前调用：返回 false 中断删除
   /// [entity]：待删除的实体（非 null 时为按实体删除）；[where]：删除条件（按条件删除时生效）
-  bool beforeDelete({T? entity, String? where, List<Object?>? whereArgs}) =>
-      true;
+  Future<bool> beforeDelete({
+    T? entity,
+    String? where,
+    List<Object?>? whereArgs,
+  }) async => true;
 
   /// 删除后调用：返回值可用于传递额外数据（如删除的关联数量）
   /// [deletedCount]：实际删除/软删除的行数；[entity]：被删除的实体（非 null 时为按实体删除）
-  dynamic afterDelete(int deletedCount, {T? entity}) => null;
-
-  dynamic _hasCreatedAt(dynamic Function() action) {
-    if (enableCreatedAt) {
-      return action();
-    } else {
-      throw 'createdAt is not enabled in $tableName';
-    }
-  }
-
-  dynamic _hasUpdatedAt(dynamic Function() action) {
-    if (enableUpdatedAt) {
-      return action();
-    } else {
-      throw 'updatedAt is not enabled in $tableName';
-    }
-  }
-
-  /// 用在 update 操作中，会将修改的值同步到实体中
-  void setValueByField(T entity, String fieldName, dynamic value);
-
-  void setMsValueByField(T entity, String fieldName, dynamic value) {
-    switch (fieldName) {
-      case 'id':
-        entity.id = value;
-        break;
-      case 'createdAt':
-        _hasCreatedAt(() {
-          entity.createdAt = value;
-        });
-        break;
-      case 'updatedAt':
-        _hasUpdatedAt(() {
-          entity.updatedAt = value;
-        });
-        break;
-      case 'deletedAt':
-        entity.deletedAt = value;
-        break;
-      default:
-        setValueByField(entity, fieldName, value);
-    }
-  }
+  Future<dynamic> afterDelete(int deletedCount, {T? entity}) async => null;
 
   /// 获取全部的记录（可能使用缓存）
   Future<List<T>> getAll() async {
@@ -195,19 +186,26 @@ abstract class ModelHelper<T extends IModel<T>> {
     required String fieldName,
     required dynamic value,
     bool tryCache = true,
+    ModelTransaction? mtn,
   }) async {
-    if (tryCache && enableCache) {
-      return _cache.firstWhereOrNull(
-        (element) => getMsValueByField(element, fieldName) == value,
-      );
+    if (tryCache && enableCache && cacheFieldGetters.containsKey(fieldName)) {
+      final getter = cacheFieldGetters[fieldName]!;
+      return _cache.firstWhereOrNull((element) => getter(element) == value);
     } else {
       try {
-        final maps = await dbService.query(
-          tableName,
-          where: appendWhere('$fieldName = ?'),
-          whereArgs: [value],
-          limit: 1, // 只查询一条
-        );
+        final maps = mtn == null
+            ? await dbService.query(
+                tableName,
+                where: appendWhere('$fieldName = ?'),
+                whereArgs: [value],
+                limit: 1, // 只查询一条
+              )
+            : await mtn.txn.query(
+                tableName,
+                where: appendWhere('$fieldName = ?'),
+                whereArgs: [value],
+                limit: 1,
+              );
         return maps.isNotEmpty ? fromMap(maps.first) : null;
       } catch (e, st) {
         debugService.exception(e, st, log: true);
@@ -216,8 +214,49 @@ abstract class ModelHelper<T extends IModel<T>> {
     }
   }
 
-  Future<T?> getById(int id, {bool tryCache = true}) async {
-    return await getFirstBy(fieldName: 'id', value: id, tryCache: tryCache);
+  Future<T?> getFirstWith(
+    String where, {
+    List<Object?>? whereArgs,
+    List<String>? columns,
+    String? orderBy,
+    ModelTransaction? mtn,
+  }) async {
+    try {
+      final maps = mtn == null
+          ? await dbService.query(
+              tableName,
+              where: appendWhere(where),
+              whereArgs: whereArgs,
+              orderBy: orderBy,
+              columns: columns,
+              limit: 1, // 只查询一条
+            )
+          : await mtn.txn.query(
+              tableName,
+              where: appendWhere(where),
+              whereArgs: whereArgs,
+              orderBy: orderBy,
+              columns: columns,
+              limit: 1,
+            );
+      return maps.isNotEmpty ? fromMap(maps.first) : null;
+    } catch (e, st) {
+      debugService.exception(e, st, log: true);
+      throw 'Failed to get record from $tableName; because: $e';
+    }
+  }
+
+  Future<T?> getById(
+    int id, {
+    bool tryCache = true,
+    ModelTransaction? mtn,
+  }) async {
+    return await getFirstBy(
+      fieldName: 'id',
+      value: id,
+      tryCache: tryCache,
+      mtn: mtn,
+    );
   }
 
   /// 检查记录在数据库中是否存在
@@ -241,10 +280,27 @@ abstract class ModelHelper<T extends IModel<T>> {
     }
   }
 
+  void _updateCacheSingle(T entity, {bool isInsert = false}) {
+    if (!enableCache) return;
+    final index = _cache.indexWhere((e) => e.id == entity.id);
+    if (isInsert) {
+      if (index == -1) _cache.add(entity);
+    } else {
+      if (index != -1) _cache[index] = entity;
+    }
+  }
+
   /// 获取记录总数。
-  Future<int> count({String? where, List<Object?>? arguments}) async {
-    if (enableCache) {
-      return _cache.length;
+  Future<int> count({
+    String? where,
+    List<Object?>? arguments,
+    bool forceRefresh = false,
+  }) async {
+    if (enableCache && !forceRefresh) {
+      // 若有查询条件，缓存无法覆盖，需查数据库
+      if (where == null && arguments == null) {
+        return _cache.length;
+      }
     }
     try {
       return await dbService.count(
@@ -275,7 +331,7 @@ abstract class ModelHelper<T extends IModel<T>> {
     List<String>? columns,
     String? orderBy,
     int? offset,
-    int? pageIndex,
+    int pageIndex = 1,
   }) async {
     try {
       final List<String> conditions = [];
@@ -290,11 +346,9 @@ abstract class ModelHelper<T extends IModel<T>> {
         columns: columns,
         where: appendWhere(baseWhere),
         whereArgs: whereArgs ?? whereArgs1,
-        orderBy: orderBy,
+        orderBy: orderBy ?? 'id DESC',
         limit: pageSize,
-        offset:
-            offset ??
-            (pageIndex == null ? null : (max(1, pageIndex) - 1) * pageSize),
+        offset: offset ?? (max(1, pageIndex) - 1) * pageSize,
       );
       return result.map((map) => fromMap(map)).toList();
     } catch (e, st) {
@@ -303,18 +357,55 @@ abstract class ModelHelper<T extends IModel<T>> {
     }
   }
 
-  /// 获取指定字段和值的所有记录。
-  Future<List<T>> getManyBy({
-    required String fieldName,
-    required dynamic value,
-    List<String>? columns,
+  /// 从数据库中获取第1条符合条件的记录的字段 [key]值
+  Future<int> getFirstRecordKey({
+    required String where,
+    required List<dynamic> whereArgs,
+    String key = 'id',
   }) async {
+    try {
+      return await dbService.firstRecordId(
+        tableName,
+        where: appendWhere(where),
+        whereArgs: whereArgs,
+        key: key,
+      );
+    } catch (e, st) {
+      debugService.exception(e, st, log: true);
+      throw 'Failed to get first record ID for $tableName; because: $e';
+    }
+  }
+
+  /// 获取指定字段和值的所有记录。如果提供了 [where] 则优先使用 [where] 和 [whereArgs]
+  Future<List<T>> getManyBy({
+    String? fieldName,
+    dynamic value,
+    String? where,
+    List<Object?>? whereArgs,
+    List<String>? columns,
+    String? groupBy,
+    String? having,
+    String? orderBy,
+    int? limit,
+    int? offset,
+  }) async {
+    if ((where == null || where.isEmpty) &&
+        (fieldName == null || fieldName.isEmpty)) {
+      throw 'Please provide either [where] or [fieldName]';
+    }
     try {
       final result = await dbService.query(
         tableName,
         columns: columns,
-        where: appendWhere('$fieldName = ?'),
-        whereArgs: [value],
+        where: where ?? appendWhere('$fieldName = ?'),
+        whereArgs:
+            whereArgs ??
+            (fieldName != null && fieldName.isNotEmpty ? [value] : null),
+        groupBy: groupBy,
+        having: having,
+        orderBy: orderBy,
+        limit: limit,
+        offset: offset,
       );
       return result.map((map) => fromMap(map)).toList();
     } catch (e, st) {
@@ -324,9 +415,17 @@ abstract class ModelHelper<T extends IModel<T>> {
   }
 
   /// 执行原生 SQL 语句
-  Future<void> execute(String sql, [List<Object?>? arguments]) async {
+  Future<void> execute(
+    String sql, {
+    List<Object?>? arguments,
+    ModelTransaction? mtn,
+  }) async {
     try {
-      await dbService.execute(sql, arguments);
+      if (mtn != null) {
+        await mtn.txn.execute(sql, arguments);
+      } else {
+        await dbService.execute(sql, arguments);
+      }
     } catch (e, st) {
       debugService.exception(
         e,
@@ -340,9 +439,9 @@ abstract class ModelHelper<T extends IModel<T>> {
 
   /// 执行原生 SQL 查询
   Future<List<Map<String, dynamic>>> rawQuery(
-    String sql, [
+    String sql, {
     List<Object?>? arguments,
-  ]) async {
+  }) async {
     try {
       return await dbService.rawQuery(sql, arguments);
     } catch (e, st) {
@@ -382,93 +481,51 @@ abstract class ModelHelper<T extends IModel<T>> {
     }
   }
 
-  /// 添加记录并返回新记录，已经自动从 [values] 中移除 id 列；
-  /// 如果使用缓存，则自动添加到缓存中
-  Future<T> insert(Map<String, Object?> values) async {
-    try {
-      if (enableCreatedAt) {
-        values['createdAt'] = DateTime.now().toIso8601String();
-      }
-      if (enableUpdatedAt) {
-        values['updatedAt'] = DateTime.now().toIso8601String();
-      }
-      final entity = fromMap(values);
-      if (!beforeInsert(entity)) {
-        throw 'Insert interrupted by beforeInsert hook for $tableName';
-      }
-      if (!beforeSave(entity, true)) {
-        // isInsert = true（插入场景）
-        throw 'Insert interrupted by beforeSave hook for $tableName';
-      }
-      // debugService.d(entity.toMap()..remove('id'));
-      // throw '~~~~ Insert interrupted by beforeSave hook for $tableName';
-      final newId = await dbService.insert(
-        tableName,
-        entity.toMap()..remove('id'),
-      );
-      if (newId <= 0) throw 'Failed to insert record into $tableName';
-      // 获取新插入的记录
-      final record = await getById(newId, tryCache: false);
-      if (record == null) {
-        throw 'Failed to get record by id=$newId from $tableName';
-      }
-      debugService.d('Inserted new record into $tableName with new ID: $newId');
-
-      /// 更新缓存
-      if (enableCache) {
-        await getAllFromDb();
-      }
-      // 更新后置钩子
-      afterInsert(record);
-      afterSave(record, true);
-      return record;
-    } catch (e, st) {
-      debugService.exception(e, st, args: values, log: true);
-      throw 'Failed to insert record into $tableName; because: $e';
-    }
-  }
-
   /// 更新符合条件的记录，并返回影响行数；如果提供 [entity] 则会更新缓存
   Future<int> update(
     Map<String, Object?> values, {
     String? where,
     List<Object?>? whereArgs,
     T? entity,
+    ModelTransaction? mtn,
   }) async {
     try {
-      if (entity != null && !entity.hasRecord()) {
-        throw 'Entity is null or has no valid id for $tableName update';
-      }
-      if (enableUpdatedAt) {
-        values['updatedAt'] = DateTime.now().toIso8601String();
-      }
-      final updateFields = values.keys.toList();
       if (entity != null) {
-        if (!beforeUpdate(entity, updateFields)) {
+        if (!entity.hasRecord()) {
+          throw 'Entity has no valid id for $tableName update';
+        }
+        if (enableUpdatedAt) {
+          entity.updatedAt = DateTime.now();
+        }
+        if (!await beforeUpdate(entity)) {
           throw 'Update interrupted by beforeUpdate hook for $tableName';
         }
-        if (!beforeSave(entity, false)) {
+        if (!await beforeSave(entity, false)) {
           // isInsert = false（更新场景）
           throw 'Update interrupted by beforeSave hook for $tableName';
         }
       }
-      final updatedRows = await dbService.update(
-        tableName,
-        values,
-        where: appendWhere(where),
-        whereArgs: whereArgs,
-      );
-      if (enableCache) await getAllFromDb();
+
+      final updatedRows = mtn == null
+          ? await dbService.update(
+              tableName,
+              values,
+              where: appendWhere(where),
+              whereArgs: whereArgs,
+            )
+          : await mtn.txn.update(
+              tableName,
+              values,
+              where: appendWhere(where),
+              whereArgs: whereArgs,
+            );
+      if (mtn == null && enableCache) await getAllFromDb();
+
       if (entity != null) {
-        // 6. 更新实体字段 + 缓存 + 后置钩子
-        if (updatedRows > 0) {
-          for (final key in updateFields) {
-            setMsValueByField(entity, key, values[key]);
-          }
-        }
-        afterUpdate(entity);
-        afterSave(entity, false); // isInsert = false
+        await afterUpdate(entity);
+        await afterSave(entity, false); // isInsert = false
       }
+
       debugService.d('Updated $updatedRows records in $tableName');
       return updatedRows;
     } catch (e, st) {
@@ -478,31 +535,29 @@ abstract class ModelHelper<T extends IModel<T>> {
   }
 
   /// 更新指定 ID 记录的数据
-  Future<int> updateWithId(
-    int id,
-    Map<String, Object?> values, {
-    required T entity,
+  Future<int> updateById(
+    T entity, {
+    List<String>? columns,
+    ModelTransaction? mtn,
   }) async {
-    return update(values, entity: entity, where: "id=?", whereArgs: [id]);
-  }
-
-  /// 从数据库中获取第1条符合条件的记录的字段 [key]值
-  Future<int> getFirstRecordKey({
-    required String where,
-    required List<dynamic> whereArgs,
-    String key = 'id',
-  }) async {
-    try {
-      return await dbService.firstRecordId(
-        tableName,
-        where: appendWhere(where),
-        whereArgs: whereArgs,
-        key: key,
-      );
-    } catch (e, st) {
-      debugService.exception(e, st, log: true);
-      throw 'Failed to get first record ID for $tableName; because: $e';
+    Map<String, dynamic> fieldValues = entity.toJson();
+    if (columns != null && columns.isNotEmpty) {
+      // 过滤指定字段，确保类型为 Map<String, Object?>
+      fieldValues = fieldValues.keys
+          .where((name) => columns.contains(name))
+          .fold<Map<String, dynamic>>(
+            {},
+            (acc, name) => acc..[name] = fieldValues[name],
+          );
     }
+    fieldValues.remove('id'); // 移除 id，避免更新主键
+    return update(
+      fieldValues.cast<String, Object?>(), // 强制类型转换（确保安全，因 fieldValues 来自实体）
+      where: "id=?",
+      whereArgs: [entity.id],
+      entity: entity,
+      mtn: mtn,
+    );
   }
 
   /// 删除符合条件的记录，自动更新缓存
@@ -510,11 +565,21 @@ abstract class ModelHelper<T extends IModel<T>> {
     String? where,
     List<Object?>? whereArgs,
     T? entity,
+    ModelTransaction? mtn,
   }) async {
     try {
-      // 1. 调用前置钩子：返回 false 中断删除
-      if (!beforeDelete(entity: entity, where: where, whereArgs: whereArgs)) {
-        throw 'Delete interrupted by beforeDelete hook for $tableName';
+      if (entity != null) {
+        if (!entity.hasRecord()) {
+          throw 'The entity must have a record ID when deleting';
+        }
+        if (!await beforeDelete(
+          entity: entity,
+          where: where,
+          whereArgs: whereArgs,
+        )) {
+          throw 'Delete interrupted by beforeDelete hook for $tableName';
+        }
+        entity.deletedAt = DateTime.now();
       }
       // 2. 执行删除/软删除（不变）
       final deletedCount = enableSoftDelete
@@ -523,15 +588,24 @@ abstract class ModelHelper<T extends IModel<T>> {
               where: where ?? '',
               whereArgs: whereArgs ?? [],
               entity: entity,
+              mtn: mtn,
             )
-          : await dbService.delete(
-              tableName,
-              where: where,
-              whereArgs: whereArgs,
-            );
+          : (mtn == null
+                ? await dbService.delete(
+                    tableName,
+                    where: where,
+                    whereArgs: whereArgs,
+                  )
+                : await mtn.txn.delete(
+                    tableName,
+                    where: where,
+                    whereArgs: whereArgs,
+                  ));
       // 更新缓存 + 后置钩子
-      if (enableCache && deletedCount > 0) await getAllFromDb();
-      afterDelete(deletedCount, entity: entity);
+      if (mtn == null && enableCache && deletedCount > 0) await getAllFromDb();
+      if (entity != null) {
+        await afterDelete(deletedCount, entity: entity);
+      }
 
       debugService.d('Deleted $deletedCount records in $tableName');
       return deletedCount;
@@ -546,58 +620,144 @@ abstract class ModelHelper<T extends IModel<T>> {
     required dynamic value,
     String fieldName = 'id',
     T? entity,
+    ModelTransaction? mtn,
   }) async {
     return await delete(
       where: '$fieldName = ?',
       whereArgs: [value],
       entity: entity,
+      mtn: mtn,
     );
   }
 
   /// 根据主键 ID 删除记录。
-  Future<int> deleteById(int id, T? entity) async {
-    return await deleteBy(fieldName: 'id', value: id, entity: entity);
+  Future<int> deleteById(int id, {ModelTransaction? mtn}) async {
+    return await deleteBy(fieldName: 'id', value: id, mtn: mtn);
   }
 
-  // 1. 批量插入（使用事务）
-  Future<List<int>> batchInsert(List<T> entities) async {
-    if (entities.isEmpty) return [];
-    final db = dbService.getDatabase();
-    return await db.transaction((txn) async {
-      final ids = <int>[];
-      for (final entity in entities) {
-        // 复用 beforeInsert/beforeSave 逻辑
-        if (!beforeInsert(entity) || !beforeSave(entity, true)) {
-          throw 'Batch insert interrupted for entity: ${entity.id}';
-        }
-        if (enableCreatedAt) entity.createdAt = DateTime.now();
-        if (enableUpdatedAt) entity.updatedAt = DateTime.now();
-        final id = await txn.insert(tableName, entity.toMap()..remove('id'));
+  /// 添加记录并返回新记录，已经自动从 [values] 中移除 id 列；
+  /// 如果使用缓存，则自动添加到缓存中
+  Future<T> insertWith(
+    Map<String, Object?> values, {
+    ModelTransaction? mtn,
+  }) async {
+    final entity = fromMap(values);
+    return insert(entity, mtn: mtn);
+  }
 
-        ids.add(id);
-        entity.id = id; // 回填 ID
-        afterInsert(entity);
-        afterSave(entity, true);
+  /// 添加记录并返回新记录，已经自动从 [entity] 中移除 id 列；
+  Future<T> insert(T entity, {ModelTransaction? mtn}) async {
+    try {
+      if (enableCreatedAt) {
+        entity.createdAt = DateTime.now();
       }
-      if (enableCache) await getAllFromDb(); // 批量更新缓存
-      return ids;
-    });
+      if (enableUpdatedAt) {
+        entity.updatedAt = DateTime.now();
+      }
+
+      if (!await beforeInsert(entity)) {
+        throw 'Insert interrupted by beforeInsert hook for $tableName';
+      }
+      if (!await beforeSave(entity, true)) {
+        throw 'Insert interrupted by beforeSave hook for $tableName';
+      }
+
+      final newId = mtn == null
+          ? await dbService.insert(tableName, entity.toJson()..remove('id'))
+          : await mtn.txn.insert(tableName, entity.toJson()..remove('id'));
+      if (newId <= 0) throw 'Failed to insert record into $tableName';
+      entity.id = newId;
+      // 获取新插入的记录
+      final record = await getById(newId, tryCache: false, mtn: mtn);
+      if (record == null) {
+        throw 'Failed to get record by id=$newId from $tableName';
+      }
+      debugService.d('Inserted new record into $tableName with new ID: $newId');
+
+      /// 更新缓存
+      if (mtn == null && enableCache) {
+        _updateCacheSingle(record, isInsert: true);
+      }
+      // 更新后置钩子
+      await afterInsert(record);
+      await afterSave(record, true);
+      return record;
+    } catch (e, st) {
+      debugService.exception(e, st, args: entity.toJson(), log: true);
+      throw 'Failed to insert record into $tableName; because: $e';
+    }
   }
 
-  // 1. 恢复软删除的记录
-  Future<int> restore({String? where, List<Object?>? whereArgs}) async {
+  /// 批量插入（使用事务），需要手动更新缓存
+  Future<List<int>> batchInsert(ModelTransaction mtn, List<T> entities) async {
+    if (entities.isEmpty) return [];
+    final ids = <int>[];
+    for (final entity in entities) {
+      // 复用 beforeInsert/beforeSave 逻辑
+      if (!await beforeInsert(entity) || !await beforeSave(entity, true)) {
+        throw 'Batch insert interrupted for entity: ${entity.id}';
+      }
+      if (enableCreatedAt) entity.createdAt = DateTime.now();
+      if (enableUpdatedAt) entity.updatedAt = DateTime.now();
+      final id = await mtn.txn.insert(tableName, entity.toJson()..remove('id'));
+
+      ids.add(id);
+      entity.id = id; // 回填 ID
+      afterInsert(entity);
+      afterSave(entity, true);
+    }
+    return ids;
+  }
+
+  /// 执行一个事务
+  Future<M> transaction<M>(
+    Future<M> Function(ModelTransaction) action, {
+    bool? exclusive,
+  }) async {
+    try {
+      final db = dbService.getDatabase();
+      return await db.transaction<M>((txn) async {
+        return action(ModelTransaction(txn));
+      }, exclusive: exclusive);
+    } catch (e, st) {
+      dprint('事务执行失败');
+      debugService.exception(e, st);
+      rethrow;
+    }
+  }
+
+  /// 恢复软删除的记录
+  Future<int> restore({
+    String? where,
+    List<Object?>? whereArgs,
+    T? entity,
+    ModelTransaction? mtn,
+  }) async {
     if (!enableSoftDelete) {
       throw 'Soft delete is not enabled for $tableName';
     }
-    return update(
+    if (!enableSoftDelete) {
+      throw 'Soft delete is not enabled for $tableName';
+    }
+    // 调用前置钩子（复用 beforeSave，isInsert = false）
+    if (entity != null && !await beforeSave(entity, false)) {
+      throw 'Restore interrupted by beforeSave hook for $tableName';
+    }
+    final updatedRows = await update(
       {'deletedAt': null},
       where: where,
       whereArgs: whereArgs,
-      // 恢复操作无需实体，但需确保更新逻辑兼容
+      entity: entity,
+      mtn: mtn,
     );
+    // 调用后置钩子
+    if (entity != null) {
+      afterSave(entity, false);
+    }
+    return updatedRows;
   }
 
-  // 2. 查询已删除的记录（与正常查询区分）
+  /// 查询已删除的记录（与正常查询区分）
   Future<List<T>> getDeleted({String? where, List<Object?>? whereArgs}) async {
     if (!enableSoftDelete) return [];
     final actualWhere = where == null
@@ -609,5 +769,25 @@ abstract class ModelHelper<T extends IModel<T>> {
       whereArgs: whereArgs,
     );
     return maps.map((m) => fromMap(m)).toList();
+  }
+
+  /// 字段递增
+  Future<int> increase(
+    int id,
+    String field, {
+    int value = 1,
+    ModelTransaction? mtn,
+  }) {
+    return update({field: '+$value'}, where: 'id=?', whereArgs: [id], mtn: mtn);
+  }
+
+  /// 字段递减
+  Future<int> decrease(
+    int id,
+    String field, {
+    int value = 1,
+    ModelTransaction? mtn,
+  }) {
+    return update({field: '-$value'}, where: 'id=?', whereArgs: [id], mtn: mtn);
   }
 }

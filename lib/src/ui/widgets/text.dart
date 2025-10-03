@@ -54,4 +54,24 @@ class MyText {
       style: TextStyle(color: Colors.lightBlue, fontWeight: FontWeight.bold),
     );
   }
+
+  static Widget listTitle(String title, {String? subTitle, bool bold = true}) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Text(
+          title,
+          style: bold
+              ? TextStyle(fontWeight: FontWeight.bold, color: Colors.black)
+              : null,
+        ),
+        if (subTitle != null && subTitle.isNotEmpty)
+          Text(
+            subTitle,
+            style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+          ),
+      ],
+    );
+  }
 }

@@ -52,7 +52,7 @@ class _ImageViewerPageState extends State<ImageViewerPage> {
 
   // 模拟下载图片功能
   Future<void> _downloadImage() async {
-    _messageService.showToast(msg: 'image downloading'.tr);
+    _messageService.toast('image downloading'.tr);
     try {
       if (Platform.isAndroid) {
         var status = await Permission.storage.request();
@@ -96,7 +96,7 @@ class _ImageViewerPageState extends State<ImageViewerPage> {
 
   // 模拟分享图片功能
   Future<void> _shareImage() async {
-    _messageService.showToast(msg: 'image sharing'.tr);
+    _messageService.toast('image sharing'.tr);
     try {
       final file = await _getImage();
       if (file == null) {

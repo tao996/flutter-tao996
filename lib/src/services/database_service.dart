@@ -9,8 +9,8 @@ typedef WhereClauseBuilder =
     void Function(List<String> conditions, List<Object> whereArgs);
 
 abstract class IDatabaseService {
-
   Database getDatabase();
+
   /// 更新数据库
   /// https://github.com/tekartik/sqflite/blob/master/sqflite/doc/migration_example.md
   Future<void> migrate(Future<Database> Function(String path) createDatabase);
@@ -120,8 +120,16 @@ class SqfliteDatabaseService implements IDatabaseService {
     String? where,
     List<Object?>? arguments,
   }) async {
+    final sql =
+        'SELECT COUNT(*) AS C FROM $tableName${where != null ? ' WHERE $where' : ''}';
+    if (printSQL) {
+      _debugService.d(
+        sql,
+        args: arguments == null ? null : {'args': arguments},
+      );
+    }
     final List<Map<String, dynamic>> result = await _database!.rawQuery(
-      'SELECT COUNT(*) AS C FROM $tableName${where != null ? ' WHERE $where' : ''}',
+      sql,
       arguments,
     );
     return result.first['C'] as int? ?? 0;
@@ -200,9 +208,10 @@ class SqfliteDatabaseService implements IDatabaseService {
     int? offset,
   }) async {
     if (printSQL) {
+      final whereSql = where != null ? 'WHERE $where' : '';
       var sql = columns != null
-          ? 'SELECT ${columns.join(', ')} FROM $table WHERE $where ORDER BY $orderBy LIMIT $limit'
-          : 'SELECT * FROM $table WHERE $where ORDER BY $orderBy LIMIT $limit';
+          ? 'SELECT ${columns.join(', ')} FROM $table $whereSql  ORDER BY $orderBy LIMIT $limit'
+          : 'SELECT * FROM $table $whereSql ORDER BY $orderBy LIMIT $limit';
       if (offset != null) {
         sql = '$sql OFFSET $offset';
       }

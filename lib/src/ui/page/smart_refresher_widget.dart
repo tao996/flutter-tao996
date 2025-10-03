@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
+import 'package:tao996/src/utils/fn_util.dart';
 
 abstract class MySmartRefresherBodyController extends GetxController {
   late final RefreshController refreshController;
@@ -8,6 +9,8 @@ abstract class MySmartRefresherBodyController extends GetxController {
   Future<void> onLoadMore();
 
   Future<void> onRefresh();
+
+  bool hasMoreData();
 }
 
 class MySmartRefresher {
@@ -25,7 +28,7 @@ class MySmartRefresher {
       enablePullDown: enablePullDown,
       enablePullUp: enablePullUp,
       header: customHeader ?? const WaterDropHeader(),
-      footer: customFooter ?? footer(),
+      footer: customFooter ?? footer(controller),
       controller: controller.refreshController,
       onRefresh: onRefresh ?? controller.onRefresh,
       onLoading: onLoading ?? controller.onLoadMore,
@@ -33,11 +36,12 @@ class MySmartRefresher {
     );
   }
 
-  static CustomFooter footer() {
+  static CustomFooter footer(MySmartRefresherBodyController controller) {
     return CustomFooter(
       builder: (BuildContext context, LoadStatus? mode) {
         Widget body;
-        if (mode == LoadStatus.noMore) {
+        dprint('smartRefreshMode: $mode; hasMoreData: ${controller.hasMoreData()}');
+        if (mode == LoadStatus.noMore || !controller.hasMoreData()) {
           body = Text("noMoreData".tr);
           // body = Container(); // Text("noMoreData".tr);
         } else if (mode == LoadStatus.failed) {
