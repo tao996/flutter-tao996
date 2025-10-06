@@ -3,7 +3,7 @@ import 'package:get/get.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
 import 'package:tao996/src/utils/fn_util.dart';
 
-abstract class MySmartRefresherBodyController extends GetxController {
+abstract class IMySmartRefresherBodyController extends GetxController {
   late final RefreshController refreshController;
 
   Future<void> onLoadMore();
@@ -12,10 +12,10 @@ abstract class MySmartRefresherBodyController extends GetxController {
 
   bool hasMoreData();
 }
-
+/// 静态方法，提供刷新和加载更多
 class MySmartRefresher {
   static SmartRefresher body(
-    MySmartRefresherBodyController controller, {
+    IMySmartRefresherBodyController controller, {
     Widget? child,
     Widget? customFooter,
     Widget? customHeader,
@@ -36,11 +36,11 @@ class MySmartRefresher {
     );
   }
 
-  static CustomFooter footer(MySmartRefresherBodyController controller) {
+  static CustomFooter footer(IMySmartRefresherBodyController controller) {
     return CustomFooter(
       builder: (BuildContext context, LoadStatus? mode) {
         Widget body;
-        dprint('smartRefreshMode: $mode; hasMoreData: ${controller.hasMoreData()}');
+        // dprint('smartRefreshMode: $mode; hasMoreData: ${controller.hasMoreData()}');
         if (mode == LoadStatus.noMore || !controller.hasMoreData()) {
           body = Text("noMoreData".tr);
           // body = Container(); // Text("noMoreData".tr);

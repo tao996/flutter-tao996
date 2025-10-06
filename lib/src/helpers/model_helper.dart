@@ -4,46 +4,6 @@ import 'package:get/get.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:tao996/tao996.dart';
 
-// 封装工具类处理类型转换
-class DbTypeConverter {
-  static bool boolFromJson(int value) => value == 1;
-
-  static int boolToJson(bool value) => value ? 1 : 0;
-
-  static String mapStringStringToJson(Map<String, String>? data) {
-    return TypeCastUtil.mapToJson(data);
-  }
-
-  static Map<String, String> mapStringStringFromJson(String? json) {
-    if (json == null || json.isEmpty) {
-      return {};
-    }
-    return TypeCastUtil.mapStringFromJson(json);
-  }
-
-  /// 调用 toMap 来生成字符串
-  static String listToJson<T extends DbTypeModel<T>>(List<T>? items) {
-    if (items == null || items.isEmpty) {
-      return '';
-    }
-    return TypeCastUtil.listToJsonString<T>(items, (e) {
-      return e.toMap();
-    });
-  }
-
-  static List<T> listFromJson<T extends DbTypeModel<T>>(
-    String? json, {
-    required T Function(Map<String, dynamic>) fromMap,
-  }) {
-    if (json == null || json.isEmpty) {
-      return [];
-    }
-    return TypeCastUtil.listFromJsonString<T>(json, (data) {
-      return fromMap(data); // 这里是错误的，应该如何改写
-    });
-  }
-}
-
 class ModelTransaction {
   final Transaction _txn;
 
@@ -146,7 +106,7 @@ abstract class ModelHelper<T extends IModel<T>> {
 
   /// 获取全部的记录（可能使用缓存）
   Future<List<T>> getAll() async {
-    if (this.enableCache) {
+    if (enableCache) {
       return _cache.isNotEmpty ? Future.value(_cache) : await getAllFromDb();
     } else {
       return await getAllFromDb();
@@ -266,13 +226,12 @@ abstract class ModelHelper<T extends IModel<T>> {
     int? excludeId,
   }) async {
     try {
-      final where = excludeId != null
-          ? '$fieldName = ? AND id != ?'
-          : '$fieldName = ?';
+      final hasId = excludeId != null && excludeId > 0;
+      final where = hasId ? '$fieldName = ? AND id != ?' : '$fieldName = ?';
       return await dbService.exists(
         tableName,
         where: appendWhere(where),
-        whereArgs: excludeId != null ? [value, excludeId] : [value],
+        whereArgs: hasId ? [value, excludeId] : [value],
       );
     } catch (e, st) {
       debugService.exception(e, st, log: true);
@@ -280,13 +239,21 @@ abstract class ModelHelper<T extends IModel<T>> {
     }
   }
 
-  void _updateCacheSingle(T entity, {bool isInsert = false}) {
-    if (!enableCache) return;
-    final index = _cache.indexWhere((e) => e.id == entity.id);
-    if (isInsert) {
-      if (index == -1) _cache.add(entity);
-    } else {
-      if (index != -1) _cache[index] = entity;
+  /// 检查记录在数据库中是否存在
+  Future<bool> existsWith(String where, {int? excludeId}) async {
+    final hasId = excludeId != null && excludeId > 0;
+    if (hasId) {
+      where += ' AND id != ?';
+    }
+    try {
+      return await dbService.exists(
+        tableName,
+        where: appendWhere(where),
+        whereArgs: hasId ? [excludeId] : null,
+      );
+    } catch (e, st) {
+      debugService.exception(e, st, log: true);
+      throw 'Failed to check existence of record in $tableName for $where; because: $e';
     }
   }
 
@@ -676,7 +643,7 @@ abstract class ModelHelper<T extends IModel<T>> {
 
       /// 更新缓存
       if (mtn == null && enableCache) {
-        _updateCacheSingle(record, isInsert: true);
+        await getAllFromDb();
       }
       // 更新后置钩子
       await afterInsert(record);

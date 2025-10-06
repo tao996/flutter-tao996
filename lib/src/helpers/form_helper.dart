@@ -74,20 +74,29 @@ class FormHelper {
   /// 水平列表框
   static Widget select<T>({
     required String label,
+    String? hintText,
     required List<KV<T>> items,
     required ValueChanged<T?> onChanged,
     required T value,
+    T? defaultValue,
   }) {
+    List<KV<T>> defaultItems = items;
+    if (defaultValue != null) {
+      defaultItems.insert(0, KV(label: hintText ?? label, value: defaultValue));
+    }
+
     return DropdownButtonFormField<T>(
-      value: value,
+      initialValue: value,
       decoration: InputDecoration(
         labelText: label,
         border: OutlineInputBorder(),
       ),
-      items: items.map((KV kv) {
+      items: defaultItems.map((KV kv) {
         return DropdownMenuItem<T>(value: kv.value, child: Text(kv.label));
       }).toList(),
       onChanged: onChanged,
+      // 移除默认的hint提示（由selectedItemBuilder控制显示）
+      hint: const SizedBox.shrink(),
     );
   }
 
@@ -99,6 +108,10 @@ class FormHelper {
     String? helperText,
     bool isPassword = false,
     bool isRequired = false,
+    bool isNumber = false, // 是否为数字输入（整数或小数，取决于是否有 min/max）
+    num? minNumber, // 最小值限制
+    num? maxNumber, // 最大值限制
+    bool isMoney = false, // 是否为货币输入（最高优先级）
     int? maxLines,
     int? minLines,
     void Function(String)? onChanged,
@@ -110,9 +123,27 @@ class FormHelper {
       helperText: helperText,
       isPassword: isPassword,
       isRequired: isRequired,
+      isNumber: isNumber,
+      minNumber: minNumber,
+      maxNumber: maxNumber,
+      isMoney: isMoney,
       maxLines: maxLines,
       minLines: minLines,
       onChanged: onChanged,
+    );
+  }
+
+  static Widget dateInput({
+    DateTime? initDate,
+    required String labelText,
+    required Function(DateTime?) onDateSelected,
+    String? hintText,
+  }) {
+    return FakeDateInput(
+      labelText: labelText,
+      hintText: hintText,
+      initialDate: initDate,
+      onDateSelected: onDateSelected,
     );
   }
 

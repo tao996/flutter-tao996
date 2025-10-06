@@ -58,6 +58,13 @@ abstract class IModel<T> extends DbTypeModel<T> {
   String get updatedAtText => DatetimeUtil.formatYMDHMS(dateTime: updatedAt);
 
   String get deletedAtText => DatetimeUtil.formatYMDHMS(dateTime: deletedAt);
+
+  void copyBaseData(IModel model){
+    model.id = id;
+    model.createdAt = createdAt;
+    model.updatedAt = updatedAt;
+    model.deletedAt = deletedAt;
+  }
 }
 
 abstract class INoTimeModel<T> extends IModel<T> {

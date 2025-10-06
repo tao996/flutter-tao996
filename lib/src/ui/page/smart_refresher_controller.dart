@@ -4,7 +4,7 @@ import 'package:pull_to_refresh/pull_to_refresh.dart';
 import '../../../tao996.dart';
 
 abstract class MySmartRefresherController<T>
-    extends MySmartRefresherBodyController {
+    extends IMySmartRefresherBodyController {
   int pageIndex = 1;
   int pageSize = 15;
   final RxBool hasMore = true.obs;
@@ -28,19 +28,27 @@ abstract class MySmartRefresherController<T>
     super.dispose();
   }
 
+  /// 重置页码
   void pageIndexReset() {
     pageIndex = 1;
   }
 
+  /// 绑定搜索，通常是关键字搜索
+  void bindSearch(String text) {
+    FnUtil.debounce(() {
+      pageIndexReset();
+      onReSearch();
+    }, milliseconds: 1000);
+  }
+
   /// 初始化数据，在控制器 onInit 时被调用
-  Future<void> initData();
+  Future<void> initData() async {}
 
   /// 加载数据，在 smartRefresh 中被调用；不需要设置 isRequesting 或者 assignItems 等操作
   /// [isRefresh] 是否是刷新，如果是，则需要重置搜索条件
   /// ```dart
   /// Future<List<ServerFeed>?> loadData() async {
-  ///    final res = await getServerFeedService().search(page: currentPage,pageSize: pageSize);
-  ///    return Future.value(res.rows as List<ServerFeed>);
+  ///    return await userService.getPaginationData(where: _getWhere(), pageSize: pageSize,pageIndex: pageIndex,);
   /// }
   /// ```
   Future<List<T>?> loadData({required bool isRefresh});
@@ -103,7 +111,7 @@ abstract class MySmartRefresherController<T>
   Future<void> afterOnRefresh() async {}
 
   /// 普通搜索
-  Future<void> onReSearch()async{
+  Future<void> onReSearch() async {
     dprint('smartRefreshController onReSearch');
     isRequesting.value = true;
     try {
@@ -134,6 +142,7 @@ abstract class MySmartRefresherController<T>
       // refreshController.refreshCompleted();
     }
   }
+
   /// 回调
   Future<void> afterOnLoadMore() async {}
 
@@ -156,7 +165,7 @@ abstract class MySmartRefresherController<T>
   }
 
   @override
-  bool hasMoreData(){
+  bool hasMoreData() {
     return hasMore.value;
   }
 }

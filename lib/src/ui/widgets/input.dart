@@ -1,4 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+
+// 定义一个枚举，用于区分各种输入限制，使代码更清晰
+enum _InputMode {
+  none,
+  integer, // 纯数字（无小数）
+  decimal, // 普通小数（可能用于 isNumber 但无 Money 限制）
+  money, // 最多两位小数
+}
 
 /// 带有后缀按钮的输入框
 class MyInput extends StatefulWidget {
@@ -10,7 +19,16 @@ class MyInput extends StatefulWidget {
   final bool isRequired;
   final int? maxLines;
   final int? minLines;
+
+  // 新增属性
+  final bool isNumber; // 是否为数字输入（整数或小数，取决于是否有 min/max）
+  final num? minNumber; // 最小值限制
+  final num? maxNumber; // 最大值限制
+  final bool isMoney; // 是否为货币输入（最高优先级）
+
   final void Function(String)? onChanged;
+
+  /// 确定按钮事件
   final void Function(String)? onFieldSubmitted;
 
   const MyInput({
@@ -22,6 +40,12 @@ class MyInput extends StatefulWidget {
     this.isRequired = false,
     this.maxLines,
     this.minLines,
+    // 新属性默认值
+    this.isNumber = false,
+    this.minNumber,
+    this.maxNumber,
+    this.isMoney = false,
+    // 回调
     this.onChanged,
     this.onFieldSubmitted,
     super.key,
@@ -37,6 +61,8 @@ class _MyInputState extends State<MyInput> {
 
   @override
   void dispose() {
+    // 移除监听器，避免内存泄漏
+    widget.controller.removeListener(_handleControllerChange);
     _focusNode.dispose();
     super.dispose();
   }
@@ -45,10 +71,101 @@ class _MyInputState extends State<MyInput> {
   void initState() {
     super.initState();
     isPassword = widget.isPassword;
-    // 添加监听器，每当文本发生变化时都调用 setState；
-    widget.controller.addListener(() {
-      setState(() {});
-    });
+    // 使用一个私有方法来处理监听器的逻辑
+    widget.controller.addListener(_handleControllerChange);
+  }
+
+  // 添加监听器，每当文本发生变化时都调用 setState；
+  void _handleControllerChange() {
+    // 仅在需要影响 UI (如 suffixIcon) 时才调用 setState
+    setState(() {});
+  }
+
+  // --- 验证器逻辑 ---
+  String? _validator(String? value) {
+    if (widget.isRequired && (value == null || value.isEmpty)) {
+      return widget.labelText != null ? '${widget.labelText}不能为空' : '此项不能为空';
+    }
+
+    // 只有当有数字限制时，才进行额外的数字校验
+    if (widget.isMoney || widget.isNumber) {
+      if (value != null && value.isNotEmpty) {
+        final num? number = num.tryParse(value);
+        if (number == null) {
+          // 理论上 inputFormatters 会阻止非数字输入，这里作为双重保险
+          return '请输入一个有效数字';
+        }
+
+        // 检查最小值
+        if (widget.minNumber != null && number < widget.minNumber!) {
+          return '不能小于 ${widget.minNumber}';
+        }
+
+        // 检查最大值
+        if (widget.maxNumber != null && number > widget.maxNumber!) {
+          return '不能大于 ${widget.maxNumber}';
+        }
+      }
+    }
+
+    return null;
+  }
+
+  // --- 确定输入模式和格式化器 ---
+  _InputMode get _currentInputMode {
+    if (widget.isPassword) return _InputMode.none;
+
+    // 优先级：isMoney > isNumber
+    if (widget.isMoney) {
+      return _InputMode.money;
+    }
+    if (widget.isNumber) {
+      // 检查是否有小数限制，如果 min/max 都是整数，则限制为整数输入
+      bool isIntegerOnly =
+          (widget.minNumber is int?) && (widget.maxNumber is int?);
+      if (isIntegerOnly) {
+        return _InputMode.integer;
+      }
+      return _InputMode.decimal; // 默认允许小数
+    }
+    return _InputMode.none;
+  }
+
+  TextInputType get _keyboardType {
+    if (_currentInputMode == _InputMode.none) {
+      return TextInputType.text;
+    }
+    // 钱/数字都使用数字键盘
+    return TextInputType.numberWithOptions(
+      signed: true, // 允许负数
+      decimal: true,
+    );
+  }
+
+  List<TextInputFormatter> get _inputFormatters {
+    final mode = _currentInputMode;
+    if (mode == _InputMode.none) {
+      return [];
+    }
+
+    // 允许数字和最多一个小数点或负号
+    final List<TextInputFormatter> formatters = [
+      FilteringTextInputFormatter.allow(RegExp(r'^-?\d*(\.?\d*)')),
+    ];
+
+    if (mode == _InputMode.money) {
+      // 限制小数点后最多两位
+      formatters.add(
+        FilteringTextInputFormatter.allow(RegExp(r'^-?\d*(\.\d{0,2})?')),
+      );
+    }
+
+    // 如果是纯整数，则排除小数点
+    if (mode == _InputMode.integer) {
+      formatters.add(FilteringTextInputFormatter.allow(RegExp(r'^-?\d*')));
+    }
+
+    return formatters;
   }
 
   @override
@@ -59,7 +176,15 @@ class _MyInputState extends State<MyInput> {
       obscureText: isPassword,
       maxLines: widget.maxLines,
       minLines: widget.minLines,
+      // 新增：限制键盘类型
+      keyboardType: _keyboardType,
+      // 新增：限制输入格式
+      inputFormatters: _inputFormatters,
+      // 新增：验证器
+      validator: _validator,
       onChanged: (value) {
+        // 由于控制器监听器已经处理了 setState，这里只需要调用外部回调;
+        // 注意不要在外部再给 controller 赋值，否则会出现错误
         widget.onChanged?.call(value);
       },
       decoration: InputDecoration(
@@ -70,9 +195,13 @@ class _MyInputState extends State<MyInput> {
         // helper: _helperWidget(),
         helperText: widget.helperText,
         border: const OutlineInputBorder(),
-        suffixIcon: widget.controller.text.isNotEmpty ? _suffix() : null,
+        // 只有当文本不为空且输入不是密码时才显示后缀图标（密码图标已包含在 _suffix 中）
+        suffixIcon: (widget.isPassword || widget.controller.text.isNotEmpty)
+            ? _suffix()
+            : null,
         isDense: true,
-        alignLabelWithHint: widget.minLines != null && widget.minLines! > 1, // 标签与输入内容对齐
+        alignLabelWithHint:
+            widget.minLines != null && widget.minLines! > 1, // 标签与输入内容对齐
       ),
       onFieldSubmitted: widget.onFieldSubmitted,
     );
@@ -116,13 +245,15 @@ class _MyInputState extends State<MyInput> {
                 ? const Icon(Icons.visibility)
                 : const Icon(Icons.visibility_off),
           ),
-        IconButton(
-          icon: const Icon(Icons.clear),
-          onPressed: () {
-            widget.controller.clear();
-            widget.onChanged?.call('');
-          },
-        ),
+        // 只有当文本不为空时才显示清除按钮
+        if (widget.controller.text.isNotEmpty)
+          IconButton(
+            icon: const Icon(Icons.clear),
+            onPressed: () {
+              widget.controller.clear();
+              widget.onChanged?.call('');
+            },
+          ),
       ],
     );
   }

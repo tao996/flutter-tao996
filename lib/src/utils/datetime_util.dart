@@ -66,6 +66,11 @@ class DatetimeUtil {
     );
   }
 
+  /// 时间格式化 [format] 'yyyy年MM月dd日 HH:mm'
+  static String formatWith(String format, DateTime datetime) {
+    return DateFormat(format).format(datetime);
+  }
+
   /// 日期解析
   /// [nowIfEmpty] 为空时返回当前时间
   /// [formatPattern] 时间格式，如果存在，则优先使用

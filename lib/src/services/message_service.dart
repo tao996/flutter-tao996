@@ -21,7 +21,7 @@ abstract class IMessageService extends IDebugMessageService {
 
   void toast(String message);
 
-  /// 成功提示，如果使用 [snackBar]，则不会有 Future 效果
+  /// 成功提示，如果使用 [snackBar]，则不会有 Future 效果，你需要提前调用 Get.back();
   @override
   Future<void> success(
     String message, {
@@ -130,42 +130,63 @@ class MessageService implements IMessageService {
     Color? iconColor,
     Color? textColor,
   }) {
+    // 限制最大宽度，确保整体偏正方形
+    final maxWidth = MediaQuery.of(Get.context!).size.width * 0.55;
+
     return Container(
-      // 半透明背景+圆角，区分于 SnackBar 的扁平样式
+      // 正方形比例约束
+      constraints: BoxConstraints(
+        maxWidth: maxWidth,
+        minWidth: 110,
+        minHeight: 110,
+      ),
       decoration: BoxDecoration(
-        color: Colors.white.withAlpha(255),
-        borderRadius: BorderRadius.circular(12),
+        // 常规浅色背景
+        color: Colors.white,
+        // 轻微圆角
+        borderRadius: BorderRadius.circular(10),
+        // 柔和阴影
         boxShadow: [
           BoxShadow(
             color: Colors.black12,
-            blurRadius: 8,
+            blurRadius: 6,
             offset: const Offset(0, 2),
           ),
         ],
       ),
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
-      // 图标+文字横向排列
-      child: Row(
-        mainAxisSize: MainAxisSize.min, // 宽度适应内容，不占满屏幕
+      // 内边距适配垂直布局
+      padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 20),
+      // 垂直布局：图标在上，文字在下
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        mainAxisAlignment: MainAxisAlignment.center,
         children: [
           if (icon != null) ...[
-            Icon(icon, size: 24, color: iconColor),
-            const SizedBox(width: 12), // 图标与文字间距
+            Icon(
+              icon,
+              size: 32, // 适中的图标大小
+              color: iconColor ?? Colors.grey[700], // 图标默认深灰色
+            ),
+            const SizedBox(height: 14), // 图标与文字间距
           ],
           Text(
             message,
             style: TextStyle(
-              fontSize: 16,
-              color: textColor,
+              fontSize: 15,
+              color: textColor ?? Colors.grey[800], // 文字默认深灰色
               fontWeight: FontWeight.w500,
+              height: 1.2,
             ),
-            maxLines: 2, // 限制最多2行，避免内容过长
+            maxLines: 3,
             overflow: TextOverflow.ellipsis,
+            textAlign: TextAlign.center, // 文字居中
           ),
         ],
       ),
     );
   }
+
+
 
   @override
   // 使用 BotToast 显示成功提示，自带动画结束回调
@@ -174,6 +195,7 @@ class MessageService implements IMessageService {
     Duration? duration = const Duration(seconds: 3),
     double offsetY = -0.2, // 核心：向上偏移（默认比正中央上移 20% 屏幕高度
     bool snackBar = false,
+    VoidCallback? onClose,
   }) async {
     if (snackBar) {
       Get.snackbar(
@@ -198,7 +220,7 @@ class MessageService implements IMessageService {
         message: message,
         icon: Icons.check_circle_outline,
         iconColor: Colors.green,
-        textColor: Colors.green[800]!,
+        // textColor: Colors.green[800]!,
       ),
       align: Alignment(0, offsetY),
       // x=0（水平居中），y=offsetY（垂直偏移）
