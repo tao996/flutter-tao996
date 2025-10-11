@@ -7,6 +7,8 @@ abstract class MySmartRefresherController<T>
     extends IMySmartRefresherBodyController {
   int pageIndex = 1;
   int pageSize = 15;
+
+  /// 是否有更多数据
   final RxBool hasMore = true.obs;
   final RxList<T> items = <T>[].obs;
 
@@ -53,8 +55,14 @@ abstract class MySmartRefresherController<T>
   /// ```
   Future<List<T>?> loadData({required bool isRefresh});
 
-  void assignItems(List<T> newItems) {
-    items.assignAll(newItems);
+  void assignItems(List<T> newItems, {bool isRefresh = false}) {
+    if (isRefresh) {
+      items.clear();
+    }
+    // dprint('--------:'+items.toString());
+    // dprint(newItems);
+    items.addAll(newItems);
+    // dprint(items);
   }
 
   void loadNoData() {
@@ -71,6 +79,7 @@ abstract class MySmartRefresherController<T>
       dprint('smartRefresh hasMore');
       final newItems = await loadData(isRefresh: isRefresh);
       if (newItems == null || newItems.isEmpty) {
+        dprint('loadData return null or empty');
         hasMore.value = false;
         if (isRefresh) {
           dprint('refreshController.refreshCompleted()');
@@ -80,12 +89,14 @@ abstract class MySmartRefresherController<T>
           refreshController.loadComplete();
         }
         loadNoData();
-        assignItems([]);
+        assignItems([], isRefresh: isRefresh);
       } else {
-        assignItems(newItems);
+        dprint('loadData return not empty');
+        assignItems(newItems, isRefresh: isRefresh);
         if (newItems.length < pageSize) {
           hasMore.value = false;
         }
+        dprint('hasMore: ${hasMore.value}');
         if (isRefresh) {
           dprint('refreshController.refreshCompleted()');
           refreshController.refreshCompleted();
@@ -162,10 +173,5 @@ abstract class MySmartRefresherController<T>
       isRequesting.value = false;
       // refreshController.loadComplete();
     }
-  }
-
-  @override
-  bool hasMoreData() {
-    return hasMore.value;
   }
 }

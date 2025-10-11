@@ -13,8 +13,23 @@ class DemoSmartRefresherPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('SmartRefresher')),
-      body: MyBodyPadding(MySmartRefresher.body(c)),
+      appBar: AppBar(title: Text('DEMO SmartRefresher')),
+      body: SafeArea(
+        child: Obx(
+          () => MySmartRefresher.body(
+            c,
+            child: c.items.isNotEmpty
+                ? ListView.builder(
+                    itemCount: c.items.length,
+                    itemBuilder: (context, index) {
+                      final t = c.items[index];
+                      return ListTile(title: Text('$t -- $index'));
+                    },
+                  )
+                : Center(child: Text('无数据')),
+          ),
+        ),
+      ),
     );
   }
 }

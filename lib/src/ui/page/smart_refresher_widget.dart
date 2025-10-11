@@ -9,11 +9,20 @@ abstract class IMySmartRefresherBodyController extends GetxController {
   Future<void> onLoadMore();
 
   Future<void> onRefresh();
-
-  bool hasMoreData();
 }
+
 /// 静态方法，提供刷新和加载更多
 class MySmartRefresher {
+  /// [child] 必须是一个 ListView，其它写法特别是 Obx(()=> ListView.builder()) 不起作用
+  ///
+  /// ```dart
+  /// child: Obx(() => MySmartRefresher.body(c,
+  ///             child: c.items.isNotEmpty ? ListView.builder(
+  ///   itemCount: c.items.length,
+  ///   itemBuilder: (context, index) {
+  ///     return ListTile(title: Text(index.toString()));
+  /// },):const Center(child: Text('无数据')),),),
+  /// ```
   static SmartRefresher body(
     IMySmartRefresherBodyController controller, {
     Widget? child,
@@ -40,24 +49,23 @@ class MySmartRefresher {
     return CustomFooter(
       builder: (BuildContext context, LoadStatus? mode) {
         Widget body;
-        // dprint('smartRefreshMode: $mode; hasMoreData: ${controller.hasMoreData()}');
-        if (mode == LoadStatus.noMore || !controller.hasMoreData()) {
-          body = Text("noMoreData".tr);
-          // body = Container(); // Text("noMoreData".tr);
-        } else if (mode == LoadStatus.failed) {
+        if (mode == LoadStatus.failed) {
           body = Text("loadFailedRetry".tr);
         } else if (mode == LoadStatus.idle) {
           body = Text("pullUpLoadMore".tr);
         } else if (mode == LoadStatus.loading) {
           body = CircularProgressIndicator();
-        } else {
+        } else if (mode == LoadStatus.canLoading) {
           body = Text("pullUpLoadMore".tr);
+        } else {
+          body = Text("noMoreData".tr);
         }
-        return SizedBox(height: 30.0, child: Center(child: body));
+        return SizedBox(height: 55.0, child: Center(child: body));
       },
     );
   }
 }
+
 
 /*
 return Scaffold(
@@ -78,35 +86,6 @@ return Scaffold(
         ),
       ),
     ),
-  ),
-);
-
-return  return SmartRefresher(
-  enablePullDown: true,
-  enablePullUp: true,
-  header: const WaterDropHeader(),
-  footer: MySmartRefresher.footer(),
-  controller: c.refreshController,
-  onRefresh: c.onRefresh,
-  onLoading: c.onLoadMore,
-  child: ListView.separated(
-    physics:
-        c.postList.isEmpty
-            ? const AlwaysScrollableScrollPhysics()
-            : const BouncingScrollPhysics(),
-    padding: const EdgeInsets.fromLTRB(12, 4, 12, 12),
-    controller: c.scrollController,
-    itemBuilder: (context, index) {
-      final post = c.postList[index];
-      return PostCardSwipeActionCell(
-        post,
-        itemOnTap: () {
-          c.toPost(c.postList[index], index: index);
-        },
-      );
-    },
-    separatorBuilder: (context, index) => const SizedBox(height: 8),
-    itemCount: c.postList.length,
   ),
 );
  */
