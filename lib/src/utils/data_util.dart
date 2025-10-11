@@ -189,7 +189,7 @@ class DataUtil {
     return cleaned;
   }
 
-  dynamic copy(dynamic data) {
+  static dynamic copy(dynamic data) {
     return jsonDecode(jsonEncode(data));
   }
 }

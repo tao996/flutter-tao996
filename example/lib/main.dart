@@ -3,6 +3,7 @@ import 'dart:async';
 
 import 'package:flutter/services.dart';
 import 'package:tao996/tao996.dart';
+import 'package:tao996_example/demo/demo_smart_refresher_page.dart';
 
 void main() {
   runApp(const MyApp());
@@ -50,14 +51,7 @@ class _MyAppState extends State<MyApp> {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      home: Scaffold(
-        appBar: AppBar(
-          title: const Text('Plugin example app'),
-        ),
-        body: Center(
-          child: Text('Running on: $_platformVersion\n'),
-        ),
-      ),
+      home: DemoSmartRefresherPage(),
     );
   }
 }

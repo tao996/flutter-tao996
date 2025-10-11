@@ -78,6 +78,20 @@ class MyText {
   static Widget helperText(String text) {
     return CustomHelperText(text);
   }
+
+  static Widget labelText(String label, String content, {String? helperText}) {
+    return TextFormField(
+      readOnly: true,
+      initialValue: content,
+      style: TextStyle(color: Colors.grey[600]),
+      decoration: InputDecoration(
+        labelText: label,
+        helperText: helperText,
+        border: const OutlineInputBorder(),
+        isDense: true,
+      ),
+    );
+  }
 }
 
 /// 自定义辅助文本组件，类似 InputDecoration 的 helperText 效果

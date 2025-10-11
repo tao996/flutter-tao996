@@ -74,15 +74,21 @@ class FormHelper {
   /// 水平列表框
   static Widget select<T>({
     required String label,
-    String? hintText,
     required List<KV<T>> items,
     required ValueChanged<T?> onChanged,
     required T value,
+    String? hintText,
     T? defaultValue,
   }) {
     List<KV<T>> defaultItems = items;
     if (defaultValue != null) {
-      defaultItems.insert(0, KV(label: hintText ?? label, value: defaultValue));
+      final values = items.map((kv) => kv.value).toList();
+      if (!values.contains(defaultValue)) {
+        defaultItems.insert(
+          0,
+          KV(label: hintText ?? label, value: defaultValue),
+        );
+      }
     }
 
     return DropdownButtonFormField<T>(

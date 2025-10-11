@@ -1,4 +1,3 @@
-import 'package:bot_toast/bot_toast.dart';
 import 'package:flutter/material.dart';
 
 import 'package:dynamic_color/dynamic_color.dart';
@@ -41,7 +40,6 @@ class MyTao996App extends StatelessWidget {
     // }
     return DynamicColorBuilder(
       builder: (ColorScheme? lightDynamic, ColorScheme? darkDynamic) {
-        final botToastBuilder = BotToastInit();  //1.调用BotToastInit
         return GetMaterialApp(
           debugShowCheckedModeBanner: false,
           title: 'appTitle'.tr,
@@ -51,7 +49,6 @@ class MyTao996App extends StatelessWidget {
             GlobalMaterialLocalizations.delegate,
             GlobalCupertinoLocalizations.delegate,
           ],
-          navigatorObservers: [BotToastNavigatorObserver()], //2.注册路由观察者
           supportedLocales:supportedLocales ?? const [Locale('zh', 'CN'), Locale('en', 'US')],
           // locale: getILocaleService().locale,
           locale: Get.deviceLocale,
@@ -71,7 +68,6 @@ class MyTao996App extends StatelessWidget {
             'fade': Transition.fade,
           }[settingService.transition],
           builder: (context, child) {
-            child = botToastBuilder(context,child);
             // 在主题构建时设置 System UI 样式
             // themeService.systemUIOverlayStyle(
             //   Theme.of(context).appBarTheme.backgroundColor!,
@@ -81,7 +77,7 @@ class MyTao996App extends StatelessWidget {
               data: MediaQuery.of(context).copyWith(
                 textScaler: TextScaler.linear(settingService.textScaleFactor),
               ),
-              child: child,
+              child: child!,
             );
           },
         );

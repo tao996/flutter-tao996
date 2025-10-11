@@ -1,3 +1,5 @@
+import 'package:tao996/tao996.dart';
+
 class NumberUtil {
   /// 将实际的金额（分，int）格式化成字符串（元，String）。
   /// 比如数据库中的 10001 分转换成 "100.01" 元。
@@ -6,11 +8,12 @@ class NumberUtil {
   /// [fractionDigits]: 小数位数，通常为 2。
   /// [emptyText] 是否返回空字符串。如果为 true，则返回空字符串，否则返回 "0"。
   static String formatMoney(
-    int num, {
+    int? num, {
     int fractionDigits = 2,
     bool emptyText = true,
+    bool trim = true,
   }) {
-    if (num == 0) {
+    if (num == 0 || num == null) {
       // 约定：如果金额为 0，返回 "0.00" 或 "0"
       return emptyText ? '' : 0.toStringAsFixed(fractionDigits);
     }
@@ -19,7 +22,13 @@ class NumberUtil {
     final double valueInCurrency = num / (100); // 假设 fractionDigits 总是 2
 
     // 2. 使用 toStringAsFixed(fractionDigits) 格式化并处理补零
-    return valueInCurrency.toStringAsFixed(fractionDigits);
+    final text = valueInCurrency.toStringAsFixed(fractionDigits);
+    if (trim) {
+      if (text.endsWith('.00')) {
+        return text.substring(0, text.length - 3);
+      }
+    }
+    return text;
   }
 
   /// 将用户输入的元（String）转换成分（int），以便保存到数据库中。
@@ -54,5 +63,23 @@ class NumberUtil {
     final int valueInCents = (valueInCurrency * 100).round();
 
     return valueInCents;
+  }
+
+  static int parseInt(String? value) {
+    return DataUtil.getInt(value);
+  }
+
+  static String formatMinutes(int totalMinutes) {
+    if (totalMinutes <= 0) return '';
+    final hours = totalMinutes ~/ 60;
+    final minutes = totalMinutes % 60;
+
+    if (hours > 0 && minutes > 0) {
+      return '${hours}h ${minutes}m';
+    } else if (hours > 0) {
+      return '${hours}h';
+    } else {
+      return '${minutes}m';
+    }
   }
 }

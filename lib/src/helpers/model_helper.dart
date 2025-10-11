@@ -509,13 +509,17 @@ abstract class ModelHelper<T extends IModel<T>> {
   }) async {
     Map<String, dynamic> fieldValues = entity.toJson();
     if (columns != null && columns.isNotEmpty) {
+      final keys = fieldValues.keys;
+      for (final c in columns) {
+        if (!keys.contains(c)) {
+          throw 'The column $c is not found in the entity (${keys.toString()})';
+        }
+      }
       // 过滤指定字段，确保类型为 Map<String, Object?>
-      fieldValues = fieldValues.keys
-          .where((name) => columns.contains(name))
-          .fold<Map<String, dynamic>>(
-            {},
-            (acc, name) => acc..[name] = fieldValues[name],
-          );
+      fieldValues = columns.fold<Map<String, dynamic>>(
+        {},
+        (acc, name) => acc..[name] = fieldValues[name],
+      );
     }
     fieldValues.remove('id'); // 移除 id，避免更新主键
     return update(

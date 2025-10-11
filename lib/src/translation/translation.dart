@@ -21,6 +21,7 @@ abstract class ITranslationService extends Translations {
       'paramError': '参数错误',
       'success': '成功',
       'failed': '失败',
+      'error': '错误',
 
       'confirmDelete': '删除?',
       'delete success': '删除成功',

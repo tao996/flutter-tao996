@@ -57,36 +57,29 @@ class MyCancelButton extends StatelessWidget {
   }
 }
 
-class MyHelperButton extends StatelessWidget {
-  final void Function()? onPressed;
-
-  const MyHelperButton({super.key, this.onPressed});
-
-  @override
-  Widget build(BuildContext context) {
-    return Tooltip(
-      message: '操作指引',
-      child: IconButton(onPressed: onPressed, icon: Icon(Icons.help_outline)),
-    );
-  }
-}
-
 /// 保存按钮
 class MySaveButton extends StatelessWidget {
   final void Function()? onPressed;
   final RxBool? isLoading;
   final MyButtonType? type;
+  final bool showIcon;
 
-  const MySaveButton({super.key, this.onPressed, this.isLoading, this.type});
+  const MySaveButton({
+    super.key,
+    this.onPressed,
+    this.isLoading,
+    this.type,
+    this.showIcon = true,
+  });
 
   @override
   Widget build(BuildContext context) {
     return MyButton(
       'save'.tr,
       onPressed: onPressed,
-      iconData: Icons.send,
+      iconData: showIcon ? Icons.send : null,
       isLoading: isLoading,
-      type: type,
+      type: type ?? MyButtonType.filled,
     );
   }
 }
@@ -96,16 +89,23 @@ class MyInsertButton extends StatelessWidget {
   final String? label;
   final void Function()? onPressed;
   final MyButtonType? type;
+  final bool showIcon;
 
-  const MyInsertButton({super.key, this.label, this.onPressed, this.type});
+  const MyInsertButton({
+    super.key,
+    this.label,
+    this.onPressed,
+    this.type,
+    this.showIcon = true,
+  });
 
   @override
   Widget build(BuildContext context) {
     return MyButton(
       label ?? 'insert'.tr,
       onPressed: onPressed,
-      icon: const Icon(Icons.add),
-      type: type,
+      icon: showIcon ? const Icon(Icons.add) : null,
+      type: type ?? MyButtonType.outlined,
     );
   }
 }
@@ -114,16 +114,23 @@ class MyEditButton extends StatelessWidget {
   final String? label;
   final void Function()? onPressed;
   final MyButtonType? type;
+  final bool showIcon;
 
-  const MyEditButton({super.key, this.label, this.onPressed, this.type});
+  const MyEditButton({
+    super.key,
+    this.label,
+    this.onPressed,
+    this.type,
+    this.showIcon = true,
+  });
 
   @override
   Widget build(BuildContext context) {
     return MyButton(
       label ?? 'edit'.tr,
       onPressed: onPressed,
-      icon: const Icon(Icons.edit),
-      type: type,
+      icon: showIcon ? const Icon(Icons.edit) : null,
+      type: type ?? MyButtonType.outlined,
     );
   }
 }
@@ -133,17 +140,38 @@ class MyDeleteButton extends StatelessWidget {
   final void Function()? onPressed;
   final RxBool? isLoading;
   final MyButtonType? type;
+  final bool showIcon;
 
-  const MyDeleteButton({super.key, this.onPressed, this.isLoading, this.type});
+  const MyDeleteButton({
+    super.key,
+    this.onPressed,
+    this.isLoading,
+    this.type,
+    this.showIcon = true,
+  });
 
   @override
   Widget build(BuildContext context) {
     return MyButton(
       '删除',
       onPressed: onPressed,
-      icon: const Icon(Icons.delete),
+      icon: showIcon ? const Icon(Icons.delete) : null,
       status: MyButtonStatus.danger,
-      type: type,
+      type: type ?? MyButtonType.outlined,
+    );
+  }
+}
+
+class MyHelperIconButton extends StatelessWidget {
+  final void Function()? onPressed;
+
+  const MyHelperIconButton({super.key, this.onPressed});
+
+  @override
+  Widget build(BuildContext context) {
+    return Tooltip(
+      message: '操作指引',
+      child: IconButton(onPressed: onPressed, icon: Icon(Icons.help_outline)),
     );
   }
 }
@@ -158,7 +186,7 @@ class MyEditIconButton extends StatelessWidget {
   Widget build(BuildContext context) {
     // return MyButton('编辑',onPressed: onPressed,type: ButtonType.info,);
     return IconButton(
-      icon: const Icon(Icons.edit_outlined),
+      icon: const Icon(Icons.edit_outlined, color: Colors.blue),
       onPressed: onPressed,
       tooltip: '编辑',
     );
@@ -224,8 +252,11 @@ class MyDeleteIconButton extends StatelessWidget {
 
 enum MyButtonStatus { primary, secondary, danger, warning, success, info }
 
-/// [MyButtonType.filled] 填充无阴影； [MyButtonType.outlined] 描边无填充； [MyButtonType.text] 纯文字无背景； [MyButtonType.elevated] 填充带阴影
-enum MyButtonType { outlined, text, filled, elevated }
+/// [MyButtonType.filled] 填充无阴影； 核心操作，当前流程中必须完成的关键操作，引导用户优先点击，如（保存、提交、确认）
+/// [MyButtonType.outlined] 描边无填充； 中等重要操作，需要突出非核心或与核心操作形成“并列选择”（如 编辑、重置、导出）
+/// [MyButtonType.text] 纯文字无背景； 次要操作，提供辅助功能（如 “取消”，“查看详情”，“帮助”）
+/// [MyButtonType.elevated] 填充带阴影； 高强调核心操作，需要极强的视觉引导的操作（如“下一步”，支持、创建，比较少用，使用 filled 替换）
+enum MyButtonType { outlined, text, filled, filledTonal, elevated }
 
 /// 定制的多功能按钮（支持四种样式+六种状态+加载动画）
 class MyButton extends StatelessWidget {
@@ -262,7 +293,7 @@ class MyButton extends StatelessWidget {
     // 3. 判断是否禁用（加载中或无点击回调时禁用）
     final bool isDisabled = (isLoading?.value ?? false) || onPressed == null;
 
-    final buttonType = type ?? MyButtonType.filled;
+    final buttonType = type ?? MyButtonType.text;
     // 4. 根据 ButtonType 生成对应样式的按钮
     final Widget buttonWidget = _buildButton(
       buttonType,
@@ -298,6 +329,12 @@ class MyButton extends StatelessWidget {
   ) {
     return switch (buttonType) {
       MyButtonType.filled => _buildFilledButton(
+        baseColor,
+        onBaseColor,
+        currentIcon,
+        isDisabled,
+      ),
+      MyButtonType.filledTonal => _buildFilledTonalButton(
         baseColor,
         onBaseColor,
         currentIcon,
@@ -365,7 +402,28 @@ class MyButton extends StatelessWidget {
         ),
         padding: padding,
       ),
-      icon: icon ?? const SizedBox.shrink(), // 无图标时显示空容器（避免布局偏移）
+      icon: icon,
+      label: Text(label),
+    );
+  }
+
+  Widget _buildFilledTonalButton(
+    Color baseColor,
+    Color onBaseColor,
+    Widget? icon,
+    bool isDisabled,
+  ) {
+    return FilledButton.tonalIcon(
+      onPressed: isDisabled ? null : onPressed,
+      style: FilledButton.styleFrom(
+        backgroundColor: isDisabled ? baseColor.withAlpha(125) : baseColor,
+        foregroundColor: onBaseColor,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(radius!),
+        ),
+        padding: padding,
+      ),
+      icon: icon,
       label: Text(label),
     );
   }
@@ -389,7 +447,7 @@ class MyButton extends StatelessWidget {
         ),
         padding: padding,
       ),
-      icon: icon ?? const SizedBox.shrink(),
+      icon: icon,
       label: Text(label),
     );
   }
@@ -413,7 +471,7 @@ class MyButton extends StatelessWidget {
         ),
         padding: padding,
       ),
-      icon: icon ?? const SizedBox.shrink(),
+      icon: icon,
       label: Text(label),
     );
   }
@@ -434,7 +492,7 @@ class MyButton extends StatelessWidget {
         ),
         padding: padding,
       ),
-      icon: icon ?? const SizedBox.shrink(),
+      icon: icon,
       label: Text(label),
     );
   }

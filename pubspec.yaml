@@ -38,6 +38,7 @@ dependencies:
   pull_to_refresh: ^2.0.0
   flutter_svg: ^2.2.0
   json_annotation: ^4.9.0
+#  collection: ^1.19.1
 
 dev_dependencies:
   flutter_test:

@@ -13,10 +13,10 @@ class MyScaffold extends StatelessWidget {
   /// [singleChildScrollView] 可垂直滚动的简单页面，默认为 false
   const MyScaffold({
     super.key,
-    this.appBar,
-    required this.body,
-    this.floatingActionButton,
     required this.singleChildScrollView,
+    this.appBar,
+    this.floatingActionButton,
+    required this.body,
   });
 
   @override
@@ -50,7 +50,6 @@ class MyScaffold2 extends StatelessWidget {
     super.key,
     this.appBar,
     this.drawer,
-    required this.body,
     this.floatingActionButton,
     this.singleChildScrollView = true,
     this.useSafeArea = true,
@@ -58,6 +57,7 @@ class MyScaffold2 extends StatelessWidget {
     this.bottomSheet,
     this.backgroundColor,
     this.drawerEdgeDragWidthPercent,
+    required this.body,
   });
 
   @override

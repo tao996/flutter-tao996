@@ -59,7 +59,7 @@ abstract class IModel<T> extends DbTypeModel<T> {
 
   String get deletedAtText => DatetimeUtil.formatYMDHMS(dateTime: deletedAt);
 
-  void copyBaseData(IModel model){
+  void copyBaseData(IModel model) {
     model.id = id;
     model.createdAt = createdAt;
     model.updatedAt = updatedAt;
@@ -68,6 +68,8 @@ abstract class IModel<T> extends DbTypeModel<T> {
 }
 
 abstract class INoTimeModel<T> extends IModel<T> {
+  INoTimeModel({super.id});
+
   /// 创建时间
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override

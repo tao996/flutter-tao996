@@ -56,6 +56,7 @@ export 'src/ui/widgets/image.dart';
 export 'src/ui/widgets/input.dart';
 export 'src/ui/widgets/input_date.dart';
 export 'src/ui/widgets/loading.dart';
+export 'src/ui/widgets/message_bar.dart';
 export 'src/ui/widgets/padding.dart';
 export 'src/ui/widgets/scaffold.dart';
 export 'src/ui/widgets/separator_line.dart';
