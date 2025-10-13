@@ -72,7 +72,7 @@ class PaginatedResponse<T> {
   PaginatedResponse({required this.totalCount, this.items});
 
   /// 从 JSON Map 创建 PaginatedResponse 实例。
-  /// [itemBuilder] 是一个函数，用于将 List<Map<String, dynamic>> 转换为 List<T>。
+  /// [itemBuilder] 是一个函数，用于将 `List<Map<String, dynamic>>` 转换为 `List<T>`。
   factory PaginatedResponse.fromJson(
     Map<String, dynamic> json,
     List<T> Function(List<Map<String, dynamic>>)? itemBuilder,
@@ -138,8 +138,8 @@ class ApiResponseHandler {
 
   /// 处理通用 API 响应，并返回其中的 'data' 部分解析后的单个对象。
   ///
-  /// [apiRequest]: 一个返回 Future<HttpResponse> 的函数，用于执行实际的网络请求。
-  /// [itemBuilder]: 一个函数，用于将 Map<String, dynamic> 解析为类型 T 的实例。
+  /// [apiRequest]: 一个返回 `Future<HttpResponse>` 的函数，用于执行实际的网络请求。
+  /// [itemBuilder]: 一个函数，用于将 `Map<String, dynamic>` 解析为类型 T 的实例。
   ///
   /// 示例：
   /// ```dart
@@ -205,8 +205,8 @@ class ApiResponseHandler {
 
   /// 处理通用 API 列表响应，并返回其中的 'data' 部分解析后的分页对象。
   ///
-  /// [apiRequest]: 一个返回 Future<HttpResponse> 的函数，用于执行实际的网络请求。
-  /// [itemBuilder]: 一个函数，用于将 List<Map<String, dynamic>> 解析为 List<T>。
+  /// [apiRequest]: 一个返回 `Future<HttpResponse>` 的函数，用于执行实际的网络请求。
+  /// [itemBuilder]: 一个函数，用于将 `List<Map<String, dynamic>>` 解析为 `List<T>`。
   ///
   /// 示例：
   /// ```dart

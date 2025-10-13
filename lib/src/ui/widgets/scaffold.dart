@@ -6,11 +6,31 @@ class MyScaffold extends StatelessWidget {
   final AppBar? appBar;
   final Widget body;
   final Widget? floatingActionButton;
+  /// [singleChildScrollView] 在滚动方向（垂直）上，不给其子 Widget 任何约束，告诉它“你可以无限高”（即 child 继承了无限高的属性）
+  /// 常用错误: `SingleChildScrollView>Column>Expanded|Flexible|ListView`
+  ///
+  /// ```
+  /// // 改正
+  /// SingleChildScrollView(
+  ///   child: Column(
+  ///     children: [
+  ///       const Text('头部内容'),
+  ///       ListView(
+  ///         shrinkWrap: true, // <-- 关键：让 ListView 高度适应内容
+  ///         physics: const NeverScrollableScrollPhysics(), // <-- 推荐：禁用内嵌 ListView 自身的滚动
+  ///         itemCount: 10,
+  ///         itemBuilder: (context, index) => Text('Item $index'),
+  ///       ),],),)
+  /// SingleChildScrollView(
+  ///   child: Column(
+  ///     mainAxisSize: MainAxisSize.min, // 确保 Column 高度最小化
+  ///     children: [
+  ///       const Text('其它内容')
+  ///     ],),)
+  /// ```
   final bool singleChildScrollView;
 
   /// 集成 SafeArea
-  ///
-  /// [singleChildScrollView] 可垂直滚动的简单页面，默认为 false
   const MyScaffold({
     super.key,
     required this.singleChildScrollView,

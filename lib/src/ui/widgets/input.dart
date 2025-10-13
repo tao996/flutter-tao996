@@ -174,8 +174,8 @@ class _MyInputState extends State<MyInput> {
       controller: widget.controller,
       focusNode: _focusNode,
       obscureText: isPassword,
-      maxLines: widget.maxLines,
-      minLines: widget.minLines,
+      maxLines: widget.isPassword ? 1 : widget.maxLines ?? 1,
+      minLines: widget.isPassword ? 1 : widget.minLines ?? 1,
       // 新增：限制键盘类型
       keyboardType: _keyboardType,
       // 新增：限制输入格式

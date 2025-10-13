@@ -1,8 +1,7 @@
 import 'package:get/get.dart';
 
-abstract class ITranslationService extends Translations {
-  @override
-  Map<String, Map<String, String>> get keys => {
+class TranslationService extends Translations {
+  final Map<String, Map<String, String>> _keys = {
     'zh_CN': {
       'confirm': '确定',
       'cancel': '取消',
@@ -71,6 +70,19 @@ abstract class ITranslationService extends Translations {
     },
     'en_US': {},
   };
+
+  @override
+  Map<String, Map<String, String>> get keys => _keys;
+
+  void addKeys(Map<String, Map<String, String>> newKeys) {
+    newKeys.forEach((key, value) {
+      if (_keys.containsKey(key)) {
+        _keys[key]!.addAll(value);
+      } else {
+        _keys[key] = value;
+      }
+    });
+  }
 }
 
 /*
@@ -89,4 +101,13 @@ class ChildTranslation extends MyTranslation {
         },
     };
 }
+
+// 使用服务
+class AppTranslation {
+  static const Map<String, Map<String, String>> keys = {
+    'zh_CN': {'appTitle': 'TAO996 DEMO'},
+  };
+}
+getTranslationService().addKeys(AppTranslation.keys);
+dprint(getTranslationService().keys);
  */

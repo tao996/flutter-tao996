@@ -1,5 +1,5 @@
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:pull_to_refresh/pull_to_refresh.dart';
 import 'package:tao996/tao996.dart';
 
 // class DemoSmartRefresherController extends GetxController
@@ -28,7 +28,7 @@ import 'package:tao996/tao996.dart';
 //   }
 // }
 
-class DemoSmartRefresherController extends MySmartRefresherController<String> {
+class MyDemoSmartRefresherController extends MySmartRefresherController<String> {
   @override
   Future<List<String>?> loadData({required bool isRefresh}) async {
     await Future.delayed(Duration(milliseconds: 1000));
@@ -39,5 +39,36 @@ class DemoSmartRefresherController extends MySmartRefresherController<String> {
     return List.generate(pageSize, (index) {
       return "${l + index}";
     });
+  }
+}
+
+class MyDemoSmartRefresherPage extends StatelessWidget {
+  late final MyDemoSmartRefresherController c;
+
+  MyDemoSmartRefresherPage({super.key}) {
+    c = Get.put(MyDemoSmartRefresherController());
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: Text('DEMO SmartRefresher')),
+      body: SafeArea(
+        child: Obx(
+          () => MySmartRefresher.body(
+            c,
+            child: c.items.isNotEmpty
+                ? ListView.builder(
+                    itemCount: c.items.length,
+                    itemBuilder: (context, index) {
+                      final t = c.items[index];
+                      return ListTile(title: Text('$t -- $index'));
+                    },
+                  )
+                : Center(child: Text('无数据')),
+          ),
+        ),
+      ),
+    );
   }
 }

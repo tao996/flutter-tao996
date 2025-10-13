@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
-import 'package:tao996/src/utils/fn_util.dart';
 
 abstract class IMySmartRefresherBodyController extends GetxController {
   late final RefreshController refreshController;
@@ -16,7 +15,7 @@ class MySmartRefresher {
   /// [child] 必须是一个 ListView，其它写法特别是 Obx(()=> ListView.builder()) 不起作用
   ///
   /// ```dart
-  /// child: Obx(() => MySmartRefresher.body(c,
+  /// child: Obx(() => MySmartRefresher.body(c,enablePullUp: c.hasMore.value,
   ///             child: c.items.isNotEmpty ? ListView.builder(
   ///   itemCount: c.items.length,
   ///   itemBuilder: (context, index) {
@@ -33,6 +32,7 @@ class MySmartRefresher {
     void Function()? onRefresh,
     void Function()? onLoading,
   }) {
+    // 注意：在 PC 端需要 app.dart 中添加配置 https://github.com/peng8350/flutter_pulltorefresh/issues/544
     return SmartRefresher(
       enablePullDown: enablePullDown,
       enablePullUp: enablePullUp,

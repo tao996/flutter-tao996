@@ -241,12 +241,12 @@ class DebugService implements IDebugService {
   @override
   void logPackages(List<String> packages, {bool append = true}) {
     if (append) {
-      packages.forEach((package) {
+      for (var package in packages) {
         package = package.startsWith('package:') ? package : 'package:$package';
         if (!debugPackages.contains(package)) {
           debugPackages.add(package);
         }
-      });
+      }
     } else {
       debugPackages.clear();
       debugPackages.addAll(

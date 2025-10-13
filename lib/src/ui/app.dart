@@ -1,3 +1,5 @@
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
 
 import 'package:dynamic_color/dynamic_color.dart';
@@ -49,11 +51,13 @@ class MyTao996App extends StatelessWidget {
             GlobalMaterialLocalizations.delegate,
             GlobalCupertinoLocalizations.delegate,
           ],
-          supportedLocales:supportedLocales ?? const [Locale('zh', 'CN'), Locale('en', 'US')],
+          supportedLocales:
+              supportedLocales ??
+              const [Locale('zh', 'CN'), Locale('en', 'US')],
           // locale: getILocaleService().locale,
           locale: Get.deviceLocale,
           fallbackLocale: fallbackLocale ?? const Locale('en', 'US'),
-          translations: getITranslationService(),
+          translations: getTranslationService(),
           theme: themeService.buildLightTheme(lightDynamic),
           darkTheme: themeService.buildDarkTheme(darkDynamic),
           themeMode: [
@@ -80,8 +84,19 @@ class MyTao996App extends StatelessWidget {
               child: child!,
             );
           },
+          scrollBehavior: MyCustomScrollBehavior(), // 解决在桌面端无法上拉下拉
         );
       },
     );
   }
+}
+
+// https://github.com/peng8350/flutter_pulltorefresh/issues/544
+class MyCustomScrollBehavior extends MaterialScrollBehavior {
+  @override
+  Set<PointerDeviceKind> get dragDevices => {
+    PointerDeviceKind.touch,
+    PointerDeviceKind.mouse,
+    // etc.
+  };
 }

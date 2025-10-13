@@ -3,6 +3,8 @@ import 'package:tao996/tao996.dart';
 
 class FormHelper {
   /// 网络布局的 checkbox 按钮组
+  /// [crossAxisCount] 列数，会根据列数自动计算自身的尺寸
+  /// 跟 FlowChipBar 有点类似，但 FlowChipBar 是单选，并且不是网络布局
   static Widget gridCheckbox({
     required List<String> items,
     required ValueChanged<List<String>> onSelectionChanged,
@@ -19,7 +21,7 @@ class FormHelper {
     );
   }
 
-  /// 列表布局的 checkbox 按钮组（占据最宽）
+  /// 列表布局的 checkbox 复选列表（占据最宽），可用于多项选择
   static Widget listCheckbox({
     required List<String> items,
     required ValueChanged<List<String>> onSelectionChanged,
@@ -32,7 +34,8 @@ class FormHelper {
     );
   }
 
-  /// 水平布局的 按钮组
+  /// 水平布局的 按钮组，可用于多单或单选，被选中的选项会打上一个勾（改变了尺寸）
+  /// 跟 [gridCheckbox] 的区别是会自动换行
   static Widget filterChipCheckbox<T>({
     required List<KV<T>> items,
     required void Function(bool selected, T item)? onSelectionChanged,
@@ -56,13 +59,18 @@ class FormHelper {
     );
   }
 
-  /// 分段按钮，可用于多选或单选
+  /// 分段按钮，2-3个选项时可使用，如果选项太多或内容太长则不建议使用，因为文字换行显示很难看
+  /// [multiSelectionEnabled] 是否支持多选; [emptySelectionAllowed] 是否允许空选项
   static Widget segmentedButton<T>({
     required List<KV<T>> items,
     required void Function(Set<T> items) onSelectionChanged,
-    required Set<T> initItems,
+    required List<T> initItems,
+    bool multiSelectionEnabled = false,
+    bool emptySelectionAllowed = true,
   }) {
     return SegmentedButton<T>(
+      multiSelectionEnabled: multiSelectionEnabled,
+      emptySelectionAllowed: emptySelectionAllowed,
       segments: items.map((kv) {
         return ButtonSegment<T>(value: kv.value, label: Text(kv.label));
       }).toList(),
@@ -76,18 +84,13 @@ class FormHelper {
     required String label,
     required List<KV<T>> items,
     required ValueChanged<T?> onChanged,
-    required T value,
+    T? value,
     String? hintText,
-    T? defaultValue,
   }) {
-    List<KV<T>> defaultItems = items;
-    if (defaultValue != null) {
+    if (value != null) {
       final values = items.map((kv) => kv.value).toList();
-      if (!values.contains(defaultValue)) {
-        defaultItems.insert(
-          0,
-          KV(label: hintText ?? label, value: defaultValue),
-        );
+      if (!values.contains(value)) {
+        value = null;
       }
     }
 
@@ -97,12 +100,11 @@ class FormHelper {
         labelText: label,
         border: OutlineInputBorder(),
       ),
-      items: defaultItems.map((KV kv) {
+      items: items.map((KV kv) {
         return DropdownMenuItem<T>(value: kv.value, child: Text(kv.label));
       }).toList(),
       onChanged: onChanged,
-      // 移除默认的hint提示（由selectedItemBuilder控制显示）
-      hint: const SizedBox.shrink(),
+      hint: hintText != null ? Text(hintText) : null,
     );
   }
 
@@ -156,7 +158,7 @@ class FormHelper {
   /// 一个普通的简单复选组件
   static Widget checkbox(
     String label, {
-    required bool? value,
+    bool? value,
     required void Function(bool?)? onChanged,
     String? helperText,
     bool helperTextBottom = true,
@@ -182,7 +184,7 @@ class FormHelper {
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 Checkbox(
-                  value: value,
+                  value: initValue,
                   onChanged: (yes) {
                     initValue = yes ?? false;
                     onChanged?.call(yes);
@@ -213,5 +215,10 @@ class FormHelper {
           ),
       ],
     );
+  }
+
+  /// 搜索框
+  static Widget search(MySearchInputMethods method, {String? hintText}) {
+    return MySearchInput(method, hintText: hintText);
   }
 }

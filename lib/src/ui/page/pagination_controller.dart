@@ -9,6 +9,7 @@ abstract class MyPaginationController<T> extends GetxController {
   RxInt pageIndex = 1.obs;
   RxInt pageSize = 20.obs;
 
+  /// 加载数据
   Future<void> loadItemsData();
 
   /// 修改分页

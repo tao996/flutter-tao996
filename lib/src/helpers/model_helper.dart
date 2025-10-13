@@ -349,6 +349,32 @@ abstract class ModelHelper<T extends IModel<T>> {
     dynamic value,
     String? where,
     List<Object?>? whereArgs,
+    String? groupBy,
+    String? having,
+    String? orderBy,
+    int? limit,
+    int? offset,
+  }) async {
+    final result = await getManyWith(
+      fieldName: fieldName,
+      value: value,
+      where: where,
+      whereArgs: whereArgs,
+      groupBy: groupBy,
+      having: having,
+      orderBy: orderBy,
+      limit: limit,
+      offset: offset,
+    );
+    return result.map((map) => fromMap(map)).toList();
+  }
+  /// 获取原始数据，需要自己动手转换
+  /// 如果提供了 [where] 则优先使用 [where] 和 [whereArgs]
+  Future<List<Map<String, dynamic>>> getManyWith({
+    String? fieldName,
+    dynamic value,
+    String? where,
+    List<Object?>? whereArgs,
     List<String>? columns,
     String? groupBy,
     String? having,
@@ -361,7 +387,7 @@ abstract class ModelHelper<T extends IModel<T>> {
       throw 'Please provide either [where] or [fieldName]';
     }
     try {
-      final result = await dbService.query(
+      return await dbService.query(
         tableName,
         columns: columns,
         where: where ?? appendWhere('$fieldName = ?'),
@@ -374,10 +400,9 @@ abstract class ModelHelper<T extends IModel<T>> {
         limit: limit,
         offset: offset,
       );
-      return result.map((map) => fromMap(map)).toList();
     } catch (e, st) {
       debugService.exception(e, st, log: true);
-      throw 'Failed to getManyBy data for $tableName; because: $e';
+      throw 'Failed to getManyWith data for $tableName; because: $e';
     }
   }
 

@@ -1,5 +1,5 @@
 export 'src/const/color.dart';
-
+export 'src/const/icon.dart';
 
 export 'src/helpers/api_response_handler.dart';
 export 'src/helpers/db_type_converter.dart';
@@ -32,13 +32,13 @@ export 'src/services/webview_service.dart';
 
 export 'src/translation/translation.dart';
 
+export 'src/ui/page/custom_tab_bar.dart';
 export 'src/ui/page/easy_refresh.dart';
 export 'src/ui/page/image_viewer.dart';
 export 'src/ui/page/network_controller.dart';
 export 'src/ui/page/network_widget.dart';
 export 'src/ui/page/qrcode_view.dart';
-export 'src/ui/page/search_controller.dart';
-export 'src/ui/page/search_widget.dart';
+export 'src/ui/page/search_input.dart';
 export 'src/ui/page/smart_refresher_controller.dart';
 export 'src/ui/page/smart_refresher_widget.dart';
 export 'src/ui/page/pagination_controller.dart';
@@ -48,6 +48,7 @@ export 'src/ui/widgets/avatar.dart';
 export 'src/ui/widgets/buttons.dart';
 export 'src/ui/widgets/dialog.dart';
 export 'src/ui/widgets/event.dart';
+export 'src/ui/widgets/flow_chip_bar.dart';
 export 'src/ui/widgets/list_checkbox.dart';
 export 'src/ui/widgets/grid_checkbox.dart';
 export 'src/ui/widgets/grid_view.dart';

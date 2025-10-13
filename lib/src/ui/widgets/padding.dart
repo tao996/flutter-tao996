@@ -61,7 +61,7 @@ class MyBodyPadding extends StatelessWidget {
 // 扩展方法
 extension WidgetListSpacing on List<Widget> {
   /// 在列表的每个元素之间插入一个间距 widget
-  List<Widget> withAppBarActions() {
+  List<Widget> withAppBarActions({double height = 16.0, double width = 16.0}) {
     if (isEmpty) {
       return this;
     }
@@ -70,7 +70,7 @@ extension WidgetListSpacing on List<Widget> {
       spacedList.add(this[i]);
       // 在除最后一个元素外的每个元素后添加间距
 
-      spacedList.add(const SizedBox(width: 16));
+      spacedList.add(SizedBox(width: width, height: height));
     }
     return spacedList;
   }

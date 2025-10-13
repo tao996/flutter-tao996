@@ -41,9 +41,7 @@ class FnUtil {
 
   /// 延时指定秒，默认为 1 秒
   static Future<void> delayed({int? seconds, int? milliseconds}) async {
-    milliseconds = milliseconds == null
-        ? (seconds == null ? 1000 : 1000 * seconds)
-        : milliseconds;
+    milliseconds = milliseconds ?? (seconds == null ? 1000 : 1000 * seconds);
     await Future.delayed(Duration(microseconds: milliseconds));
   }
 }

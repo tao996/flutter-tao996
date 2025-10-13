@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:tao996/src/utils/fn_util.dart';
 
 class MyDialog {
-  /// 全屏对话框
+  /// 全屏对话框，如果你需要在高度/宽度上尽可能小，则需要将 Column/Row 的 mainAxisSize: MainAxisSize.min
   static void fullScreenDialog(
     BuildContext context, {
     required Widget child,
@@ -13,13 +14,15 @@ class MyDialog {
     if (horizontalPadding != null) {
       final screenWidth = MediaQuery.of(context).size.width;
       width = screenWidth - horizontalPadding; // 比父窗口宽度小 20
+      width = width.toInt().toDouble();
     }
     double? height;
     if (verticalPadding != null) {
       final screenHeight = MediaQuery.of(context).size.height;
       height = screenHeight - verticalPadding; // 比父窗口高度小 20
+      height = height.toInt().toDouble();
     }
-
+    dprint('width: $width; height: $height');
     showDialog(
       context: context,
       builder: (BuildContext context) {

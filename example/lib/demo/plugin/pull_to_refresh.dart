@@ -3,14 +3,14 @@ import 'package:flutter/material.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
 
 // 从仓库原制出来 https://github.com/peng8350/flutter_pulltorefresh/blob/master/README_CN.md
-class MySmartRefresh extends StatefulWidget {
-  const MySmartRefresh({super.key});
+class PluginPullToRefresh extends StatefulWidget {
+  const PluginPullToRefresh({super.key});
 
   @override
-  State<MySmartRefresh> createState() => _MySmartRefreshState();
+  State<PluginPullToRefresh> createState() => _PluginPullToRefreshState();
 }
 
-class _MySmartRefreshState extends State<MySmartRefresh> {
+class _PluginPullToRefreshState extends State<PluginPullToRefresh> {
   List<String> items = ["1", "2", "3", "4", "5", "6", "7", "8"];
   final RefreshController _refreshController = RefreshController(
     initialRefresh: false,
@@ -35,6 +35,7 @@ class _MySmartRefreshState extends State<MySmartRefresh> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(title: Text("SmartRefresh")),
       body: SmartRefresher(
         enablePullDown: true,
         enablePullUp: true,

@@ -77,12 +77,12 @@ class MyIconSvg extends StatelessWidget {
   final double size;
   final Color? color;
   const MyIconSvg({
-    Key? key,
+    super.key,
     this.iconPath,
     this.iconData,
     this.size = 24,
     this.color,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

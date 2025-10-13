@@ -14,13 +14,14 @@ void registerTao996Dependencies(GetIt locator) {
   final ILogService logService = LogService();
   locator.registerSingleton<ILogService>(logService);
   locator.registerLazySingleton<IDebugService>(() => DebugService());
+  locator.registerLazySingleton<TranslationService>(() => TranslationService());
 }
 
 /// 注册有依赖的服务
 void registerTao996Services(GetIt locator) {
   // final locator = GetIt.instance;
   // 用户需要自己注册
-  // ISettingsService, IThemeService, IDatabaseService, ITranslationService,IRouteService,ModelActionHelper
+  // ISettingsService, IThemeService, IDatabaseService, IRouteService,ModelActionHelper
   // locator.registerLazySingleton<IThemeService>(() => ThemeService());
   // locator.registerLazySingleton<IDatabaseService>(() => SqfliteDatabaseService());
 
@@ -102,8 +103,8 @@ IThemeService getIThemeService() {
   return GetIt.instance<IThemeService>();
 }
 
-ITranslationService getITranslationService() {
-  return GetIt.instance<ITranslationService>();
+TranslationService getTranslationService() {
+  return GetIt.instance<TranslationService>();
 }
 
 IRouteService getIRouteService() {

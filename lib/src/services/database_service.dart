@@ -99,6 +99,7 @@ class SqfliteDatabaseService implements IDatabaseService {
     return databasePath;
   }
 
+  @override
   Database getDatabase() => _database!;
 
   @override

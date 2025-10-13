@@ -69,10 +69,10 @@ class _GridCheckboxState extends State<GridCheckbox> {
       itemBuilder: (context, index) {
         final name = widget.items[index];
         final isSelected = _selectedNames.contains(name);
-        _debugService.d(
-          'itemBuilder:',
-          args: {'name': name, 'isSelected': isSelected},
-        );
+        // _debugService.d(
+        //   'itemBuilder:',
+        //   args: {'name': name, 'isSelected': isSelected},
+        // );
 
         return InkWell(
           // 使用 InkWell 提供点击波纹效果

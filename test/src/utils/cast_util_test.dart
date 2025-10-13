@@ -40,7 +40,6 @@ void main() {
     // Test data
     final MyObject obj1 = MyObject('test1', 1);
     final MyObject obj2 = MyObject('test2', 2);
-    final MyObject obj3 = MyObject('test3', 3);
 
     // -------------------------------------------------------------------------
     // castList<T> and castListFromData<T>

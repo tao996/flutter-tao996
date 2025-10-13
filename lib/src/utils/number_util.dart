@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:tao996/tao996.dart';
 
 class NumberUtil {
@@ -8,18 +10,20 @@ class NumberUtil {
   /// [fractionDigits]: 小数位数，通常为 2。
   /// [emptyText] 是否返回空字符串。如果为 true，则返回空字符串，否则返回 "0"。
   static String formatMoney(
-    int? num, {
+    dynamic num, {
     int fractionDigits = 2,
     bool emptyText = true,
     bool trim = true,
   }) {
-    if (num == 0 || num == null) {
+    if (num == 0 || num == null || num == '') {
       // 约定：如果金额为 0，返回 "0.00" 或 "0"
       return emptyText ? '' : 0.toStringAsFixed(fractionDigits);
     }
 
+    final numData = DataUtil.getDouble(num);
+
     // 1. 将整数（分）转为 double（元）
-    final double valueInCurrency = num / (100); // 假设 fractionDigits 总是 2
+    final double valueInCurrency = numData / (100); // 假设 fractionDigits 总是 2
 
     // 2. 使用 toStringAsFixed(fractionDigits) 格式化并处理补零
     final text = valueInCurrency.toStringAsFixed(fractionDigits);
@@ -81,5 +85,104 @@ class NumberUtil {
     } else {
       return '${minutes}m';
     }
+  }
+
+
+  /// 将多种类型的数字格式化为带逗号分隔的字符串
+  /// [number]：支持 null、String、int、double 类型
+  /// [decimalDigits]：保留的小数位数（默认 null，自动保留有效小数）
+  /// [allowTrailingZeros]：是否保留小数末尾的 0（默认 false）
+  /// 返回：格式化字符串，若无法解析则返回 "0"
+ static String formatNumberWithComma(
+      dynamic number, {
+        int? decimalDigits,
+        bool allowTrailingZeros = false,
+      }) {
+    // 1. 处理 null 情况
+    if (number == null) {
+      return "0";
+    }
+
+    // 2. 转换为 num 类型（处理 String、int、double）
+    num? parsedNumber;
+    if (number is num) {
+      parsedNumber = number;
+    } else if (number is String) {
+      // 尝试解析字符串（支持整数、小数、负数）
+      if (number.isEmpty) {
+        return "0";
+      }
+      // 移除可能存在的逗号（避免已格式化的字符串重复加逗号）
+      final cleaned = number.replaceAll(',', '');
+      // 先尝试解析为 int，失败则尝试解析为 double
+      parsedNumber = int.tryParse(cleaned) ?? double.tryParse(cleaned);
+    }
+
+    // 若解析失败，返回默认值 "0"
+    if (parsedNumber == null || parsedNumber.isNaN) {
+      return "0";
+    }
+
+    // 3. 处理小数部分
+    String numberStr;
+    if (decimalDigits != null) {
+      // 限制小数位数（四舍五入）
+      final rounded = parsedNumber.toStringAsFixed(decimalDigits);
+      if (!allowTrailingZeros) {
+        // 移除小数末尾的0和多余的小数点
+        numberStr =
+            rounded.replaceAll(RegExp(r'(\.0*$)|(\.([0-9]*[1-9])0*$)'), r'$2');
+      } else {
+        numberStr = rounded;
+      }
+    } else {
+      // 自动保留有效小数（整数不显示小数点）
+      if (parsedNumber is int || parsedNumber == parsedNumber.roundToDouble()) {
+        numberStr = parsedNumber.toInt().toString();
+      } else {
+        numberStr = parsedNumber.toString();
+        // 处理科学计数法
+        if (numberStr.contains('e') || numberStr.contains('E')) {
+          numberStr = parsedNumber
+              .toStringAsFixed(10)
+              .replaceAll(RegExp(r'0+$'), '')
+              .replaceAll(RegExp(r'\.$'), '');
+        }
+      }
+    }
+
+    // 4. 拆分整数和小数部分
+    final parts = numberStr.split('.');
+    final intPart = parts[0]; // 可能包含负号
+    final decimalPart = parts.length > 1 ? ".${parts[1]}" : "";
+
+    // 5. 处理整数部分的逗号分隔
+    String formattedIntPart;
+    if (intPart.startsWith('-')) {
+      final absIntPart = intPart.substring(1);
+      formattedIntPart = "-${_addCommaToPositiveInt(absIntPart)}";
+    } else {
+      formattedIntPart = _addCommaToPositiveInt(intPart);
+    }
+
+    // 6. 拼接结果
+    return "$formattedIntPart$decimalPart";
+  }
+
+  /// 给正整数字符串添加逗号分隔
+  static String _addCommaToPositiveInt(String positiveIntStr) {
+    final length = positiveIntStr.length;
+    if (length <= 3) return positiveIntStr;
+
+    final sb = StringBuffer();
+    final firstSegmentLength = length % 3 == 0 ? 3 : length % 3;
+
+    sb.write(positiveIntStr.substring(0, firstSegmentLength));
+
+    for (int i = firstSegmentLength; i < length; i += 3) {
+      sb.write(",${positiveIntStr.substring(i, min(i + 3, length))}");
+    }
+
+    return sb.toString();
   }
 }
