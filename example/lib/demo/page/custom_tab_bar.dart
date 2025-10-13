@@ -18,7 +18,19 @@ class MyDemoCustomTabBar extends StatelessWidget {
       appBar: AppBar(title: Text('Mock TabBarView')),
       body: Column(
         children: [
+          MyText.h3(context, 'MyCustomTabBar'),
+          const SizedBox(height: 16),
           MyCustomTabBar(
+            activeIndex: activeIndex,
+            onChange: (index) {
+              dprint(activeIndex.value);
+            },
+            children: children,
+          ),
+          Divider(),
+          MyText.h3(context, 'MyFlowCustomTabBar'),
+          const SizedBox(height: 16),
+          MyFlowCustomTabBar(
             activeIndex: activeIndex,
             onChange: (index) {
               dprint(activeIndex.value);
@@ -27,6 +39,8 @@ class MyDemoCustomTabBar extends StatelessWidget {
           ),
 
           Divider(),
+          MyText.h3(context, 'FlowChipBar'),
+          const SizedBox(height: 16),
           FlowChipBar(
             activeIndex: activeIndex,
             onChange: (index) {

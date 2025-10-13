@@ -2,8 +2,7 @@ import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:get/get.dart';
 
 class MyNetworkController extends GetxController {
-  var isWifiConnected = false.obs;
-  var hasNetwork = true.obs;
+  final results = <ConnectivityResult>[].obs;
 
   final Connectivity _connectivity = Connectivity();
 
@@ -20,8 +19,7 @@ class MyNetworkController extends GetxController {
   }
 
   void _updateConnectionStatus(List<ConnectivityResult> result) {
-    isWifiConnected.value = result.contains(ConnectivityResult.wifi);
-    hasNetwork.value = result.contains(ConnectivityResult.none);
+    results.value = result;
   }
 }
 
@@ -34,14 +32,14 @@ void main() {
 
 // 在你的 Widget 中使用
 class MyMediaDisplay extends StatelessWidget {
-  final networkController = Get.find<MyNetworkController>();
+  final c = Get.find<MyNetworkController>();
 
   @override
   Widget build(BuildContext context) {
     return Obx(() {
-      if (networkController.isWifiConnected.value) {
+      if (c.results.isWifi) {
         return Image.network('high_quality_image_url');
-      } else if (networkController.hasNetwork.value) {
+      } else if (c.results.isConnected) {
         return Image.network('low_quality_image_url');
       } else {
         return const Text('No internet connection');

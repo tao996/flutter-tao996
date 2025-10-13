@@ -9,17 +9,21 @@ import 'package:cached_network_image/cached_network_image.dart';
 
 import '../../../tao996.dart';
 
-/// 新增图片查看器页面
-class ImageViewerPage extends StatefulWidget {
+/// 新增图片查看器页面，在 image.dart 中使用
+class MyImageViewerWidget extends StatefulWidget {
+  /// 图片的访问地址
   final String imageUrl;
 
-  const ImageViewerPage({super.key, required this.imageUrl});
+  /// 缓存到本地保存的目录
+  final Directory? director;
+
+  const MyImageViewerWidget({super.key, required this.imageUrl, this.director});
 
   @override
-  State<ImageViewerPage> createState() => _ImageViewerPageState();
+  State<MyImageViewerWidget> createState() => _MyImageViewerWidgetState();
 }
 
-class _ImageViewerPageState extends State<ImageViewerPage> {
+class _MyImageViewerWidgetState extends State<MyImageViewerWidget> {
   final _debugService = getIDebugService();
   final _messageService = getIMessageService();
 
@@ -27,7 +31,8 @@ class _ImageViewerPageState extends State<ImageViewerPage> {
   final bool _showControls = true;
 
   Future<File?> _getImage({void Function(int, int)? onReceiveProgress}) async {
-    final directory = await getIPathService().getTemporaryDirectoryPath();
+    final directory =
+        widget.director ?? await getIPathService().getTemporaryDirectoryPath();
     // 从 URL 中提取文件名，或者生成一个唯一的文件名
     final fileName = widget.imageUrl.split('/').last.split('?').first;
     final filePath = '${directory.path}/$fileName';
@@ -35,14 +40,14 @@ class _ImageViewerPageState extends State<ImageViewerPage> {
     final file = File(filePath);
     // 检查图片是否存在
     if (file.existsSync()) {
-      _debugService.d('图片已经存在本地: $filePath');
+      dprint('图片已经存在本地: $filePath');
     } else {
       final success = await getIDioHttpService().download(
         widget.imageUrl,
         filePath,
       );
       if (success) {
-        _debugService.d('图片已经下载到本地: $filePath');
+        dprint('图片已经下载到本地: $filePath');
       } else {
         return null;
       }
@@ -71,7 +76,7 @@ class _ImageViewerPageState extends State<ImageViewerPage> {
             double progress = (received / total) * 100;
             // 你可以在这里更新下载进度条，如果需要的话
             if (isDebugMode) {
-              _debugService.d('下载进度: ${progress.toStringAsFixed(0)}%');
+              dprint('下载进度: ${progress.toStringAsFixed(0)}%');
             }
           }
         },
@@ -140,14 +145,12 @@ class _ImageViewerPageState extends State<ImageViewerPage> {
                 child: CachedNetworkImage(
                   imageUrl: widget.imageUrl,
                   fit: BoxFit.contain, // 确保图片完整显示
-                  placeholder:
-                      (context, url) => const Center(
-                        child: CircularProgressIndicator(color: Colors.white),
-                      ),
-                  errorWidget:
-                      (context, url, error) => const Center(
-                        child: Icon(Icons.error, color: Colors.white, size: 50),
-                      ),
+                  placeholder: (context, url) => const Center(
+                    child: CircularProgressIndicator(color: Colors.white),
+                  ),
+                  errorWidget: (context, url, error) => const Center(
+                    child: Icon(Icons.error, color: Colors.white, size: 50),
+                  ),
                 ),
               ),
             ),
@@ -233,7 +236,10 @@ class _ImageViewerPageState extends State<ImageViewerPage> {
   }) {
     return Column(
       children: [
-        IconButton(icon: Icon(icon, color: Colors.white), onPressed: onTap),
+        IconButton(
+          icon: Icon(icon, color: Colors.white),
+          onPressed: onTap,
+        ),
         Text(
           label,
           style: const TextStyle(color: Colors.white, fontSize: 12.0),

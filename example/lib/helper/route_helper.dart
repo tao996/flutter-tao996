@@ -1,7 +1,10 @@
 import 'package:get/get.dart';
 import 'package:tao996/tao996.dart';
 import 'package:tao996_example/demo/page/easy_refresh.dart';
+import 'package:tao996_example/demo/page/image.dart';
+import 'package:tao996_example/demo/page/network.dart';
 import 'package:tao996_example/demo/page/pagination_widget.dart';
+import 'package:tao996_example/demo/page/qrcode_view.dart';
 import 'package:tao996_example/demo/page/search_input.dart';
 import 'package:tao996_example/demo/plugin/pull_to_refresh.dart';
 import 'package:tao996_example/demo/helper/form_helper.dart';
@@ -32,6 +35,9 @@ class RouteHelper implements IRouteService {
     GetPage(name: '/easyRefresh', page: () => MyDemoEasyRefresh()),
     GetPage(name: '/searchInput', page: () => MyDemoSearchInput()),
     GetPage(name: '/paginationWidget', page: () => MyDemoPagination()),
+    GetPage(name: '/image', page: () => MyDemoImage()),
+    GetPage(name: '/network', page: () => MyDemoNetwork()),
+    GetPage(name: '/qrcode', page: () => MyDemoQrcodeView()),
   ];
 
   Future<dynamic> gotoName(String name) async {
@@ -62,7 +68,14 @@ class RouteHelper implements IRouteService {
         subtitle: '对 RefreshIndicator 的二次封装; pc 上无效，使用 MySmartRefresher 代替',
       ),
       RouteItem(title: 'SearchInput', name: '/searchInput', subtitle: '搜索框'),
-      RouteItem(title: 'PaginationWidget', name: '/paginationWidget', subtitle: 'PC 端分页组件'),
+      RouteItem(
+        title: 'PaginationWidget',
+        name: '/paginationWidget',
+        subtitle: 'PC 端分页组件',
+      ),
+      RouteItem(title: 'Image', name: '/image', subtitle: '图片组件'),
+      RouteItem(title: 'Network', name: '/network', subtitle: '网络请求组件'),
+      RouteItem(title: 'QrcodeView', name: '/qrcode', subtitle: '二维码组件'),
     ];
   }
 }

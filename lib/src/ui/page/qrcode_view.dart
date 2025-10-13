@@ -7,8 +7,8 @@ import 'package:qr_code_scanner_plus/qr_code_scanner_plus.dart';
 
 import '../../../tao996.dart';
 
-
 // https://github.com/vespr-wallet/qr_code_scanner_plus/blob/master/example/lib/main.dart
+/// 二维码扫描，扫描成功后关闭页面返回结果 MyQrcodeIconButton(onChange:(text){})
 
 class QRCodeView extends StatefulWidget {
   const QRCodeView({super.key});
@@ -22,13 +22,23 @@ class _QRCodeViewState extends State<QRCodeView> {
   QRViewController? controller;
   final GlobalKey qrKey = GlobalKey(debugLabel: 'QR');
 
+  // *** 1. 核心修复：添加一个标志位，防止重复调用 Get.back() ***
+  bool _isProcessing = false;
+
   @override
   void reassemble() {
     super.reassemble();
     if (Platform.isAndroid) {
-      controller!.pauseCamera();
+      controller?.pauseCamera();
     }
-    controller!.resumeCamera();
+    controller?.resumeCamera();
+  }
+
+  // *** 2. 关键修改：在 dispose 中取消流监听器（尽管这不是直接原因，但仍是好习惯）***
+  @override
+  void dispose() {
+    controller?.dispose();
+    super.dispose();
   }
 
   @override
@@ -52,7 +62,7 @@ class _QRCodeViewState extends State<QRCodeView> {
                     child: FutureBuilder(
                       future: controller?.getFlashStatus(),
                       builder: (context, snapshot) {
-                        return Text('Flash: ${snapshot.data}');
+                        return Text(snapshot.data == true ? 'Flash Off'.tr : 'Flash On'.tr);
                       },
                     ),
                   ),
@@ -79,8 +89,11 @@ class _QRCodeViewState extends State<QRCodeView> {
           this.controller = controller;
         });
         controller.scannedDataStream.listen((scanData) {
+          if (_isProcessing) return; // 如果正在处理或已处理，则忽略
           if (scanData.code != null) {
+            _isProcessing = true; // 立即设置为 true
             controller.stopCamera();
+            // dprint('扫描结果: ${scanData.code}');
             Get.back(result: scanData.code);
             // Navigator.pop(context, scanData.code);
           } else {

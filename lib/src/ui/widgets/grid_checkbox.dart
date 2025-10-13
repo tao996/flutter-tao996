@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:tao996/tao996.dart';
 
-/// 网格布局的 checkbox 按钮组
+/// 网格布局的 checkbox 按钮组，可以通过 [FormHelper.gridCheckbox] 调用
 /// 用户可以选中或取消选中列表中的每个名称。
 class GridCheckbox extends StatefulWidget {
   /// 所有的可选名称列表。

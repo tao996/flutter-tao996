@@ -14,7 +14,7 @@ Widget myImagePlaceholder(String text, {void Function()? onTap}) {
       child: Container(
         height: 200,
         width: double.infinity,
-        decoration: BoxDecoration(borderRadius: BorderRadius.circular(8)),
+        decoration: BoxDecoration(borderRadius: BorderRadius.circular(8),color: Colors.grey[200]),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           crossAxisAlignment: CrossAxisAlignment.center,
@@ -48,8 +48,8 @@ class _MyImageCacheState extends State<MyImageCache> {
   final bool isWifi;
 
   _MyImageCacheState()
-      : useLowDataMode = getISettingsService().useLowDataMode,
-        isWifi = getINetworkService().currentNetworkState.isWifi {
+    : useLowDataMode = getISettingsService().useLowDataMode,
+      isWifi = getINetworkService().currentNetworkState.isWifi {
     _shouldLoadManually = useLowDataMode && !isWifi;
     _debugService.d(
       '[_MyImageCacheState] 图片加载模式',
@@ -89,11 +89,11 @@ class _MyImageCacheState extends State<MyImageCache> {
           _isImageCached = false;
         });
       }
-      _debugService.d('[checkImageCache] imageUrl is empty');
+      dprint('[checkImageCache] imageUrl is empty');
       return;
     }
     try {
-      _debugService.d('[checkImageCache] 准备检查 URL 缓存: $imageUrl');
+      dprint('[checkImageCache] 准备检查 URL 缓存: $imageUrl');
       final cacheManager = DefaultCacheManager();
 
       final file = await cacheManager.getFileFromCache(imageUrl);
@@ -101,12 +101,10 @@ class _MyImageCacheState extends State<MyImageCache> {
         setState(() {
           _isImageCached = file != null;
         });
-        getIDebugService().d(
-            '[checkImageCache] 缓存文件是否存在: $_isImageCached');
+        dprint('[checkImageCache] 缓存文件是否存在: $_isImageCached');
       }
     } catch (e) {
-      getIDebugService().d(
-          '[checkImageCache] 检查缓存时发生错误: $imageUrl, 错误: $e');
+      dprint('[checkImageCache] 检查缓存时发生错误: $imageUrl, 错误: $e');
 
       if (mounted) {
         setState(() {
@@ -146,23 +144,21 @@ class _MyImageCacheState extends State<MyImageCache> {
     );
   }
 
-
   /// 图片可见区域检测
   Widget _visibilityDetector(String imageUrl) {
     return VisibilityDetector(
-        key: Key(imageUrl), // 为每个图片 URL 使用唯一的 key
-        onVisibilityChanged: (VisibilityInfo info) {
-          // 如果图片可见，CachedNetworkImage 会自动处理加载。
-          // 这里不需要额外的 _isVisible 状态。
-          // 可以用于调试或更复杂的懒加载策略（例如，当图片进入屏幕时预加载）
-          if (isDebugMode && info.visibleFraction > 0.0) {
-            getIDebugService().d(
-              '[VisibilityDetector]: $imageUrl isVisible: ${info
-                  .visibleFraction}',
-            );
-          }
-        },
-        child: _gestureDetector(_image(imageUrl), imageUrl: imageUrl)
+      key: Key(imageUrl), // 为每个图片 URL 使用唯一的 key
+      onVisibilityChanged: (VisibilityInfo info) {
+        // 如果图片可见，CachedNetworkImage 会自动处理加载。
+        // 这里不需要额外的 _isVisible 状态。
+        // 可以用于调试或更复杂的懒加载策略（例如，当图片进入屏幕时预加载）
+        if (isDebugMode && info.visibleFraction > 0.0) {
+          dprint(
+            '[VisibilityDetector]: $imageUrl isVisible: ${info.visibleFraction}',
+          );
+        }
+      },
+      child: _gestureDetector(_image(imageUrl), imageUrl: imageUrl),
     );
   }
 
@@ -173,11 +169,11 @@ class _MyImageCacheState extends State<MyImageCache> {
       onTap: () {
         if (imageUrl.isNotEmpty) {
           // 只有在图片应该加载时才允许点击放大
-          getIDebugService().d('click to open image view: $imageUrl');
+          dprint('click to open image view: $imageUrl');
           Navigator.push(
             context,
             MaterialPageRoute(
-              builder: (context) => ImageViewerPage(imageUrl: imageUrl),
+              builder: (context) => MyImageViewerWidget(imageUrl: imageUrl),
             ),
           );
         }

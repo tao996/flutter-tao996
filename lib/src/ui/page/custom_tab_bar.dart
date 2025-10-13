@@ -192,3 +192,104 @@ class _MyCustomTabBarState extends State<MyCustomTabBar> {
     );
   }
 }
+
+
+class MyFlowCustomTabBar extends StatelessWidget {
+  // 沿用 FlowChipBar 的属性
+  final List<Widget> children;
+  final RxInt activeIndex;
+  final void Function(int index) onChange;
+
+  // 垂直内边距用于控制整体高度
+  final double verticalPadding;
+
+  const MyFlowCustomTabBar({
+    super.key,
+    required this.activeIndex,
+    required this.onChange,
+    required this.children,
+    this.verticalPadding = 8.0, // 调整为更小的垂直内边距
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final ThemeData theme = Theme.of(context);
+
+    return Container(
+      width: double.infinity,
+      decoration: BoxDecoration(
+        color: theme.appBarTheme.backgroundColor ?? theme.scaffoldBackgroundColor,
+        border: Border(
+          bottom: BorderSide(
+            color: theme.dividerColor.withOpacity(0.5),
+            width: 0.5,
+          ),
+        ),
+      ),
+
+      child: Padding(
+        // Padding 用于控制 Tab Bar 的垂直空间和左右边距
+        padding: EdgeInsets.symmetric(vertical: verticalPadding, horizontal: 8.0),
+
+        child: Wrap(
+          spacing: 16.0, // 子 Widget 之间的水平间距
+          runSpacing: 10.0, // 行与行之间的垂直间距（略微增加，以容纳指示器）
+          alignment: WrapAlignment.start,
+
+          children: List.generate(children.length, (index) {
+
+            return Obx(() {
+              final isCurrentActive = activeIndex.value == index;
+
+              return Column(
+                mainAxisSize: MainAxisSize.min, // 确保 Column 不会占用多余空间
+                children: [
+                  // 1. Tab 点击区域 (使用 InkWell)
+                  InkWell(
+                    onTap: () {
+                      activeIndex.value = index;
+                      onChange(index);
+                    },
+
+                    child: Container(
+                      // 填充内部 Padding，使点击区域更舒适
+                      padding: const EdgeInsets.symmetric(horizontal: 4.0, vertical: 4.0),
+
+                      child: DefaultTextStyle(
+                        style: TextStyle(
+                          // 根据选中状态改变文本颜色和粗细
+                          color: isCurrentActive
+                              ? theme.colorScheme.primary
+                              : theme.textTheme.bodyMedium?.color?.withOpacity(0.8),
+                          fontWeight: isCurrentActive ? FontWeight.bold : FontWeight.normal,
+                          fontSize: 14.0,
+                        ),
+                        child: children[index],
+                      ),
+                    ),
+                  ),
+
+                  // 2. 底部指示器 (AnimatedContainer)
+                  AnimatedContainer(
+                    duration: const Duration(milliseconds: 200),
+                    curve: Curves.easeOutCubic,
+
+                    // 指示器宽度：固定宽度，使其居中于 Tab
+                    width: isCurrentActive ? 24.0 : 0.0,
+                    height: 3.0,
+                    margin: const EdgeInsets.only(top: 2.0), // 保持与内容的间距
+
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(1.5),
+                      color: theme.colorScheme.primary,
+                    ),
+                  ),
+                ],
+              );
+            });
+          }),
+        ),
+      ),
+    );
+  }
+}

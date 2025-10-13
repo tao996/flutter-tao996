@@ -34,7 +34,6 @@ export 'src/translation/translation.dart';
 
 export 'src/ui/page/custom_tab_bar.dart';
 export 'src/ui/page/easy_refresh.dart';
-export 'src/ui/page/image_viewer.dart';
 export 'src/ui/page/network_controller.dart';
 export 'src/ui/page/network_widget.dart';
 export 'src/ui/page/qrcode_view.dart';
@@ -54,6 +53,7 @@ export 'src/ui/widgets/grid_checkbox.dart';
 export 'src/ui/widgets/grid_view.dart';
 export 'src/ui/widgets/icon.dart';
 export 'src/ui/widgets/image.dart';
+export 'src/ui/widgets/image_viewer.dart';
 export 'src/ui/widgets/input.dart';
 export 'src/ui/widgets/input_date.dart';
 export 'src/ui/widgets/loading.dart';

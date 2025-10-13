@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:tao996/tao996.dart';
 
-/// 一个用于展示列表的复选框 Widget。
+/// 一个用于展示列表的复选框 Widget。可以通过 [FormHelper.listCheckbox] 调用
 class ListCheckbox extends StatefulWidget {
   /// 待显示的列表。
   final List<String> items;

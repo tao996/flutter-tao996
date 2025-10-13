@@ -209,6 +209,31 @@ class MyDetailIconButton extends StatelessWidget {
   }
 }
 
+class MyQrcodeIconButton extends StatelessWidget {
+  final void Function(String?) onChange;
+
+  const MyQrcodeIconButton({super.key, required this.onChange});
+
+  @override
+  Widget build(BuildContext context) {
+    return IconButton(
+      icon: const Icon(Icons.qr_code_scanner),
+      onPressed: () {
+        // Navigator.of(context)
+        //     .push(MaterialPageRoute(builder: (context) => const QRCodeView()))
+        //     .then((result) {
+        //       dprint('~~~~~~~~~~~~ $result');
+        //       onChange(result);
+        //     });
+        Get.to(() => const QRCodeView())?.then((result) {
+          dprint('~~~~~~~~~~~~ $result');
+          onChange(result);
+        });
+      },
+    );
+  }
+}
+
 /// 删除图标无文字按钮
 class MyDeleteIconButton extends StatelessWidget {
   final void Function()? onPressed;

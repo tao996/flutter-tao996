@@ -61,6 +61,8 @@ class TranslationService extends Translations {
       'share failed': '分享失败: @reason',
       'Download': '下载',
       'Share': '分享',
+      'Flash On':'打开灯光',
+      'Flash Off':'关闭灯光',
 
       // 权限
       'Permission storage deny': '没有存储权限',
