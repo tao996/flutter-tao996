@@ -69,6 +69,9 @@ class TranslationService extends Translations {
       // URL
       'openUrlFailed': '打开 @title 链接失败',
       'urlIsEmpty': '@title 链接为空',
+      // widgets
+      'dateHint':'点击选择一个日期',
+      'datetimeHint':'点击选择日期和时间'
     },
     'en_US': {},
   };

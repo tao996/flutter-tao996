@@ -4,7 +4,22 @@ import '../../tao996.dart';
 
 enum DateTimeFormat { ymd, ymdHm, ymdHms }
 
+// 正则表达式：匹配 YYYY-MM-DDTXX:XX:XX.XXX... 的格式
+// ^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d+$ 匹配了日期、T、时间、点和至少一位数字
+final RegExp _iso8601Regex = RegExp(
+  r'^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3,6}$',
+);
+
 class DatetimeUtil {
+  /// 仅使用正则表达式检查字符串是否匹配 toIso8601String() 的格式。
+  /// 注意：此方法不验证日期（如 2025-02-30）或时间（如 25:00:00）的有效性。
+  static bool isIso8601FormatRegex(dynamic input) {
+    if (input == null || input is! String) {
+      return false;
+    }
+    return _iso8601Regex.hasMatch(input);
+  }
+
   static String getNowTime({String pattern = 'yyyy-MM-dd HH:mm:ss'}) {
     return DateFormat(pattern).format(DateTime.now());
   }

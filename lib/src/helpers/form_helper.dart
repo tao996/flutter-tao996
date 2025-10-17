@@ -155,6 +155,23 @@ class FormHelper {
     );
   }
 
+
+  static Widget datetimeInput({
+    DateTime? initialDatetime,
+    required String labelText,
+    required Function(DateTime?) onDatetimeSelected,
+    String? hintText,
+  }) {
+    return FakeDatetimeInput(
+      labelText: labelText,
+      hintText: hintText,
+      initialDatetime: initialDatetime,
+      onDatetimeSelected: onDatetimeSelected,
+    );
+  }
+
+
+
   /// 一个普通的简单复选组件
   static Widget checkbox(
     String label, {

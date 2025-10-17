@@ -13,7 +13,7 @@ class HomePage extends StatelessWidget {
     final items = routeHelper.items();
     return MyScaffold(
       appBar: AppBar(title: Text('appTitle'.tr)),
-      singleChildScrollView: false,
+      singleChildScrollView: true,
       body: Column(
         children: List.generate(items.length, (index) {
           final item = items[index];

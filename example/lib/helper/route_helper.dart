@@ -57,9 +57,9 @@ class RouteHelper implements IRouteService {
         subtitle: '对 flutter_pulltorefresh 进行二次封装',
       ),
       RouteItem(
-        title: 'CustomTabBar + FlowChipBar',
+        title: 'CustomTabBar',
         name: '/customTabBar',
-        subtitle: '对 tabBarView 的优化，流式 Chip 布局',
+        subtitle: '对 tabBarView 的优化，支持多种显示方式',
       ),
       RouteItem(title: 'MyForm', name: '/formHelper', subtitle: '二次封装的表单组件'),
       RouteItem(

@@ -8,7 +8,7 @@ enum Company {
    facebook,
 }
 class ConstHelper {
- static const List<String> titles = [
+ static List<String> titles = [
     'Apple',
     'Google',
     'Microsoft',
@@ -19,11 +19,6 @@ class ConstHelper {
     'Baidu',
     'Toutiao',
     'JD',
-    'Yahoo',
-    'Twitter',
-    'Instagram',
-    'LinkedIn',
-    'Pinterest',
   ];
  static  List<KV<Company>> kvTitles = kvCreateList<Company>({
     Company.apple: 'Apple',

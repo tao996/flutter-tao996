@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 
 // 定义一个新的可复用 Widget 来实现伪输入框效果
 class FakeDateInput extends StatefulWidget {
   final String labelText;
-  final String hintText;
+  final String? hintText;
   final DateTime? initialDate;
 
   // 修改回调函数，使其可以接受 null，表示清除日期
@@ -12,10 +13,10 @@ class FakeDateInput extends StatefulWidget {
   const FakeDateInput({
     super.key,
     required this.labelText,
-    String? hintText,
+    this.hintText,
     this.initialDate,
     required this.onDateSelected,
-  }) : hintText = hintText ?? '点击选择一个日期';
+  });
 
   @override
   State<FakeDateInput> createState() => _FakeDateInputState();
@@ -34,7 +35,7 @@ class _FakeDateInputState extends State<FakeDateInput> {
   // 格式化日期显示（使用 padLeft 确保两位数）
   String get _formattedDate {
     if (_selectedDate == null) {
-      return widget.hintText;
+      return widget.hintText ?? 'dateHint'.tr;
     }
     final year = _selectedDate!.year;
     final month = _selectedDate!.month.toString().padLeft(2, '0');

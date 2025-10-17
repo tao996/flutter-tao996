@@ -185,4 +185,13 @@ class NumberUtil {
 
     return sb.toString();
   }
+
+  static double formatDoubleWithRegex(double value) {
+    String s = value.toString();
+    // 匹配字符串末尾的 ".0"
+    if (s.endsWith('.0')) {
+      return double.parse(s.substring(0, s.length - 2));
+    }
+    return value;
+  }
 }

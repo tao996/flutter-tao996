@@ -4,12 +4,12 @@ import 'package:tao996/src/utils/fn_util.dart';
 
 class MyDialog {
   /// 全屏对话框，如果你需要在高度/宽度上尽可能小，则需要将 Column/Row 的 mainAxisSize: MainAxisSize.min
-  static void fullScreenDialog(
+  static Future<dynamic> fullScreenDialog(
     BuildContext context, {
     required Widget child,
     double? horizontalPadding = 20.0,
     double? verticalPadding = 20.0,
-  }) {
+  }) async {
     double? width;
     if (horizontalPadding != null) {
       final screenWidth = MediaQuery.of(context).size.width;
@@ -23,7 +23,7 @@ class MyDialog {
       height = height.toInt().toDouble();
     }
     dprint('width: $width; height: $height');
-    showDialog(
+    return showDialog(
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
@@ -44,8 +44,11 @@ class MyDialog {
   }
 
   /// 打开一个普通的对话框
-  static void open(BuildContext context, {required Widget child}) {
-    showDialog(
+  static Future<dynamic> open(
+    BuildContext context, {
+    required Widget child,
+  }) async {
+    return showDialog(
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(

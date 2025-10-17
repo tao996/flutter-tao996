@@ -83,6 +83,13 @@ class _MyDemoFormHelperState extends State<MyDemoFormHelper> {
                 dprint(dt);
               },
             ),
+            const SizedBox(height: 16),
+            FormHelper.datetimeInput(
+              labelText: '日期时间',
+              onDatetimeSelected: (dt) {
+                dprint(dt);
+              },
+            ),
 
             const SizedBox(height: 16),
             Obx(
