@@ -1,8 +1,13 @@
-import 'package:get/get_navigation/src/routes/get_route.dart';
+import 'package:get/get.dart';
 
 abstract class IRouteService {
-  String initRoute = '/';
-  List<GetPage> routes = [];
+  // static const String initial = '/';
+  String get initRoute => '/';
+  List<GetPage> get routes => [];
+
+  Future<dynamic> toName(String routeName, {dynamic arguments}) async {
+    return await Get.toNamed(routeName, arguments: arguments);
+  }
 }
 /*
 import 'package:get/get.dart';

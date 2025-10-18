@@ -1,18 +1,48 @@
 import 'package:flutter/cupertino.dart';
 
 class MyLayout {
-  static Widget miniColumn(List<Widget> children) {
+
+  static Widget emptyWidget() => const SizedBox.shrink();
+  static Widget sizeHeight() => const SizedBox(height: 16,);
+  static Widget miniColumn(
+    List<Widget> children, {
+    MainAxisAlignment mainAxisAlignment = MainAxisAlignment.start,
+    CrossAxisAlignment crossAxisAlignment = CrossAxisAlignment.start,
+    TextDirection? textDirection,
+    VerticalDirection verticalDirection = VerticalDirection.down,
+    TextBaseline? textBaseline,
+    double spacing = 0.0,
+  }) {
     return Column(
-      mainAxisSize: MainAxisSize.min, // 推荐：只占用所需的垂直空间
-      crossAxisAlignment: CrossAxisAlignment.start, // 推荐：对齐方式
+      mainAxisSize: MainAxisSize.min,
+      // 推荐：只占用所需的垂直空间
+      mainAxisAlignment: mainAxisAlignment,
+      crossAxisAlignment: crossAxisAlignment,
+      textDirection: textDirection,
+      verticalDirection: verticalDirection,
+      textBaseline: textBaseline,
+      spacing: spacing,
       children: children,
     );
   }
 
-  static Widget miniRow(List<Widget> children) {
+  static Widget miniRow(
+    List<Widget> children, {
+    MainAxisAlignment mainAxisAlignment = MainAxisAlignment.start,
+    CrossAxisAlignment crossAxisAlignment = CrossAxisAlignment.start,
+    TextDirection? textDirection,
+    VerticalDirection verticalDirection = VerticalDirection.down,
+    TextBaseline? textBaseline,
+    double spacing = 0.0,
+  }) {
     return Row(
-      mainAxisSize: MainAxisSize.min, // 推荐：只占用所需的水平空间
-      crossAxisAlignment: CrossAxisAlignment.start, // 推荐：对齐方式
+      mainAxisSize: MainAxisSize.min,
+      mainAxisAlignment: mainAxisAlignment,
+      crossAxisAlignment: crossAxisAlignment,
+      textDirection: textDirection,
+      verticalDirection: verticalDirection,
+      textBaseline: textBaseline,
+      spacing: spacing,
       children: children,
     );
   }
@@ -48,5 +78,22 @@ class MyLayout {
     );
   }
 
-  static Widget emptyWidget() => const SizedBox.shrink();
+
+  static Widget leftLabel(String label, Widget child, {double width = 80}) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        SizedBox(
+          width: width,
+          child: Text(
+            label,
+            softWrap: true,
+            style: TextStyle(fontWeight: FontWeight.bold),
+          ),
+        ),
+        const SizedBox(width: 10),
+        Expanded(child: child),
+      ],
+    );
+  }
 }

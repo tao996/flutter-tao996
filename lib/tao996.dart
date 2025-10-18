@@ -1,5 +1,6 @@
 export 'src/const/color.dart';
 export 'src/const/icon.dart';
+export 'src/const/space.dart';
 
 export 'src/helpers/api_response_handler.dart';
 export 'src/helpers/db_type_converter.dart';

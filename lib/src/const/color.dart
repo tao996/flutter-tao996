@@ -1,5 +1,7 @@
-
 // 定义一些常用的颜色常量，方便使用
+import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+
 class MyColor {
   static const String reset = '\x1B[0m'; // 重置/默认
   static const String black = '\x1B[30m';
@@ -26,5 +28,44 @@ class MyColor {
   static const String faint = '\x1B[2m';
   static const String italic = '\x1B[3m'; // 斜体
   static const String underline = '\x1B[4m'; // 下划线
+
+  /// 代表成功的颜色，通常用于表示成功、完成、通过等操作
+  static Color success() {
+    return getColorScheme().secondary;
+  }
+
+  /// 代表失败的颜色，通常用于表示失败、错误、拒绝等操作
+  static Color error() {
+    return getColorScheme().error;
+  }
+
+  /// 背景、表面式，常用于 AlertDialog
+  static Color surface() {
+    return getColorScheme().surface;
+  }
+
+  /// 高亮或信息提示
+  static Color info() {
+    return getColorScheme().primary;
+  }
+  /// 文本颜色
+  static Color text(double opacity) {
+    return getColorScheme().onSurface.withAlpha((255 * opacity).toInt());
+  }
 }
 
+// 确保在 GetX 环境中安全获取当前的 BuildContext
+BuildContext? getThemeContext() {
+  // 使用 Get.context 获取当前激活的 BuildContext
+  return Get.context;
+}
+
+// 获取当前主题的 ColorScheme
+ColorScheme getColorScheme() {
+  final context = getThemeContext();
+  // 如果 context 不可用，返回一个默认的 ColorScheme 防止崩溃
+  if (context == null) {
+    return const ColorScheme.light();
+  }
+  return Theme.of(context).colorScheme;
+}

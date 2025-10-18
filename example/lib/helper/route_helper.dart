@@ -21,12 +21,12 @@ class RouteItem {
   RouteItem({required this.title, required this.name, required this.subtitle});
 }
 
-class RouteHelper implements IRouteService {
+class RouteHelper extends IRouteService {
   @override
-  String initRoute = '/';
+  String get initRoute => '/';
 
   @override
-  List<GetPage> routes = [
+  List<GetPage> get routes => [
     GetPage(name: '/', page: () => HomePage()),
     GetPage(name: '/plugin_pull_to_refresh', page: () => PluginPullToRefresh()),
     GetPage(name: '/smartRefresh', page: () => MyDemoSmartRefresherPage()),

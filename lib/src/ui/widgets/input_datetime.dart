@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:tao996/src/const/color.dart';
 
 class FakeDatetimeInput extends StatefulWidget {
   final String labelText;
@@ -147,56 +148,10 @@ class _FakeDatetimeInputState extends State<FakeDatetimeInput> {
           style: TextStyle(
             color: hasDatetime
                 ? Theme.of(context).textTheme.titleMedium?.color
-                : Colors.grey[600],
+                : MyColor.text(0.6),
           ),
         ),
       ),
     );
   }
-}
-
-// ==========================================================
-// 外部调用示例
-// ==========================================================
-// 需要在 MaterialApp 环境中运行
-
-class DemoPage extends StatefulWidget {
-  const DemoPage({super.key});
-
-  @override
-  State<DemoPage> createState() => _DemoPageState();
-}
-
-class _DemoPageState extends State<DemoPage> {
-  DateTime? scheduledTime;
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text('日期时间选择器')),
-      body: Padding(
-        padding: const EdgeInsets.all(20.0),
-        child: Column(
-          children: [
-            FakeDatetimeInput(
-              labelText: '预约时间',
-              initialDatetime: scheduledTime,
-              onDatetimeSelected: (datetime) {
-                setState(() {
-                  scheduledTime = datetime;
-                });
-                print('外部接收到的完整时间: $datetime');
-              },
-            ),
-            const SizedBox(height: 20),
-            Text('最终选中的时间 (外部状态): ${scheduledTime ?? '未选择'}'),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-void main() {
-  runApp(const MaterialApp(home: DemoPage()));
 }

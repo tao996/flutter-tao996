@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:tao996/src/const/color.dart';
 
 // 定义一个枚举，用于区分各种输入限制，使代码更清晰
 enum _InputMode {
@@ -191,7 +192,7 @@ class _MyInputState extends State<MyInput> {
         // labelText: widget.labelText,
         label: _labelWidget(),
         hintText: widget.hintText,
-        hintStyle: TextStyle(color: Colors.grey[400]),
+        hintStyle: TextStyle(color: MyColor.text(0.4)),
         // helper: _helperWidget(),
         helperText: widget.helperText,
         border: const OutlineInputBorder(),
@@ -211,7 +212,6 @@ class _MyInputState extends State<MyInput> {
     if (widget.labelText != null && widget.labelText!.isNotEmpty) {
       final child = Text(
         widget.labelText!,
-        // style: TextStyle(fontSize: 12, color: Colors.grey),
       );
       if (widget.isRequired) {
         return Row(
@@ -219,7 +219,7 @@ class _MyInputState extends State<MyInput> {
           mainAxisAlignment: MainAxisAlignment.start,
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            const Icon(Icons.circle, size: 6, color: Colors.red),
+             Icon(Icons.circle, size: 6, color: MyColor.error()),
             const SizedBox(width: 4),
             child,
           ],

@@ -3,9 +3,10 @@ import 'package:get/get.dart';
 
 /// 适用于内容可能超出屏幕范围但不需要复杂的滑动效果（例如视差滚动）的页面。
 class MyScaffold extends StatelessWidget {
-  final AppBar? appBar;
+  final AppBar appBar;
   final Widget body;
   final Widget? floatingActionButton;
+
   /// [singleChildScrollView] 在滚动方向（垂直）上，不给其子 Widget 任何约束，告诉它“你可以无限高”（即 child 继承了无限高的属性）
   /// 常用错误: `SingleChildScrollView>Column>Expanded|Flexible|ListView`
   ///
@@ -34,7 +35,7 @@ class MyScaffold extends StatelessWidget {
   const MyScaffold({
     super.key,
     required this.singleChildScrollView,
-    this.appBar,
+    required this.appBar,
     this.floatingActionButton,
     required this.body,
   });

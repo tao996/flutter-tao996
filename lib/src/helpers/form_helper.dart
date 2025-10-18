@@ -34,7 +34,7 @@ class FormHelper {
     );
   }
 
-  /// 水平布局的 按钮组，可用于多单或单选，被选中的选项会打上一个勾（改变了尺寸）
+  /// 水平布局的 按钮组，可用于多单或单选（oneFilterChip），被选中的选项会打上一个勾（改变了尺寸）
   /// 跟 [gridCheckbox] 的区别是会自动换行
   static Widget filterChipCheckbox<T>({
     required List<KV<T>> items,
@@ -47,6 +47,7 @@ class FormHelper {
       children: items.map((item) {
         final isSelected = initItems != null && initItems.contains(item.value);
         return FilterChip(
+          // avatar: item.iconData != null ? Icon(item.iconData) : null,
           label: Text(item.label),
           selected: isSelected,
           onSelected: onSelectionChanged != null
@@ -57,6 +58,29 @@ class FormHelper {
         );
       }).toList(),
     );
+  }
+
+  /// 水平布局的 按钮组，可用于单选
+  static Widget oneFilterChip<T>({
+    required List<KV<T>> items,
+    required void Function(T item) onSelectionChanged,
+    T? value,
+    String? label,
+  }) {
+    final child = filterChipCheckbox<T>(
+      items: items,
+      onSelectionChanged: (selected, item) {
+        if (selected) {
+          onSelectionChanged(item);
+        }
+      },
+      initItems: value == null ? null : [value],
+    );
+    if (label != null && label.isNotEmpty) {
+      return MyLayout.leftLabel(label, child);
+    }
+
+    return child;
   }
 
   /// 分段按钮，2-3个选项时可使用，如果选项太多或内容太长则不建议使用，因为文字换行显示很难看
@@ -79,6 +103,26 @@ class FormHelper {
     );
   }
 
+  /// 单选分段按钮
+  static Widget oneSegmentedButton<T>({
+    required List<KV<T>> items,
+    required void Function(T value) onSelectionChanged,
+    T? value,
+    String? label,
+  }) {
+    final child = segmentedButton<T>(
+      items: items,
+      onSelectionChanged: (data) {
+        onSelectionChanged(data.first);
+      },
+      initItems: value == null ? [] : [value],
+    );
+    if (label != null && label.isNotEmpty) {
+      return MyLayout.leftLabel(label, child);
+    }
+    return child;
+  }
+
   /// 水平列表框
   static Widget select<T>({
     required String label,
@@ -86,6 +130,7 @@ class FormHelper {
     required ValueChanged<T?> onChanged,
     T? value,
     String? hintText,
+    String? helperText,
   }) {
     if (value != null) {
       final values = items.map((kv) => kv.value).toList();
@@ -98,6 +143,7 @@ class FormHelper {
       initialValue: value,
       decoration: InputDecoration(
         labelText: label,
+        helperText: helperText,
         border: OutlineInputBorder(),
       ),
       items: items.map((KV kv) {
@@ -155,7 +201,6 @@ class FormHelper {
     );
   }
 
-
   static Widget datetimeInput({
     DateTime? initialDatetime,
     required String labelText,
@@ -169,8 +214,6 @@ class FormHelper {
       onDatetimeSelected: onDatetimeSelected,
     );
   }
-
-
 
   /// 一个普通的简单复选组件
   static Widget checkbox(

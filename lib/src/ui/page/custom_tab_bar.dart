@@ -55,15 +55,18 @@ class MyCustomTabBar extends StatefulWidget {
   /// 当前选中的标签索引
   final RxInt activeIndex;
   final void Function(int index) onChange;
-  final MyCustomTabBarStyle tabStyle;
+  final MyCustomTabBarStyle style;
+  /// 选中的 TabBar 背景色，默认为 theme.scaffoldBackgroundColor
+  final Color? notebookBgColor;
 
   const MyCustomTabBar({
     super.key,
     this.height = 50,
-    this.tabStyle = MyCustomTabBarStyle.horizontal,
+    this.style = MyCustomTabBarStyle.horizontal,
     required this.activeIndex,
     required this.onChange,
     required this.children,
+    this.notebookBgColor,
   });
 
   @override
@@ -160,7 +163,7 @@ class _MyCustomTabBarState extends State<MyCustomTabBar> {
 
   @override
   Widget build(BuildContext context) {
-    switch (widget.tabStyle) {
+    switch (widget.style) {
       case MyCustomTabBarStyle.bookMark:
         return _buildBookMarkStyle(context);
       case MyCustomTabBarStyle.flow:
@@ -280,7 +283,7 @@ class _MyCustomTabBarState extends State<MyCustomTabBar> {
     final ThemeData theme = Theme.of(context);
 
     // 笔记本背景颜色（可以和 Scaffold 背景色一致，产生连接感）
-    final Color notebookBgColor = theme.scaffoldBackgroundColor;
+    final Color notebookBgColor = widget.notebookBgColor ?? theme.scaffoldBackgroundColor;
     // 标签页选中颜色
     final Color activeTabColor = notebookBgColor;
     // 标签页未选中颜色（略微深一点或灰色）
@@ -318,7 +321,7 @@ class _MyCustomTabBarState extends State<MyCustomTabBar> {
                 child: Obx(() {
                   final bool currentActive = widget.activeIndex.value == index;
                   final double verticalPadding =
-                      widget.activeIndex.value == index ? -2 : 4.0;
+                      widget.activeIndex.value == index ? -2 : 2.0;
                   return AnimatedContainer(
                     duration: const Duration(milliseconds: 150),
                     curve: Curves.easeOut,

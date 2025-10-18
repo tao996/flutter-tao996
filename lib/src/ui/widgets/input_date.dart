@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:tao996/src/const/color.dart';
 
 // 定义一个新的可复用 Widget 来实现伪输入框效果
 class FakeDateInput extends StatefulWidget {
@@ -123,56 +124,10 @@ class _FakeDateInputState extends State<FakeDateInput> {
             // 如果没有日期，使用 HintText 的颜色
             color: hasDate
                 ? Theme.of(context).textTheme.titleMedium?.color
-                : Colors.grey[600],
+                : MyColor.text(0.6),
           ),
         ),
       ),
     );
   }
 }
-
-// ==========================================================
-// 外部调用示例
-// ==========================================================
-//
-// class DemoPage extends StatefulWidget {
-//   const DemoPage({super.key});
-//
-//   @override
-//   State<DemoPage> createState() => _DemoPageState();
-// }
-//
-// class _DemoPageState extends State<DemoPage> {
-//   DateTime? birthDate;
-//
-//   @override
-//   Widget build(BuildContext context) {
-//     return Scaffold(
-//       appBar: AppBar(title: const Text('带清除按钮的日期选择器')),
-//       body: Padding(
-//         padding: const EdgeInsets.all(20.0),
-//         child: Column(
-//           children: [
-//             FakeDateInput(
-//               labelText: '出生日期',
-//               initialDate: birthDate,
-//               // 注意：onDateSelected 现在接受 DateTime?
-//               onDateSelected: (date) {
-//                 setState(() {
-//                   birthDate = date;
-//                 });
-//                 print('外部接收到的日期: $date');
-//               },
-//             ),
-//             const SizedBox(height: 20),
-//             Text('最终选中的日期 (外部状态): ${birthDate?.toLocal().toString().split(' ')[0] ?? '未选择'}'),
-//           ],
-//         ),
-//       ),
-//     );
-//   }
-// }
-//
-// void main() {
-//   runApp(const MaterialApp(home: DemoPage()));
-// }

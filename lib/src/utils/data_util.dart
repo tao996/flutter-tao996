@@ -192,4 +192,8 @@ class DataUtil {
   static dynamic copy(dynamic data) {
     return jsonDecode(jsonEncode(data));
   }
+  /// 获取数据运行时的类型
+  static Type getType(dynamic data){
+    return data.runtimeType;
+  }
 }

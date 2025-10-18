@@ -24,15 +24,37 @@ class MessageBar extends StatelessWidget {
   });
 
   Color _getBackgroundColor(BuildContext context, MessageType type) {
+    final colors = Theme.of(context).colorScheme;
     switch (type) {
       case MessageType.info:
-        return Colors.blue.withAlpha(229); // 0.9 * 255 = 229
+        return colors.primary;
       case MessageType.success:
-        return Colors.green.withAlpha(229);
+        return colors.secondary;
       case MessageType.warning:
-        return Colors.amber.shade800; //.withAlpha(229);
+
+        /// 警告色没有内置
+        return Colors.amber.shade700; //.withAlpha(229);
       case MessageType.error:
-        return Colors.red.withAlpha(229);
+        return colors.error;
+    }
+  }
+
+  // 2. 根据背景色获取前景文本/图标颜色
+  Color _getForegroundColor(BuildContext context, MessageType type) {
+    final colors = Theme.of(context).colorScheme;
+    switch (type) {
+      case MessageType.info:
+        // Primary Color 上的文本颜色
+        return colors.onPrimary;
+      case MessageType.success:
+        // Secondary Color 上的文本颜色
+        return colors.onSecondary;
+      case MessageType.warning:
+        // 警告色前景使用黑色或深灰色确保可读性
+        return Colors.black87;
+      case MessageType.error:
+        // Error Color 上的文本颜色
+        return colors.onError;
     }
   }
 
@@ -51,20 +73,21 @@ class MessageBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final foregroundColor = _getForegroundColor(context, type);
     return Material(
       color: Colors.transparent, // 确保背景透明，以便动画正常工作
       child: Container(
-        padding: const EdgeInsets.only(left: 8, right: 8, top: 4, bottom: 4),
+        padding: const EdgeInsets.only(left: 12, right: 8, top: 8, bottom: 8),
         // margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         decoration: _decoration(context),
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            if (icon) ..._icon(),
-            Expanded(child: _text()),
+            if (icon) ..._icon(foregroundColor),
+            Expanded(child: _text(foregroundColor)),
             if (onClose != null)
               IconButton(
-                icon: const Icon(Icons.close, color: Colors.white),
+                icon: Icon(Icons.close, color: foregroundColor),
                 onPressed: onClose,
               ),
           ],
@@ -78,23 +101,26 @@ class MessageBar extends StatelessWidget {
     return BoxDecoration(
       color: backgroundColor,
       borderRadius: BorderRadius.circular(8),
-      // boxShadow: [
-      //   BoxShadow(
-      //     color: backgroundColor.withAlpha(125),
-      //     blurRadius: 10,
-      //     offset: const Offset(0, 4),
-      //   ),
-      // ],
+      boxShadow: [
+        BoxShadow(
+          color: backgroundColor.withAlpha(100),
+          blurRadius: 6,
+          offset: const Offset(0, 2),
+        ),
+      ],
     );
   }
 
-  Widget _text() {
-    return Text(message, style: TextStyle(color: Colors.white, fontSize: 14));
+  Widget _text(Color foregroundColor) {
+    return Text(
+      message,
+      style: TextStyle(color: foregroundColor, fontSize: 14),
+    );
   }
 
-  List<Widget> _icon() {
+  List<Widget> _icon(Color foregroundColor) {
     return [
-      Icon(_getIcon(type), color: Colors.white),
+      Icon(_getIcon(type), color: foregroundColor),
       const SizedBox(width: 8),
     ];
   }

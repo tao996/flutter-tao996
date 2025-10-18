@@ -186,7 +186,7 @@ class MyEditIconButton extends StatelessWidget {
   Widget build(BuildContext context) {
     // return MyButton('编辑',onPressed: onPressed,type: ButtonType.info,);
     return IconButton(
-      icon: const Icon(Icons.edit_outlined, color: Colors.blue),
+      icon: Icon(Icons.edit_outlined, color: MyColor.info()),
       onPressed: onPressed,
       tooltip: '编辑',
     );
@@ -258,7 +258,7 @@ class MyDeleteIconButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return IconButton(
-      icon: const Icon(Icons.delete_outline, color: Colors.red),
+      icon: Icon(Icons.delete_outline, color: MyColor.error()),
       onPressed: confirm
           ? () async {
               final result = await getIMessageService().confirm(

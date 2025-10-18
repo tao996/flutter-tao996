@@ -20,7 +20,7 @@ class ConstHelper {
     'Toutiao',
     'JD',
   ];
- static  List<KV<Company>> kvTitles = kvCreateList<Company>({
+ static  List<KVWidget<Company>> kvTitles = kvCreateWidgetList<Company>({
     Company.apple: 'Apple',
     Company.google: 'Google',
     Company.microsoft: 'Microsoft',

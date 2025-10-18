@@ -88,6 +88,10 @@ class MessageService implements IMessageService {
             child: Text('cancel'.tr),
           ),
           ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: getColorScheme().error, // 使用 Error Color 强调删除操作
+              foregroundColor: getColorScheme().onError,
+            ),
             onPressed: () async {
               Get.back(result: true); // 必须提前关闭
               yes?.call();
@@ -110,11 +114,11 @@ class MessageService implements IMessageService {
       message = message.substring(message.lastIndexOf(':') + 1).trim();
     }
     if (Platform.isWindows || Platform.isLinux || Platform.isMacOS) {
-      snackbar(title ?? '提示', message, successIcon: successIcon);
+      snackbar(title ?? 'info'.tr, message, successIcon: successIcon);
       return;
     }
     Fluttertoast.cancel();
-    Fluttertoast.showToast(msg: message, textColor: textColor);
+    Fluttertoast.showToast(msg: message, textColor: getColorScheme().onSurface);
   }
 
   @override
@@ -134,8 +138,8 @@ class MessageService implements IMessageService {
       icon: successIcon == null
           ? null
           : (successIcon
-                ? Icon(Icons.check_outlined, color: Colors.green)
-                : Icon(Icons.close_outlined, color: Colors.red)),
+                ? Icon(Icons.check_outlined, color: MyColor.success())
+                : Icon(Icons.close_outlined, color: MyColor.error())),
       onTap: (snack) {
         Get.back();
       },
@@ -150,7 +154,7 @@ class MessageService implements IMessageService {
     }
     toast(
       message,
-      textColor: Colors.green,
+      textColor: MyColor.success(),
       title: 'success'.tr,
       successIcon: true,
     );
@@ -169,7 +173,7 @@ class MessageService implements IMessageService {
     }
     toast(
       message,
-      textColor: Colors.red,
+      textColor: MyColor.error(),
       title: 'error'.tr,
       successIcon: false,
     );

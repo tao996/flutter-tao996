@@ -8,15 +8,26 @@ class DbTypeConverter {
 
   static int boolToJson(bool value) => value ? 1 : 0;
 
-  static String mapStringStringToJson(Map<String, String>? data) {
+  static String mapStringToJson(Map<String, String>? data) {
     return TypeCastUtil.mapToJson(data);
   }
 
-  static Map<String, String> mapStringStringFromJson(String? json) {
+  static Map<String, String> mapStringFromJson(String? json) {
     if (json == null || json.isEmpty) {
       return {};
     }
     return TypeCastUtil.mapStringFromJson(json);
+  }
+
+  static String mapIntToJson(Map<String, int>? data) {
+    return TypeCastUtil.mapToJson(data);
+  }
+
+  static Map<String, int> mapIntFromJson(String? json) {
+    if (json == null || json.isEmpty) {
+      return {};
+    }
+    return TypeCastUtil.mapIntFromJson(json);
   }
 
   /// 调用 toMap 来生成字符串

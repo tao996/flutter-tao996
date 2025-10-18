@@ -19,7 +19,7 @@ class MyDemoImage extends StatelessWidget {
             MyText.h3(context, '图片显示 MyImageCache'),
             const SizedBox(height: 10),
             MyImageCache(url: 'https://picsum.photos/250?image=9'),
-            MyText.helperText('点击图片可下载和分享'),
+            MyText.h3(context, '点击图片可下载和分享'),
           ],
         ),
       ),

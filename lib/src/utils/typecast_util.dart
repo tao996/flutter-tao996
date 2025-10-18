@@ -93,6 +93,11 @@ class TypeCastUtil {
     final dynamic decoded = safeJsonDecode(jsonString, isList: false);
     return castMap<String, String>(decoded);
   }
+  /// 将 json string 还原为 `Map<String,int>`
+  static Map<String, int> mapIntFromJson(String? jsonString) {
+    final dynamic decoded = safeJsonDecode(jsonString, isList: false);
+    return castMap<String, int>(decoded);
+  }
 
   /// 将 `List<T>` 转为 `List<Map<String, dynamic>>`
   static List<Map<String, dynamic>> listToMapList<T>(

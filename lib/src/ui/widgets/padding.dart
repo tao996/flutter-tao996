@@ -65,12 +65,34 @@ extension WidgetListSpacing on List<Widget> {
     if (isEmpty) {
       return this;
     }
-    final spacedList = <Widget>[];
+    final spacedList = <Widget>[SizedBox(width: width, height: height)];
     for (int i = 0; i < length; i++) {
       spacedList.add(this[i]);
-      // 在除最后一个元素外的每个元素后添加间距
-
       spacedList.add(SizedBox(width: width, height: height));
+    }
+    return spacedList;
+  }
+
+  List<Widget> withRowWidth() {
+    if (isEmpty) {
+      return this;
+    }
+    final spacedList = <Widget>[const SizedBox(width: 10)];
+    for (int i = 0; i < length; i++) {
+      spacedList.add(this[i]);
+      spacedList.add(const SizedBox(width: 10));
+    }
+    return spacedList;
+  }
+
+  List<Widget> withColumnHeight() {
+    if (isEmpty) {
+      return this;
+    }
+    final spacedList = <Widget>[const SizedBox(height: 16)];
+    for (int i = 0; i < length; i++) {
+      spacedList.add(this[i]);
+      spacedList.add(const SizedBox(height: 16));
     }
     return spacedList;
   }

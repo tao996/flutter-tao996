@@ -21,6 +21,7 @@ class TranslationService extends Translations {
       'success': '成功',
       'failed': '失败',
       'error': '错误',
+      'info': '注意',
 
       'confirmDelete': '删除?',
       'delete success': '删除成功',
@@ -61,8 +62,8 @@ class TranslationService extends Translations {
       'share failed': '分享失败: @reason',
       'Download': '下载',
       'Share': '分享',
-      'Flash On':'打开灯光',
-      'Flash Off':'关闭灯光',
+      'Flash On': '打开灯光',
+      'Flash Off': '关闭灯光',
 
       // 权限
       'Permission storage deny': '没有存储权限',
@@ -70,8 +71,8 @@ class TranslationService extends Translations {
       'openUrlFailed': '打开 @title 链接失败',
       'urlIsEmpty': '@title 链接为空',
       // widgets
-      'dateHint':'点击选择一个日期',
-      'datetimeHint':'点击选择日期和时间'
+      'dateHint': '点击选择一个日期',
+      'datetimeHint': '点击选择日期和时间',
     },
     'en_US': {},
   };

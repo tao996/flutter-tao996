@@ -51,7 +51,7 @@ class MyDemoCustomTabBar extends StatelessWidget {
           Obx(
             () => MyCustomTabBar(
               activeIndex: activeIndex,
-              tabStyle: MyCustomTabBarStyle.bookMark,
+              style: MyCustomTabBarStyle.bookMark,
               onChange: (index) {
                 dprint(activeIndex.value);
               },
@@ -64,7 +64,7 @@ class MyDemoCustomTabBar extends StatelessWidget {
           Obx(
             () => MyCustomTabBar(
               activeIndex: activeIndex,
-              tabStyle: MyCustomTabBarStyle.flow,
+              style: MyCustomTabBarStyle.flow,
               onChange: (index) {
                 dprint(activeIndex.value);
               },
@@ -77,7 +77,7 @@ class MyDemoCustomTabBar extends StatelessWidget {
           Obx(
             () => MyCustomTabBar(
               activeIndex: activeIndex,
-              tabStyle: MyCustomTabBarStyle.flowChip,
+              style: MyCustomTabBarStyle.flowChip,
               onChange: (index) {
                 dprint(activeIndex.value);
               },
