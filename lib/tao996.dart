@@ -5,6 +5,7 @@ export 'src/const/space.dart';
 export 'src/helpers/api_response_handler.dart';
 export 'src/helpers/db_type_converter.dart';
 export 'src/helpers/form_helper.dart';
+export 'src/helpers/get_theme.dart';
 export 'src/helpers/kv.dart';
 export 'src/helpers/model.dart';
 export 'src/helpers/model_action.dart';

@@ -87,17 +87,16 @@ class NumberUtil {
     }
   }
 
-
   /// 将多种类型的数字格式化为带逗号分隔的字符串
   /// [number]：支持 null、String、int、double 类型
   /// [decimalDigits]：保留的小数位数（默认 null，自动保留有效小数）
   /// [allowTrailingZeros]：是否保留小数末尾的 0（默认 false）
   /// 返回：格式化字符串，若无法解析则返回 "0"
- static String formatNumberWithComma(
-      dynamic number, {
-        int? decimalDigits,
-        bool allowTrailingZeros = false,
-      }) {
+  static String formatNumberWithComma(
+    dynamic number, {
+    int? decimalDigits,
+    bool allowTrailingZeros = false,
+  }) {
     // 1. 处理 null 情况
     if (number == null) {
       return "0";
@@ -130,8 +129,10 @@ class NumberUtil {
       final rounded = parsedNumber.toStringAsFixed(decimalDigits);
       if (!allowTrailingZeros) {
         // 移除小数末尾的0和多余的小数点
-        numberStr =
-            rounded.replaceAll(RegExp(r'(\.0*$)|(\.([0-9]*[1-9])0*$)'), r'$2');
+        numberStr = rounded.replaceAll(
+          RegExp(r'(\.0*$)|(\.([0-9]*[1-9])0*$)'),
+          r'$2',
+        );
       } else {
         numberStr = rounded;
       }
@@ -193,5 +194,9 @@ class NumberUtil {
       return double.parse(s.substring(0, s.length - 2));
     }
     return value;
+  }
+
+  static num sum(List<num> list) {
+    return list.fold(0.0, (previous, current) => previous + current);
   }
 }

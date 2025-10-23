@@ -22,15 +22,17 @@ class FormHelper {
   }
 
   /// 列表布局的 checkbox 复选列表（占据最宽），可用于多项选择
-  static Widget listCheckbox({
-    required List<String> items,
-    required ValueChanged<List<String>> onSelectionChanged,
-    List<String>? initItems,
+  static Widget listCheckbox<T>({
+    required List<KV<T>> items,
+    required ValueChanged<List<T>> onSelectionChanged,
+    List<T>? initItems,
+    bool dense = false,
   }) {
     return ListCheckbox(
       items: items,
       onSelectionChanged: onSelectionChanged,
       initItems: initItems,
+      dense: dense,
     );
   }
 
@@ -66,6 +68,8 @@ class FormHelper {
     required void Function(T item) onSelectionChanged,
     T? value,
     String? label,
+    InputDecoration? decoration, // 允许传入自定义 decoration
+    bool isRequired = false,
   }) {
     final child = filterChipCheckbox<T>(
       items: items,
@@ -77,7 +81,12 @@ class FormHelper {
       initItems: value == null ? null : [value],
     );
     if (label != null && label.isNotEmpty) {
-      return MyLayout.leftLabel(label, child);
+      return inputDecoration(
+        label,
+        child,
+        decoration: decoration,
+        isRequired: isRequired,
+      );
     }
 
     return child;
@@ -109,6 +118,7 @@ class FormHelper {
     required void Function(T value) onSelectionChanged,
     T? value,
     String? label,
+    bool isRequired = false,
   }) {
     final child = segmentedButton<T>(
       items: items,
@@ -118,7 +128,7 @@ class FormHelper {
       initItems: value == null ? [] : [value],
     );
     if (label != null && label.isNotEmpty) {
-      return MyLayout.leftLabel(label, child);
+      return inputDecoration(label, child, isRequired: isRequired);
     }
     return child;
   }
@@ -131,6 +141,7 @@ class FormHelper {
     T? value,
     String? hintText,
     String? helperText,
+    bool isRequired = false,
   }) {
     if (value != null) {
       final values = items.map((kv) => kv.value).toList();
@@ -142,7 +153,7 @@ class FormHelper {
     return DropdownButtonFormField<T>(
       initialValue: value,
       decoration: InputDecoration(
-        labelText: label,
+        label: MyInputLabel(label: label, isRequired: isRequired),
         helperText: helperText,
         border: OutlineInputBorder(),
       ),
@@ -280,5 +291,36 @@ class FormHelper {
   /// 搜索框
   static Widget search(MySearchInputMethods method, {String? hintText}) {
     return MySearchInput(method, hintText: hintText);
+  }
+
+  /// 用来模拟一个输入框，如果只是单纯需要显示文字，使用 MyText.label
+  static InputDecorator inputDecoration(
+    String label,
+    Widget child, {
+    InputDecoration? decoration,
+    bool isRequired = false,
+    String? helperText,
+  }) {
+    final textWidget = MyInputLabel(label: label, isRequired: isRequired);
+
+    final usedDecoration =
+        (decoration ??
+                InputDecoration(
+                  border: const OutlineInputBorder(),
+                  isDense: true,
+                  helperText: helperText,
+                  // 适当调整内容内边距，确保内容不会顶到边框
+                  contentPadding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 20,
+                  ),
+                ))
+            .copyWith(label: textWidget);
+
+    return InputDecorator(
+      decoration: usedDecoration,
+      // child 内部的 padding 用于调整芯片内容与装饰器内边距的契合度
+      child: child,
+    );
   }
 }

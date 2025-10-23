@@ -210,22 +210,10 @@ class _MyInputState extends State<MyInput> {
 
   Widget? _labelWidget() {
     if (widget.labelText != null && widget.labelText!.isNotEmpty) {
-      final child = Text(
-        widget.labelText!,
+      return MyInputLabel(
+        label: widget.labelText!,
+        isRequired: widget.isRequired,
       );
-      if (widget.isRequired) {
-        return Row(
-          mainAxisSize: MainAxisSize.min,
-          mainAxisAlignment: MainAxisAlignment.start,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-             Icon(Icons.circle, size: 6, color: MyColor.error()),
-            const SizedBox(width: 4),
-            child,
-          ],
-        );
-      }
-      return child;
     }
     return null;
   }
@@ -256,5 +244,30 @@ class _MyInputState extends State<MyInput> {
           ),
       ],
     );
+  }
+}
+
+class MyInputLabel extends StatelessWidget {
+  final String label;
+  final bool isRequired;
+
+  const MyInputLabel({super.key, required this.label, this.isRequired = false});
+
+  @override
+  Widget build(BuildContext context) {
+    final child = Text(label);
+    if (isRequired) {
+      return Row(
+        mainAxisSize: MainAxisSize.min,
+        mainAxisAlignment: MainAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          Icon(Icons.circle, size: 6, color: MyColor.error()),
+          const SizedBox(width: 4),
+          child,
+        ],
+      );
+    }
+    return child;
   }
 }

@@ -16,7 +16,7 @@ class MyDemoNetwork extends StatelessWidget {
       appBar: AppBar(title: Text('网络')),
       body: Column(
         children: [
-          MyText.h3(context, 'MyNetworkWidget'),
+          MyText.h3('MyNetworkWidget'),
           const SizedBox(height: 16),
           MyNetworkWidget(
             builder: (context, result) {
@@ -30,7 +30,7 @@ class MyDemoNetwork extends StatelessWidget {
             },
           ),
           const SizedBox(height: 16),
-          MyText.h3(context, 'MyNetworkController'),
+          MyText.h3('MyNetworkController'),
           const SizedBox(height: 16),
           Obx(() {
             if (c.results.isWifi) {

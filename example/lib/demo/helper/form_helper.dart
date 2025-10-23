@@ -103,7 +103,7 @@ class _MyDemoFormHelperState extends State<MyDemoFormHelper> {
             ),
 
             const SizedBox(height: 16),
-            MyText.h3(context, 'gridCheckbox'),
+            MyText.h3('gridCheckbox'),
             const SizedBox(height: 16),
             FormHelper.gridCheckbox(
               items: ConstHelper.titles,
@@ -114,17 +114,17 @@ class _MyDemoFormHelperState extends State<MyDemoFormHelper> {
             ),
 
             const SizedBox(height: 16),
-            MyText.h3(context, 'listCheckbox'),
+            MyText.h3('listCheckbox'),
             const SizedBox(height: 16),
             FormHelper.listCheckbox(
-              items: ConstHelper.titles.sublist(0, 5),
+              items: ConstHelper.kvTitles,
               onSelectionChanged: (values) {
                 dprint('values: $values');
               },
             ),
 
             const SizedBox(height: 16),
-            MyText.h3(context, 'filterChipCheckbox'),
+            MyText.h3('filterChipCheckbox'),
             const SizedBox(height: 16),
             Obx(
               () => FormHelper.filterChipCheckbox<Company>(
@@ -141,7 +141,7 @@ class _MyDemoFormHelperState extends State<MyDemoFormHelper> {
             ),
 
             const SizedBox(height: 16),
-            MyText.h3(context, 'segmentedButton'),
+            MyText.h3('segmentedButton'),
             const SizedBox(height: 16),
             Obx(
               () => FormHelper.segmentedButton(

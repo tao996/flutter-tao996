@@ -1,9 +1,12 @@
 import 'package:flutter/cupertino.dart';
 
 class MyLayout {
-
   static Widget emptyWidget() => const SizedBox.shrink();
-  static Widget sizeHeight() => const SizedBox(height: 16,);
+
+  static Widget sizeHeight() => const SizedBox(height: 16);
+
+  static Widget sizeWidth() => const SizedBox(width: 16);
+
   static Widget miniColumn(
     List<Widget> children, {
     MainAxisAlignment mainAxisAlignment = MainAxisAlignment.start,
@@ -47,6 +50,20 @@ class MyLayout {
     );
   }
 
+  static Widget miniListView(
+    int? itemCount,
+    Widget? Function(BuildContext, int) itemBuilder,
+  ) {
+    return ListView.builder(
+      // 保持 shrinkWrap: true，让 ListView 根据内容高度收缩
+      shrinkWrap: true,
+      // 保持 NeverScrollableScrollPhysics()，禁用内部滚动，让外部的处理滚动
+      physics: const NeverScrollableScrollPhysics(),
+      itemCount: itemCount,
+      itemBuilder: itemBuilder,
+    );
+  }
+
   /// [crossAxisCount] 列数；[itemCount] 总记录数量;
   ///
   /// [crossAxisSpacing] 列间距；[mainAxisSpacing] 行间距; [childAspectRatio] 宽度比
@@ -78,7 +95,6 @@ class MyLayout {
     );
   }
 
-
   static Widget leftLabel(String label, Widget child, {double width = 80}) {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.center,
@@ -88,12 +104,20 @@ class MyLayout {
           child: Text(
             label,
             softWrap: true,
-            style: TextStyle(fontWeight: FontWeight.bold),
+            style: const TextStyle(fontWeight: FontWeight.bold),
           ),
         ),
         const SizedBox(width: 10),
         Expanded(child: child),
       ],
     );
+  }
+
+  static Widget right(Widget child) {
+    return Align(alignment: Alignment.centerRight, child: child);
+  }
+
+  static Widget left(Widget child) {
+    return Align(alignment: Alignment.centerLeft, child: child);
   }
 }

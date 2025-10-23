@@ -34,7 +34,7 @@ class MyDemoCustomTabBar extends StatelessWidget {
             },
             child: Text('追加一个 item'),
           ),
-          MyText.h3(context, 'MyCustomTabBar.horizontal'),
+          MyText.h3('MyCustomTabBar.horizontal'),
           const SizedBox(height: 16),
           Obx(
             () => MyCustomTabBar(
@@ -46,7 +46,7 @@ class MyDemoCustomTabBar extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 16),
-          MyText.h3(context, 'MyCustomTabBar.bookMark'),
+          MyText.h3('MyCustomTabBar.bookMark'),
           const SizedBox(height: 16),
           Obx(
             () => MyCustomTabBar(
@@ -59,7 +59,7 @@ class MyDemoCustomTabBar extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 16),
-          MyText.h3(context, 'MyCustomTabBar.flow'),
+          MyText.h3('MyCustomTabBar.flow'),
           const SizedBox(height: 16),
           Obx(
             () => MyCustomTabBar(
@@ -72,7 +72,7 @@ class MyDemoCustomTabBar extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 16),
-          MyText.h3(context, 'MyCustomTabBar.flowChip'),
+          MyText.h3('MyCustomTabBar.flowChip'),
           const SizedBox(height: 16),
           Obx(
             () => MyCustomTabBar(

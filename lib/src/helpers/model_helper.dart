@@ -343,7 +343,8 @@ abstract class ModelHelper<T extends IModel<T>> {
     }
   }
 
-  /// 获取指定字段和值的所有记录。如果提供了 [where] 则优先使用 [where] 和 [whereArgs]
+  /// 获取指定字段和值的所有记录。如果提供了 [where] 则优先使用 [where] 和 [whereArgs]；
+  /// 再使用 [fieldName] 和 [value] 组合
   Future<List<T>> getManyBy({
     String? fieldName,
     dynamic value,
@@ -368,8 +369,10 @@ abstract class ModelHelper<T extends IModel<T>> {
     );
     return result.map((map) => fromMap(map)).toList();
   }
+
   /// 获取原始数据，需要自己动手转换
   /// 如果提供了 [where] 则优先使用 [where] 和 [whereArgs]
+  /// 再使用 [fieldName] 和 [value] 组合
   Future<List<Map<String, dynamic>>> getManyWith({
     String? fieldName,
     dynamic value,
@@ -382,15 +385,15 @@ abstract class ModelHelper<T extends IModel<T>> {
     int? limit,
     int? offset,
   }) async {
-    if ((where == null || where.isEmpty) &&
-        (fieldName == null || fieldName.isEmpty)) {
-      throw 'Please provide either [where] or [fieldName]';
-    }
     try {
       return await dbService.query(
         tableName,
         columns: columns,
-        where: where ?? appendWhere('$fieldName = ?'),
+        where:
+            where ??
+            (fieldName != null && fieldName.isNotEmpty
+                ? appendWhere('$fieldName = ?')
+                : null),
         whereArgs:
             whereArgs ??
             (fieldName != null && fieldName.isNotEmpty ? [value] : null),
@@ -685,8 +688,22 @@ abstract class ModelHelper<T extends IModel<T>> {
   }
 
   /// 批量插入（使用事务），需要手动更新缓存
-  Future<List<int>> batchInsert(ModelTransaction mtn, List<T> entities) async {
+  Future<List<int>> batchInsert(
+    List<T> entities, {
+    ModelTransaction? mtn,
+  }) async {
     if (entities.isEmpty) return [];
+    if (mtn == null) {
+      return transaction((mtn) async {
+        return _batchInsert(entities, mtn);
+      });
+    }
+    return _batchInsert(entities, mtn);
+  }
+
+  Future<List<int>> _batchInsert(List<T> entities, ModelTransaction mtn) async {
+    if (entities.isEmpty) return [];
+
     final ids = <int>[];
     for (final entity in entities) {
       // 复用 beforeInsert/beforeSave 逻辑

@@ -57,43 +57,98 @@ class MyBodyPadding extends StatelessWidget {
     );
   }
 }
+/// 检查一个 Widget 是否为功能上的“零尺寸占位符”。
+///
+/// 零尺寸占位符包括：
+/// 1. const SizedBox.shrink()
+/// 2. SizedBox(width: 0.0, height: 0.0)
+/// 3. const Spacer() (如果在 Row/Column 中，Spacer 会尝试占据空间，但作为列表项，其尺寸可能为零)
+///    * 注意：Spacer 的行为取决于其周围的 Flex 约束，但我们通常只关注零尺寸的 SizedBox。
+///
+/// 这里我们只关注最常用的零尺寸占位符：SizedBox 且 width/height 都为 0.0。
+bool _isZeroSizedPlaceholder(Widget widget) {
+  if (widget is SizedBox) {
+    final SizedBox sizedBox = widget;
+    // 检查 width 和 height 是否为 0.0
+    return (sizedBox.width == 0.0 || sizedBox.width == null) &&
+        (sizedBox.height == 0.0 || sizedBox.height == null);
+  }
+  // 如果未来您想支持其他零尺寸 Widget，可以在这里添加。
+  // 例如：if (widget is Offstage && widget.offstage) return true;
+  return false;
+}
 
 // 扩展方法
 extension WidgetListSpacing on List<Widget> {
-  /// 在列表的每个元素之间插入一个间距 widget
-  List<Widget> withAppBarActions({double height = 16.0, double width = 16.0}) {
-    if (isEmpty) {
-      return this;
+
+  // 间距值可以定义为常量，方便维护
+  static const double _spacingValue = 16.0;
+
+  /// 在水平列表的非空元素之间插入一个间距
+  List<Widget> withRowWidth({bool first = true}) {
+    // 过滤掉所有零尺寸占位符，得到一个“有效”列表
+    final effectiveList = where((w) => !_isZeroSizedPlaceholder(w)).toList();
+
+    if (effectiveList.isEmpty) {
+      return const []; // 如果有效列表为空，则返回空列表
     }
-    final spacedList = <Widget>[SizedBox(width: width, height: height)];
-    for (int i = 0; i < length; i++) {
-      spacedList.add(this[i]);
-      spacedList.add(SizedBox(width: width, height: height));
+
+    final spacedList = <Widget>[];
+
+    // 1. 处理列表开头的间距 (如果 first=true)
+    if (first) {
+      spacedList.add(const SizedBox(width: _spacingValue));
     }
+
+    // 2. 遍历有效列表并插入间隔
+    for (int i = 0; i < effectiveList.length; i++) {
+      spacedList.add(effectiveList[i]);
+
+      // 如果不是最后一个元素，则添加间隔
+      if (i < effectiveList.length - 1) {
+        spacedList.add(const SizedBox(width: _spacingValue));
+      }
+    }
+
+    // 3. 处理列表结尾的间距 (如果 first=true，则在结尾也加上一个)
+    if (first) {
+      spacedList.add(const SizedBox(width: _spacingValue));
+    }
+
     return spacedList;
   }
 
-  List<Widget> withRowWidth() {
-    if (isEmpty) {
-      return this;
-    }
-    final spacedList = <Widget>[const SizedBox(width: 10)];
-    for (int i = 0; i < length; i++) {
-      spacedList.add(this[i]);
-      spacedList.add(const SizedBox(width: 10));
-    }
-    return spacedList;
-  }
+  /// 在垂直列表的非空元素之间插入一个间距
+  List<Widget> withColumnHeight({bool first = true}) {
+    // 过滤掉所有零尺寸占位符，得到一个“有效”列表
+    final effectiveList = where((w) => !_isZeroSizedPlaceholder(w)).toList();
 
-  List<Widget> withColumnHeight() {
-    if (isEmpty) {
-      return this;
+    if (effectiveList.isEmpty) {
+      return const []; // 如果有效列表为空，则返回空列表
     }
-    final spacedList = <Widget>[const SizedBox(height: 16)];
-    for (int i = 0; i < length; i++) {
-      spacedList.add(this[i]);
-      spacedList.add(const SizedBox(height: 16));
+
+    final spacedList = <Widget>[];
+
+    // 1. 处理列表开头的间距 (如果 first=true)
+    if (first) {
+      spacedList.add(const SizedBox(height: _spacingValue));
     }
+
+    // 2. 遍历有效列表并插入间隔
+    for (int i = 0; i < effectiveList.length; i++) {
+      spacedList.add(effectiveList[i]);
+
+      // 如果不是最后一个元素，则添加间隔
+      if (i < effectiveList.length - 1) {
+        spacedList.add(const SizedBox(height: _spacingValue));
+      }
+    }
+
+    // 3. 处理列表结尾的间距 (如果 first=true，则在结尾也加上一个)
+    if (first) {
+      spacedList.add(const SizedBox(height: _spacingValue));
+    }
+
     return spacedList;
   }
 }

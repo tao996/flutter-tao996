@@ -63,6 +63,7 @@ class MySaveButton extends StatelessWidget {
   final RxBool? isLoading;
   final MyButtonType? type;
   final bool showIcon;
+  final String? label;
 
   const MySaveButton({
     super.key,
@@ -70,12 +71,13 @@ class MySaveButton extends StatelessWidget {
     this.isLoading,
     this.type,
     this.showIcon = true,
+    this.label,
   });
 
   @override
   Widget build(BuildContext context) {
     return MyButton(
-      'save'.tr,
+      label ?? 'save'.tr,
       onPressed: onPressed,
       iconData: showIcon ? Icons.send : null,
       isLoading: isLoading,

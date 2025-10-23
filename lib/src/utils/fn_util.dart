@@ -2,8 +2,15 @@ import 'dart:async';
 import 'dart:math';
 
 import 'package:flutter/foundation.dart';
+import 'package:tao996/src/getx.dart';
 
 void dprint(dynamic message) => debugPrint(message.toString());
+
+void ddprint(dynamic message, dynamic args) {
+  if (kDebugMode) {
+    getIDebugService().d(message, args: args);
+  }
+}
 
 class FnUtil {
   static Timer? _debounce;
@@ -39,9 +46,13 @@ class FnUtil {
     await Future.delayed(Duration(milliseconds: delayMilliseconds));
   }
 
-  /// 延时指定秒，默认为 1 秒
+  /// 延时指定时间，支持秒或毫秒（优先使用毫秒）
+  /// [seconds]：秒数（1秒=1000毫秒）
+  /// [milliseconds]：毫秒数（若不为null，会覆盖seconds）
   static Future<void> delayed({int? seconds, int? milliseconds}) async {
-    milliseconds = milliseconds ?? (seconds == null ? 1000 : 1000 * seconds);
-    await Future.delayed(Duration(microseconds: milliseconds));
+    // 计算延时毫秒数：若指定了milliseconds则用它，否则用seconds转换（默认1秒）
+    final int delayMs = milliseconds ?? (seconds ?? 1) * 1000;
+    // 使用正确的毫秒参数
+    await Future.delayed(Duration(milliseconds: delayMs));
   }
 }

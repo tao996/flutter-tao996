@@ -1,8 +1,24 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:tao996/src/utils/fn_util.dart';
+import 'package:tao996/tao996.dart';
 
 class MyDialog {
+  static Widget title(String title) {
+    return MyLayout.miniRow(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      crossAxisAlignment: CrossAxisAlignment.center,
+      [
+        Text(title, style: getTextTheme().titleLarge),
+        IconButton(
+          onPressed: () {
+            Get.back();
+          },
+          icon: Icon(Icons.close),
+        ),
+      ],
+    );
+  }
+
   /// 全屏对话框，如果你需要在高度/宽度上尽可能小，则需要将 Column/Row 的 mainAxisSize: MainAxisSize.min
   static Future<dynamic> fullScreenDialog(
     BuildContext context, {
@@ -22,7 +38,7 @@ class MyDialog {
       height = screenHeight - verticalPadding; // 比父窗口高度小 20
       height = height.toInt().toDouble();
     }
-    dprint('width: $width; height: $height');
+    // dprint('MyDialog.fullScreenDialog width: $width; height: $height');
     return showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -35,6 +51,9 @@ class MyDialog {
           content: SizedBox(
             // 将计算出的动态尺寸应用于对话框的内容
             width: width,
+            // 如果 child 高度超过此 height，
+            // 则可以使用 ListView
+            // 或使用 SingleChildScrollView(child) 来让子元素支持滚动
             height: height,
             child: child,
           ),

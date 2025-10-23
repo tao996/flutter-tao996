@@ -1,6 +1,6 @@
 // 定义一些常用的颜色常量，方便使用
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
+import 'package:tao996/tao996.dart';
 
 class MyColor {
   static const String reset = '\x1B[0m'; // 重置/默认
@@ -48,24 +48,10 @@ class MyColor {
   static Color info() {
     return getColorScheme().primary;
   }
+
   /// 文本颜色
   static Color text(double opacity) {
     return getColorScheme().onSurface.withAlpha((255 * opacity).toInt());
   }
 }
 
-// 确保在 GetX 环境中安全获取当前的 BuildContext
-BuildContext? getThemeContext() {
-  // 使用 Get.context 获取当前激活的 BuildContext
-  return Get.context;
-}
-
-// 获取当前主题的 ColorScheme
-ColorScheme getColorScheme() {
-  final context = getThemeContext();
-  // 如果 context 不可用，返回一个默认的 ColorScheme 防止崩溃
-  if (context == null) {
-    return const ColorScheme.light();
-  }
-  return Theme.of(context).colorScheme;
-}
