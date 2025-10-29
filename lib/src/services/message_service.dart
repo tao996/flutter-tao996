@@ -17,6 +17,8 @@ abstract class IMessageService extends IDebugMessageService {
     void Function()? no,
   });
 
+  Future<void> alert(String title, {String? content, Widget? icon});
+
   // 删除确认
   Future<bool?> deleteConfirm(String title, [void Function()? yes]);
 
@@ -68,6 +70,25 @@ class MessageService implements IMessageService {
               Get.back(result: true);
             },
             child: Text((confirmText ?? 'confirm').tr),
+          ),
+        ],
+      ),
+    );
+  }
+
+  @override
+  Future<void> alert(String title, {String? content, Widget? icon}) {
+    return Get.dialog(
+      AlertDialog(
+        icon: icon,
+        title: Text(title),
+        content: content == null ? null : Text(content),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Get.back();
+            },
+            child: Text('confirm'.tr),
           ),
         ],
       ),

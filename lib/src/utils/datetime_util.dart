@@ -2,7 +2,7 @@ import 'package:intl/intl.dart';
 
 import '../../tao996.dart';
 
-enum DateTimeFormat { ymd, ymdHm, ymdHms }
+enum DateTimeFormat { ymd, ymdHm, ymdHms,ymdFile, ymdHmFile, ymdHmsFile }
 
 // 正则表达式：匹配 YYYY-MM-DDTXX:XX:XX.XXX... 的格式
 // ^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d+$ 匹配了日期、T、时间、点和至少一位数字
@@ -43,6 +43,8 @@ class DatetimeUtil {
 
     if (format == DateTimeFormat.ymd) {
       return '$year-$formattedMonth-$formattedDay';
+    } else if (format == DateTimeFormat.ymdFile){
+      return '$year$formattedMonth$formattedDay';
     }
     int hour = dateTime.hour;
     String formattedHour = hour.toString().padLeft(2, '0');
@@ -51,9 +53,14 @@ class DatetimeUtil {
     String formattedMinute = minute.toString().padLeft(2, '0');
     if (format == DateTimeFormat.ymdHm) {
       return '$year-$formattedMonth-$formattedDay $formattedHour:$formattedMinute';
+    } else if (format == DateTimeFormat.ymdHmFile) {
+      return '$year$formattedMonth$formattedDay-$formattedHour$formattedMinute';
     }
     int second = dateTime.second;
     String formattedSecond = second.toString().padLeft(2, '0');
+    if (format == DateTimeFormat.ymdHmsFile) {
+      return '$year$formattedMonth$formattedDay-$formattedHour$formattedMinute$formattedSecond';
+    }
     return '$year-$formattedMonth-$formattedDay $formattedHour:$formattedMinute:$formattedSecond';
   }
 

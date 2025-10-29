@@ -110,7 +110,7 @@ class _MyDemoFormHelperState extends State<MyDemoFormHelper> {
               onSelectionChanged: (title) {
                 dprint('title:$title');
               },
-              initItems: ['Facebook', 'Tencent'],
+              values: ['Facebook', 'Tencent'],
             ),
 
             const SizedBox(height: 16),
@@ -129,7 +129,7 @@ class _MyDemoFormHelperState extends State<MyDemoFormHelper> {
             Obx(
               () => FormHelper.filterChipCheckbox<Company>(
                 items: ConstHelper.kvTitles,
-                initItems: kvCompanyValues,
+                values: kvCompanyValues,
                 onSelectionChanged: (selected, item) {
                   if (selected) {
                     kvCompanyValues.add(item);
@@ -150,7 +150,7 @@ class _MyDemoFormHelperState extends State<MyDemoFormHelper> {
                 onSelectionChanged: (items) {
                   dprint(items);
                 },
-                initItems: kvCompanyValues,
+                values: kvCompanyValues,
               ),
             ),
 

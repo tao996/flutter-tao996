@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
+import 'package:tao996/src/utils/fn_util.dart';
 
 abstract class IMySmartRefresherBodyController extends GetxController {
   late final RefreshController refreshController;
@@ -49,6 +50,7 @@ class MySmartRefresher {
     return CustomFooter(
       builder: (BuildContext context, LoadStatus? mode) {
         Widget body;
+        dprint('CustomFooter: $mode');
         if (mode == LoadStatus.failed) {
           body = Text("loadFailedRetry".tr);
         } else if (mode == LoadStatus.idle) {

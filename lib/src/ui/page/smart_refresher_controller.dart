@@ -150,7 +150,7 @@ abstract class MySmartRefresherController<T>
       getIMessageService().toast(error.toString());
     } finally {
       isRequesting.value = false;
-      // refreshController.refreshCompleted();
+      refreshController.refreshCompleted();
     }
   }
 

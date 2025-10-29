@@ -33,9 +33,6 @@ abstract class IDebugService {
   IDebugService printList(List<dynamic> items);
 
   IDebugService printLists(List<List<dynamic>> items);
-
-  /// 设置需要记录的包名，注意：包名不需要添加 package:前缀
-  void logPackages(List<String> packages, {bool append = true});
 }
 
 abstract class IDebugMessageService {
@@ -72,7 +69,8 @@ class DebugService implements IDebugService {
 
   String _color = '';
 
-  String get color => _color.isNotEmpty ? _color : ColorUtil.randomConsoleColor();
+  String get color =>
+      _color.isNotEmpty ? _color : ColorUtil.randomConsoleColor();
 
   @override
   IDebugService begin() {
@@ -89,8 +87,8 @@ class DebugService implements IDebugService {
   }
 
   void printCaller() {
-    for (String line in getStackTraceString()) {
-      if (inPackageLine(line)) {
+    for (String line in StackUtil.getStackTraceString()) {
+      if (StackUtil.inPackageLine(line)) {
         ColorUtil.print(line, color);
       }
     }
@@ -154,8 +152,10 @@ class DebugService implements IDebugService {
 
     if (log == true) {
       List<String> data = ['ERROR:$error', 'ARGUS:$args'];
-      for (String line in getStackTraceString(stackTrace: stackTrace)) {
-        if (inPackageLine(line)) {
+      for (String line in StackUtil.getStackTraceString(
+        stackTrace: stackTrace,
+      )) {
+        if (StackUtil.inPackageLine(line)) {
           data.add(line);
         }
       }
@@ -172,21 +172,11 @@ class DebugService implements IDebugService {
     return this;
   }
 
-  List<String> getStackTraceString({StackTrace? stackTrace}) {
-    StackTrace st = stackTrace ?? StackTrace.current;
-    String stackTraceString = st.toString();
-    return stackTraceString.split('\n');
-  }
-
   @override
   IDebugService stack() {
     if (kDebugMode) {
       ColorUtil.print('<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<', color);
-      for (String line in getStackTraceString()) {
-        if (inPackageLine(line)) {
-          ColorUtil.print(line, color);
-        }
-      }
+      StackUtil.output(color: color);
       ColorUtil.print('>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>', color);
     }
     return this;
@@ -209,7 +199,7 @@ class DebugService implements IDebugService {
       List<String> stackTraceLines = stackTraceString.split('\n');
 
       for (String line in stackTraceLines) {
-        if (inPackageLine(line)) {
+        if (StackUtil.inPackageLine(line)) {
           ColorUtil.print(line, color);
         }
       }
@@ -221,42 +211,5 @@ class DebugService implements IDebugService {
       ColorUtil.print('>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>', color);
     }
     return this;
-  }
-
-  final List<String> debugPackages = ['package:tao996'];
-
-  bool inPackageLine(String line) {
-    if (line.contains('debug_service.dart') ||
-        line.contains('log_service.dart')) {
-      return false;
-    }
-    for (String package in debugPackages) {
-      if (line.contains(package)) {
-        return true;
-      }
-    }
-    return false;
-  }
-
-  @override
-  void logPackages(List<String> packages, {bool append = true}) {
-    if (append) {
-      for (var package in packages) {
-        package = package.startsWith('package:') ? package : 'package:$package';
-        if (!debugPackages.contains(package)) {
-          debugPackages.add(package);
-        }
-      }
-    } else {
-      debugPackages.clear();
-      debugPackages.addAll(
-        packages
-            .map(
-              (package) =>
-                  package.startsWith('package:') ? package : 'package:$package',
-            )
-            .toList(),
-      );
-    }
   }
 }

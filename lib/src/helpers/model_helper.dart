@@ -680,6 +680,7 @@ abstract class ModelHelper<T extends IModel<T>> {
       // 更新后置钩子
       await afterInsert(record);
       await afterSave(record, true);
+      dprint('insert success: ${record.id}');
       return record;
     } catch (e, st) {
       debugService.exception(e, st, args: entity.toJson(), log: true);
@@ -738,6 +739,13 @@ abstract class ModelHelper<T extends IModel<T>> {
       rethrow;
     }
   }
+
+  // Future<ModelTransaction> transactionTXN({bool? exclusive}) async {
+  //   final db = dbService.getDatabase();
+  //   return await db.transaction<ModelTransaction>((txn) async {
+  //     return ModelTransaction(txn);
+  //   }, exclusive: exclusive);
+  // }
 
   /// 恢复软删除的记录
   Future<int> restore({

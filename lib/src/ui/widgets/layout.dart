@@ -1,11 +1,17 @@
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
+import 'package:tao996/tao996.dart';
 
 class MyLayout {
   static Widget emptyWidget() => const SizedBox.shrink();
 
-  static Widget sizeHeight() => const SizedBox(height: 16);
+  static Widget height() => const SizedBox(height: 16);
 
-  static Widget sizeWidth() => const SizedBox(width: 16);
+  static Widget height8() => const SizedBox(height: 8);
+
+  static Widget width() => const SizedBox(width: 16);
+
+  static Widget width8() => const SizedBox(width: 8);
 
   static Widget miniColumn(
     List<Widget> children, {
@@ -119,5 +125,12 @@ class MyLayout {
 
   static Widget left(Widget child) {
     return Align(alignment: Alignment.centerLeft, child: child);
+  }
+
+  static Widget card(Widget child) {
+    return Card(
+      margin: EdgeInsets.zero,
+      child: MyPadding(child: child),
+    );
   }
 }

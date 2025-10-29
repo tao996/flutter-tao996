@@ -8,14 +8,14 @@ class FormHelper {
   static Widget gridCheckbox({
     required List<String> items,
     required ValueChanged<List<String>> onSelectionChanged,
-    List<String>? initItems,
+    List<String>? values,
     int crossAxisCount = 3,
     double horizontal = 18,
   }) {
     return GridCheckbox(
       items: items,
       onSelectionChanged: onSelectionChanged,
-      initItems: initItems,
+      values: values,
       crossAxisCount: crossAxisCount,
       horizontal: horizontal,
     );
@@ -25,13 +25,13 @@ class FormHelper {
   static Widget listCheckbox<T>({
     required List<KV<T>> items,
     required ValueChanged<List<T>> onSelectionChanged,
-    List<T>? initItems,
+    List<T>? values,
     bool dense = false,
   }) {
     return ListCheckbox(
       items: items,
       onSelectionChanged: onSelectionChanged,
-      initItems: initItems,
+      values: values,
       dense: dense,
     );
   }
@@ -41,13 +41,13 @@ class FormHelper {
   static Widget filterChipCheckbox<T>({
     required List<KV<T>> items,
     required void Function(bool selected, T item)? onSelectionChanged,
-    List<T>? initItems,
+    List<T>? values,
   }) {
     return Wrap(
       spacing: 8.0,
       runSpacing: 8.0,
       children: items.map((item) {
-        final isSelected = initItems != null && initItems.contains(item.value);
+        final isSelected = values != null && values.contains(item.value);
         return FilterChip(
           // avatar: item.iconData != null ? Icon(item.iconData) : null,
           label: Text(item.label),
@@ -78,7 +78,7 @@ class FormHelper {
           onSelectionChanged(item);
         }
       },
-      initItems: value == null ? null : [value],
+      values: value == null ? null : [value],
     );
     if (label != null && label.isNotEmpty) {
       return inputDecoration(
@@ -97,7 +97,7 @@ class FormHelper {
   static Widget segmentedButton<T>({
     required List<KV<T>> items,
     required void Function(Set<T> items) onSelectionChanged,
-    required List<T> initItems,
+    required List<T> values,
     bool multiSelectionEnabled = false,
     bool emptySelectionAllowed = true,
   }) {
@@ -107,7 +107,7 @@ class FormHelper {
       segments: items.map((kv) {
         return ButtonSegment<T>(value: kv.value, label: Text(kv.label));
       }).toList(),
-      selected: initItems.toSet(),
+      selected: values.toSet(),
       onSelectionChanged: onSelectionChanged,
     );
   }
@@ -125,7 +125,7 @@ class FormHelper {
       onSelectionChanged: (data) {
         onSelectionChanged(data.first);
       },
-      initItems: value == null ? [] : [value],
+      values: value == null ? [] : [value],
     );
     if (label != null && label.isNotEmpty) {
       return inputDecoration(label, child, isRequired: isRequired);

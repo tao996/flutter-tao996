@@ -91,11 +91,10 @@ class SqfliteDatabaseService implements IDatabaseService {
   Future<String> _getDatabasesPath() async {
     // 存在同名函数 getDatabasesPath()
     if (databasePath.isEmpty) {
-      final Directory documentsDirectory =
-          await getApplicationDocumentsDirectory();
-      databasePath = path.join(documentsDirectory.path, databaseName);
+      final homeDir= await FilepathUtil.homeDir();
+      databasePath = path.join(homeDir, databaseName);
     }
-    _debugService.d('[SQLite]: database path: $databasePath.');
+    dprint('[SQLite]: database path: $databasePath.');
     return databasePath;
   }
 

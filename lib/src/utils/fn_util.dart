@@ -3,8 +3,20 @@ import 'dart:math';
 
 import 'package:flutter/foundation.dart';
 import 'package:tao996/src/getx.dart';
+import 'package:tao996/tao996.dart';
 
-void dprint(dynamic message) => debugPrint(message.toString());
+void dprint(dynamic message, {bool stack = true}) {
+  if (kDebugMode) {
+    debugPrint(message.toString());
+    if (stack) {
+      StackUtil.output(
+        color: MyColor.yellow,
+        filterNames: ['fn_util.dart'],
+        first: true,
+      );
+    }
+  }
+}
 
 void ddprint(dynamic message, dynamic args) {
   if (kDebugMode) {

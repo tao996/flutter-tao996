@@ -7,7 +7,7 @@ class ListCheckbox<T> extends StatefulWidget {
   final List<KV<T>> items;
 
   /// 初始选中的名称列表。
-  final List<T>? initItems;
+  final List<T>? values;
 
   /// 当任何复选框的选中状态发生改变时调用的回调函数。
   final ValueChanged<List<T>>? onSelectionChanged;
@@ -16,7 +16,7 @@ class ListCheckbox<T> extends StatefulWidget {
   const ListCheckbox({
     super.key,
     required this.items,
-    this.initItems,
+    this.values,
     this.onSelectionChanged,
     this.dense = false,
   });
@@ -48,8 +48,8 @@ class _ListCheckboxState<T> extends State<ListCheckbox<T>> {
           (item) => _ListCheckItem<T>(
         item: item,
         selected:
-        widget.initItems != null &&
-            widget.initItems!.contains(item.value),
+        widget.values != null &&
+            widget.values!.contains(item.value),
       ),
     )
         .toList();
@@ -59,7 +59,7 @@ class _ListCheckboxState<T> extends State<ListCheckbox<T>> {
   void didUpdateWidget(covariant ListCheckbox<T> oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (widget.items != oldWidget.items ||
-        widget.initItems != oldWidget.initItems) {
+        widget.values != oldWidget.values) {
       _initializeList();
     }
   }

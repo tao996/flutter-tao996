@@ -8,7 +8,7 @@ class GridCheckbox extends StatefulWidget {
   final List<String> items;
 
   /// 初始选中的名称列表。
-  final List<String>? initItems;
+  final List<String>? values;
 
   /// 选中状态改变时调用的回调函数。
   /// 参数是当前所有选中的名称列表。
@@ -23,7 +23,7 @@ class GridCheckbox extends StatefulWidget {
     super.key,
     required this.items,
     required this.onSelectionChanged,
-    this.initItems,
+    this.values,
     this.crossAxisCount = 3,
     this.horizontal = 18,
   });
@@ -41,8 +41,8 @@ class _GridCheckboxState extends State<GridCheckbox> {
   void initState() {
     super.initState();
     // 初始化选中的名称列表
-    if (widget.initItems != null) {
-      _selectedNames.addAll(widget.initItems!);
+    if (widget.values != null) {
+      _selectedNames.addAll(widget.values!);
     }
     _debugService.d('_selectedNames', args: _selectedNames);
   }
