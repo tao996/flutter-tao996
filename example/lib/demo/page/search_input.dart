@@ -6,12 +6,12 @@ class MyDemoSearchMethods extends MySearchInputMethods {
   var keyword = 'none'.obs;
 
   @override
-  Future<void> onChanged(String text) async {
+  Future<void> onChanged(String text,{dynamic data}) async {
     keyword.value = 'onChanged: $text';
   }
 
   @override
-  Future<void> onSubmitted(String text) async {
+  Future<void> onSubmitted(String text, {dynamic data}) async {
     keyword.value = 'onSubmitted: $text';
   }
 }

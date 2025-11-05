@@ -98,13 +98,13 @@ class DatetimeUtil {
   /// [formatPattern] 时间格式，如果存在，则优先使用
   static DateTime? parse(
     dynamic dateStr, {
-    bool nowIfEmpty = true,
+    bool nowIfEmpty = false,
     String? formatPattern,
   }) {
-    if (dateStr == null) {
+    if (dateStr == null || dateStr == '') {
       return nowIfEmpty ? DateTime.now() : null;
     }
-    final str = (dateStr as String).trim();
+    final str = dateStr.toString().trim();
     if (str.isEmpty) {
       return nowIfEmpty ? DateTime.now() : null;
     }
@@ -152,6 +152,26 @@ Z: 解析时区偏移。intl 包的 DateFormat 能够识别 RFC 822 格式中的
     } else {
       return null;
     }
+  }
+
+  static int compareTo(dynamic a, dynamic b){
+    if (a == null || a == ''){
+      return -1;
+    } else if (b == null || b == ''){
+      return 1;
+    }
+    if (a is String && b is String){
+      final at = parse(a);
+      final bt = parse(b);
+      if (at == null || bt == null){
+        return 0;
+      }
+      return at.compareTo(bt);
+    }
+    if (a is DateTime && b is DateTime) {
+      return a.compareTo(b);
+    }
+    return 0;
   }
 }
 

@@ -20,9 +20,29 @@ T _getValue<T extends num>(dynamic v, T defaultValue) {
 class DataUtil {
   static final IDebugService _debugService = getIDebugService();
 
-  static bool getBool(dynamic v, {bool defaultValue = false}) {
-    if (v == null || v == '') {
+  static bool getBool(
+    dynamic v, {
+    bool defaultValue = false,
+    bool textCompare = false,
+  }) {
+    if (v == null ||
+        v == '' ||
+        (textCompare &&
+            (v == '0' ||
+                v == 'false' ||
+                v == 'f' ||
+                v == 'F' ||
+                v == 'OFF' ||
+                v == 'off'))) {
       return defaultValue;
+    } else if (textCompare &&
+        (v == '1' ||
+            v == 'true' ||
+            v == 't' ||
+            v == 'T' ||
+            v == 'on' ||
+            v == 'ON')) {
+      return true;
     } else if (v is num) {
       return v > 0;
     }
@@ -99,7 +119,8 @@ class DataUtil {
       return defaultValue;
     }
     try {
-      return DatetimeUtil.parse(v, formatPattern: formatPattern);
+      final rst = DatetimeUtil.parse(v, formatPattern: formatPattern);
+      return rst ?? defaultValue;
     } catch (e, stackTrace) {
       _debugService.exception(e, stackTrace);
     }
@@ -192,8 +213,9 @@ class DataUtil {
   static dynamic copy(dynamic data) {
     return jsonDecode(jsonEncode(data));
   }
+
   /// 获取数据运行时的类型
-  static Type getType(dynamic data){
+  static Type getType(dynamic data) {
     return data.runtimeType;
   }
 }

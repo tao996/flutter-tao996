@@ -3,9 +3,10 @@ import 'package:tao996/tao996.dart';
 
 class KV<T> {
   String label;
+  final Widget? icon;
   T value;
 
-  KV({required this.label, required this.value});
+  KV({required this.label, required this.value, this.icon});
 
   @override
   String toString() {
@@ -64,25 +65,4 @@ String kvGetLabel<T extends Enum>(List<KV<T>> kvs, T value, {String defaultLabel
     }
   }
   return defaultLabel;
-}
-
-
-class KVWidget<T> extends KV<T> {
-  final Widget? icon;
-  final IconData? iconData;
-
-  KVWidget({
-    required super.label,
-    required super.value,
-    this.icon,
-    this.iconData,
-  });
-}
-
-List<KVWidget<T>> kvCreateWidgetList<T extends Enum>(Map<T, String> maps) {
-  final List<KVWidget<T>> list = [];
-  maps.forEach((key, label) {
-    list.add(KVWidget(label: label, value: key));
-  });
-  return list;
 }

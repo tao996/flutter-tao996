@@ -199,4 +199,59 @@ class NumberUtil {
   static num sum(List<num> list) {
     return list.fold(0.0, (previous, current) => previous + current);
   }
+
+  static bool numGte(dynamic a, int b) {
+    if (a == null) {
+      return false;
+    } else if (a is num) {
+      return a >= b;
+    } else if (a is String) {
+      try {
+        return int.parse(a) >= b;
+      } catch (e) {
+        dprint('RecordSearchHelper._numGte failed: $a');
+      }
+    }
+    return false;
+  }
+
+  static bool numLte(dynamic a, int b) {
+    if (a == null) {
+      return false;
+    } else if (a is num) {
+      return a <= b;
+    } else if (a is String) {
+      try {
+        return int.parse(a) <= b;
+      } catch (e) {
+        dprint('RecordSearchHelper._numLte failed: $a');
+      }
+    }
+    return false;
+  }
+
+  static int numCompare(dynamic a, dynamic b) {
+    if (a == null || b == null) {
+      return -1;
+    }
+    try {
+      if (a is num) {
+        if (b is num) {
+          return a.compareTo(b);
+        } else if (b is String) {
+          return a.compareTo(int.parse(b));
+        }
+      }
+      if (a is String) {
+        if (b is num) {
+          return int.parse(a).compareTo(b);
+        } else if (b is String) {
+          return int.parse(a).compareTo(int.parse(b));
+        }
+      }
+    } catch (e) {
+      dprint('RecordSearchHelper._numCompare failed: $a, $b');
+    }
+    return -1;
+  }
 }

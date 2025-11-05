@@ -31,8 +31,10 @@ class MyScaffold extends StatelessWidget {
   final Widget? bottomNavigationBar;
   final Widget? bottomSheet;
   final Color? backgroundColor;
+
   /// [drawerEdgeDragWidthPercent] 定义一个宽度区域，在这个区域内水平拖动（滑动）手势可以触发打开 drawer (侧边栏)。可以指定为 0.3
   final double? drawerEdgeDragWidthPercent;
+  final FloatingActionButtonLocation? floatingActionButtonLocation;
 
   const MyScaffold({
     super.key,
@@ -45,6 +47,7 @@ class MyScaffold extends StatelessWidget {
     this.bottomSheet,
     this.backgroundColor,
     this.drawerEdgeDragWidthPercent,
+    this.floatingActionButtonLocation,
     required this.body,
   });
 
@@ -61,6 +64,7 @@ class MyScaffold extends StatelessWidget {
       appBar: appBar,
       drawer: drawer,
       floatingActionButton: floatingActionButton,
+      floatingActionButtonLocation: floatingActionButtonLocation,
       bottomNavigationBar: bottomNavigationBar,
       bottomSheet: bottomSheet,
       backgroundColor: backgroundColor,
@@ -91,6 +95,71 @@ class MyMiniScaffold extends StatelessWidget {
       singleChildScrollView: true,
       appBar: appBar,
       body: MyBodyPadding(MyLayout.miniColumn(children)),
+    );
+  }
+}
+
+class MyAppBarMenuItem {
+  final String value;
+  final String text;
+  final IconData? iconData;
+  final Color? color;
+  final bool bold;
+
+  const MyAppBarMenuItem({
+    required this.value,
+    required this.text,
+    this.iconData,
+    this.color,
+    this.bold = false,
+  });
+}
+
+class MyAppBarMenuButtons extends StatelessWidget {
+  final void Function(String) onSelected;
+  final List<List<MyAppBarMenuItem>> items;
+
+  const MyAppBarMenuButtons({
+    super.key,
+    required this.onSelected,
+    required this.items,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final List<PopupMenuEntry<String>> children = [];
+    for (var i = 0; i < items.length; i++) {
+      if (i > 0) {
+        children.add(const PopupMenuDivider(height: 1));
+      }
+      children.addAll(
+        items[i].map((item) {
+          final textChild = Text(
+            item.text,
+            style: TextStyle(
+              color: item.color,
+              fontWeight: item.bold ? FontWeight.bold : null,
+            ),
+          );
+          return PopupMenuItem(
+            value: item.value,
+            child: item.iconData == null
+                ? textChild
+                : Row(
+                    children: [
+                      Icon(item.iconData!, size: 20, color: item.color),
+                      const SizedBox(width: 12),
+                      textChild,
+                    ],
+                  ),
+          );
+        }),
+      );
+    }
+    return PopupMenuButton<String>(
+      icon: const Icon(Icons.more_vert),
+      onSelected: onSelected,
+      itemBuilder: (context) => children,
     );
   }
 }

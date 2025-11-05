@@ -134,3 +134,62 @@ class MyLayout {
     );
   }
 }
+
+
+/// 自定义 FAB 位置，使其向上偏移指定的距离
+class CustomEndFloatFabLocation extends FloatingActionButtonLocation {
+  final double offsetY;
+
+  const CustomEndFloatFabLocation(this.offsetY);
+
+  // 1. 实现 getOffsetX: 确定 FAB 的 X 坐标 (标准 endFloat 逻辑)
+
+  double getOffsetX(
+      ScaffoldPrelayoutGeometry scaffoldGeometry,
+      double adjustment,
+      ) {
+    // 默认的右侧定位逻辑：Scaffold 宽度 - FAB 宽度 - 16.0 边距
+    final double end = scaffoldGeometry.scaffoldSize.width;
+    final double x =
+        end - scaffoldGeometry.floatingActionButtonSize.width - 16.0;
+
+    // 减去 adjustment (通常用于处理 bottomSheet 或 SnackBar 的宽度变化，一般为 0)
+    return x - adjustment;
+  }
+
+  // 2. 实现 getOffsetY: 确定 FAB 的 Y 坐标 (标准 endFloat 逻辑)
+  double getOffsetY(
+      ScaffoldPrelayoutGeometry scaffoldGeometry,
+      double adjustment,
+      ) {
+    // 默认的底部定位逻辑：
+    // 使用 contentBottom (内容区域的底部 Y 坐标) 减去 FAB 高度，再减去底部边距 (16.0)。
+    // contentBottom 已经考虑了 bottomNavigationBar 和系统插边。
+    final double contentBottom = scaffoldGeometry.contentBottom;
+
+    final double standardY =
+        contentBottom -
+            scaffoldGeometry.floatingActionButtonSize.height -
+            16.0; // 默认底部边距
+
+    // 扣除 adjustment
+    return standardY;
+  }
+
+  // 3. 核心覆盖 getOffset：应用自定义偏移
+  @override
+  Offset getOffset(ScaffoldPrelayoutGeometry scaffoldGeometry) {
+    // 调用实现的 getOffsetX 和 getOffsetY 获得标准位置
+    final double standardX = getOffsetX(scaffoldGeometry, 0.0);
+    final double standardY = getOffsetY(scaffoldGeometry, 0.0);
+
+    // 返回调整后的坐标：Y 坐标减去我们需要的偏移量 (向上移动)
+    return Offset(
+      standardX,
+      standardY - offsetY, // <-- 核心修改点：向上偏移
+    );
+  }
+
+  @override
+  String toString() => 'FloatingActionButtonLocation.customEndFloat($offsetY)';
+}

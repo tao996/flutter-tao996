@@ -1,6 +1,4 @@
-import 'dart:io';
 import 'package:sqflite/sqflite.dart';
-import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart' as path;
 
 import '../../tao996.dart';
@@ -75,27 +73,21 @@ abstract class IDatabaseService {
 
 class SqfliteDatabaseService implements IDatabaseService {
   Database? _database;
-  String databasePath; // 数据库路径
-
-  final String databaseName;
+  late String databasePath; // 数据库路径
   final bool printSQL;
 
   final IDebugService _debugService = getIDebugService();
 
+  /// 数据库服务
+  /// [databaseDir] 数据库文件所在目录，通常为 `await FilepathUtil.homeDir()`
+  /// [databaseName] 数据库文件名
   SqfliteDatabaseService({
-    this.databaseName = 'main.sqlite.db',
-    this.databasePath = '',
+    required String databaseDir,
+    String databaseName = 'main.sqlite.db',
     this.printSQL = false,
-  });
-
-  Future<String> _getDatabasesPath() async {
-    // 存在同名函数 getDatabasesPath()
-    if (databasePath.isEmpty) {
-      final homeDir= await FilepathUtil.homeDir();
-      databasePath = path.join(homeDir, databaseName);
-    }
-    dprint('[SQLite]: database path: $databasePath.');
-    return databasePath;
+  }){
+    databasePath = path.join(databaseDir, databaseName);
+    dprint('db path: $databasePath');
   }
 
   @override
@@ -105,7 +97,7 @@ class SqfliteDatabaseService implements IDatabaseService {
   Future<void> migrate(
     Future<Database> Function(String path) createDatabase,
   ) async {
-    _database = await createDatabase(await _getDatabasesPath());
+    _database = await createDatabase(databasePath);
   }
 
   @override

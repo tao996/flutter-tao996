@@ -21,16 +21,14 @@ class FontService implements IFontService {
   final ISettingsService _settingsService = getISettingsService();
   final IDebugService _debugService = getIDebugService();
 
-  String _getDirSeparator() {
-    return Platform.isWindows ? '\\' : '/';
-  }
 
+  /// 获取字体目录
   Future<Directory> _getFontDir() async {
     final Directory appWorkDir =
         Platform.isAndroid
             ? await getApplicationDocumentsDirectory()
             : await getApplicationSupportDirectory();
-    final String fontDirPath = '${appWorkDir.path}${_getDirSeparator()}fonts';
+    final String fontDirPath = '${appWorkDir.path}${FilepathUtil.dirSeparator()}fonts';
     final Directory fontDir = Directory(fontDirPath);
     if (!(await fontDir.exists())) {
       await fontDir.create(recursive: true);
@@ -52,7 +50,7 @@ class FontService implements IFontService {
       List<String> fontNameList = [];
       final fontDir = await _getFontDir();
       for (var fontFile in fontDir.listSync()) {
-        final fontName = fontFile.path.split(_getDirSeparator()).last;
+        final fontName = fontFile.path.split(FilepathUtil.dirSeparator()).last;
         await _readFont(fontFile.path, fontName);
         fontNameList.add(fontName);
       }
@@ -70,7 +68,7 @@ class FontService implements IFontService {
       if (themeFontName != 'system') {
         final fontFileDir = await _getFontDir();
         await _readFont(
-          '${fontFileDir.path}${_getDirSeparator()}$themeFontName',
+          '${fontFileDir.path}${FilepathUtil.dirSeparator()}$themeFontName',
           themeFontName,
         );
       }
@@ -86,7 +84,7 @@ class FontService implements IFontService {
       return;
     }
     final fontFileDir = await _getFontDir();
-    final fontFile = File('${fontFileDir.path}${_getDirSeparator()}$fontName');
+    final fontFile = File('${fontFileDir.path}${FilepathUtil.dirSeparator()}$fontName');
     try {
       if (await fontFile.exists()) {
         await fontFile.delete();
@@ -110,9 +108,9 @@ class FontService implements IFontService {
             fontFilePicker.paths.map((path) => File(path!)).toList();
         final fontFileDir = await _getFontDir();
         for (var fontFile in fontFileList) {
-          final fontFileName = fontFile.path.split(_getDirSeparator()).last;
+          final fontFileName = fontFile.path.split(FilepathUtil.dirSeparator()).last;
           final newFontPath =
-              '${fontFileDir.path}${_getDirSeparator()}$fontFileName';
+              '${fontFileDir.path}${FilepathUtil.dirSeparator()}$fontFileName';
           await fontFile.copy(newFontPath);
           // await fontFile.delete();
         }

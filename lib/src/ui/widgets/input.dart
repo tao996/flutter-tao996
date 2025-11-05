@@ -12,10 +12,11 @@ enum _InputMode {
 
 /// 带有后缀按钮的输入框
 class MyInput extends StatefulWidget {
-  final TextEditingController controller;
+  final TextEditingController? controller;
   final String? labelText;
   final String? hintText;
   final String? helperText;
+  final String? defaultValue;
   final bool isPassword;
   final bool isRequired;
   final int? maxLines;
@@ -33,10 +34,11 @@ class MyInput extends StatefulWidget {
   final void Function(String)? onFieldSubmitted;
 
   const MyInput({
-    required this.controller,
+    this.controller,
     this.labelText,
     this.hintText,
     this.helperText,
+    this.defaultValue,
     this.isPassword = false,
     this.isRequired = false,
     this.maxLines,
@@ -59,27 +61,32 @@ class MyInput extends StatefulWidget {
 class _MyInputState extends State<MyInput> {
   bool isPassword = false;
   final FocusNode _focusNode = FocusNode();
+  late TextEditingController controller;
 
-  @override
-  void dispose() {
-    // 移除监听器，避免内存泄漏
-    widget.controller.removeListener(_handleControllerChange);
-    _focusNode.dispose();
-    super.dispose();
-  }
 
   @override
   void initState() {
     super.initState();
     isPassword = widget.isPassword;
+    controller = widget.controller ?? TextEditingController(text:widget.defaultValue ?? '');
     // 使用一个私有方法来处理监听器的逻辑
-    widget.controller.addListener(_handleControllerChange);
+    controller.addListener(_handleControllerChange);
+  }
+  @override
+  void dispose() {
+    // 移除监听器，避免内存泄漏
+    controller.removeListener(_handleControllerChange);
+    if (widget.controller == null){
+      controller.dispose();
+    }
+    _focusNode.dispose();
+    super.dispose();
   }
 
   // 添加监听器，每当文本发生变化时都调用 setState；
   void _handleControllerChange() {
     // 仅在需要影响 UI (如 suffixIcon) 时才调用 setState
-    setState(() {});
+    // setState(() {});
   }
 
   // --- 验证器逻辑 ---
@@ -197,7 +204,7 @@ class _MyInputState extends State<MyInput> {
         helperText: widget.helperText,
         border: const OutlineInputBorder(),
         // 只有当文本不为空且输入不是密码时才显示后缀图标（密码图标已包含在 _suffix 中）
-        suffixIcon: (widget.isPassword || widget.controller.text.isNotEmpty)
+        suffixIcon: (widget.isPassword || controller.text.isNotEmpty)
             ? _suffix()
             : null,
         isDense: true,
@@ -219,6 +226,7 @@ class _MyInputState extends State<MyInput> {
   }
 
   Widget _suffix() {
+
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
@@ -234,11 +242,11 @@ class _MyInputState extends State<MyInput> {
                 : const Icon(Icons.visibility_off),
           ),
         // 只有当文本不为空时才显示清除按钮
-        if (widget.controller.text.isNotEmpty)
+        if (controller.text.isNotEmpty)
           IconButton(
             icon: const Icon(Icons.clear),
             onPressed: () {
-              widget.controller.clear();
+              controller.clear();
               widget.onChanged?.call('');
             },
           ),

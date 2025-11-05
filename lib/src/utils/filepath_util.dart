@@ -73,6 +73,10 @@ class FilepathUtil {
     return p.posix.separator;
   }
 
+  static String dirSeparator() {
+    return Platform.isWindows ? '\\' : '/';
+  }
+
   /// 获取用户的家目录
   static Future<String> homeDir() async {
     // 1. 获取用户的家目录
@@ -277,5 +281,17 @@ class FilepathUtil {
   /// 获取当前脚本目录
   static String scriptDir() {
     return p.dirname(Platform.script.toFilePath());
+  }
+  /// 获取字符串的文件名
+  static List<String> getFileNames(List<File> files) {
+    return files
+        .map((file) => file.path.split(FilepathUtil.dirSeparator()).last)
+        .toList();
+  }
+
+  /// 调用原生文件选择器来选择一个目录
+ static Future<String?> getDirectoryPath() async {
+    // 这会打开一个原生文件选择对话框，只允许用户选择目录，而不是文件。
+    return await FilePicker.platform.getDirectoryPath();
   }
 }

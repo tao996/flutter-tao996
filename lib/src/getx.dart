@@ -27,6 +27,7 @@ void registerTao996Services(GetIt locator) {
 
   locator.registerLazySingleton<IFontService>(() => FontService());
   locator.registerLazySingleton<DioHttpService>(() => DioHttpService());
+  locator.registerLazySingleton<ImagePickerService>(() => ImagePickerService());
   // locator.registerLazySingleton<IHttpService>(() => DioHttpClient());
   locator.registerLazySingleton<ILocaleService>(() => LocaleService());
   locator.registerLazySingleton<INetworkService>(() => NetworkService());
@@ -68,6 +69,10 @@ IDioHttpService getIDioHttpService() {
 
 DioHttpService getDioHttpClient() {
   return GetIt.instance<DioHttpService>();
+}
+
+ImagePickerService getImagePickerService() {
+  return GetIt.instance<ImagePickerService>();
 }
 
 ILocaleService getILocaleService() {

@@ -21,6 +21,7 @@ export 'src/services/file_picker_service.dart';
 export 'src/services/font_service.dart';
 export 'src/services/http_getx_service.dart';
 export 'src/services/http_dio_service.dart';
+export 'src/services/image_picker_service.dart';
 export 'src/services/locale_service.dart';
 export 'src/services/log_service.dart';
 export 'src/services/message_service.dart';

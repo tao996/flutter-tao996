@@ -86,35 +86,6 @@ class MyText {
     );
   }
 
-  static Widget listTitle(String title, {String? subTitle, bool bold = true}) {
-    final Color primaryTextColor = getColorScheme().onSurface;
-    final Color subduedTextColor = MyColor.text(
-      0.6,
-    ); // 模拟 Colors.grey[600] 的柔和效果
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Text(
-          title,
-          style: (bold ? TextStyle(fontWeight: FontWeight.bold) : null)
-              ?.copyWith(
-                color: primaryTextColor, // 替换 Colors.black
-              ),
-        ),
-        if (subTitle != null && subTitle.isNotEmpty)
-          Text(
-            subTitle,
-            style: TextStyle(
-              fontSize: 12,
-              color: subduedTextColor, // 替换 Colors.grey[600]
-            ),
-          ),
-      ],
-    );
-  }
-
   static Widget labelText(
     String label,
     String content, {
@@ -124,6 +95,7 @@ class MyText {
     return InputDecorator(
       decoration: InputDecoration(
         labelText: label,
+        fillColor: Colors.grey[100],
         // enabled: border,
         // border: border ? null : InputBorder.none,
         // enabledBorder: border ? null : InputBorder.none,
@@ -139,56 +111,43 @@ class MyText {
     return Text(text, style: TextStyle(fontWeight: FontWeight.bold));
   }
 
-  static Widget groupTitle({required String title, IconData? icon}) {
-    return _SectionHeader(title: title, icon: icon);
-  }
-}
-
-/// 一个美观的区块/分组标题组件
-/// 用于取代简单的 MyText.h5 + Divider 的组合
-class _SectionHeader extends StatelessWidget {
-  final String title;
-  final IconData? icon;
-
-  const _SectionHeader({required this.title, this.icon});
-
-  @override
-  Widget build(BuildContext context) {
-    final child = MyText.h5(
-      title,
-      fontWeight: FontWeight.w700, // 更粗的字体
-      color: Colors.blueGrey[800],
-    );
-    if (icon == null) {
-      return child;
-    }
-    // 使用 Row 组合图标和文本
-    final content = Row(
-      crossAxisAlignment: CrossAxisAlignment.center,
-      children: [
-        // 1. 图标
-        Icon(icon, size: 18, color: Colors.blue[700]),
-        MyLayout.width8(), // 间距
-        // 2. 标题文本
-        child,
-      ],
-    );
-
-    // return Padding(
-    //   padding: const EdgeInsets.fromLTRB(4, 12, 4, 10),
-    //   child: content,
-    // );
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        // 顶部留白和内边距
-        Padding(
-          padding: const EdgeInsets.fromLTRB(4, 12, 4, 12),
-          child: content,
+  /// 分组标题
+  static Widget sectionTitle(
+    String title, {
+    IconData? iconData,
+    String? subTitle,
+    Widget? trailing,
+  }) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.center, // 确保垂直居中
+      children: <Widget>[
+        if (iconData != null) ...[
+          Icon(iconData, size: 24),
+          const SizedBox(width: 16),
+        ], // 间距
+        Expanded(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: <Widget>[
+              Text(
+                title,
+                style: getTextTheme().titleMedium?.copyWith(
+                  fontWeight: FontWeight.bold,
+                  color: getColorScheme().primary,
+                ),
+              ),
+              if (subTitle != null && subTitle.isNotEmpty)
+                Text(
+                  subTitle,
+                  style: TextStyle(fontSize: 12, color: MyColor.text(0.6)),
+                ),
+            ],
+          ),
         ),
-        // 底部细分隔线
-        Container(height: 1.0, color: Colors.grey[300]),
+
+        // Trailing (右侧图标/Widget)
+        if (trailing != null) trailing,
       ],
     );
   }

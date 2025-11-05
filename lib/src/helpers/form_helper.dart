@@ -40,7 +40,7 @@ class FormHelper {
   /// 跟 [gridCheckbox] 的区别是会自动换行
   static Widget filterChipCheckbox<T>({
     required List<KV<T>> items,
-    required void Function(bool selected, T item)? onSelectionChanged,
+    required void Function(bool selected, T item) onSelectionChanged,
     List<T>? values,
   }) {
     return Wrap(
@@ -52,11 +52,9 @@ class FormHelper {
           // avatar: item.iconData != null ? Icon(item.iconData) : null,
           label: Text(item.label),
           selected: isSelected,
-          onSelected: onSelectionChanged != null
-              ? (selected) {
-                  onSelectionChanged(selected, item.value);
-                }
-              : null,
+          onSelected: (selected) {
+            onSelectionChanged(selected, item.value);
+          },
         );
       }).toList(),
     );
@@ -65,7 +63,7 @@ class FormHelper {
   /// 水平布局的 按钮组，可用于单选
   static Widget oneFilterChip<T>({
     required List<KV<T>> items,
-    required void Function(T item) onSelectionChanged,
+    required void Function(T? item) onSelectionChanged,
     T? value,
     String? label,
     InputDecoration? decoration, // 允许传入自定义 decoration
@@ -76,6 +74,8 @@ class FormHelper {
       onSelectionChanged: (selected, item) {
         if (selected) {
           onSelectionChanged(item);
+        } else if (!isRequired) {
+          onSelectionChanged(null);
         }
       },
       values: value == null ? null : [value],
@@ -105,7 +105,11 @@ class FormHelper {
       multiSelectionEnabled: multiSelectionEnabled,
       emptySelectionAllowed: emptySelectionAllowed,
       segments: items.map((kv) {
-        return ButtonSegment<T>(value: kv.value, label: Text(kv.label));
+        return ButtonSegment<T>(
+          value: kv.value,
+          label: Text(kv.label),
+          icon: kv.icon,
+        );
       }).toList(),
       selected: values.toSet(),
       onSelectionChanged: onSelectionChanged,
@@ -167,10 +171,11 @@ class FormHelper {
 
   /// 注意 [onChanged] 里不需要再次更新 controller.text，否则会触发 auto Fours
   static Widget input({
-    required TextEditingController controller,
+    TextEditingController? controller,
     String? labelText,
     String? hintText,
     String? helperText,
+    String? defaultValue,
     bool isPassword = false,
     bool isRequired = false,
     bool isNumber = false, // 是否为数字输入（整数或小数，取决于是否有 min/max）
@@ -186,6 +191,7 @@ class FormHelper {
       labelText: labelText,
       hintText: hintText,
       helperText: helperText,
+      defaultValue: defaultValue,
       isPassword: isPassword,
       isRequired: isRequired,
       isNumber: isNumber,
@@ -223,6 +229,24 @@ class FormHelper {
       hintText: hintText,
       initialDatetime: initialDatetime,
       onDatetimeSelected: onDatetimeSelected,
+    );
+  }
+
+  static Widget checkboxListTile({
+    required String title,
+    required void Function(bool) onChanged,
+    String? subtitle,
+    bool value = false,
+    IconData? iconData,
+  }) {
+    return CheckboxListTile(
+      title: Text(title),
+      subtitle: subtitle != null && subtitle.isNotEmpty ? Text(subtitle) : null,
+      value: value,
+      onChanged: (bool? newValue) {
+        onChanged(newValue == true);
+      },
+      secondary: iconData == null ? null : Icon(iconData),
     );
   }
 
@@ -288,9 +312,19 @@ class FormHelper {
     );
   }
 
-  /// 搜索框
-  static Widget search(MySearchInputMethods method, {String? hintText}) {
-    return MySearchInput(method, hintText: hintText);
+  /// 搜索框 [data] 原始数据，在用户输入或提交时会同时将原始数据返回
+  static Widget search(
+    MySearchInputMethods method, {
+    String? hintText,
+    String? value,
+    dynamic data,
+  }) {
+    return MySearchInput(
+      method,
+      hintText: hintText,
+      data: data,
+      defaultValue: value,
+    );
   }
 
   /// 用来模拟一个输入框，如果只是单纯需要显示文字，使用 MyText.label

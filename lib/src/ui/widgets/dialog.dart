@@ -3,11 +3,12 @@ import 'package:get/get.dart';
 import 'package:tao996/tao996.dart';
 
 class MyDialog {
+  /// 可用于关闭对话框
   static Widget title(String title) {
-    return MyLayout.miniRow(
+    return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       crossAxisAlignment: CrossAxisAlignment.center,
-      [
+      children: [
         Text(title, style: getTextTheme().titleLarge),
         IconButton(
           onPressed: () {
@@ -79,6 +80,52 @@ class MyDialog {
           content: child,
         );
       },
+    );
+  }
+
+  /// 一个适用于表单的通用对话框
+  /// [onSubmit] 点击保存按钮，你需要自己手动关闭对话框
+  static Future<dynamic> form(
+    BuildContext context, {
+    required String title,
+    required List<Widget> children,
+    bool? deleteButton = false,
+    required void Function() onSubmit,
+  }) async {
+    final length = children.length;
+    return await MyDialog.fullScreenDialog(
+      context,
+      verticalPadding: null,
+      child: MyBodyPadding(
+        Column(
+          mainAxisSize: MainAxisSize.min,
+          children: List.generate(length + 1, (index) {
+            if (index == length) {
+              return MyPadding(
+                vertical: 16,
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  // mainAxisSize: MainAxisSize.min,
+                  children: [
+                    MyCancelButton(type: MyButtonType.outlined),
+                    if (deleteButton == true)
+                      MyDeleteButton(
+                        onPressed: () {
+                          getIMessageService().deleteConfirm(title, () {
+                            goBackWithResult('delete');
+                          });
+                        },
+                      ),
+                    // 保存按钮
+                    MySaveButton(onPressed: onSubmit),
+                  ],
+                ),
+              );
+            }
+            return children[index];
+          }),
+        ),
+      ),
     );
   }
 
@@ -181,6 +228,62 @@ class MyDialog {
               ],
             );
           },
+    );
+  }
+
+  /// 定义一个从顶部滑入的函数
+  /// [context] 通常为 navigatorKey.currentContext!, 使用全局 Context
+  static Future<T?> showTopSheet<T>({
+    required BuildContext context,
+    required WidgetBuilder builder,
+  }) {
+    return showGeneralDialog<T>(
+      context: context,
+      barrierDismissible: true,
+      // 点击外部区域是否关闭
+      barrierLabel: MaterialLocalizations.of(context).modalBarrierDismissLabel,
+      barrierColor: Colors.black54,
+      // 背景颜色
+      transitionDuration: const Duration(milliseconds: 300),
+      // 动画时长
+
+      // --------------------------------------------------
+      // 关键步骤 1: 定义内容的位置和动画
+      // --------------------------------------------------
+      transitionBuilder: (context, animation, secondaryAnimation, child) {
+        // 使用 Tween 定义从顶部上方 (offset.dy = -1.0) 滑入到最终位置 (offset.dy = 0.0)
+        const begin = Offset(0.0, -1.0);
+        const end = Offset.zero;
+        final tween = Tween(begin: begin, end: end);
+
+        // 使用 SlideTransition 应用动画
+        return SlideTransition(
+          position: animation.drive(tween),
+          child: child, // 传入下面的 PageBuilder 构建的 Widget
+        );
+      },
+
+      // --------------------------------------------------
+      // 关键步骤 2: 构建要显示的内容
+      // --------------------------------------------------
+      pageBuilder: (context, animation, secondaryAnimation) {
+        // 使用 Align 将内容固定在顶部
+        return Align(
+          alignment: Alignment.topCenter,
+          // 使用 Material 组件，以便内容具有背景和阴影
+          child: Material(
+            color: Colors.white, // 内容背景色
+            elevation: 10, // 阴影
+            borderRadius: const BorderRadius.vertical(
+              bottom: Radius.circular(12),
+            ),
+            child: SizedBox(
+              width: MediaQuery.of(context).size.width, // * 0.9, // 宽度占屏幕的 90%
+              child: builder(context), // 调用用户传入的 builder 函数来构建内容
+            ),
+          ),
+        );
+      },
     );
   }
 }

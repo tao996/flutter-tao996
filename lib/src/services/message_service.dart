@@ -20,7 +20,12 @@ abstract class IMessageService extends IDebugMessageService {
   Future<void> alert(String title, {String? content, Widget? icon});
 
   // 删除确认
-  Future<bool?> deleteConfirm(String title, [void Function()? yes]);
+  // [isContent] 为 true 时，[text] 为内容，否则为标题
+  Future<bool?> deleteConfirm(
+    String text,
+    void Function() yes, {
+    bool isContent = false,
+  });
 
   void toast(String message);
 
@@ -96,11 +101,17 @@ class MessageService implements IMessageService {
   }
 
   @override
-  Future<bool?> deleteConfirm(String title, [void Function()? yes]) async {
+  Future<bool?> deleteConfirm(
+    String text,
+    void Function() yes, {
+    bool isContent = false,
+  }) async {
     return Get.dialog(
       AlertDialog(
         title: Text('deleteConfirmTitle'.tr),
-        content: Text('deleteConfirmContent'.trParams({'title': title})),
+        content: Text(
+          isContent ? text : 'deleteConfirmContent'.trParams({'title': text}),
+        ),
         actions: [
           TextButton(
             onPressed: () {
@@ -115,7 +126,7 @@ class MessageService implements IMessageService {
             ),
             onPressed: () async {
               Get.back(result: true); // 必须提前关闭
-              yes?.call();
+              yes.call();
             },
             child: Text('confirm'.tr),
           ),
