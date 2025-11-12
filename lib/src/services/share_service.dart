@@ -10,7 +10,7 @@ abstract class IShareService {
     String? text,
     String? subject,
   });
-
+  /// 分享文本
   Future<IShareStatus> share(String text, {String? subject});
 }
 

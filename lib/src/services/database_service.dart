@@ -3,6 +3,7 @@ import 'package:path/path.dart' as path;
 
 import '../../tao996.dart';
 
+/// 自定义查询条件，将你的条件添加到 [conditions]中，将对应的值添加到 [whereArgs] 中
 typedef WhereClauseBuilder =
     void Function(List<String> conditions, List<Object> whereArgs);
 

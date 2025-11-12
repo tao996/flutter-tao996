@@ -18,6 +18,7 @@ export 'src/services/database_service.dart';
 export 'src/services/debug_service.dart';
 export 'src/services/device_service.dart';
 export 'src/services/file_picker_service.dart';
+export 'src/services/file_service.dart';
 export 'src/services/font_service.dart';
 export 'src/services/http_getx_service.dart';
 export 'src/services/http_dio_service.dart';
@@ -32,6 +33,7 @@ export 'src/services/setting_service.dart';
 export 'src/services/share_service.dart';
 export 'src/services/theme_service.dart';
 export 'src/services/webview_service.dart';
+export 'src/services/zip_service.dart';
 
 export 'src/translation/translation.dart';
 

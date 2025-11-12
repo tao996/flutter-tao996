@@ -152,23 +152,62 @@ class MyDialog {
               mainAxisAlignment: MainAxisAlignment.center,
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                for (String value in values)
-                  RadioListTile(
-                    value: value,
-                    groupValue: selectedValue,
-                    title: Text(value.tr),
-                    onChanged: (value) {
-                      if (value != null && value != selectedValue) {
-                        setState(() {
-                          selectedValue = value;
-                        });
-                      }
-                    },
-                    visualDensity: VisualDensity.compact,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(80),
-                    ),
+                // 🚨 关键修改：用 RadioGroup 包裹所有的 RadioListTile
+                RadioGroup<String>(
+                  // 1. 设置当前的选中值
+                  groupValue: selectedValue,
+
+                  // 2. 集中处理选中值改变事件
+                  onChanged: (String? newValue) {
+                    if (newValue != null && newValue != selectedValue) {
+                      setState(() {
+                        selectedValue = newValue;
+                      });
+                    }
+                  },
+
+                  // 3. 将所有 RadioListTile 包装在一个 Column 中作为 child
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      for (String value in values)
+                        RadioListTile.adaptive(
+                          // 推荐使用 .adaptive 保持跨平台一致性
+                          // 每一个 RadioListTile 只需要设置 value 属性
+                          value: value,
+
+                          // ❌ 移除 groupValue
+                          // ❌ 移除 onChanged
+
+                          // 标题和本地化保持不变
+                          title: Text(value.tr),
+
+                          visualDensity: VisualDensity.compact,
+
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(80),
+                          ),
+                        ),
+                    ],
                   ),
+                ),
+                // for (String value in values)
+                //   RadioListTile(
+                //     value: value,
+                //     groupValue: selectedValue,
+                //     title: Text(value.tr),
+                //     onChanged: (value) {
+                //       if (value != null && value != selectedValue) {
+                //         setState(() {
+                //           selectedValue = value;
+                //         });
+                //       }
+                //     },
+                //     visualDensity: VisualDensity.compact,
+                //     shape: RoundedRectangleBorder(
+                //       borderRadius: BorderRadius.circular(80),
+                //     ),
+                //   ),
               ],
             );
           },

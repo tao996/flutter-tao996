@@ -50,6 +50,10 @@ void registerTao996Services(GetIt locator) {
 IDatabaseService getIDatabaseService() {
   return GetIt.instance<IDatabaseService>();
 }
+/// 如果你自己手动注册（通常用于替换数据库）
+SqfliteDatabaseService getSqfliteDatabaseService() {
+  return GetIt.instance<SqfliteDatabaseService>();
+}
 
 IDebugService getIDebugService() {
   return GetIt.instance<IDebugService>();

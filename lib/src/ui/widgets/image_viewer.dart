@@ -1,13 +1,28 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
-import 'package:flutter_image_gallery_saver/flutter_image_gallery_saver.dart';
 import 'package:get/get.dart';
 import 'package:permission_handler/permission_handler.dart';
-
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:tao996/tao996.dart';
 
-import '../../../tao996.dart';
+void openImageViewer(
+  BuildContext context,
+  String imageUrl, {
+  Directory? director,
+  List<Widget>? actions,
+}) {
+  Navigator.push(
+    context,
+    MaterialPageRoute(
+      builder: (context) => MyImageViewerWidget(
+        imageUrl: FilepathUtil.normalize(imageUrl),
+        director: director,
+        actions: actions,
+      ),
+    ),
+  );
+}
 
 /// 新增图片查看器页面，在 image.dart 中使用
 class MyImageViewerWidget extends StatefulWidget {
@@ -17,7 +32,14 @@ class MyImageViewerWidget extends StatefulWidget {
   /// 缓存到本地保存的目录
   final Directory? director;
 
-  const MyImageViewerWidget({super.key, required this.imageUrl, this.director});
+  final List<Widget>? actions;
+
+  const MyImageViewerWidget({
+    super.key,
+    required this.imageUrl,
+    this.director,
+    this.actions,
+  });
 
   @override
   State<MyImageViewerWidget> createState() => _MyImageViewerWidgetState();
@@ -26,11 +48,22 @@ class MyImageViewerWidget extends StatefulWidget {
 class _MyImageViewerWidgetState extends State<MyImageViewerWidget> {
   final _debugService = getIDebugService();
   final _messageService = getIMessageService();
+  ResourceLocation location = ResourceLocation.unknown;
+
+  @override
+  void initState() {
+    super.initState();
+    location = FilepathUtil.determineLocation(widget.imageUrl);
+    dprint('资源位置: ${widget.imageUrl} => $location');
+  }
 
   // 控制底部操作按钮的显示/隐藏状态
   final bool _showControls = true;
 
   Future<File?> _getImage({void Function(int, int)? onReceiveProgress}) async {
+    if (location.isLocal) {
+      return File(widget.imageUrl);
+    }
     final directory =
         widget.director ?? await getIPathService().getTemporaryDirectoryPath();
     // 从 URL 中提取文件名，或者生成一个唯一的文件名
@@ -57,7 +90,6 @@ class _MyImageViewerWidgetState extends State<MyImageViewerWidget> {
 
   // 模拟下载图片功能
   Future<void> _downloadImage() async {
-    _messageService.toast('image downloading'.tr);
     try {
       if (Platform.isAndroid) {
         var status = await Permission.storage.request();
@@ -69,27 +101,28 @@ class _MyImageViewerWidgetState extends State<MyImageViewerWidget> {
           return;
         }
       }
-
-      final file = await _getImage(
-        onReceiveProgress: (received, total) {
-          if (total != -1) {
-            double progress = (received / total) * 100;
-            // 你可以在这里更新下载进度条，如果需要的话
-            if (isDebugMode) {
-              dprint('下载进度: ${progress.toStringAsFixed(0)}%');
-            }
-          }
-        },
-      );
-      if (file == null) {
-        _messageService.error('image download error'.tr);
+      if (location.isLocal) {
+        await MyFileService.saveFile(widget.imageUrl);
       } else {
-        await FlutterImageGallerySaver.saveImage(await file.readAsBytes());
-        _debugService.d(
-          '图片保存成功',
-          successMessage: 'download and save success'.tr,
+        final file = await _getImage(
+          onReceiveProgress: (received, total) {
+            if (total != -1) {
+              double progress = (received / total) * 100;
+              // 你可以在这里更新下载进度条，如果需要的话
+              if (isDebugMode) {
+                dprint('下载进度: ${progress.toStringAsFixed(0)}%');
+              }
+            }
+          },
         );
+        if (file == null) {
+          _messageService.error('image download error'.tr);
+          return;
+        } else {
+          await MyFileService.saveImage(file);
+        }
       }
+      _debugService.d('图片保存成功', successMessage: 'download and save success'.tr);
     } catch (error, stackTrace) {
       _debugService.exception(
         error,
@@ -142,16 +175,37 @@ class _MyImageViewerWidgetState extends State<MyImageViewerWidget> {
                 boundaryMargin: const EdgeInsets.all(1),
                 minScale: 1, // 适当的最小缩放
                 maxScale: 10, // 适当的最大缩放
-                child: CachedNetworkImage(
-                  imageUrl: widget.imageUrl,
-                  fit: BoxFit.contain, // 确保图片完整显示
-                  placeholder: (context, url) => const Center(
-                    child: CircularProgressIndicator(color: Colors.white),
-                  ),
-                  errorWidget: (context, url, error) => const Center(
-                    child: Icon(Icons.error, color: Colors.white, size: 50),
-                  ),
-                ),
+                child: location.isLocal
+                    ? Image.file(
+                        File(widget.imageUrl),
+                        fit: BoxFit.contain,
+
+                        // 专门处理异步加载失败（文件不存在或被清除）
+                        errorBuilder: (context, error, stackTrace) {
+                          // 捕获到加载失败，打印错误
+                          dprint('异步加载图片失败失败，触发再生或显示错误图标: ${widget.imageUrl}');
+                          dprint('具体错误: $error');
+
+                          // 返回一个替代的 Widget
+                          return const Center(
+                            child: Icon(Icons.broken_image, color: Colors.red),
+                          );
+                        },
+                      )
+                    : CachedNetworkImage(
+                        imageUrl: widget.imageUrl,
+                        fit: BoxFit.contain, // 确保图片完整显示
+                        placeholder: (context, url) => const Center(
+                          child: CircularProgressIndicator(color: Colors.white),
+                        ),
+                        errorWidget: (context, url, error) => const Center(
+                          child: Icon(
+                            Icons.error,
+                            color: Colors.white,
+                            size: 50,
+                          ),
+                        ),
+                      ),
               ),
             ),
           ),
@@ -180,6 +234,19 @@ class _MyImageViewerWidgetState extends State<MyImageViewerWidget> {
                     ),
                     const Spacer(), // 将返回按钮推到左边
                     // 如果有其他顶部操作，可以放在这里
+                    imageViewerActionButton(
+                      icon: Icons.download,
+                      label: '下载',
+                      onTap: _downloadImage,
+                      vertical: false,
+                    ),
+
+                    imageViewerActionButton(
+                      icon: Icons.share,
+                      label: 'Share'.tr,
+                      onTap: _shareImage,
+                      vertical: false,
+                    ),
                   ],
                 ),
               ),
@@ -187,64 +254,54 @@ class _MyImageViewerWidgetState extends State<MyImageViewerWidget> {
           ),
 
           // 3. 底部操作按钮
-          Positioned(
-            bottom: MediaQuery.of(context).padding.bottom, // 距离系统导航栏底部
-            left: 0,
-            right: 0,
-            child: AnimatedOpacity(
-              opacity: _showControls ? 1.0 : 0.0,
-              duration: const Duration(milliseconds: 200),
-              child: Container(
-                color: Colors.black.withAlpha(120), // 半透明背景
-                padding: const EdgeInsets.symmetric(vertical: 8.0),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceAround, // 按钮均匀分布
-                  children: [
-                    _buildActionButton(
-                      icon: Icons.download,
-                      label: 'Download'.tr,
-                      onTap: _downloadImage,
-                    ),
-                    _buildActionButton(
-                      icon: Icons.share,
-                      label: 'Share'.tr,
-                      onTap: _shareImage,
-                    ),
-                    // 可以添加更多操作，例如：
-                    // _buildActionButton(
-                    //   icon: Icons.info_outline,
-                    //   label: '详情'.tr,
-                    //   onTap: () {
-                    //     _messageService.showToast(msg: '查看图片详情');
-                    //   },
-                    // ),
-                  ],
+          if (widget.actions != null && widget.actions!.isNotEmpty)
+            Positioned(
+              bottom: MediaQuery.of(context).padding.bottom, // 距离系统导航栏底部
+              left: 0,
+              right: 0,
+              child: AnimatedOpacity(
+                opacity: _showControls ? 1.0 : 0.0,
+                duration: const Duration(milliseconds: 200),
+                child: Container(
+                  color: Colors.black.withAlpha(120), // 半透明背景
+                  padding: const EdgeInsets.symmetric(vertical: 8.0),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceAround, // 按钮均匀分布
+                    children: widget.actions!,
+                  ),
                 ),
               ),
             ),
-          ),
         ],
       ),
     );
   }
+}
 
-  // 辅助方法：构建底部操作按钮
-  Widget _buildActionButton({
-    required IconData icon,
-    required String label,
-    required VoidCallback onTap,
-  }) {
-    return Column(
-      children: [
-        IconButton(
-          icon: Icon(icon, color: Colors.white),
-          onPressed: onTap,
-        ),
-        Text(
-          label,
-          style: const TextStyle(color: Colors.white, fontSize: 12.0),
-        ),
-      ],
+// 辅助方法：构建底部操作按钮
+Widget imageViewerActionButton({
+  required IconData icon,
+  required String label,
+  required VoidCallback onTap,
+  bool vertical = true,
+}) {
+  if (vertical == false) {
+    return TextButton.icon(
+      onPressed: onTap,
+      label: Text(
+        label,
+        style: const TextStyle(color: Colors.white, fontSize: 12.0),
+      ),
+      icon: Icon(icon, color: Colors.white),
     );
   }
+  return Column(
+    children: [
+      IconButton(
+        icon: Icon(icon, color: Colors.white),
+        onPressed: onTap,
+      ),
+      Text(label, style: const TextStyle(color: Colors.white, fontSize: 12.0)),
+    ],
+  );
 }

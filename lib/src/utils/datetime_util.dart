@@ -2,7 +2,7 @@ import 'package:intl/intl.dart';
 
 import '../../tao996.dart';
 
-enum DateTimeFormat { ymd, ymdHm, ymdHms,ymdFile, ymdHmFile, ymdHmsFile }
+enum DateTimeFormat { ymd, ymdHm, ymdHms, ymdFile, ymdHmFile, ymdHmsFile }
 
 // 正则表达式：匹配 YYYY-MM-DDTXX:XX:XX.XXX... 的格式
 // ^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d+$ 匹配了日期、T、时间、点和至少一位数字
@@ -43,7 +43,7 @@ class DatetimeUtil {
 
     if (format == DateTimeFormat.ymd) {
       return '$year-$formattedMonth-$formattedDay';
-    } else if (format == DateTimeFormat.ymdFile){
+    } else if (format == DateTimeFormat.ymdFile) {
       return '$year$formattedMonth$formattedDay';
     }
     int hour = dateTime.hour;
@@ -154,16 +154,16 @@ Z: 解析时区偏移。intl 包的 DateFormat 能够识别 RFC 822 格式中的
     }
   }
 
-  static int compareTo(dynamic a, dynamic b){
-    if (a == null || a == ''){
+  static int compareTo(dynamic a, dynamic b) {
+    if (a == null || a == '') {
       return -1;
-    } else if (b == null || b == ''){
+    } else if (b == null || b == '') {
       return 1;
     }
-    if (a is String && b is String){
+    if (a is String && b is String) {
       final at = parse(a);
       final bt = parse(b);
-      if (at == null || bt == null){
+      if (at == null || bt == null) {
         return 0;
       }
       return at.compareTo(bt);
@@ -172,6 +172,18 @@ Z: 解析时区偏移。intl 包的 DateFormat 能够识别 RFC 822 格式中的
       return a.compareTo(b);
     }
     return 0;
+  }
+  /// 获取时间戳
+  /// [l10] 10 位的时间戳，用于 php 之类的；
+  /// [l13] 13 位毫秒级时间戳（自 Unix 纪元（1970-01-01 00:00:00 UTC）以来的毫秒数）
+  /// 默认为 16 位微秒级时间戳（自 Unix 纪元以来的微秒数，1毫秒=1000微秒）
+  static int timestamp(DateTime dt, {bool l10 = false, bool l13 = false}) {
+    if (l10) {
+      return dt.millisecondsSinceEpoch % 1000;
+    } else if (l13) {
+      return dt.millisecondsSinceEpoch;
+    }
+    return dt.microsecondsSinceEpoch;
   }
 }
 

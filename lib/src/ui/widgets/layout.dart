@@ -1,4 +1,3 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:tao996/tao996.dart';
 
@@ -22,16 +21,18 @@ class MyLayout {
     TextBaseline? textBaseline,
     double spacing = 0.0,
   }) {
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      // 推荐：只占用所需的垂直空间
-      mainAxisAlignment: mainAxisAlignment,
-      crossAxisAlignment: crossAxisAlignment,
-      textDirection: textDirection,
-      verticalDirection: verticalDirection,
-      textBaseline: textBaseline,
-      spacing: spacing,
-      children: children,
+    return MyBlockWidget(
+      Column(
+        mainAxisSize: MainAxisSize.min,
+        // 推荐：只占用所需的垂直空间
+        mainAxisAlignment: mainAxisAlignment,
+        crossAxisAlignment: crossAxisAlignment,
+        textDirection: textDirection,
+        verticalDirection: verticalDirection,
+        textBaseline: textBaseline,
+        spacing: spacing,
+        children: children,
+      ),
     );
   }
 
@@ -135,7 +136,6 @@ class MyLayout {
   }
 }
 
-
 /// 自定义 FAB 位置，使其向上偏移指定的距离
 class CustomEndFloatFabLocation extends FloatingActionButtonLocation {
   final double offsetY;
@@ -145,9 +145,9 @@ class CustomEndFloatFabLocation extends FloatingActionButtonLocation {
   // 1. 实现 getOffsetX: 确定 FAB 的 X 坐标 (标准 endFloat 逻辑)
 
   double getOffsetX(
-      ScaffoldPrelayoutGeometry scaffoldGeometry,
-      double adjustment,
-      ) {
+    ScaffoldPrelayoutGeometry scaffoldGeometry,
+    double adjustment,
+  ) {
     // 默认的右侧定位逻辑：Scaffold 宽度 - FAB 宽度 - 16.0 边距
     final double end = scaffoldGeometry.scaffoldSize.width;
     final double x =
@@ -159,9 +159,9 @@ class CustomEndFloatFabLocation extends FloatingActionButtonLocation {
 
   // 2. 实现 getOffsetY: 确定 FAB 的 Y 坐标 (标准 endFloat 逻辑)
   double getOffsetY(
-      ScaffoldPrelayoutGeometry scaffoldGeometry,
-      double adjustment,
-      ) {
+    ScaffoldPrelayoutGeometry scaffoldGeometry,
+    double adjustment,
+  ) {
     // 默认的底部定位逻辑：
     // 使用 contentBottom (内容区域的底部 Y 坐标) 减去 FAB 高度，再减去底部边距 (16.0)。
     // contentBottom 已经考虑了 bottomNavigationBar 和系统插边。
@@ -169,8 +169,8 @@ class CustomEndFloatFabLocation extends FloatingActionButtonLocation {
 
     final double standardY =
         contentBottom -
-            scaffoldGeometry.floatingActionButtonSize.height -
-            16.0; // 默认底部边距
+        scaffoldGeometry.floatingActionButtonSize.height -
+        16.0; // 默认底部边距
 
     // 扣除 adjustment
     return standardY;

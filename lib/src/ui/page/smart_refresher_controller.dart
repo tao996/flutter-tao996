@@ -14,7 +14,7 @@ abstract class MySmartRefresherController<T>
 
   RxBool isRequesting = false.obs;
 
-  MySmartRefresherController({bool autoLoad = true}) {
+  MySmartRefresherController({bool autoLoad = true, this.pageSize = 15}) {
     refreshController = RefreshController(initialRefresh: autoLoad);
   }
 

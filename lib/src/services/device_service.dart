@@ -39,4 +39,7 @@ GetPlatform.isWeb
   static bool isPc(){
     return Platform.isWindows || Platform.isLinux || Platform.isMacOS;
   }
+  static bool isMobile(){
+    return Platform.isAndroid || Platform.isIOS;
+  }
 }

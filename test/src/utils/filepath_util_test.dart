@@ -26,10 +26,10 @@ void main() {
         );
       }
 
-      expect(FilepathUtil.normalizeToPosixPath('C:\\a\\b.txt'), 'C:/a/b.txt');
+      expect(FilepathUtil.normalize('C:\\a\\b.txt'), 'C:/a/b.txt');
 
-      expect(FilepathUtil.joinAll(['/a', 'b\\c']), '/a/b\\c');
-      expect(FilepathUtil.normalizeToPosixPath('/a/b\\c'), '/a/b/c');
+      expect(FilepathUtil.posixJoinAll(['/a', 'b\\c']), '/a/b\\c');
+      expect(FilepathUtil.normalize('/a/b\\c'), '/a/b/c');
     });
   });
 }

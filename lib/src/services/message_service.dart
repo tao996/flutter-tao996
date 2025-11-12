@@ -146,7 +146,12 @@ class MessageService implements IMessageService {
       message = message.substring(message.lastIndexOf(':') + 1).trim();
     }
     if (Platform.isWindows || Platform.isLinux || Platform.isMacOS) {
-      snackbar(title ?? 'info'.tr, message, successIcon: successIcon);
+      snackbar(
+        title ?? 'info'.tr,
+        message,
+        successIcon: successIcon,
+        colorText: textColor,
+      );
       return;
     }
     Fluttertoast.cancel();
@@ -160,9 +165,11 @@ class MessageService implements IMessageService {
     SnackPosition snackPosition = SnackPosition.TOP,
     bool? successIcon,
     int seconds = 3,
+    Color? colorText,
   }) {
     return Get.snackbar(
       title,
+      colorText: colorText,
       message,
       snackPosition: snackPosition,
       margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),

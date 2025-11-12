@@ -2,7 +2,6 @@ import 'dart:async';
 import 'dart:math';
 
 import 'package:flutter/foundation.dart';
-import 'package:tao996/src/getx.dart';
 import 'package:tao996/tao996.dart';
 
 void dprint(dynamic message, {bool stack = true}) {

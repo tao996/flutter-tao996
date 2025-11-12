@@ -39,6 +39,9 @@ dependencies:
   pull_to_refresh: ^2.0.0
   flutter_svg: ^2.2.0
   json_annotation: ^4.9.0
+  archive: ^3.6.1
+  file_selector: ^1.0.4
+  mime: ^2.0.0
 #  collection: ^1.19.1
 
 dev_dependencies:

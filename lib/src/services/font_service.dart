@@ -6,7 +6,6 @@ import 'package:path_provider/path_provider.dart';
 
 import '../../tao996.dart';
 
-
 abstract class IFontService {
   Future<List<String>> readAllFont();
 
@@ -21,14 +20,13 @@ class FontService implements IFontService {
   final ISettingsService _settingsService = getISettingsService();
   final IDebugService _debugService = getIDebugService();
 
-
   /// 获取字体目录
   Future<Directory> _getFontDir() async {
-    final Directory appWorkDir =
-        Platform.isAndroid
-            ? await getApplicationDocumentsDirectory()
-            : await getApplicationSupportDirectory();
-    final String fontDirPath = '${appWorkDir.path}${FilepathUtil.dirSeparator()}fonts';
+    final Directory appWorkDir = Platform.isAndroid
+        ? await getApplicationDocumentsDirectory()
+        : await getApplicationSupportDirectory();
+    final String fontDirPath =
+        '${appWorkDir.path}${FilepathUtil.dirSeparator()}fonts';
     final Directory fontDir = Directory(fontDirPath);
     if (!(await fontDir.exists())) {
       await fontDir.create(recursive: true);
@@ -84,7 +82,9 @@ class FontService implements IFontService {
       return;
     }
     final fontFileDir = await _getFontDir();
-    final fontFile = File('${fontFileDir.path}${FilepathUtil.dirSeparator()}$fontName');
+    final fontFile = File(
+      '${fontFileDir.path}${FilepathUtil.dirSeparator()}$fontName',
+    );
     try {
       if (await fontFile.exists()) {
         await fontFile.delete();
@@ -98,23 +98,24 @@ class FontService implements IFontService {
   @override
   Future<bool> loadLocalFont() async {
     try {
-      final fontFilePicker = await getIFilePickerService().pickFiles(
+      List<File> fontFileList = await getIFilePickerService().quickPickFiles(
         type: FileType.custom,
-        allowedExtensions: ['ttf', 'otf', '.ttc', '.TTF', '.OTF', '.TTC'],
+        allowedExtensions: ['ttf', 'otf', 'ttc'],
         allowMultiple: true,
       );
-      if (fontFilePicker != null) {
-        List<File> fontFileList =
-            fontFilePicker.paths.map((path) => File(path!)).toList();
-        final fontFileDir = await _getFontDir();
-        for (var fontFile in fontFileList) {
-          final fontFileName = fontFile.path.split(FilepathUtil.dirSeparator()).last;
-          final newFontPath =
-              '${fontFileDir.path}${FilepathUtil.dirSeparator()}$fontFileName';
-          await fontFile.copy(newFontPath);
-          // await fontFile.delete();
-        }
-        return true;
+      if (fontFileList.isEmpty) {
+        return false;
+      }
+
+      final fontFileDir = await _getFontDir();
+      for (var fontFile in fontFileList) {
+        final fontFileName = fontFile.path
+            .split(FilepathUtil.dirSeparator())
+            .last;
+        final newFontPath =
+            '${fontFileDir.path}${FilepathUtil.dirSeparator()}$fontFileName';
+        await fontFile.copy(newFontPath);
+        // await fontFile.delete();
       }
       return true;
     } catch (error, stackTrace) {

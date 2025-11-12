@@ -22,6 +22,9 @@ class MyInput extends StatefulWidget {
   final int? maxLines;
   final int? minLines;
 
+  final int remStep;
+  final int addStep;
+
   // 新增属性
   final bool isNumber; // 是否为数字输入（整数或小数，取决于是否有 min/max）
   final num? minNumber; // 最小值限制
@@ -47,6 +50,8 @@ class MyInput extends StatefulWidget {
     this.isNumber = false,
     this.minNumber,
     this.maxNumber,
+    this.remStep = -1,
+    this.addStep = 1,
     this.isMoney = false,
     // 回调
     this.onChanged,
@@ -63,20 +68,22 @@ class _MyInputState extends State<MyInput> {
   final FocusNode _focusNode = FocusNode();
   late TextEditingController controller;
 
-
   @override
   void initState() {
     super.initState();
     isPassword = widget.isPassword;
-    controller = widget.controller ?? TextEditingController(text:widget.defaultValue ?? '');
+    controller =
+        widget.controller ??
+        TextEditingController(text: widget.defaultValue ?? '');
     // 使用一个私有方法来处理监听器的逻辑
     controller.addListener(_handleControllerChange);
   }
+
   @override
   void dispose() {
     // 移除监听器，避免内存泄漏
     controller.removeListener(_handleControllerChange);
-    if (widget.controller == null){
+    if (widget.controller == null) {
       controller.dispose();
     }
     _focusNode.dispose();
@@ -226,7 +233,6 @@ class _MyInputState extends State<MyInput> {
   }
 
   Widget _suffix() {
-
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
@@ -240,6 +246,14 @@ class _MyInputState extends State<MyInput> {
             icon: isPassword
                 ? const Icon(Icons.visibility)
                 : const Icon(Icons.visibility_off),
+          ),
+        if (widget.isNumber)
+          StepperSuffixIcon(
+            controller: controller,
+            minValue: widget.minNumber?.toInt(),
+            maxValue: widget.maxNumber?.toInt(),
+            remStep: widget.remStep,
+            addStep: widget.addStep,
           ),
         // 只有当文本不为空时才显示清除按钮
         if (controller.text.isNotEmpty)
@@ -277,5 +291,97 @@ class MyInputLabel extends StatelessWidget {
       );
     }
     return child;
+  }
+}
+
+class StepperSuffixIcon extends StatelessWidget {
+  // 当前 TextField 的控制器
+  final TextEditingController controller;
+
+  final int remStep;
+  final int addStep;
+
+  // 最小/最大值限制
+  final int? minValue;
+  final int? maxValue;
+
+  const StepperSuffixIcon({
+    super.key,
+    required this.controller,
+    this.remStep = -1,
+    this.addStep = 1,
+    this.minValue,
+    this.maxValue, // 默认限制最大值
+  });
+
+  // ----------------------------------------------------------------------
+  // 核心方法：执行步进逻辑
+  // ----------------------------------------------------------------------
+  void _changeValue(int change) {
+    // 1. 获取当前值（如果解析失败，则默认为 minValue）
+    int currentValue = int.tryParse(controller.text) ?? 0;
+
+    // 2. 计算新值
+    int newValue = currentValue + change;
+
+    // 3. 应用边界限制
+    if (minValue != null && newValue < minValue!) {
+      newValue = minValue!;
+    } else if (maxValue != null && newValue > maxValue!) {
+      newValue = maxValue!;
+    }
+
+    // 4. 更新 TextField
+    controller.text = newValue.toString();
+
+    // 确保光标移动到文本末尾，提供更好的输入体验
+    controller.selection = TextSelection.fromPosition(
+      TextPosition(offset: controller.text.length),
+    );
+  }
+
+  // ----------------------------------------------------------------------
+  // 构建 UI
+  // ----------------------------------------------------------------------
+  @override
+  Widget build(BuildContext context) {
+    // 将两个按钮垂直排列，并限制整体尺寸以适配 suffixIcon
+    return SizedBox(
+      width: 64, // 确保有足够的宽度容纳图标
+      height: 24, // 适应 InputDecoration 的默认高度
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center, // 垂直居中
+        children: <Widget>[
+          // 减量按钮 (-1)
+          _buildButton(
+            icon: Icons.remove,
+            onPressed: () => _changeValue(remStep),
+          ),
+          // 增量按钮 (+1)
+          _buildButton(icon: Icons.add, onPressed: () => _changeValue(addStep)),
+        ],
+      ),
+    );
+  }
+
+  // 辅助方法：构建紧凑的 IconButton
+  Widget _buildButton({
+    required IconData icon,
+    required VoidCallback onPressed,
+  }) {
+    return SizedBox(
+      height: 24, // 限制按钮高度为 Column 高度的一半
+      width: 32,
+      child: IconButton(
+        padding: EdgeInsets.zero,
+        // 移除内边距
+        iconSize: 18,
+        // 缩小图标尺寸
+        icon: Icon(icon, color: Colors.grey.shade600),
+        onPressed: onPressed,
+        // 可选：减少 Material 触摸反馈的区域
+        visualDensity: VisualDensity.compact,
+      ),
+    );
   }
 }
