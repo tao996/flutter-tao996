@@ -76,6 +76,12 @@ class TranslationService extends Translations {
       // widgets
       'dateHint': '点击选择一个日期',
       'datetimeHint': '点击选择日期和时间',
+
+      // scaffold.dart
+      'record':'记录',
+      'emptyHint':'暂无@title,一片空白',
+      'emptyInertHint':'点击下方按钮，开始创建您的第一个@title',
+      'emptyInertButton':'添加新@title',
     },
     'en_US': {},
   };

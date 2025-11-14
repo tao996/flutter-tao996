@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 
 class MyPadding extends StatelessWidget {
@@ -41,18 +43,20 @@ class MyBodyPadding extends StatelessWidget {
   final Widget child;
   final double horizontal;
   final double vertical;
+  final double top;
 
   const MyBodyPadding(
     this.child, {
     super.key,
     this.horizontal = 16,
     this.vertical = 0,
+    this.top = 0,
   });
 
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: EdgeInsets.symmetric(horizontal: horizontal, vertical: vertical),
+      padding: EdgeInsets.only(left: horizontal,right: horizontal,top: max(vertical, top),bottom: vertical),
       child: child,
     );
   }

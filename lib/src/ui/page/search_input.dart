@@ -57,6 +57,7 @@ class MySearchInputController extends GetxController {
 class MySearchInput extends StatelessWidget {
   final String? hintText;
   final String? defaultValue;
+  final double? fontSize;
   late final MySearchInputController c;
 
   MySearchInput(
@@ -65,6 +66,7 @@ class MySearchInput extends StatelessWidget {
     this.hintText,
     dynamic data,
     this.defaultValue,
+    this.fontSize = 16,
   }) {
     c = Get.put(MySearchInputController(methods: methods, data: data));
   }
@@ -81,16 +83,18 @@ class MySearchInput extends StatelessWidget {
         controller: c.textController,
         onChanged: c.bindChanged,
         onSubmitted: c.bindSubmitted,
-        // style: const TextStyle(fontSize: 16.0),
-        textAlignVertical: TextAlignVertical.center,
+        style: TextStyle(fontSize: fontSize),
+        // textAlign: TextAlign.center,
+        textAlignVertical: TextAlignVertical.bottom,
         maxLines: 1,
         // 设置垂直居中
         decoration: InputDecoration(
           border: const OutlineInputBorder(),
-          hintStyle: const TextStyle(color: Colors.grey),
           isDense: true,
           // 移除内部 padding
           hintText: hintText ?? 'Search'.tr,
+          hintStyle: const TextStyle(color: Colors.grey),
+          prefixIcon: Icon(Icons.search),
           suffixIcon: c.showClearIcon.value
               ? IconButton(
                   icon: const Icon(Icons.clear),

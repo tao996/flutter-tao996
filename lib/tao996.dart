@@ -84,3 +84,5 @@ export 'src/utils/number_util.dart';
 export 'src/utils/stack_util.dart';
 export 'src/utils/url_util.dart';
 export 'src/getx.dart';
+
+export 'src/app/app.dart';

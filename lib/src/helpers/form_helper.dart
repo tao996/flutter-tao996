@@ -315,12 +315,14 @@ class FormHelper {
   /// 搜索框 [data] 原始数据，在用户输入或提交时会同时将原始数据返回
   static Widget search(
     MySearchInputMethods method, {
+    double fontSize = 16,
     String? hintText,
     String? value,
     dynamic data,
   }) {
     return MySearchInput(
       method,
+      fontSize: fontSize,
       hintText: hintText,
       data: data,
       defaultValue: value,

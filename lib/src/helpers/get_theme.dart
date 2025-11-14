@@ -7,6 +7,14 @@ BuildContext? getThemeContext() {
   return Get.context;
 }
 
+ThemeData getTheme() {
+  final context = getThemeContext();
+  if (context == null) {
+    return ThemeData.light();
+  }
+  return Theme.of(Get.context!);
+}
+
 // 获取当前主题的 ColorScheme
 ColorScheme getColorScheme() {
   final context = getThemeContext();

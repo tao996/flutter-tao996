@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:visibility_detector/visibility_detector.dart';
@@ -14,7 +16,10 @@ Widget myImagePlaceholder(String text, {void Function()? onTap}) {
       child: Container(
         height: 200,
         width: double.infinity,
-        decoration: BoxDecoration(borderRadius: BorderRadius.circular(8),color: Colors.grey[200]),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(8),
+          color: Colors.grey[200],
+        ),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           crossAxisAlignment: CrossAxisAlignment.center,
@@ -195,6 +200,62 @@ class _MyImageCacheState extends State<MyImageCache> {
           myImagePlaceholder('image load error'.tr),
       fadeInDuration: const Duration(milliseconds: 500),
       fadeOutDuration: const Duration(milliseconds: 500),
+    );
+  }
+}
+
+// 这是一个示例 Widget，您可以在您的 Tile 或其他地方使用它
+class MyFixedSizeLocalImage extends StatelessWidget {
+  final String filePath;
+  final double width;
+  final double height;
+
+  const MyFixedSizeLocalImage({
+    super.key,
+    required this.filePath,
+    this.width = 50,
+    this.height = 50,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    // 确保文件路径不为空且不是一个占位符
+    if (filePath.isEmpty) {
+      return const SizedBox(
+        width: 50,
+        height: 50,
+        child: Icon(Icons.broken_image, size: 30),
+      );
+    }
+
+    return Container(
+      width: width,
+      height: height,
+      clipBehavior: Clip.hardEdge,
+      // 确保图片不会溢出边界
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(4), // 可选：添加圆角
+      ),
+      child: Image.file(
+        File(filePath), // 1. 使用 Image.file 加载本地文件
+
+        width: width, // 2. 限制图片的宽度
+        height: height, // 3. 限制图片的高度
+        // 4. 控制图片的填充方式
+        fit: BoxFit.cover,
+
+        // 5. 推荐：处理图片加载失败的情况 (文件不存在、损坏等)
+        errorBuilder: (context, error, stackTrace) {
+          // 在文件不存在或加载失败时，显示一个占位符
+          return const Center(
+            child: Icon(
+              Icons.image_not_supported,
+              size: 30,
+              color: Colors.grey,
+            ),
+          );
+        },
+      ),
     );
   }
 }

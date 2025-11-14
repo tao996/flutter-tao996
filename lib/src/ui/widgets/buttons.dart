@@ -79,9 +79,9 @@ class MySaveButton extends StatelessWidget {
     return MyButton(
       label ?? 'save'.tr,
       onPressed: onPressed,
-      iconData: showIcon ? Icons.send : null,
+      iconData: showIcon ? Icons.save_outlined : null,
       isLoading: isLoading,
-      type: type ?? MyButtonType.filled,
+      type: type ?? MyButtonType.text,
     );
   }
 }
@@ -107,7 +107,7 @@ class MyInsertButton extends StatelessWidget {
       label ?? 'insert'.tr,
       onPressed: onPressed,
       icon: showIcon ? const Icon(Icons.add) : null,
-      type: type ?? MyButtonType.outlined,
+      type: type ?? MyButtonType.text,
     );
   }
 }
@@ -132,7 +132,7 @@ class MyEditButton extends StatelessWidget {
       label ?? 'edit'.tr,
       onPressed: onPressed,
       icon: showIcon ? const Icon(Icons.edit) : null,
-      type: type ?? MyButtonType.outlined,
+      type: type ?? MyButtonType.text,
     );
   }
 }
@@ -159,7 +159,7 @@ class MyDeleteButton extends StatelessWidget {
       onPressed: onPressed,
       icon: showIcon ? const Icon(Icons.delete) : null,
       status: MyButtonStatus.danger,
-      type: type ?? MyButtonType.outlined,
+      type: type ?? MyButtonType.text,
     );
   }
 }

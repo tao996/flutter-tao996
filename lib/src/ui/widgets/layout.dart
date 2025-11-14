@@ -20,8 +20,9 @@ class MyLayout {
     VerticalDirection verticalDirection = VerticalDirection.down,
     TextBaseline? textBaseline,
     double spacing = 0.0,
+    bool block = false,
   }) {
-    return MyBlockWidget(
+    final child = MyEvents.unfocusOnTap(
       Column(
         mainAxisSize: MainAxisSize.min,
         // 推荐：只占用所需的垂直空间
@@ -34,6 +35,7 @@ class MyLayout {
         children: children,
       ),
     );
+    return block ? MyBlockWidget(child) : child;
   }
 
   static Widget miniRow(

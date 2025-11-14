@@ -65,7 +65,7 @@ class MyInput extends StatefulWidget {
 
 class _MyInputState extends State<MyInput> {
   bool isPassword = false;
-  final FocusNode _focusNode = FocusNode();
+  // final FocusNode _focusNode = FocusNode();
   late TextEditingController controller;
 
   @override
@@ -86,7 +86,7 @@ class _MyInputState extends State<MyInput> {
     if (widget.controller == null) {
       controller.dispose();
     }
-    _focusNode.dispose();
+    // _focusNode.dispose();
     super.dispose();
   }
 
@@ -187,7 +187,7 @@ class _MyInputState extends State<MyInput> {
   Widget build(BuildContext context) {
     return TextFormField(
       controller: widget.controller,
-      focusNode: _focusNode,
+      // focusNode: _focusNode,
       obscureText: isPassword,
       maxLines: widget.isPassword ? 1 : widget.maxLines ?? 1,
       minLines: widget.isPassword ? 1 : widget.minLines ?? 1,
