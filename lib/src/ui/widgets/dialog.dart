@@ -5,18 +5,21 @@ import 'package:tao996/tao996.dart';
 class MyDialog {
   /// 可用于关闭对话框
   static Widget title(String title) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      crossAxisAlignment: CrossAxisAlignment.center,
-      children: [
-        Text(title, style: getTextTheme().titleLarge),
-        IconButton(
-          onPressed: () {
-            Get.back();
-          },
-          icon: Icon(Icons.close),
-        ),
-      ],
+    return MyPadding(
+      vertical: 10,
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          Text(title, style: getTextTheme().titleLarge),
+          IconButton(
+            onPressed: () {
+              Get.back();
+            },
+            icon: Icon(Icons.close),
+          ),
+        ],
+      ),
     );
   }
 
@@ -84,12 +87,13 @@ class MyDialog {
   }
 
   /// 一个适用于表单的通用对话框
-  /// [onSubmit] 点击保存按钮，你需要自己手动关闭对话框
+  /// [title] 对话框标题， [onSubmit] 点击保存按钮，你需要自己手动关闭对话框；
+  /// [deleteHint] 删除确认提示语，如果设置则会显示 “删除按钮”
   static Future<dynamic> form(
     BuildContext context, {
     required String title,
     required List<Widget> children,
-    bool? deleteButton = false,
+    String? deleteHint,
     required void Function() onSubmit,
   }) async {
     final length = children.length;
@@ -99,19 +103,23 @@ class MyDialog {
       child: MyBodyPadding(
         Column(
           mainAxisSize: MainAxisSize.min,
-          children: List.generate(length + 1, (index) {
-            if (index == length) {
+          children: List.generate(length + 2, (index) {
+            if (index == 0) {
+              return MyDialog.title(title);
+            }
+            if (index == length + 1) {
+              /// 操作按钮
               return MyPadding(
                 vertical: 16,
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   // mainAxisSize: MainAxisSize.min,
                   children: [
-                    MyCancelButton(type: MyButtonType.outlined),
-                    if (deleteButton == true)
+                    MyCancelButton(),
+                    if (deleteHint != null && deleteHint.isNotEmpty)
                       MyDeleteButton(
                         onPressed: () {
-                          getIMessageService().deleteConfirm(title, () {
+                          getIMessageService().deleteConfirm(deleteHint, () {
                             goBackWithResult('delete');
                           });
                         },
@@ -122,7 +130,7 @@ class MyDialog {
                 ),
               );
             }
-            return children[index];
+            return children[index - 1];
           }),
         ),
       ),
@@ -130,16 +138,12 @@ class MyDialog {
   }
 
   /// 单选列表对话框，通常用在 onTab 回调内部
-  static void radioList({
+  static void radioList<T>({
     Widget? icon,
     required String title,
-
-    /// 列表项
-    required List<String> values,
-
-    /// 值项，必须在列表项中
-    required String selectedValue,
-    required void Function(String) onSubmit,
+    required List<KV<T>> items,
+    T? value,
+    required void Function(T?) onSubmit,
   }) {
     Get.dialog(
       AlertDialog(
@@ -152,62 +156,31 @@ class MyDialog {
               mainAxisAlignment: MainAxisAlignment.center,
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                // 🚨 关键修改：用 RadioGroup 包裹所有的 RadioListTile
-                RadioGroup<String>(
-                  // 1. 设置当前的选中值
-                  groupValue: selectedValue,
-
-                  // 2. 集中处理选中值改变事件
-                  onChanged: (String? newValue) {
-                    if (newValue != null && newValue != selectedValue) {
+                RadioGroup<T>(
+                  groupValue: value,
+                  onChanged: (T? newValue) {
+                    if (newValue != null && newValue != value) {
                       setState(() {
-                        selectedValue = newValue;
+                        value = newValue;
                       });
                     }
                   },
-
-                  // 3. 将所有 RadioListTile 包装在一个 Column 中作为 child
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
-                    children: [
-                      for (String value in values)
-                        RadioListTile.adaptive(
-                          // 推荐使用 .adaptive 保持跨平台一致性
-                          // 每一个 RadioListTile 只需要设置 value 属性
-                          value: value,
+                    children: items.map((kv) {
+                      return RadioListTile.adaptive(
+                        value: kv.value,
 
-                          // ❌ 移除 groupValue
-                          // ❌ 移除 onChanged
+                        title: Text(kv.label),
 
-                          // 标题和本地化保持不变
-                          title: Text(value.tr),
-
-                          visualDensity: VisualDensity.compact,
-
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(80),
-                          ),
+                        visualDensity: VisualDensity.compact,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(80),
                         ),
-                    ],
+                      );
+                    }).toList(),
                   ),
                 ),
-                // for (String value in values)
-                //   RadioListTile(
-                //     value: value,
-                //     groupValue: selectedValue,
-                //     title: Text(value.tr),
-                //     onChanged: (value) {
-                //       if (value != null && value != selectedValue) {
-                //         setState(() {
-                //           selectedValue = value;
-                //         });
-                //       }
-                //     },
-                //     visualDensity: VisualDensity.compact,
-                //     shape: RoundedRectangleBorder(
-                //       borderRadius: BorderRadius.circular(80),
-                //     ),
-                //   ),
               ],
             );
           },
@@ -221,7 +194,7 @@ class MyDialog {
           ),
           TextButton(
             onPressed: () {
-              onSubmit(selectedValue);
+              onSubmit(value);
               Get.back();
             },
             child: Text('confirm'.tr),
@@ -270,11 +243,36 @@ class MyDialog {
     );
   }
 
+  static Future<T?> showBottomSheet<T>(
+    BuildContext context, {
+    required Widget child,
+    bool scrollView = false,
+  }) {
+    return showModalBottomSheet(
+      context: Get.context!,
+      isScrollControlled: true, // 允许 BottomSheet 占据大部分屏幕
+      builder: (context) => scrollView
+          ? SafeArea(
+              // 只关注底部安全区域（顶部由 Material 和 AppBar 的约束自然处理）
+              top: false,
+              left: false,
+              right: false,
+              bottom: true,
+
+              // 确保底部内容不被系统导航栏遮挡
+              child: SingleChildScrollView(child: child),
+            )
+          : child,
+    );
+  }
+
   /// 定义一个从顶部滑入的函数
   /// [context] 通常为 navigatorKey.currentContext!, 使用全局 Context
-  static Future<T?> showTopSheet<T>({
-    required BuildContext context,
-    required WidgetBuilder builder,
+  /// [scrollView] 是否需要支持滚动
+  static Future<T?> showTopSheet<T>(
+    BuildContext context, {
+    required Widget child,
+    bool scrollView = false,
   }) {
     return showGeneralDialog<T>(
       context: context,
@@ -318,7 +316,18 @@ class MyDialog {
             ),
             child: SizedBox(
               width: MediaQuery.of(context).size.width, // * 0.9, // 宽度占屏幕的 90%
-              child: builder(context), // 调用用户传入的 builder 函数来构建内容
+              child: scrollView
+                  ? SafeArea(
+                      // 只关注底部安全区域（顶部由 Material 和 AppBar 的约束自然处理）
+                      top: false,
+                      left: false,
+                      right: false,
+                      bottom: true,
+
+                      // 确保底部内容不被系统导航栏遮挡
+                      child: SingleChildScrollView(child: child),
+                    )
+                  : child, // 调用用户传入的 builder 函数来构建内容
             ),
           ),
         );

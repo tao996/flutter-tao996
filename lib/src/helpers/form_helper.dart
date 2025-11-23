@@ -178,10 +178,11 @@ class FormHelper {
     String? defaultValue,
     bool isPassword = false,
     bool isRequired = false,
-    bool isNumber = false, // 是否为数字输入（整数或小数，取决于是否有 min/max）
     num? minNumber, // 最小值限制
     num? maxNumber, // 最大值限制
-    bool isMoney = false, // 是否为货币输入（最高优先级）
+    bool isInteger = false,
+    bool isDouble = false,
+    bool isMoney = false,
     int? maxLines,
     int? minLines,
     void Function(String)? onChanged,
@@ -194,7 +195,8 @@ class FormHelper {
       defaultValue: defaultValue,
       isPassword: isPassword,
       isRequired: isRequired,
-      isNumber: isNumber,
+      isInteger: isInteger,
+      isDouble: isDouble,
       minNumber: minNumber,
       maxNumber: maxNumber,
       isMoney: isMoney,
@@ -215,6 +217,20 @@ class FormHelper {
       hintText: hintText,
       initialDate: initDate,
       onDateSelected: onDateSelected,
+    );
+  }
+
+  static Widget timeInput({
+    DateTime? initTime,
+    required String labelText,
+    required Function(DateTime?) onTimeSelected,
+    String? hintText,
+  }) {
+    return FakeTimeInput(
+      initTime: initTime,
+      labelText: labelText,
+      onTimeSelected: onTimeSelected,
+      hintText: hintText,
     );
   }
 
@@ -311,6 +327,8 @@ class FormHelper {
       ],
     );
   }
+
+  // static Widget radioGroup(){}
 
   /// 搜索框 [data] 原始数据，在用户输入或提交时会同时将原始数据返回
   static Widget search(

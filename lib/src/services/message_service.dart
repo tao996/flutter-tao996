@@ -117,7 +117,7 @@ class MessageService implements IMessageService {
             onPressed: () {
               Get.back(result: false);
             },
-            child: Text('cancel'.tr),
+            child: Text('Cancel'.tr),
           ),
           ElevatedButton(
             style: ElevatedButton.styleFrom(

@@ -70,6 +70,11 @@ abstract class IDatabaseService {
     List<dynamic> whereArgs,
     String key = 'id',
   });
+
+  /// 执行一个事务，注意事务内部全部都需要传递 mt.txn 来执行，否则会导致锁
+  Future<M> transaction<M>(Future<M> Function(ModelTransaction mt) action, {
+    bool? exclusive,
+  });
 }
 
 class SqfliteDatabaseService implements IDatabaseService {
@@ -94,6 +99,48 @@ class SqfliteDatabaseService implements IDatabaseService {
   @override
   Database getDatabase() => _database!;
 
+  /// 使用注意：在手机上禁止将全部语句合并成一条
+  /// ```
+  /// // 模型数据服务
+  ///   final db = SqfliteDatabaseService(
+  ///     printSQL: kDebugMode,
+  ///     databaseDir: mainDIR,
+  ///     databaseName: AppStorageKeys.databaseFileName,
+  ///   );
+  ///   locator.registerSingleton<SqfliteDatabaseService>(db);
+  ///   locator.registerSingleton<IDatabaseService>(db);
+  ///   try {
+  ///     await DbSQL.execute(db);
+  ///   } catch (e, st) {
+  ///     getIDebugService().exception(e, st);
+  ///     rethrow;
+  ///   }
+  /// // 建表语句
+  /// class DbSQL {
+  ///   static Future<void> execute(SqfliteDatabaseService db) async {
+  ///     /// 在手机上禁止将全部语句合并成一条
+  ///     void version1(Batch batch) {
+  ///       batch.execute('');
+  ///     }
+  ///
+  ///     await db.migrate((path) async {
+  ///       return await openDatabase(
+  ///         path,
+  ///         version: 1,
+  ///         onCreate: (db, version) async {
+  ///           var batch = db.batch();
+  ///           version1(batch);
+  ///           await batch.commit();
+  ///         },
+  ///         onUpgrade: (db, oldVersion, newVersion) async {
+  ///           var batch = db.batch();
+  ///           await batch.commit();
+  ///         },
+  ///       );
+  ///     });
+  ///   }
+  /// }
+  /// ```
   @override
   Future<void> migrate(
     Future<Database> Function(String path) createDatabase,
@@ -251,4 +298,27 @@ class SqfliteDatabaseService implements IDatabaseService {
       conflictAlgorithm: conflictAlgorithm,
     );
   }
+
+  /// 执行一个事务
+  Future<M> transaction<M>(Future<M> Function(ModelTransaction mt) action, {
+    bool? exclusive,
+  }) async {
+    try {
+      final db = getDatabase();
+      return await db.transaction<M>((txn) async {
+        return action(ModelTransaction(txn));
+      }, exclusive: exclusive);
+    } catch (e, st) {
+      getIDebugService().exception(e, st);
+      rethrow;
+    }
+  }
+}
+
+class ModelTransaction {
+  final Transaction _txn;
+
+  Transaction get txn => _txn;
+
+  ModelTransaction(Transaction txn) : _txn = txn;
 }

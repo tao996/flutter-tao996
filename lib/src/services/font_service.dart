@@ -55,7 +55,7 @@ class FontService implements IFontService {
       return fontNameList;
     } catch (error, stackTrace) {
       _debugService.exception(error, stackTrace);
-      throw Exception('failed to read font files'.tr);
+      throw Exception('failedToReadFontFiles'.tr);
     }
   }
 
@@ -72,7 +72,7 @@ class FontService implements IFontService {
       }
     } catch (error, stackTrace) {
       _debugService.exception(error, stackTrace);
-      throw Exception('failed to read theme font'.tr);
+      throw Exception('failedToReadThemeFont'.tr);
     }
   }
 
@@ -91,7 +91,7 @@ class FontService implements IFontService {
       }
     } catch (error, stackTrace) {
       _debugService.exception(error, stackTrace);
-      throw Exception('failed to delete font'.tr);
+      throw Exception('failedToDeleteFont'.tr);
     }
   }
 
@@ -120,7 +120,7 @@ class FontService implements IFontService {
       return true;
     } catch (error, stackTrace) {
       _debugService.exception(error, stackTrace);
-      throw Exception('failed to import fonts'.tr);
+      throw Exception('failedToImportFonts'.tr);
     }
   }
 }

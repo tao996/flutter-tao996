@@ -6,11 +6,13 @@ import '../../tao996.dart';
 abstract class ILocaleService {
   Future<void> changeLocale(String locale);
 
-  // 获取地区
+  // 获取地区 ，zh_CN, en_US 等
   Locale? get locale;
 
   /// 获取系统语言，由小写字母组成，如 en, zh
   String languageCode();
+
+  void changeLanguage(String newLang);
 }
 
 /*
@@ -39,7 +41,7 @@ class LocaleService implements ILocaleService {
   Future<void> changeLocale(String language) async {
     final ll = language.split('_');
     if (ll.length != 2 && language != 'system') {
-      throw Exception('error language data'.tr);
+      throw Exception('errorLanguageData'.tr);
     }
     settingsService.language = language;
     if (ll.length == 2) {
@@ -57,5 +59,15 @@ class LocaleService implements ILocaleService {
   @override
   String languageCode() {
     return _locale!.languageCode;
+  }
+  /// 修改語言
+  @override
+  void changeLanguage(String newLang) {
+    if (newLang != 'system') {
+      Get.updateLocale(Locale(newLang.split('_').first, newLang.split('_').last));
+    } else {
+      Get.updateLocale(Get.deviceLocale ?? const Locale('en', 'US'));
+    }
+    getISettingsService().language = newLang;
   }
 }

@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:image_picker/image_picker.dart';
 
 /// 选择类型 [camera] 拍照；[gallery] 相册；[galleryVideo] 从相册选择一个视频；[cameraVideo] 拍摄一个视频；[media] 选择一个图片和视频

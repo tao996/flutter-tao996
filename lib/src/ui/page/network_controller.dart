@@ -42,7 +42,7 @@ class MyMediaDisplay extends StatelessWidget {
       } else if (c.results.isConnected) {
         return Image.network('low_quality_image_url');
       } else {
-        return const Text('No internet connection');
+        return const Text('noInternetConnection');
       }
     });
   }

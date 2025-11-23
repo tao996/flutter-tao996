@@ -4,14 +4,6 @@ import 'package:get/get.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:tao996/tao996.dart';
 
-class ModelTransaction {
-  final Transaction _txn;
-
-  Transaction get txn => _txn;
-
-  ModelTransaction(Transaction txn) : _txn = txn;
-}
-
 abstract class ModelHelper<T extends IModel<T>> {
   final IDatabaseService dbService = getIDatabaseService();
   final IDebugService debugService = getIDebugService();
@@ -43,14 +35,14 @@ abstract class ModelHelper<T extends IModel<T>> {
 
   // 1. 扩展 getFirstBy 的缓存支持（支持任意字段，需子类注册缓存字段）
   // 新增：缓存字段映射（子类可重写，指定需要缓存的字段）
-  Map<String, dynamic Function(T)> get cacheFieldGetters =>
-      {
-        'id': (entity) => entity.id,
-      };
+  Map<String, dynamic Function(T)> get cacheFieldGetters => {
+    'id': (entity) => entity.id,
+  };
 
   /// [enableCache] 是否使用缓存，通常用于小表使用;
   /// [enableSoftDelete] 是否使用软删除功能，注意：如果你的表中包含了 unique 索引，请不要使用软删除功能
-  ModelHelper(this._tableName, {
+  ModelHelper(
+    this._tableName, {
     this.enableCache = false,
     this.enableSoftDelete = false,
     this.enableCreatedAt = true,
@@ -155,17 +147,17 @@ abstract class ModelHelper<T extends IModel<T>> {
       try {
         final maps = mtn == null
             ? await dbService.query(
-          tableName,
-          where: appendWhere('$fieldName = ?'),
-          whereArgs: [value],
-          limit: 1, // 只查询一条
-        )
+                tableName,
+                where: appendWhere('$fieldName = ?'),
+                whereArgs: [value],
+                limit: 1, // 只查询一条
+              )
             : await mtn.txn.query(
-          tableName,
-          where: appendWhere('$fieldName = ?'),
-          whereArgs: [value],
-          limit: 1,
-        );
+                tableName,
+                where: appendWhere('$fieldName = ?'),
+                whereArgs: [value],
+                limit: 1,
+              );
         return maps.isNotEmpty ? fromMap(maps.first) : null;
       } catch (e, st) {
         debugService.exception(e, st, log: true);
@@ -174,7 +166,8 @@ abstract class ModelHelper<T extends IModel<T>> {
     }
   }
 
-  Future<T?> getFirstWith(String where, {
+  Future<T?> getFirstWith(
+    String where, {
     List<Object?>? whereArgs,
     List<String>? columns,
     String? orderBy,
@@ -183,21 +176,21 @@ abstract class ModelHelper<T extends IModel<T>> {
     try {
       final maps = mtn == null
           ? await dbService.query(
-        tableName,
-        where: appendWhere(where),
-        whereArgs: whereArgs,
-        orderBy: orderBy,
-        columns: columns,
-        limit: 1, // 只查询一条
-      )
+              tableName,
+              where: appendWhere(where),
+              whereArgs: whereArgs,
+              orderBy: orderBy,
+              columns: columns,
+              limit: 1, // 只查询一条
+            )
           : await mtn.txn.query(
-        tableName,
-        where: appendWhere(where),
-        whereArgs: whereArgs,
-        orderBy: orderBy,
-        columns: columns,
-        limit: 1,
-      );
+              tableName,
+              where: appendWhere(where),
+              whereArgs: whereArgs,
+              orderBy: orderBy,
+              columns: columns,
+              limit: 1,
+            );
       return maps.isNotEmpty ? fromMap(maps.first) : null;
     } catch (e, st) {
       debugService.exception(e, st, log: true);
@@ -205,7 +198,8 @@ abstract class ModelHelper<T extends IModel<T>> {
     }
   }
 
-  Future<T?> getById(int id, {
+  Future<T?> getById(
+    int id, {
     bool tryCache = true,
     ModelTransaction? mtn,
   }) async {
@@ -218,7 +212,8 @@ abstract class ModelHelper<T extends IModel<T>> {
   }
 
   /// 检查记录在数据库中是否存在
-  Future<bool> exists(dynamic value, {
+  Future<bool> exists(
+    dynamic value, {
     required String fieldName,
     int? excludeId,
   }) async {
@@ -395,12 +390,12 @@ abstract class ModelHelper<T extends IModel<T>> {
         tableName,
         columns: columns,
         where:
-        newWhere ??
+            newWhere ??
             (fieldName != null && fieldName.isNotEmpty
                 ? appendWhere('$fieldName = ?')
                 : null),
         whereArgs:
-        newWhereArgs ??
+            newWhereArgs ??
             (fieldName != null && fieldName.isNotEmpty ? [value] : null),
         groupBy: groupBy,
         having: having,
@@ -425,14 +420,16 @@ abstract class ModelHelper<T extends IModel<T>> {
     String? orderBy,
   }) async {
     try {
-      final records = await getManyMapWith(fieldName: fieldName,
-          value: value,
-          where: where,
-          whereArgs: whereArgs,
-          clauseBuilder: clauseBuilder,
-          groupBy: groupBy,
-          having: having,
-          orderBy: orderBy);
+      final records = await getManyMapWith(
+        fieldName: fieldName,
+        value: value,
+        where: where,
+        whereArgs: whereArgs,
+        clauseBuilder: clauseBuilder,
+        groupBy: groupBy,
+        having: having,
+        orderBy: orderBy,
+      );
       return records.map((record) => record['id'] as int).toList();
     } catch (e, st) {
       debugService.exception(e, st, log: true);
@@ -440,9 +437,11 @@ abstract class ModelHelper<T extends IModel<T>> {
     }
   }
 
-  (String?, List<Object?>?) createWhere(String? where,
-      List<Object?>? whereArgs,
-      WhereClauseBuilder? clauseBuilder,) {
+  (String?, List<Object?>?) createWhere(
+    String? where,
+    List<Object?>? whereArgs,
+    WhereClauseBuilder? clauseBuilder,
+  ) {
     final List<String> conditions = [];
     final List<Object> appendArgs = [];
     if (clauseBuilder != null) {
@@ -462,7 +461,8 @@ abstract class ModelHelper<T extends IModel<T>> {
   }
 
   /// 执行原生 SQL 语句
-  Future<void> execute(String sql, {
+  Future<void> execute(
+    String sql, {
     List<Object?>? arguments,
     ModelTransaction? mtn,
   }) async {
@@ -484,7 +484,8 @@ abstract class ModelHelper<T extends IModel<T>> {
   }
 
   /// 执行原生 SQL 查询
-  Future<List<Map<String, dynamic>>> rawQuery(String sql, {
+  Future<List<Map<String, dynamic>>> rawQuery(
+    String sql, {
     List<Object?>? arguments,
   }) async {
     try {
@@ -527,7 +528,8 @@ abstract class ModelHelper<T extends IModel<T>> {
   }
 
   /// 更新符合条件的记录，并返回影响行数；如果提供 [entity] 则会更新缓存
-  Future<int> update(Map<String, Object?> values, {
+  Future<int> update(
+    Map<String, Object?> values, {
     String? where,
     List<Object?>? whereArgs,
     T? entity,
@@ -552,17 +554,17 @@ abstract class ModelHelper<T extends IModel<T>> {
 
       final updatedRows = mtn == null
           ? await dbService.update(
-        tableName,
-        values,
-        where: appendWhere(where),
-        whereArgs: whereArgs,
-      )
+              tableName,
+              values,
+              where: appendWhere(where),
+              whereArgs: whereArgs,
+            )
           : await mtn.txn.update(
-        tableName,
-        values,
-        where: appendWhere(where),
-        whereArgs: whereArgs,
-      );
+              tableName,
+              values,
+              where: appendWhere(where),
+              whereArgs: whereArgs,
+            );
       if (mtn == null && enableCache) await getAllFromDb();
 
       if (entity != null) {
@@ -579,7 +581,8 @@ abstract class ModelHelper<T extends IModel<T>> {
   }
 
   /// 更新指定 ID 记录的数据
-  Future<int> updateById(T entity, {
+  Future<int> updateById(
+    T entity, {
     List<String>? columns,
     ModelTransaction? mtn,
   }) async {
@@ -594,7 +597,7 @@ abstract class ModelHelper<T extends IModel<T>> {
       // 过滤指定字段，确保类型为 Map<String, Object?>
       fieldValues = columns.fold<Map<String, dynamic>>(
         {},
-            (acc, name) => acc..[name] = fieldValues[name],
+        (acc, name) => acc..[name] = fieldValues[name],
       );
     }
     fieldValues.remove('id'); // 移除 id，避免更新主键
@@ -631,23 +634,23 @@ abstract class ModelHelper<T extends IModel<T>> {
       // 2. 执行删除/软删除（不变）
       final deletedCount = enableSoftDelete
           ? await update(
-        {'deletedAt': DateTime.now().toIso8601String()},
-        where: where ?? '',
-        whereArgs: whereArgs ?? [],
-        entity: entity,
-        mtn: mtn,
-      )
+              {'deletedAt': DateTime.now().toIso8601String()},
+              where: where ?? '',
+              whereArgs: whereArgs ?? [],
+              entity: entity,
+              mtn: mtn,
+            )
           : (mtn == null
-          ? await dbService.delete(
-        tableName,
-        where: where,
-        whereArgs: whereArgs,
-      )
-          : await mtn.txn.delete(
-        tableName,
-        where: where,
-        whereArgs: whereArgs,
-      ));
+                ? await dbService.delete(
+                    tableName,
+                    where: where,
+                    whereArgs: whereArgs,
+                  )
+                : await mtn.txn.delete(
+                    tableName,
+                    where: where,
+                    whereArgs: whereArgs,
+                  ));
       // 更新缓存 + 后置钩子
       if (mtn == null && enableCache && deletedCount > 0) await getAllFromDb();
       if (entity != null) {
@@ -684,7 +687,8 @@ abstract class ModelHelper<T extends IModel<T>> {
 
   /// 添加记录并返回新记录，已经自动从 [values] 中移除 id 列；
   /// 如果使用缓存，则自动添加到缓存中
-  Future<T> insertWith(Map<String, Object?> values, {
+  Future<T> insertWith(
+    Map<String, Object?> values, {
     ModelTransaction? mtn,
   }) async {
     final entity = fromMap(values);
@@ -709,10 +713,8 @@ abstract class ModelHelper<T extends IModel<T>> {
       }
 
       final newId = mtn == null
-          ? await dbService.insert(tableName, entity.toJson()
-        ..remove('id'))
-          : await mtn.txn.insert(tableName, entity.toJson()
-        ..remove('id'));
+          ? await dbService.insert(tableName, entity.toJson()..remove('id'))
+          : await mtn.txn.insert(tableName, entity.toJson()..remove('id'));
       if (newId <= 0) throw 'Failed to insert record into $tableName';
       entity.id = newId;
       // 获取新插入的记录
@@ -738,8 +740,10 @@ abstract class ModelHelper<T extends IModel<T>> {
   }
 
   /// 批量插入（使用事务），需要手动更新缓存
-  Future<List<int>> batchInsert(List<T> entities, {
+  Future<List<int>> batchInsert(
+    List<T> entities, {
     ModelTransaction? mtn,
+    bool callback = false,
   }) async {
     if (entities.isEmpty) return [];
     if (mtn == null) {
@@ -750,7 +754,11 @@ abstract class ModelHelper<T extends IModel<T>> {
     return _batchInsert(entities, mtn);
   }
 
-  Future<List<int>> _batchInsert(List<T> entities, ModelTransaction mtn) async {
+  Future<List<int>> _batchInsert(
+    List<T> entities,
+    ModelTransaction mtn, {
+    bool callback = false,
+  }) async {
     if (entities.isEmpty) return [];
 
     final ids = <int>[];
@@ -761,19 +769,21 @@ abstract class ModelHelper<T extends IModel<T>> {
       }
       if (enableCreatedAt) entity.createdAt = DateTime.now();
       if (enableUpdatedAt) entity.updatedAt = DateTime.now();
-      final id = await mtn.txn.insert(tableName, entity.toJson()
-        ..remove('id'));
+      final id = await mtn.txn.insert(tableName, entity.toJson()..remove('id'));
 
       ids.add(id);
       entity.id = id; // 回填 ID
-      afterInsert(entity);
-      afterSave(entity, true);
+      if (callback) {
+        afterInsert(entity);
+        afterSave(entity, true);
+      }
     }
     return ids;
   }
 
   /// 执行一个事务
-  Future<M> transaction<M>(Future<M> Function(ModelTransaction) action, {
+  Future<M> transaction<M>(
+    Future<M> Function(ModelTransaction) action, {
     bool? exclusive,
   }) async {
     try {
@@ -841,20 +851,22 @@ abstract class ModelHelper<T extends IModel<T>> {
   }
 
   /// 字段递增
-  Future<int> increase(int id,
-      String field, {
-        int value = 1,
-        ModelTransaction? mtn,
-      }) {
+  Future<int> increase(
+    int id,
+    String field, {
+    int value = 1,
+    ModelTransaction? mtn,
+  }) {
     return update({field: '+$value'}, where: 'id=?', whereArgs: [id], mtn: mtn);
   }
 
   /// 字段递减
-  Future<int> decrease(int id,
-      String field, {
-        int value = 1,
-        ModelTransaction? mtn,
-      }) {
+  Future<int> decrease(
+    int id,
+    String field, {
+    int value = 1,
+    ModelTransaction? mtn,
+  }) {
     return update({field: '-$value'}, where: 'id=?', whereArgs: [id], mtn: mtn);
   }
 }

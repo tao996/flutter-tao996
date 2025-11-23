@@ -295,11 +295,11 @@ class NetworkInterceptor extends Interceptor {
       // 如果没有网络，直接拒绝请求并抛出自定义异常
       _debugService.d('拦截器：没有网络连接，请求被取消');
       // throw NoNetworkException();
-      // _messageService.showToast(msg: 'No Internet Connection');
+      // _messageService.showToast(msg: 'noInternetConnection');
       return handler.reject(
         DioException(
           requestOptions: options,
-          error: NoNetworkException('No Internet Connection'.tr),
+          error: NoNetworkException('noInternetConnection'.tr),
           type: DioExceptionType.unknown,
         ),
       );

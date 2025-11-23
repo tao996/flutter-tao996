@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:typed_data';
 import 'package:file_selector/file_selector.dart';
 import 'package:flutter_image_gallery_saver/flutter_image_gallery_saver.dart';
 import 'package:get/get.dart';
@@ -8,47 +9,76 @@ import 'package:crypto/crypto.dart';
 class MyFileService {
   // 【桌面端专用】通过对话框让用户选择保存路径，并执行文件复制
   static Future<bool?> _saveFileToUserSelectedPath(
-    File sourceFile,
-    String dialogTitle,
-    String suggestedFileName,
-  ) async {
+    String suggestedFileName, {
+    File? sourceFile,
+    Uint8List? data,
+  }) async {
+    if (sourceFile == null && data == null) {
+      throw 'sourceFile or data is null';
+    }
     // 1. 获取用户选择的保存路径
     final FileSaveLocation? result = await getSaveLocation(
       suggestedName: suggestedFileName,
     );
     if (result == null) {
-      // Operation was canceled by the user.
       return null;
     }
     // 2. 将源文件复制到用户指定的路径
-    await sourceFile.copy(result.path);
-
-    // 可以在这里添加一个 Get.snackbar 或其他 UI 提示：文件已保存到 $savePath
+    if (sourceFile != null) {
+      await sourceFile.copy(result.path);
+    } else {
+      final file = File(result.path);
+      await file.writeAsBytes(data!);
+    }
     dprint('文件已成功保存到: ${result.path}');
     return true;
   }
 
-  /// 保存图片
-  static Future<void> saveImage(File file) async {
-    if (DeviceService.isPc()) {
-      // 桌面端：调用通用保存逻辑
-      final suggestedName = FilepathUtil.basename(file.path);
-      await _saveFileToUserSelectedPath(file, 'image save'.tr, suggestedName);
-      return;
+  /// 保存图片到用户相册
+  /// 注意：在 iOS 端，需要配置 flutter_image_gallery_saver
+  /// [suggestedFileName] 在 [imageBytes] 有值时使用
+  static Future<void> saveImage({
+    File? file,
+    Uint8List? imageBytes,
+    String? suggestedFileName,
+  }) async {
+    if (file == null && imageBytes == null) {
+      throw 'file or imageBytes is null';
     }
-    await FlutterImageGallerySaver.saveImage(await file.readAsBytes());
+    if (file != null) {
+      if (DeviceService.isPc()) {
+        // 桌面端：调用通用保存逻辑
+        final suggestedName = FilepathUtil.basename(file.path);
+        await _saveFileToUserSelectedPath(suggestedName, sourceFile: file);
+        return;
+      }
+      await FlutterImageGallerySaver.saveImage(await file.readAsBytes());
+    } else if (imageBytes != null) {
+      if (DeviceService.isPc()) {
+        await _saveFileToUserSelectedPath(
+          suggestedFileName ??
+              DatetimeUtil.format(
+                dateTime: DateTime.now(),
+                format: DateTimeFormat.ymdHmFile,
+              ),
+          data: imageBytes,
+        );
+        return;
+      }
+      await FlutterImageGallerySaver.saveImage(imageBytes);
+    }
   }
 
   /// 保存图片
   static Future<void> saveFile(String filePath) async {
     final file = File(filePath);
     if (!await file.exists()) {
-      throw 'file not exists'.tr;
+      throw 'fileNotExists'.tr;
     }
     if (DeviceService.isPc()) {
       // 提取文件名作为建议名称
       final fileName = FilepathUtil.basename(filePath);
-      await _saveFileToUserSelectedPath(file, 'file save'.tr, fileName);
+      await _saveFileToUserSelectedPath(fileName, sourceFile: file);
       return;
     }
     await FlutterImageGallerySaver.saveFile(filePath);

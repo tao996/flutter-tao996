@@ -92,7 +92,7 @@ class MySearchInput extends StatelessWidget {
           border: const OutlineInputBorder(),
           isDense: true,
           // 移除内部 padding
-          hintText: hintText ?? 'Search'.tr,
+          hintText: hintText ?? 'search'.tr,
           hintStyle: const TextStyle(color: Colors.grey),
           prefixIcon: Icon(Icons.search),
           suffixIcon: c.showClearIcon.value

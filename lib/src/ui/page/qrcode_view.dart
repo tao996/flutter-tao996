@@ -62,7 +62,7 @@ class _QRCodeViewState extends State<QRCodeView> {
                     child: FutureBuilder(
                       future: controller?.getFlashStatus(),
                       builder: (context, snapshot) {
-                        return Text(snapshot.data == true ? 'Flash Off'.tr : 'Flash On'.tr);
+                        return Text(snapshot.data == true ? 'flashOff'.tr : 'flashOn'.tr);
                       },
                     ),
                   ),

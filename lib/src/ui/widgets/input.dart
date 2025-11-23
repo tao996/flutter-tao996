@@ -25,11 +25,16 @@ class MyInput extends StatefulWidget {
   final int remStep;
   final int addStep;
 
-  // 新增属性
-  final bool isNumber; // 是否为数字输入（整数或小数，取决于是否有 min/max）
+  /// 是否为整数
+  final bool isInteger;
+
+  /// 是否为浮点数
+  final bool isDouble;
+
+  // 是否为货币输入（最高优先级），只能精确到分
+  final bool isMoney;
   final num? minNumber; // 最小值限制
   final num? maxNumber; // 最大值限制
-  final bool isMoney; // 是否为货币输入（最高优先级）
 
   final void Function(String)? onChanged;
 
@@ -46,8 +51,8 @@ class MyInput extends StatefulWidget {
     this.isRequired = false,
     this.maxLines,
     this.minLines,
-    // 新属性默认值
-    this.isNumber = false,
+    this.isInteger = false,
+    this.isDouble = false,
     this.minNumber,
     this.maxNumber,
     this.remStep = -1,
@@ -65,6 +70,7 @@ class MyInput extends StatefulWidget {
 
 class _MyInputState extends State<MyInput> {
   bool isPassword = false;
+
   // final FocusNode _focusNode = FocusNode();
   late TextEditingController controller;
 
@@ -103,9 +109,11 @@ class _MyInputState extends State<MyInput> {
     }
 
     // 只有当有数字限制时，才进行额外的数字校验
-    if (widget.isMoney || widget.isNumber) {
+    if (widget.isMoney || widget.isInteger || widget.isDouble) {
       if (value != null && value.isNotEmpty) {
-        final num? number = num.tryParse(value);
+        final num? number = widget.isInteger
+            ? int.parse(value)
+            : num.tryParse(value);
         if (number == null) {
           // 理论上 inputFormatters 会阻止非数字输入，这里作为双重保险
           return '请输入一个有效数字';
@@ -134,14 +142,11 @@ class _MyInputState extends State<MyInput> {
     if (widget.isMoney) {
       return _InputMode.money;
     }
-    if (widget.isNumber) {
-      // 检查是否有小数限制，如果 min/max 都是整数，则限制为整数输入
-      bool isIntegerOnly =
-          (widget.minNumber is int?) && (widget.maxNumber is int?);
-      if (isIntegerOnly) {
+    if (widget.isInteger || widget.isDouble) {
+      if (widget.isInteger) {
         return _InputMode.integer;
       }
-      return _InputMode.decimal; // 默认允许小数
+      return _InputMode.decimal;
     }
     return _InputMode.none;
   }
@@ -186,7 +191,7 @@ class _MyInputState extends State<MyInput> {
   @override
   Widget build(BuildContext context) {
     return TextFormField(
-      controller: widget.controller,
+      controller: controller,
       // focusNode: _focusNode,
       obscureText: isPassword,
       maxLines: widget.isPassword ? 1 : widget.maxLines ?? 1,
@@ -247,7 +252,7 @@ class _MyInputState extends State<MyInput> {
                 ? const Icon(Icons.visibility)
                 : const Icon(Icons.visibility_off),
           ),
-        if (widget.isNumber)
+        if (widget.isInteger || widget.isDouble)
           StepperSuffixIcon(
             controller: controller,
             minValue: widget.minNumber?.toInt(),

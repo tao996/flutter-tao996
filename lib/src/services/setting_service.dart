@@ -65,6 +65,10 @@ abstract class ISettingsService {
   Future<void> init(); // 添加 init 方法到接口
 }
 
+Future<SharedPreferences> getSharedPreferences() async {
+  return await SharedPreferences.getInstance();
+}
+
 abstract class SettingService implements ISettingsService {
   late SharedPreferences _prefs;
 
@@ -162,8 +166,9 @@ abstract class SettingService implements ISettingsService {
 
   @override
   void updateServerHost(String value) {
-    final newHost =
-        value.endsWith('/') ? value.substring(0, value.length - 1) : value;
+    final newHost = value.endsWith('/')
+        ? value.substring(0, value.length - 1)
+        : value;
     _prefs.setString('serverHost', newHost);
   }
 }

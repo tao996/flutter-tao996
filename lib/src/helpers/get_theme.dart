@@ -7,8 +7,8 @@ BuildContext? getThemeContext() {
   return Get.context;
 }
 
-ThemeData getTheme() {
-  final context = getThemeContext();
+ThemeData getTheme({BuildContext? context}) {
+  context ??= getThemeContext();
   if (context == null) {
     return ThemeData.light();
   }
@@ -16,8 +16,8 @@ ThemeData getTheme() {
 }
 
 // 获取当前主题的 ColorScheme
-ColorScheme getColorScheme() {
-  final context = getThemeContext();
+ColorScheme getColorScheme({BuildContext? context}) {
+  context ??= getThemeContext();
   // 如果 context 不可用，返回一个默认的 ColorScheme 防止崩溃
   if (context == null) {
     return const ColorScheme.light();
@@ -25,8 +25,8 @@ ColorScheme getColorScheme() {
   return Theme.of(context).colorScheme;
 }
 
-TextTheme getTextTheme() {
-  final context = getThemeContext();
+TextTheme getTextTheme({BuildContext? context}) {
+  context ??= getThemeContext();
   if (context == null) {
     return const TextTheme();
   }

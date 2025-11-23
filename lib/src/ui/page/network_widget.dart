@@ -67,7 +67,7 @@ class MyMediaDisplay extends StatelessWidget {
         if (results.contains(NetworkResult.wifi)) {
           return Image.network('high_quality_image_url');
         } else {
-          return const Text('No internet connection');
+          return const Text('noInternetConnection');
         }
       },
     );

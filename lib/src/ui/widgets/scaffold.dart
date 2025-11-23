@@ -178,12 +178,15 @@ class MyEmptyStateWidget extends StatelessWidget {
 
   final Widget? child;
 
+  final bool showDesc;
+
   const MyEmptyStateWidget({
     super.key,
     this.title,
     this.buttonText,
     this.onAction,
     this.child,
+    this.showDesc = true,
   });
 
   @override
@@ -196,7 +199,7 @@ class MyEmptyStateWidget extends StatelessWidget {
 
     final childBox = Center(
       child: Padding(
-        padding: EdgeInsets.only(left: 32.0, right: 32),
+        padding: EdgeInsets.only(left: 32.0, right: 32,),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           crossAxisAlignment: CrossAxisAlignment.center,
@@ -214,7 +217,7 @@ class MyEmptyStateWidget extends StatelessWidget {
 
             // 2. 提示文本
             Text(
-              'emptyHint'.trParams({'title': titleText}),
+              'noRecord'.trParams({'title': titleText}),
               style: theme.textTheme.headlineSmall!.copyWith(
                 fontWeight: FontWeight.bold,
                 color: colorScheme.onSurface.withAlpha(200),
@@ -222,21 +225,21 @@ class MyEmptyStateWidget extends StatelessWidget {
               textAlign: TextAlign.center,
             ),
 
-            const SizedBox(height: 8),
-
             // 3. 详细说明
-            Text(
-              'emptyInertHint'.trParams({'title': titleText}),
-              style: theme.textTheme.bodyMedium!.copyWith(
-                color: colorScheme.onSurface.withAlpha(150),
+            if (showDesc) ...[
+              const SizedBox(height: 8),
+              Text(
+                'clickToCreateYourFirstRecord'.trParams({'title': titleText}),
+                style: theme.textTheme.bodyMedium!.copyWith(
+                  color: colorScheme.onSurface.withAlpha(150),
+                ),
+                textAlign: TextAlign.center,
               ),
-              textAlign: TextAlign.center,
-            ),
-
-            const SizedBox(height: 40),
+            ],
 
             // 4. 主要操作按钮 (使用主题 Primary Color)
-            if (onAction != null)
+            if (onAction != null) ...[
+              const SizedBox(height: 30),
               SizedBox(
                 width: 250, // 限定按钮宽度
                 child: ElevatedButton.icon(
@@ -244,7 +247,7 @@ class MyEmptyStateWidget extends StatelessWidget {
                   icon: const Icon(Icons.add),
                   label: Text(
                     buttonText ??
-                        'emptyInertButton'.trParams({'title': titleText}),
+                        'createNewRecord'.trParams({'title': titleText}),
                   ),
                   style: ElevatedButton.styleFrom(
                     // 🚨 遵循扁平化主题：移除阴影
@@ -259,6 +262,7 @@ class MyEmptyStateWidget extends StatelessWidget {
                   ),
                 ),
               ),
+            ],
             if (child != null) child!,
           ],
         ),

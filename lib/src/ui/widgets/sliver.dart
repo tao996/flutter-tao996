@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 
 class MySliver {
-  static Widget body(List<Widget> children) {
-    return CustomScrollView(slivers: children);
+  static Widget body(List<Widget> children, {Key? key}) {
+    return CustomScrollView(slivers: children, key: key);
   }
 
   /// 少量/静态内容，用于普通的 Widget

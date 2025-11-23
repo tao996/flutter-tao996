@@ -41,6 +41,8 @@ class MyCustomTabBarItem {
   final String title;
 
   MyCustomTabBarItem({required this.key, required this.title});
+
+  String toString() => 'MyCustomTabBarItem(key: $key, title: $title)';
 }
 
 /// 显示样式 [bookMark] 书签样式（滚动）；[flow] 流式样式；[horizontal] 水平样式（滚动）
@@ -55,7 +57,9 @@ class MyCustomTabBar extends StatefulWidget {
   /// 当前选中的标签索引
   final RxInt activeIndex;
   final void Function(int index) onChange;
+  final void Function(int index)? onDoubleTap;
   final MyCustomTabBarStyle style;
+
   /// 选中的 TabBar 背景色，默认为 theme.scaffoldBackgroundColor
   final Color? notebookBgColor;
 
@@ -65,6 +69,7 @@ class MyCustomTabBar extends StatefulWidget {
     this.style = MyCustomTabBarStyle.horizontal,
     required this.activeIndex,
     required this.onChange,
+    this.onDoubleTap,
     required this.children,
     this.notebookBgColor,
   });
@@ -257,6 +262,9 @@ class _MyCustomTabBarState extends State<MyCustomTabBar> {
                             // });
                           }
                         },
+                        onDoubleTap: widget.onDoubleTap != null
+                            ? () => widget.onDoubleTap!(index)
+                            : null,
                         // 使用 Container/SizedBox 确保 InkWell 填充所需的点击区域
                         child: Container(
                           padding: const EdgeInsets.symmetric(
@@ -283,7 +291,8 @@ class _MyCustomTabBarState extends State<MyCustomTabBar> {
     final ThemeData theme = Theme.of(context);
 
     // 笔记本背景颜色（可以和 Scaffold 背景色一致，产生连接感）
-    final Color notebookBgColor = widget.notebookBgColor ?? theme.scaffoldBackgroundColor;
+    final Color notebookBgColor =
+        widget.notebookBgColor ?? theme.scaffoldBackgroundColor;
     // 标签页选中颜色
     final Color activeTabColor = notebookBgColor;
     // 标签页未选中颜色（略微深一点或灰色）
@@ -316,6 +325,9 @@ class _MyCustomTabBarState extends State<MyCustomTabBar> {
                     widget.onChange(index);
                   }
                 },
+                onDoubleTap: widget.onDoubleTap != null
+                    ? () => widget.onDoubleTap!(index)
+                    : null,
 
                 // 使用 Obx 来响应 activeIndex 的变化
                 child: Obx(() {
@@ -396,6 +408,9 @@ class _MyCustomTabBarState extends State<MyCustomTabBar> {
                       widget.onChange(index);
                     }
                   },
+                  onDoubleTap: widget.onDoubleTap != null
+                      ? () => widget.onDoubleTap!(index)
+                      : null,
 
                   child: Container(
                     // 填充内部 Padding，使点击区域更舒适
@@ -457,6 +472,9 @@ class _MyCustomTabBarState extends State<MyCustomTabBar> {
                   widget.onChange(index);
                 }
               },
+              onDoubleTap: widget.onDoubleTap != null
+                  ? () => widget.onDoubleTap!(index)
+                  : null,
 
               // 使用 Container 来模拟 Tab 的背景和形状 (Chip 风格)
               child: Obx(
@@ -470,8 +488,10 @@ class _MyCustomTabBarState extends State<MyCustomTabBar> {
                   decoration: BoxDecoration(
                     color: widget.activeIndex.value == index
                         ? theme.colorScheme.primary.withAlpha(25) // 选中时浅色背景
-                        : theme.dividerColor.withAlpha(25), // 未选中时淡灰色背景
-                    borderRadius: BorderRadius.circular(20.0), // 圆角边框，Chip 风格
+                        : theme.dividerColor.withAlpha(25),
+                    // 未选中时淡灰色背景
+                    borderRadius: BorderRadius.circular(20.0),
+                    // 圆角边框，Chip 风格
                     border: Border.all(
                       color: widget.activeIndex.value == index
                           ? theme

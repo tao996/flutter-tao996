@@ -139,7 +139,7 @@ class _MyImageCacheState extends State<MyImageCache> {
     }
 
     return myImagePlaceholder(
-      'Click to load image'.tr,
+      'clickToLoadImage'.tr,
       onTap: () {
         // 点击时，允许立即加载
         setState(() {
@@ -195,9 +195,9 @@ class _MyImageCacheState extends State<MyImageCache> {
       fit: BoxFit.cover,
       width: double.infinity,
       // 占位符和错误组件处理它们自己的状态
-      placeholder: (context, url) => myImagePlaceholder('image loading'.tr),
+      placeholder: (context, url) => myImagePlaceholder('imageLoading'.tr),
       errorWidget: (context, url, error) =>
-          myImagePlaceholder('image load error'.tr),
+          myImagePlaceholder('imageLoadError'.tr),
       fadeInDuration: const Duration(milliseconds: 500),
       fadeOutDuration: const Duration(milliseconds: 500),
     );

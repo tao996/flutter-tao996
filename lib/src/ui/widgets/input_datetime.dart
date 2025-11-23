@@ -35,7 +35,7 @@ class _FakeDatetimeInputState extends State<FakeDatetimeInput> {
   // 格式化日期和时间显示
   String get _formattedDatetime {
     if (_selectedDatetime == null) {
-      return widget.hintText ?? 'datetimeHint'.tr;
+      return widget.hintText ?? 'selectDateAndTime'.tr;
     }
     final dt = _selectedDatetime!;
     final date =

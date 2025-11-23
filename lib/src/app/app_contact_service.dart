@@ -28,7 +28,7 @@ class AppContactService {
 
   Future<void> copy(String account) async {
     Clipboard.setData(ClipboardData(text: account));
-    messageSer.success('copySuccess'.tr);
+    messageSer.success('Copy success'.tr);
   }
 
   /// 尝试打开 URL

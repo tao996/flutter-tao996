@@ -54,7 +54,7 @@ class _MyDemoFormHelperState extends State<MyDemoFormHelper> {
             FormHelper.input(
               controller: createController(),
               labelText: '数字输入框',
-              isNumber: true,
+              isInteger: true,
               helperText: '请输入一个整数',
             ),
             const SizedBox(height: 16),

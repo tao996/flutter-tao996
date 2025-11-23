@@ -18,10 +18,15 @@ abstract class MySmartRefresherController<T>
     refreshController = RefreshController(initialRefresh: autoLoad);
   }
 
+  int _initCount = 0;
+
   @override
   void onInit() {
     super.onInit();
-    initData();
+    if (_initCount == 0 && refreshController.initialRefresh == false) {
+      _initCount++;
+      initData();
+    }
   }
 
   @override
@@ -44,7 +49,9 @@ abstract class MySmartRefresherController<T>
   }
 
   /// 初始化数据，在控制器 onInit 时被调用
-  Future<void> initData() async {}
+  Future<void> initData() async {
+    await smartRefresh(isRefresh: true);
+  }
 
   /// 加载数据，在 smartRefresh 中被调用；不需要设置 isRequesting 或者 assignItems 等操作
   /// [isRefresh] 是否是刷新，如果是，则需要重置搜索条件
@@ -58,11 +65,10 @@ abstract class MySmartRefresherController<T>
   void assignItems(List<T> newItems, {bool isRefresh = false}) {
     if (isRefresh) {
       items.clear();
+      items.value = newItems;
+    } else {
+      items.addAll(newItems);
     }
-    // dprint('--------:'+items.toString());
-    // dprint(newItems);
-    items.addAll(newItems);
-    // dprint(items);
   }
 
   void loadNoData() {
@@ -75,8 +81,10 @@ abstract class MySmartRefresherController<T>
       pageIndex = 1;
       hasMore.value = true;
     }
+    dprint(
+      '|<-- smartRefresh {hasMore: ${hasMore.value}, isRefresh: $isRefresh}',
+    );
     if (hasMore.value) {
-      dprint('smartRefresh hasMore');
       final newItems = await loadData(isRefresh: isRefresh);
       if (newItems == null || newItems.isEmpty) {
         dprint('loadData return null or empty');

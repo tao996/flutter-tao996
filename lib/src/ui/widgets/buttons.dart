@@ -46,7 +46,7 @@ class MyCancelButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MyButton(
-      id == null ? '取消' : '返回',
+      id == null ? 'cancel'.tr : 'back'.tr,
       iconData: id == null ? Icons.cancel_outlined : Icons.navigate_before,
       onPressed: () {
         Get.back();
@@ -104,7 +104,7 @@ class MyInsertButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MyButton(
-      label ?? 'insert'.tr,
+      label ?? 'add'.tr,
       onPressed: onPressed,
       icon: showIcon ? const Icon(Icons.add) : null,
       type: type ?? MyButtonType.text,
@@ -155,7 +155,7 @@ class MyDeleteButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MyButton(
-      '删除',
+      'delete'.tr,
       onPressed: onPressed,
       icon: showIcon ? const Icon(Icons.delete) : null,
       status: MyButtonStatus.danger,
@@ -172,7 +172,7 @@ class MyHelperIconButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Tooltip(
-      message: '操作指引',
+      message: 'userGuide'.tr,
       child: IconButton(onPressed: onPressed, icon: Icon(Icons.help_outline)),
     );
   }
@@ -190,7 +190,7 @@ class MyEditIconButton extends StatelessWidget {
     return IconButton(
       icon: Icon(Icons.edit_outlined, color: MyColor.info()),
       onPressed: onPressed,
-      tooltip: '编辑',
+      tooltip: 'edit'.tr,
     );
   }
 }
@@ -206,7 +206,7 @@ class MyDetailIconButton extends StatelessWidget {
     return IconButton(
       icon: const Icon(Icons.info_outline),
       onPressed: onPressed,
-      tooltip: '详情',
+      tooltip: 'info'.tr,
     );
   }
 }
@@ -264,15 +264,17 @@ class MyDeleteIconButton extends StatelessWidget {
       onPressed: confirm
           ? () async {
               final result = await getIMessageService().confirm(
-                title: '警告',
-                content: (content ?? '确定要删除当前记录吗？') + (cancel ? '' : '此操作无法撤销'),
+                title: 'deleteConfirmTitle'.tr,
+                content:
+                    (content ?? 'deleteConfirmContent'.tr) +
+                    (cancel ? '' : 'youCannotUndoThis'.tr),
               );
               if (result == true && onPressed != null) {
                 onPressed!();
               }
             }
           : onPressed,
-      tooltip: '删除',
+      tooltip: 'delete'.tr,
     );
   }
 }

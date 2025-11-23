@@ -96,7 +96,7 @@ class _MyImageViewerWidgetState extends State<MyImageViewerWidget> {
         if (!status.isGranted) {
           _debugService.d(
             '存储权限未授予',
-            errorMessage: 'Permission storage deny'.tr,
+            errorMessage: 'permissionStorageDeny'.tr,
           );
           return;
         }
@@ -116,13 +116,13 @@ class _MyImageViewerWidgetState extends State<MyImageViewerWidget> {
           },
         );
         if (file == null) {
-          _messageService.error('image download error'.tr);
+          _messageService.error('imageDownloadError'.tr);
           return;
         } else {
-          await MyFileService.saveImage(file);
+          await MyFileService.saveImage(file: file);
         }
       }
-      _debugService.d('图片保存成功', successMessage: 'download and save success'.tr);
+      _debugService.d('图片保存成功', successMessage: 'downloadAndSaveSuccess'.tr);
     } catch (error, stackTrace) {
       _debugService.exception(
         error,
@@ -134,11 +134,11 @@ class _MyImageViewerWidgetState extends State<MyImageViewerWidget> {
 
   // 模拟分享图片功能
   Future<void> _shareImage() async {
-    _messageService.toast('image sharing'.tr);
+    _messageService.toast('imageSharing'.tr);
     try {
       final file = await _getImage();
       if (file == null) {
-        _messageService.error('image not exists'.tr);
+        _messageService.error('imageNotExists'.tr);
       } else {
         await getIShareService().shareFilepath(file.path);
       }
@@ -150,7 +150,7 @@ class _MyImageViewerWidgetState extends State<MyImageViewerWidget> {
     } catch (e) {
       _debugService.d(
         '分享图片错误: $e',
-        errorMessage: 'share failed'.trParams({'reason': e.toString()}),
+        errorMessage: 'shareFailed'.trParams({'reason': e.toString()}),
       );
     }
   }
@@ -243,7 +243,7 @@ class _MyImageViewerWidgetState extends State<MyImageViewerWidget> {
 
                     imageViewerActionButton(
                       icon: Icons.share,
-                      label: 'Share'.tr,
+                      label: 'share'.tr,
                       onTap: _shareImage,
                       vertical: false,
                     ),

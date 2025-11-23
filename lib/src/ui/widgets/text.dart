@@ -2,20 +2,20 @@ import 'package:flutter/material.dart';
 import 'package:tao996/tao996.dart';
 
 class MyText {
-  static Widget h1(String text) {
-    return Text(text, style: getTextTheme().displayLarge);
+  static Widget h1(String text, {BuildContext? context}) {
+    return Text(text, style: getTextTheme(context: context).displayLarge);
   }
 
-  static Widget h2(String text) {
-    return Text(text, style: getTextTheme().headlineMedium);
+  static Widget h2(String text, {BuildContext? context}) {
+    return Text(text, style: getTextTheme(context: context).headlineMedium);
   }
 
-  static Widget h3(String text) {
-    return Text(text, style: getTextTheme().titleLarge);
+  static Widget h3(String text, {BuildContext? context}) {
+    return Text(text, style: getTextTheme(context: context).titleLarge);
   }
 
-  static Widget h4(String text) {
-    return Text(text, style: getTextTheme().titleMedium);
+  static Widget h4(String text, {BuildContext? context}) {
+    return Text(text, style: getTextTheme(context: context).titleMedium);
   }
 
   static Widget h5(
@@ -24,10 +24,11 @@ class MyText {
     double? fontSize,
     FontWeight? fontWeight,
     FontStyle? fontStyle,
+    BuildContext? context,
   }) {
     return _text(
       text,
-      style: getTextTheme().bodyLarge,
+      style: getTextTheme(context: context).bodyLarge,
       color: color,
       fontSize: fontSize,
       fontWeight: fontWeight,
@@ -35,8 +36,8 @@ class MyText {
     );
   }
 
-  static Widget h6(String text) {
-    return Text(text, style: getTextTheme().bodyMedium);
+  static Widget h6(String text, {BuildContext? context}) {
+    return Text(text, style: getTextTheme(context: context).bodyMedium);
   }
 
   static Widget _text(
@@ -62,18 +63,19 @@ class MyText {
     String title, {
     double horizontal = 18,
     double vertical = 10,
+    BuildContext? context,
   }) {
     return Padding(
       padding: EdgeInsets.symmetric(horizontal: horizontal, vertical: vertical),
-      child: Text(title, style: getTextTheme().bodyMedium),
+      child: Text(title, style: getTextTheme(context: context).titleMedium),
     );
   }
 
-  static Widget warning(String text) {
+  static Widget warning(String text, {BuildContext? context}) {
     return Text(
       text,
       style: TextStyle(
-        color: getColorScheme().error,
+        color: getColorScheme(context: context).error,
         fontWeight: FontWeight.bold,
       ),
     );
@@ -117,6 +119,7 @@ class MyText {
     IconData? iconData,
     String? subTitle,
     Widget? trailing,
+    BuildContext? context,
   }) {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.center, // 确保垂直居中
@@ -132,9 +135,9 @@ class MyText {
             children: <Widget>[
               Text(
                 title,
-                style: getTextTheme().titleMedium?.copyWith(
+                style: getTextTheme(context: context).titleMedium?.copyWith(
                   fontWeight: FontWeight.bold,
-                  color: getColorScheme().primary,
+                  color: getColorScheme(context: context).primary,
                 ),
               ),
               if (subTitle != null && subTitle.isNotEmpty)
