@@ -11,16 +11,16 @@ import '../../tao996.dart';
 
 class MyTao996App extends StatelessWidget {
   final ISettingsService settingService;
+
+  /// 在 app 构建之前执行
   final Function? beforeBuild;
   final Locale? fallbackLocale;
-  final Iterable<Locale>? supportedLocales;
 
   const MyTao996App({
     super.key,
     required this.settingService,
     this.beforeBuild,
     this.fallbackLocale,
-    this.supportedLocales,
   });
 
   @override
@@ -45,19 +45,20 @@ class MyTao996App extends StatelessWidget {
         return GetMaterialApp(
           debugShowCheckedModeBanner: false,
           title: 'appTitle'.tr,
+          // 🎯 Flutter Material 的配置 (控制内置组件)
           localizationsDelegates: [
             RefreshLocalizations.delegate,
             GlobalWidgetsLocalizations.delegate,
             GlobalMaterialLocalizations.delegate,
             GlobalCupertinoLocalizations.delegate,
           ],
-          supportedLocales:
-              supportedLocales ??
-              const [Locale('zh', 'CN'), Locale('en', 'US')],
-          // locale: getILocaleService().locale,
-          locale: Get.deviceLocale,
-          fallbackLocale: fallbackLocale ?? const Locale('en', 'US'),
+          supportedLocales: systemSupportedLocales,
+          // https://github.com/jonataslaw/getx?tab=readme-ov-file#internationalization
           translations: getTranslationService(),
+          locale: getILocaleService().locale,
+          // 系统默认
+          fallbackLocale: fallbackLocale ?? const Locale('en', 'US'),
+
           theme: themeService.buildLightTheme(lightDynamic),
           darkTheme: themeService.buildDarkTheme(darkDynamic),
           themeMode: [

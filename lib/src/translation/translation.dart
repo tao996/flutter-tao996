@@ -1,22 +1,47 @@
+import 'dart:ui';
+
 import 'package:get/get.dart';
 import 'package:tao996/tao996.dart';
+
 /// 系统语言
 List<KV<String>> kvLanguages = [
   KV(label: 'systemLanguage'.tr, value: 'system'),
+  // system 是 local_service.dart 中的值
   KV(label: '中文简体', value: 'zh_CN'),
   KV(label: '中文繁體', value: 'zh_TW'),
   KV(label: '日本語', value: 'ja_JP'),
   // 欧洲主要语言
   KV(label: 'English', value: 'en_US'),
-  KV(label: 'Deutsch', value: 'de_DE'),  // 德语 (German)
-  KV(label: 'Français', value: 'fr_FR'), // 法语 (French) (可选)
-  KV(label: 'Español', value: 'es_ES'),  // 西班牙语 (Spanish) (可选)
+  KV(label: 'Deutsch', value: 'de_DE'),
+  // 德语 (German)
+  KV(label: 'Français', value: 'fr_FR'),
+  // 法语 (French) (可选)
+  KV(label: 'Español', value: 'es_ES'),
+  // 西班牙语 (Spanish) (可选)
 ];
+final List<Locale> systemSupportedLocales = [
+  Locale('zh', 'CN'), //
+  Locale('zh', 'TW'), //
+  Locale('en', 'US'), //
+  Locale('ja', 'JP'),
+  Locale('de', 'DE'), // 德语 (German)
+  Locale('fr', 'FR'), // 法语 (French) (可选)
+  Locale('es', 'ES'), // 西班牙语 (Spanish) (可选)
+  // 'zh_CN',
+  // 'zh_TW',
+  // 'en_US',
+  // 'de_DE',
+  // 'fr_FR',
+  // 'es_ES',
+];
+
 // 其它语言
 // {'zh_CN':{},'zh_TW':{},'en_US':{},'de_DE':{},'fr_FR':{},'es_ES':{}}
 // language code
 // {'cn':{},'tw':{},'ja':{},'en':{},'de':{},'fr':{},'es':{}}
+// 请为我下面的国际化生成对应的繁体中文 zh_TW（注意：可能不能直接将简体转换成繁体），英文 en_US，日本语 ja_JP，德语 de_DE，法语 fr_FR，西班牙语 es_ES 的翻译
 // http://www.lingoes.net/zh/translator/langcode.htm
+// 使用注意：只有在 GetMaterialApp build 之后，才能使用到 .tr 否则无交
 class TranslationService extends Translations {
   final Map<String, Map<String, String>> _keys = {
     // ----------------------------------------------------
@@ -33,12 +58,12 @@ class TranslationService extends Translations {
       'search': '搜索',
       'success': '成功',
       'error': '错误',
-      'info': '详情',
+      'detail': '详情',
       'userGuide': '用户指南',
 
       'pullUpLoadMore': '上拉加载更多',
       'loadFailedRetry': '加载失败，请重试',
-      'noMoreData': '没有更多数据了',
+      'noMoreData': '没有更多数据',
 
       'failedToReadFontFiles': '读取字体文件失败',
       'failedToReadThemeFont': '读取主题字体失败',
@@ -87,21 +112,24 @@ class TranslationService extends Translations {
     'zh_TW': {
       'confirm': '確定',
       'cancel': '取消',
-      'save': '儲存', // 繁体更常用 '儲存'
-      'add': '新增', // 繁体更常用 '新增'
+      'save': '儲存',
+      // 繁体更常用 '儲存'
+      'add': '新增',
+      // 繁体更常用 '新增'
       'edit': '編輯',
       'delete': '刪除',
       'back': '返回',
       'search': '搜尋',
       'success': '成功',
       'error': '錯誤',
-      'info': '詳情',
+      'detail': '詳情',
       'userGuide': '用戶指南',
 
       'pullUpLoadMore': '上拉載入更多',
       'loadFailedRetry': '載入失敗，請重試',
-      'noMoreData': '沒有更多資料了', // '資料' 更常用
+      'noMoreData': '沒有更多資料了',
 
+      // '資料' 更常用
       'failedToReadFontFiles': '無法讀取字體檔案',
       'failedToReadThemeFont': '無法讀取主題字體',
       'failedToDeleteFont': '刪除字體失敗',
@@ -110,8 +138,9 @@ class TranslationService extends Translations {
 
       'deleteConfirmTitle': '警告',
       'deleteConfirmContent': '確定要刪除 @title 嗎?',
-      'youCannotUndoThis': '此操作無法復原', // '復原' 更常用
+      'youCannotUndoThis': '此操作無法復原',
 
+      // '復原' 更常用
       'noInternetConnection': '網路錯誤或連線異常',
 
       'clickToLoadImage': '點擊載入圖片',
@@ -139,7 +168,8 @@ class TranslationService extends Translations {
 
       'record': '記錄',
       'noRecord': '暫無@title',
-      'clickToCreateYourFirstRecord': '點擊下方按鈕，開始建立您的第一個@title', // '建立' 更常用
+      'clickToCreateYourFirstRecord': '點擊下方按鈕，開始建立您的第一個@title',
+      // '建立' 更常用
       'createNewRecord': '新增@title',
     },
 
@@ -157,7 +187,7 @@ class TranslationService extends Translations {
       'search': 'Search',
       'success': 'Success',
       'error': 'Error',
-      'info': 'Details',
+      'detail': 'Details',
       'userGuide': 'User Guide',
 
       'pullUpLoadMore': 'Pull up to load more',
@@ -201,7 +231,8 @@ class TranslationService extends Translations {
 
       'record': 'Record',
       'noRecord': 'No @title yet',
-      'clickToCreateYourFirstRecord': 'Click the button below to create your first @title',
+      'clickToCreateYourFirstRecord':
+          'Click the button below to create your first @title',
       'createNewRecord': 'Create new @title',
     },
 
@@ -219,7 +250,7 @@ class TranslationService extends Translations {
       'search': '検索',
       'success': '成功',
       'error': 'エラー',
-      'info': '詳細',
+      'detail': '詳細',
       'userGuide': 'ユーザーガイド',
 
       'pullUpLoadMore': '上へ引っ張ってさらに読み込む',
@@ -281,7 +312,7 @@ class TranslationService extends Translations {
       'search': 'Suchen',
       'success': 'Erfolg',
       'error': 'Fehler',
-      'info': 'Details',
+      'detail': 'Details',
       'userGuide': 'Benutzerhandbuch',
 
       'pullUpLoadMore': 'Hochziehen zum Laden weiterer Daten',
@@ -295,7 +326,8 @@ class TranslationService extends Translations {
       'errorLanguageData': 'Fehlerhaftes Sprachdatenformat',
 
       'deleteConfirmTitle': 'Warnung',
-      'deleteConfirmContent': 'Sind Sie sicher, dass Sie @title löschen möchten?',
+      'deleteConfirmContent':
+          'Sind Sie sicher, dass Sie @title löschen möchten?',
       'youCannotUndoThis': 'Diese Aktion kann nicht rückgängig gemacht werden.',
 
       'noInternetConnection': 'Keine Internetverbindung',
@@ -325,7 +357,8 @@ class TranslationService extends Translations {
 
       'record': 'Eintrag',
       'noRecord': 'Noch kein @title vorhanden',
-      'clickToCreateYourFirstRecord': 'Klicken Sie unten, um Ihren ersten @title zu erstellen',
+      'clickToCreateYourFirstRecord':
+          'Klicken Sie unten, um Ihren ersten @title zu erstellen',
       'createNewRecord': 'Neuen @title erstellen',
     },
 
@@ -343,7 +376,7 @@ class TranslationService extends Translations {
       'search': 'Rechercher',
       'success': 'Succès',
       'error': 'Erreur',
-      'info': 'Détails',
+      'detail': 'Détails',
       'userGuide': 'Guide utilisateur',
 
       'pullUpLoadMore': 'Tirer pour charger plus',
@@ -387,7 +420,8 @@ class TranslationService extends Translations {
 
       'record': 'Enregistrement',
       'noRecord': 'Aucun @title pour l\'instant',
-      'clickToCreateYourFirstRecord': 'Cliquez ci-dessous pour créer votre premier @title',
+      'clickToCreateYourFirstRecord':
+          'Cliquez ci-dessous pour créer votre premier @title',
       'createNewRecord': 'Créer un nouvel @title',
     },
 
@@ -405,7 +439,7 @@ class TranslationService extends Translations {
       'search': 'Buscar',
       'success': 'Éxito',
       'error': 'Error',
-      'info': 'Detalles',
+      'detail': 'Detalles',
       'userGuide': 'Guía de usuario',
 
       'pullUpLoadMore': 'Tirar para cargar más',
@@ -449,7 +483,8 @@ class TranslationService extends Translations {
 
       'record': 'Registro',
       'noRecord': 'Aún no hay @title',
-      'clickToCreateYourFirstRecord': 'Haga clic abajo para crear su primer @title',
+      'clickToCreateYourFirstRecord':
+          'Haga clic abajo para crear su primer @title',
       'createNewRecord': 'Crear nuevo @title',
     },
   };

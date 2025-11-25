@@ -206,7 +206,7 @@ class MyDetailIconButton extends StatelessWidget {
     return IconButton(
       icon: const Icon(Icons.info_outline),
       onPressed: onPressed,
-      tooltip: 'info'.tr,
+      tooltip: 'detail'.tr,
     );
   }
 }

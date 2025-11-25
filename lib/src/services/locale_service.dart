@@ -26,6 +26,8 @@ PlatformDispatcher.instance.locale 在 Flutter 中返回的是当前用户界面
 class LocaleService implements ILocaleService {
   final ISettingsService settingsService = getISettingsService();
   Locale? _locale;
+  /// 默认的地区
+  // static Locale defaultLocale = const Locale('en', 'US');
 
   LocaleService() {
     _locale = settingsService.language == 'system'
@@ -34,6 +36,7 @@ class LocaleService implements ILocaleService {
             settingsService.language.split('_').first,
             settingsService.language.split('_').last,
           );
+    dprint('==================== 默认地区: $_locale');
     Get.updateLocale(_locale!);
   }
 
@@ -63,10 +66,11 @@ class LocaleService implements ILocaleService {
   /// 修改語言
   @override
   void changeLanguage(String newLang) {
-    if (newLang != 'system') {
-      Get.updateLocale(Locale(newLang.split('_').first, newLang.split('_').last));
-    } else {
+    dprint('changeLanguage: $newLang');
+    if (newLang == 'system') {
       Get.updateLocale(Get.deviceLocale ?? const Locale('en', 'US'));
+    } else {
+      Get.updateLocale(Locale(newLang.split('_').first, newLang.split('_').last));
     }
     getISettingsService().language = newLang;
   }

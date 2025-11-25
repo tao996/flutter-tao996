@@ -19,12 +19,12 @@ abstract class IMessageService extends IDebugMessageService {
 
   Future<void> alert(String title, {String? content, Widget? icon});
 
-  // 删除确认
-  // [isContent] 为 true 时，[text] 为内容，否则为标题
+  /// 删除确认
+  /// [textIsContent] 为 true 时，[text] 为内容，否则为标题
   Future<bool?> deleteConfirm(
     String text,
     void Function() yes, {
-    bool isContent = false,
+    bool textIsContent = false,
   });
 
   void toast(String message);
@@ -104,13 +104,13 @@ class MessageService implements IMessageService {
   Future<bool?> deleteConfirm(
     String text,
     void Function() yes, {
-    bool isContent = false,
+    bool textIsContent = false,
   }) async {
     return Get.dialog(
       AlertDialog(
         title: Text('deleteConfirmTitle'.tr),
         content: Text(
-          isContent ? text : 'deleteConfirmContent'.trParams({'title': text}),
+          textIsContent ? text : 'deleteConfirmContent'.trParams({'title': text}),
         ),
         actions: [
           TextButton(
@@ -147,7 +147,7 @@ class MessageService implements IMessageService {
     }
     if (Platform.isWindows || Platform.isLinux || Platform.isMacOS) {
       snackbar(
-        title ?? 'info'.tr,
+        title ?? 'detail'.tr,
         message,
         successIcon: successIcon,
         colorText: textColor,
