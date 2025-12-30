@@ -1,7 +1,6 @@
 import 'dart:math';
 
 import 'package:get/get.dart';
-import 'package:sqflite/sqflite.dart';
 import 'package:tao996/tao996.dart';
 
 abstract class ModelHelper<T extends IModel<T>> {
@@ -203,6 +202,9 @@ abstract class ModelHelper<T extends IModel<T>> {
     bool tryCache = true,
     ModelTransaction? mtn,
   }) async {
+    if (id < 1) {
+      return null;
+    }
     return await getFirstBy(
       fieldName: 'id',
       value: id,
@@ -381,22 +383,28 @@ abstract class ModelHelper<T extends IModel<T>> {
     int? offset,
   }) async {
     try {
-      final (newWhere, newWhereArgs) = createWhere(
+      var (newWhere, newWhereArgs) = createWhere(
         where,
         whereArgs,
         clauseBuilder,
       );
+      if (fieldName != null && fieldName.isNotEmpty) {
+        if (newWhere == null) {
+          newWhere = appendWhere('$fieldName = ?');
+        } else {
+          newWhere += ' AND $fieldName = ?';
+        }
+        if (newWhereArgs == null) {
+          newWhereArgs = [value];
+        } else {
+          newWhereArgs.add(value);
+        }
+      }
       return await dbService.query(
         tableName,
         columns: columns,
-        where:
-            newWhere ??
-            (fieldName != null && fieldName.isNotEmpty
-                ? appendWhere('$fieldName = ?')
-                : null),
-        whereArgs:
-            newWhereArgs ??
-            (fieldName != null && fieldName.isNotEmpty ? [value] : null),
+        where: newWhere,
+        whereArgs: newWhereArgs,
         groupBy: groupBy,
         having: having,
         orderBy: orderBy,
@@ -467,6 +475,7 @@ abstract class ModelHelper<T extends IModel<T>> {
     ModelTransaction? mtn,
   }) async {
     try {
+      dprint('execute SQL $sql');
       if (mtn != null) {
         await mtn.txn.execute(sql, arguments);
       } else {
@@ -527,8 +536,9 @@ abstract class ModelHelper<T extends IModel<T>> {
     }
   }
 
-  /// 更新符合条件的记录，并返回影响行数；如果提供 [entity] 则会更新缓存
-  Future<int> update(
+  /// 更新符合条件的记录，并返回影响行数；如果提供 [entity] 则会更新修改时间及记录缓存;
+  /// [values] 字段及其值
+  Future<int> updateWith(
     Map<String, Object?> values, {
     String? where,
     List<Object?>? whereArgs,
@@ -581,7 +591,7 @@ abstract class ModelHelper<T extends IModel<T>> {
   }
 
   /// 更新指定 ID 记录的数据
-  Future<int> updateById(
+  Future<int> update(
     T entity, {
     List<String>? columns,
     ModelTransaction? mtn,
@@ -599,9 +609,16 @@ abstract class ModelHelper<T extends IModel<T>> {
         {},
         (acc, name) => acc..[name] = fieldValues[name],
       );
+    } else {
+      if (enableCreatedAt) {
+        fieldValues.remove('createdAt');
+      }
+      if (enableUpdatedAt) {
+        fieldValues['createdAt'] = DateTime.now().toIso8601String();
+      }
     }
     fieldValues.remove('id'); // 移除 id，避免更新主键
-    return update(
+    return updateWith(
       fieldValues.cast<String, Object?>(), // 强制类型转换（确保安全，因 fieldValues 来自实体）
       where: "id=?",
       whereArgs: [entity.id],
@@ -633,7 +650,7 @@ abstract class ModelHelper<T extends IModel<T>> {
       }
       // 2. 执行删除/软删除（不变）
       final deletedCount = enableSoftDelete
-          ? await update(
+          ? await updateWith(
               {'deletedAt': DateTime.now().toIso8601String()},
               where: where ?? '',
               whereArgs: whereArgs ?? [],
@@ -822,7 +839,7 @@ abstract class ModelHelper<T extends IModel<T>> {
     if (entity != null && !await beforeSave(entity, false)) {
       throw 'Restore interrupted by beforeSave hook for $tableName';
     }
-    final updatedRows = await update(
+    final updatedRows = await updateWith(
       {'deletedAt': null},
       where: where,
       whereArgs: whereArgs,
@@ -851,22 +868,24 @@ abstract class ModelHelper<T extends IModel<T>> {
   }
 
   /// 字段递增
-  Future<int> increase(
+  Future<void> increase(
     int id,
     String field, {
     int value = 1,
     ModelTransaction? mtn,
-  }) {
-    return update({field: '+$value'}, where: 'id=?', whereArgs: [id], mtn: mtn);
+  }) async {
+    final sql = 'UPDATE $tableName SET $field=$field+$value WHERE id=$id';
+    await execute(sql, mtn: mtn);
   }
 
   /// 字段递减
-  Future<int> decrease(
+  Future<void> decrease(
     int id,
     String field, {
     int value = 1,
     ModelTransaction? mtn,
-  }) {
-    return update({field: '-$value'}, where: 'id=?', whereArgs: [id], mtn: mtn);
+  }) async {
+    final sql = 'UPDATE $tableName SET $field=$field-$value WHERE id=$id';
+    await execute(sql, mtn: mtn);
   }
 }

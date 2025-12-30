@@ -39,7 +39,7 @@ final List<Locale> systemSupportedLocales = [
 // {'zh_CN':{},'zh_TW':{},'en_US':{},'de_DE':{},'fr_FR':{},'es_ES':{}}
 // language code
 // {'cn':{},'tw':{},'ja':{},'en':{},'de':{},'fr':{},'es':{}}
-// 请为我下面的国际化生成对应的繁体中文 zh_TW（注意：可能不能直接将简体转换成繁体），英文 en_US，日本语 ja_JP，德语 de_DE，法语 fr_FR，西班牙语 es_ES 的翻译
+// 请写出它们的繁体中文 zh_TW，英文 en_US，日本语 ja_JP，德语 de_DE，法语 fr_FR，西班牙语 es_ES 的翻译，输出格式为 Map<String, Map<String, String>>，key 只使用单引号
 // http://www.lingoes.net/zh/translator/langcode.htm
 // 使用注意：只有在 GetMaterialApp build 之后，才能使用到 .tr 否则无交
 class TranslationService extends Translations {
@@ -61,6 +61,7 @@ class TranslationService extends Translations {
       'detail': '详情',
       'userGuide': '用户指南',
 
+      'pullDownRefresh': '下拉刷新',
       'pullUpLoadMore': '上拉加载更多',
       'loadFailedRetry': '加载失败，请重试',
       'noMoreData': '没有更多数据',
@@ -74,6 +75,7 @@ class TranslationService extends Translations {
       'deleteConfirmTitle': '警告',
       'deleteConfirmContent': '确定要删除 @title 吗?',
       'youCannotUndoThis': '此操作无法撤销',
+      'noRecordDelete': '没有记录被删除',
 
       'noInternetConnection': '网络错误或连接异常',
 
@@ -139,6 +141,7 @@ class TranslationService extends Translations {
       'deleteConfirmTitle': '警告',
       'deleteConfirmContent': '確定要刪除 @title 嗎?',
       'youCannotUndoThis': '此操作無法復原',
+      'noRecordDelete': '沒有記錄被刪除',
 
       // '復原' 更常用
       'noInternetConnection': '網路錯誤或連線異常',
@@ -203,6 +206,7 @@ class TranslationService extends Translations {
       'deleteConfirmTitle': 'Warning',
       'deleteConfirmContent': 'Are you sure you want to delete @title?',
       'youCannotUndoThis': 'This action cannot be undone.',
+      'noRecordDelete': 'No records deleted',
 
       'noInternetConnection': 'No Internet Connection',
 
@@ -266,6 +270,7 @@ class TranslationService extends Translations {
       'deleteConfirmTitle': '警告',
       'deleteConfirmContent': '@title を削除してもよろしいですか？',
       'youCannotUndoThis': 'この操作は元に戻せません。',
+      'noRecordDelete': '記録は削除されませんでした',
 
       'noInternetConnection': 'インターネット接続がありません',
 
@@ -329,6 +334,7 @@ class TranslationService extends Translations {
       'deleteConfirmContent':
           'Sind Sie sicher, dass Sie @title löschen möchten?',
       'youCannotUndoThis': 'Diese Aktion kann nicht rückgängig gemacht werden.',
+      'noRecordDelete': 'Keine Datensätze gelöscht',
 
       'noInternetConnection': 'Keine Internetverbindung',
 
@@ -392,6 +398,7 @@ class TranslationService extends Translations {
       'deleteConfirmTitle': 'Avertissement',
       'deleteConfirmContent': 'Êtes-vous sûr de vouloir supprimer @title ?',
       'youCannotUndoThis': 'Cette action est irréversible.',
+      'noRecordDelete': 'Aucun enregistrement supprimé',
 
       'noInternetConnection': 'Aucune connexion Internet',
 
@@ -455,6 +462,7 @@ class TranslationService extends Translations {
       'deleteConfirmTitle': 'Advertencia',
       'deleteConfirmContent': '¿Está seguro de que desea eliminar @title?',
       'youCannotUndoThis': 'Esta acción no se puede deshacer.',
+      'noRecordDelete': 'No se eliminaron registros',
 
       'noInternetConnection': 'Sin conexión a internet',
 

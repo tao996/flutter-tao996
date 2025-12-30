@@ -66,7 +66,11 @@ abstract class IFilePickerService {
   Future<String?> getDirectory();
 
   /// 成功读取文件内容后返回 String，否则返回 null。
-  Future<String?> pickAndRead({FileType type = FileType.any});
+  Future<String?> pickAndRead({
+    FileType type = FileType.any,
+    String? initialDirectory,
+    List<String>? allowedExtensions,
+  });
 }
 
 class FilePickerService implements IFilePickerService {
@@ -127,12 +131,18 @@ class FilePickerService implements IFilePickerService {
   }
 
   @override
-  Future<String?> pickAndRead({FileType type = FileType.any}) async {
+  Future<String?> pickAndRead({
+    FileType type = FileType.any,
+    String? initialDirectory,
+    List<String>? allowedExtensions,
+  }) async {
     try {
       // 调用文件选择器，只允许选择文件
       FilePickerResult? result = await FilePicker.platform.pickFiles(
         type: type, // 允许选择任何类型的文件
         allowMultiple: false, // 只允许选择单个文件
+        initialDirectory: initialDirectory,
+        allowedExtensions: allowedExtensions,
       );
 
       // 如果用户取消了选择，result 将为 null

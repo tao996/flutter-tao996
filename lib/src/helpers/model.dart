@@ -59,11 +59,13 @@ abstract class IModel<T> extends DbTypeModel<T> {
 
   String get deletedAtText => DatetimeUtil.formatYMDHMS(dateTime: deletedAt);
 
-  void copyBaseData(IModel model) {
-    model.id = id;
-    model.createdAt = createdAt;
-    model.updatedAt = updatedAt;
-    model.deletedAt = deletedAt;
+  void copyBaseDataFrom(dynamic model) {
+    if (model != null && model is IModel) {
+      id = model.id;
+      createdAt = model.createdAt;
+      updatedAt = model.updatedAt;
+      deletedAt = model.deletedAt;
+    }
   }
 }
 

@@ -86,7 +86,7 @@ bool _isZeroSizedPlaceholder(Widget widget) {
 // 扩展方法
 extension WidgetListSpacing on List<Widget> {
   /// 在水平列表的非空元素之间插入一个间距
-  List<Widget> withRowWidth({bool first = true, double width = 16.0}) {
+  List<Widget> withRowWidth({bool first = true, double width = 16.0, bool last = false}) {
     // 过滤掉所有零尺寸占位符，得到一个“有效”列表
     final effectiveList = where((w) => !_isZeroSizedPlaceholder(w)).toList();
 
@@ -112,8 +112,8 @@ extension WidgetListSpacing on List<Widget> {
       }
     }
 
-    // 3. 处理列表结尾的间距 (如果 first=true，则在结尾也加上一个)
-    if (first) {
+    // 3. 处理列表结尾的间距 (如果 last=true，则在结尾也加上一个)
+    if (last) {
       spacedList.add(space);
     }
 
@@ -121,7 +121,7 @@ extension WidgetListSpacing on List<Widget> {
   }
 
   /// 在垂直列表的非空元素之间插入一个间距
-  List<Widget> withColumnHeight({bool first = true, double height = 16.0}) {
+  List<Widget> withColumnHeight({bool first = true, double height = 16.0, bool last = true}) {
     // 过滤掉所有零尺寸占位符，得到一个“有效”列表
     final effectiveList = where((w) => !_isZeroSizedPlaceholder(w)).toList();
 
@@ -148,7 +148,7 @@ extension WidgetListSpacing on List<Widget> {
     }
 
     // 3. 处理列表结尾的间距 (如果 first=true，则在结尾也加上一个)
-    if (first) {
+    if (last) {
       spacedList.add(space);
     }
 

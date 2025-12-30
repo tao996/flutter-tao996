@@ -76,6 +76,7 @@ class MyIconSvg extends StatelessWidget {
   final IconData? iconData;
   final double size;
   final Color? color;
+
   const MyIconSvg({
     super.key,
     this.iconPath,
@@ -88,13 +89,16 @@ class MyIconSvg extends StatelessWidget {
   Widget build(BuildContext context) {
     return iconData != null
         ? Icon(iconData, size: size, color: color)
-        : SvgPicture.asset(
-            iconPath!,
+        : SizedBox(
+            width: size, // 🚀 修改点：使用 SizedBox 封装
             height: size,
-            width: size,
-            colorFilter: ColorFilter.mode(
-              color ?? Theme.of(context).iconTheme.color!,
-              BlendMode.srcIn,
+            child: SvgPicture.asset(
+              iconPath!,
+              fit: BoxFit.contain,
+              colorFilter: ColorFilter.mode(
+                color ?? Theme.of(context).iconTheme.color!,
+                BlendMode.srcIn,
+              ),
             ),
           );
   }

@@ -6,6 +6,30 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:tao996/tao996.dart';
 
+/// 多张图片浏览：
+/// 在 MyImageViewerWidget 的基础上，添加了向左滑（下一张）和向右滑（上一张）的功能
+/// [imageUrls] 待浏览的图片的列表；[index] 默认显示的图片索引； [director] 如果用户需要保存，则保存到该目录下; [actions] 底部操作按钮
+// void openImagesViewer(
+//   BuildContext context,
+//   List<String> imageUrls, {
+//   int index = 0,
+//   Directory? director,
+//   List<Widget>? actions,
+// }) {
+//   Navigator.push(
+//     context,
+//     MaterialPageRoute(
+//       builder: (context) => MyImagesViewerWidget(
+//         imageUrls: imageUrls,
+//         index: index,
+//         director: director,
+//         actions: actions,
+//       ),
+//     ),
+//   );
+// }
+
+/// 打开图片 [imageUrl] 图片路径; [director] 如果用户需要保存，则保存到该目录下; [actions] 底部操作按钮
 void openImageViewer(
   BuildContext context,
   String imageUrl, {
@@ -15,7 +39,7 @@ void openImageViewer(
   Navigator.push(
     context,
     MaterialPageRoute(
-      builder: (context) => MyImageViewerWidget(
+      builder: (context) => _MyImageViewer(
         imageUrl: FilepathUtil.normalize(imageUrl),
         director: director,
         actions: actions,
@@ -24,135 +48,37 @@ void openImageViewer(
   );
 }
 
-/// 新增图片查看器页面，在 image.dart 中使用
-class MyImageViewerWidget extends StatefulWidget {
+class _MyImageViewer extends StatefulWidget {
   /// 图片的访问地址
   final String imageUrl;
 
   /// 缓存到本地保存的目录
   final Directory? director;
 
+  /// 底部操作按钮
   final List<Widget>? actions;
 
-  const MyImageViewerWidget({
-    super.key,
-    required this.imageUrl,
-    this.director,
-    this.actions,
-  });
+  const _MyImageViewer({required this.imageUrl, this.director, this.actions});
 
   @override
-  State<MyImageViewerWidget> createState() => _MyImageViewerWidgetState();
+  State<_MyImageViewer> createState() => _MyImageViewerState();
 }
 
-class _MyImageViewerWidgetState extends State<MyImageViewerWidget> {
-  final _debugService = getIDebugService();
-  final _messageService = getIMessageService();
-  ResourceLocation location = ResourceLocation.unknown;
+class _MyImageViewerState extends State<_MyImageViewer> {
+  late ResourceLocation location;
+  late String imageUrl;
 
   @override
   void initState() {
     super.initState();
-    location = FilepathUtil.determineLocation(widget.imageUrl);
-    dprint('资源位置: ${widget.imageUrl} => $location');
+    _updateImageUrl(widget.imageUrl);
   }
 
-  // 控制底部操作按钮的显示/隐藏状态
-  final bool _showControls = true;
-
-  Future<File?> _getImage({void Function(int, int)? onReceiveProgress}) async {
-    if (location.isLocal) {
-      return File(widget.imageUrl);
-    }
-    final directory =
-        widget.director ?? await getIPathService().getTemporaryDirectoryPath();
-    // 从 URL 中提取文件名，或者生成一个唯一的文件名
-    final fileName = widget.imageUrl.split('/').last.split('?').first;
-    final filePath = '${directory.path}/$fileName';
-
-    final file = File(filePath);
-    // 检查图片是否存在
-    if (file.existsSync()) {
-      dprint('图片已经存在本地: $filePath');
-    } else {
-      final success = await getIDioHttpService().download(
-        widget.imageUrl,
-        filePath,
-      );
-      if (success) {
-        dprint('图片已经下载到本地: $filePath');
-      } else {
-        return null;
-      }
-    }
-    return file;
-  }
-
-  // 模拟下载图片功能
-  Future<void> _downloadImage() async {
-    try {
-      if (Platform.isAndroid) {
-        var status = await Permission.storage.request();
-        if (!status.isGranted) {
-          _debugService.d(
-            '存储权限未授予',
-            errorMessage: 'permissionStorageDeny'.tr,
-          );
-          return;
-        }
-      }
-      if (location.isLocal) {
-        await MyFileService.saveFile(widget.imageUrl);
-      } else {
-        final file = await _getImage(
-          onReceiveProgress: (received, total) {
-            if (total != -1) {
-              double progress = (received / total) * 100;
-              // 你可以在这里更新下载进度条，如果需要的话
-              if (isDebugMode) {
-                dprint('下载进度: ${progress.toStringAsFixed(0)}%');
-              }
-            }
-          },
-        );
-        if (file == null) {
-          _messageService.error('imageDownloadError'.tr);
-          return;
-        } else {
-          await MyFileService.saveImage(file: file);
-        }
-      }
-      _debugService.d('图片保存成功', successMessage: 'downloadAndSaveSuccess'.tr);
-    } catch (error, stackTrace) {
-      _debugService.exception(
-        error,
-        stackTrace,
-        errorMessage: 'download failed'.trParams({'reason': error.toString()}),
-      );
-    }
-  }
-
-  // 模拟分享图片功能
-  Future<void> _shareImage() async {
-    _messageService.toast('imageSharing'.tr);
-    try {
-      final file = await _getImage();
-      if (file == null) {
-        _messageService.error('imageNotExists'.tr);
-      } else {
-        await getIShareService().shareFilepath(file.path);
-      }
-      // _messageService.showToast(msg: '分享已完成'.tr);
-
-      // 分享完成后，可以选择删除临时文件 (可选，因为是临时目录，系统会清理)
-      // File(filePath).deleteSync(); // 如果需要立即删除
-      // _debugService.d('临时文件已删除');
-    } catch (e) {
-      _debugService.d(
-        '分享图片错误: $e',
-        errorMessage: 'shareFailed'.trParams({'reason': e.toString()}),
-      );
-    }
+  void _updateImageUrl(String newImageUrl) {
+    setState(() {
+      location = FilepathUtil.determineLocation(newImageUrl);
+      imageUrl = newImageUrl;
+    });
   }
 
   @override
@@ -177,13 +103,13 @@ class _MyImageViewerWidgetState extends State<MyImageViewerWidget> {
                 maxScale: 10, // 适当的最大缩放
                 child: location.isLocal
                     ? Image.file(
-                        File(widget.imageUrl),
+                        File(imageUrl),
                         fit: BoxFit.contain,
 
                         // 专门处理异步加载失败（文件不存在或被清除）
                         errorBuilder: (context, error, stackTrace) {
                           // 捕获到加载失败，打印错误
-                          dprint('异步加载图片失败失败，触发再生或显示错误图标: ${widget.imageUrl}');
+                          dprint('异步加载图片失败失败，触发再生或显示错误图标: $imageUrl');
                           dprint('具体错误: $error');
 
                           // 返回一个替代的 Widget
@@ -193,7 +119,7 @@ class _MyImageViewerWidgetState extends State<MyImageViewerWidget> {
                         },
                       )
                     : CachedNetworkImage(
-                        imageUrl: widget.imageUrl,
+                        imageUrl: imageUrl,
                         fit: BoxFit.contain, // 确保图片完整显示
                         placeholder: (context, url) => const Center(
                           child: CircularProgressIndicator(color: Colors.white),
@@ -216,7 +142,7 @@ class _MyImageViewerWidgetState extends State<MyImageViewerWidget> {
             left: 0,
             right: 0,
             child: AnimatedOpacity(
-              opacity: _showControls ? 1.0 : 0.0,
+              opacity: 1.0,
               duration: const Duration(milliseconds: 200),
               child: Container(
                 color: Colors.black.withAlpha(120), // 半透明背景
@@ -237,14 +163,22 @@ class _MyImageViewerWidgetState extends State<MyImageViewerWidget> {
                     imageViewerActionButton(
                       icon: Icons.download,
                       label: '下载',
-                      onTap: _downloadImage,
+                      onTap: () => _downloadImage(
+                        imageUrl: imageUrl,
+                        location: location,
+                        director: widget.director,
+                      ),
                       vertical: false,
                     ),
 
                     imageViewerActionButton(
                       icon: Icons.share,
                       label: 'share'.tr,
-                      onTap: _shareImage,
+                      onTap: () => _shareImage(
+                        imageUrl: imageUrl,
+                        location: location,
+                        director: widget.director,
+                      ),
                       vertical: false,
                     ),
                   ],
@@ -260,7 +194,7 @@ class _MyImageViewerWidgetState extends State<MyImageViewerWidget> {
               left: 0,
               right: 0,
               child: AnimatedOpacity(
-                opacity: _showControls ? 1.0 : 0.0,
+                opacity: 1.0,
                 duration: const Duration(milliseconds: 200),
                 child: Container(
                   color: Colors.black.withAlpha(120), // 半透明背景
@@ -304,4 +238,117 @@ Widget imageViewerActionButton({
       Text(label, style: const TextStyle(color: Colors.white, fontSize: 12.0)),
     ],
   );
+}
+
+/// 获取图片文件
+Future<File?> _getImage({
+  required String imageUrl,
+  required ResourceLocation location,
+  Directory? director,
+  void Function(int, int)? onReceiveProgress,
+}) async {
+  if (location.isLocal) {
+    return File(imageUrl);
+  }
+  final directory =
+      director ?? await getIPathService().getTemporaryDirectoryPath();
+  // 从 URL 中提取文件名，或者生成一个唯一的文件名
+  final fileName = imageUrl.split('/').last.split('?').first;
+  final filePath = '${directory.path}/$fileName';
+
+  final file = File(filePath);
+  // 检查图片是否存在
+  if (file.existsSync()) {
+    dprint('图片已经存在本地: $filePath');
+  } else {
+    final success = await getIDioHttpService().download(imageUrl, filePath);
+    if (success) {
+      dprint('图片已经下载到本地: $filePath');
+    } else {
+      return null;
+    }
+  }
+  return file;
+}
+
+/// 下载图片
+Future<void> _downloadImage({
+  required String imageUrl,
+  required ResourceLocation location,
+  Directory? director,
+}) async {
+  try {
+    if (Platform.isAndroid) {
+      var status = await Permission.storage.request();
+      if (!status.isGranted) {
+        getIDebugService().d(
+          '存储权限未授予',
+          errorMessage: 'permissionStorageDeny'.tr,
+        );
+        return;
+      }
+    }
+    if (location.isLocal) {
+      await MyFileService.saveFile(imageUrl);
+    } else {
+      final file = await _getImage(
+        imageUrl: imageUrl,
+        location: location,
+        director: director,
+        onReceiveProgress: (received, total) {
+          if (total != -1) {
+            double progress = (received / total) * 100;
+            // 你可以在这里更新下载进度条，如果需要的话
+            if (isDebugMode) {
+              dprint('下载进度: ${progress.toStringAsFixed(0)}%');
+            }
+          }
+        },
+      );
+      if (file == null) {
+        getIMessageService().error('imageDownloadError'.tr);
+        return;
+      } else {
+        await MyFileService.saveImage(file: file);
+      }
+    }
+    getIDebugService().d('图片保存成功', successMessage: 'downloadAndSaveSuccess'.tr);
+  } catch (error, stackTrace) {
+    getIDebugService().exception(
+      error,
+      stackTrace,
+      errorMessage: 'download failed'.trParams({'reason': error.toString()}),
+    );
+  }
+}
+
+// 分享图片
+Future<void> _shareImage({
+  required String imageUrl,
+  required ResourceLocation location,
+  Directory? director,
+}) async {
+  getIMessageService().toast('imageSharing'.tr);
+  try {
+    final file = await _getImage(
+      imageUrl: imageUrl,
+      location: location,
+      director: director,
+    );
+    if (file == null) {
+      getIMessageService().error('imageNotExists'.tr);
+    } else {
+      await getIShareService().shareFilepath(file.path);
+    }
+    // _messageService.showToast(msg: '分享已完成'.tr);
+
+    // 分享完成后，可以选择删除临时文件 (可选，因为是临时目录，系统会清理)
+    // File(filePath).deleteSync(); // 如果需要立即删除
+    // _debugService.d('临时文件已删除');
+  } catch (e) {
+    getIDebugService().d(
+      '分享图片错误: $e',
+      errorMessage: 'shareFailed'.trParams({'reason': e.toString()}),
+    );
+  }
 }

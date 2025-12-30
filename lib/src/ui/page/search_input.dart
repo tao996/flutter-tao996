@@ -106,3 +106,55 @@ class MySearchInput extends StatelessWidget {
     );
   }
 }
+
+/// 搜索结果为空
+class MyEmptySearchResultWidget extends StatelessWidget {
+  /// 描述当前页面的内容类型（例如：“活动”、“资源”）。
+  final String? title;
+  final Widget? child;
+
+  const MyEmptySearchResultWidget({super.key, this.title, this.child});
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
+    // final double upwardShift = DeviceService.screenHeight / 5;
+    final titleText = title ?? 'record'.tr;
+
+    return Center(
+      child: Padding(
+        padding: EdgeInsets.only(left: 32.0, right: 32),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          mainAxisSize: MainAxisSize.min, // 确保 Column 占据的空间最小化
+          children: <Widget>[
+            // 1. 引导图标
+            Icon(
+              Icons.inbox_outlined, // 使用一个清晰的图标表示“空”
+              size: 80.0,
+              // 使用辅助色，因为主色通常用于主要操作
+              color: colorScheme.secondary.withAlpha(125),
+            ),
+
+            const SizedBox(height: 24),
+
+            // 2. 提示文本
+            Text(
+              'noRecord'.trParams({'title': titleText}),
+              style: theme.textTheme.headlineSmall!.copyWith(
+                fontWeight: FontWeight.bold,
+                color: colorScheme.onSurface.withAlpha(200),
+              ),
+              textAlign: TextAlign.center,
+            ),
+
+            if (child != null) child!,
+          ],
+        ),
+      ),
+    );
+  }
+}

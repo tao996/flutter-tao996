@@ -63,6 +63,9 @@ class MyCustomTabBar extends StatefulWidget {
   /// 选中的 TabBar 背景色，默认为 theme.scaffoldBackgroundColor
   final Color? notebookBgColor;
 
+  /// 最后一个标签添加按钮
+  final void Function()? lastAction;
+
   const MyCustomTabBar({
     super.key,
     this.height = 50,
@@ -72,6 +75,7 @@ class MyCustomTabBar extends StatefulWidget {
     this.onDoubleTap,
     required this.children,
     this.notebookBgColor,
+    this.lastAction,
   });
 
   @override
@@ -181,7 +185,7 @@ class _MyCustomTabBarState extends State<MyCustomTabBar> {
   }
 
   /// 文本的显示
-  Widget _child(ThemeData theme, int index) {
+  Widget _child(ThemeData theme, int index, {String? title}) {
     final bool active = widget.activeIndex.value == index;
     return DefaultTextStyle(
       style: TextStyle(
@@ -192,7 +196,7 @@ class _MyCustomTabBarState extends State<MyCustomTabBar> {
             : theme.textTheme.bodyLarge?.color,
         fontWeight: active ? FontWeight.bold : FontWeight.normal,
       ),
-      child: Text(widget.children[index].title),
+      child: Text(title ?? widget.children[index].title),
     );
   }
 
@@ -297,6 +301,66 @@ class _MyCustomTabBarState extends State<MyCustomTabBar> {
     final Color activeTabColor = notebookBgColor;
     // 标签页未选中颜色（略微深一点或灰色）
     final Color inactiveTabColor = theme.dividerColor.withAlpha(25);
+    final child = SingleChildScrollView(
+      controller: _scrollController,
+      scrollDirection: Axis.horizontal,
+      padding: EdgeInsets.zero,
+
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.end, // 关键：将所有标签页对齐到底部
+        children: List.generate(widget.children.length, (index) {
+          return Padding(
+            // 标签页之间的水平间距
+            padding: const EdgeInsets.symmetric(horizontal: 4.0),
+
+            child: InkWell(
+              key: _getKey(widget.children[index]),
+              onTap: () {
+                // 如果是点击未激活的 Tab，则更新状态并滚动
+                if (widget.activeIndex.value != index) {
+                  widget.activeIndex.value = index;
+                  widget.onChange(index);
+                }
+              },
+              onDoubleTap: widget.onDoubleTap != null
+                  ? () => widget.onDoubleTap!(index)
+                  : null,
+
+              // 使用 Obx 来响应 activeIndex 的变化
+              child: Obx(() {
+                final bool currentActive = widget.activeIndex.value == index;
+                final double verticalPadding = widget.activeIndex.value == index
+                    ? -2
+                    : 2.0;
+                return AnimatedContainer(
+                  duration: const Duration(milliseconds: 150),
+                  curve: Curves.easeOut,
+                  padding: EdgeInsets.fromLTRB(16, 8, 16, 8 - verticalPadding),
+
+                  // 未选中时向下推，以便于对齐 Row 的底部
+                  decoration: BoxDecoration(
+                    color: currentActive ? activeTabColor : inactiveTabColor,
+                    borderRadius: const BorderRadius.only(
+                      topLeft: Radius.circular(4.0), // 略微圆润
+                      topRight: Radius.circular(4.0),
+                    ),
+                    // 关键：使用 Border.all 来绘制统一的边框，以满足圆角要求
+                    border: currentActive
+                        ? null // 选中的 Tab 无边框，与内容连接
+                        : Border.all(
+                            color: theme.dividerColor.withAlpha(10),
+                            width: 0.5,
+                          ),
+                  ),
+
+                  child: _child(theme, index),
+                );
+              }),
+            ),
+          );
+        }),
+      ),
+    );
 
     return Container(
       // 外部 Container 充当笔记本的底色或边框
@@ -304,70 +368,18 @@ class _MyCustomTabBarState extends State<MyCustomTabBar> {
       width: double.infinity,
       color: theme.dividerColor.withAlpha(25), // 模拟 Tab Bar 的背景底色
 
-      child: SingleChildScrollView(
-        controller: _scrollController,
-        scrollDirection: Axis.horizontal,
-        padding: EdgeInsets.zero,
-
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.end, // 关键：将所有标签页对齐到底部
-          children: List.generate(widget.children.length, (index) {
-            return Padding(
-              // 标签页之间的水平间距
-              padding: const EdgeInsets.symmetric(horizontal: 4.0),
-
-              child: InkWell(
-                key: _getKey(widget.children[index]),
-                onTap: () {
-                  // 如果是点击未激活的 Tab，则更新状态并滚动
-                  if (widget.activeIndex.value != index) {
-                    widget.activeIndex.value = index;
-                    widget.onChange(index);
-                  }
-                },
-                onDoubleTap: widget.onDoubleTap != null
-                    ? () => widget.onDoubleTap!(index)
-                    : null,
-
-                // 使用 Obx 来响应 activeIndex 的变化
-                child: Obx(() {
-                  final bool currentActive = widget.activeIndex.value == index;
-                  final double verticalPadding =
-                      widget.activeIndex.value == index ? -2 : 2.0;
-                  return AnimatedContainer(
-                    duration: const Duration(milliseconds: 150),
-                    curve: Curves.easeOut,
-                    padding: EdgeInsets.fromLTRB(
-                      16,
-                      8,
-                      16,
-                      8 - verticalPadding,
-                    ),
-
-                    // 未选中时向下推，以便于对齐 Row 的底部
-                    decoration: BoxDecoration(
-                      color: currentActive ? activeTabColor : inactiveTabColor,
-                      borderRadius: const BorderRadius.only(
-                        topLeft: Radius.circular(4.0), // 略微圆润
-                        topRight: Radius.circular(4.0),
-                      ),
-                      // 关键：使用 Border.all 来绘制统一的边框，以满足圆角要求
-                      border: currentActive
-                          ? null // 选中的 Tab 无边框，与内容连接
-                          : Border.all(
-                              color: theme.dividerColor.withAlpha(10),
-                              width: 0.5,
-                            ),
-                    ),
-
-                    child: _child(theme, index),
-                  );
-                }),
-              ),
-            );
-          }),
-        ),
-      ),
+      child: widget.lastAction == null
+          ? child
+          : Row(
+              crossAxisAlignment: CrossAxisAlignment.end, // 关键：将所有标签页对齐到底部
+              children: [
+                Expanded(child: child),
+                SizedBox(
+                  width: 50,
+                  child: IconButton(onPressed: widget.lastAction, icon: Icon(Icons.add)),
+                ),
+              ],
+            ),
     );
   }
 

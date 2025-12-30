@@ -4,14 +4,15 @@ import 'package:tao996/tao996.dart';
 
 class MyDialog {
   /// 可用于关闭对话框
-  static Widget title(String title) {
+  static Widget title(String title, {List<Widget>? actions}) {
     return MyPadding(
       vertical: 10,
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          Text(title, style: getTextTheme().titleLarge),
+          Expanded(child: Text(title, style: getTextTheme().titleLarge)),
+          if (actions != null) ...actions,
           IconButton(
             onPressed: () {
               Get.back();
@@ -23,28 +24,36 @@ class MyDialog {
     );
   }
 
-  /// 全屏对话框，如果你需要在高度/宽度上尽可能小，则需要将 Column/Row 的 mainAxisSize: MainAxisSize.min
+  /// 全屏对话框，如果你需要在高度/宽度上尽可能小，则需要将 Column/Row 的 mainAxisSize: MainAxisSize.min;
+  /// [num] 默认与1，会与 [horizontalPadding]，[verticalPadding] 相乘
   static Future<dynamic> fullScreenDialog(
     BuildContext context, {
     required Widget child,
     double? horizontalPadding = 20.0,
     double? verticalPadding = 20.0,
+    double? width,
+    double? height,
+    int num = 1,
+    bool? barrierDismissible,
   }) async {
-    double? width;
-    if (horizontalPadding != null) {
-      final screenWidth = MediaQuery.of(context).size.width;
-      width = screenWidth - horizontalPadding; // 比父窗口宽度小 20
-      width = width.toInt().toDouble();
+    if (width == null) {
+      if (horizontalPadding != null) {
+        final screenWidth = MediaQuery.of(context).size.width;
+        width = screenWidth - (horizontalPadding * num); // 比父窗口宽度小 20
+        width = width.toInt().toDouble();
+      }
     }
-    double? height;
-    if (verticalPadding != null) {
-      final screenHeight = MediaQuery.of(context).size.height;
-      height = screenHeight - verticalPadding; // 比父窗口高度小 20
-      height = height.toInt().toDouble();
+    if (height == null) {
+      if (verticalPadding != null) {
+        final screenHeight = MediaQuery.of(context).size.height;
+        height = screenHeight - (verticalPadding * num); // 比父窗口高度小 20
+        height = height.toInt().toDouble();
+      }
     }
-    // dprint('MyDialog.fullScreenDialog width: $width; height: $height');
+    dprint('MyDialog.fullScreenDialog num:$num; width: $width; height: $height');
     return showDialog(
       context: context,
+      barrierDismissible: barrierDismissible ?? DeviceService.isMobile(),
       builder: (BuildContext context) {
         return AlertDialog(
           // backgroundColor: const Color(0xFF1F2937),
@@ -70,6 +79,8 @@ class MyDialog {
   static Future<dynamic> open(
     BuildContext context, {
     required Widget child,
+    double? width,
+    double? height,
   }) async {
     return showDialog(
       context: context,
@@ -80,7 +91,9 @@ class MyDialog {
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12.0),
           ),
-          content: child,
+          content: width != null && height != null
+              ? SizedBox(width: width, height: height, child: child)
+              : child,
         );
       },
     );

@@ -19,7 +19,10 @@ T _getValue<T extends num>(dynamic v, T defaultValue) {
 
 class DataUtil {
   static final IDebugService _debugService = getIDebugService();
-
+  /// 获取 bool 值;
+  /// [textCompare] 如果为 true，则会将 0/false/f/F/OFF/off/OFF 转为 false；将 1/true/t/T/ON/on/ON 转为 true
+  /// 如果 [v] 为 null/空字符串则返回 [defaultValue] 默认值；
+  /// [v] 为整数并且 >0 时，返回 true
   static bool getBool(
     dynamic v, {
     bool defaultValue = false,

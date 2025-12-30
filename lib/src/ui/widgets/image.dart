@@ -127,11 +127,11 @@ class _MyImageCacheState extends State<MyImageCache> {
     }
     // 已缓存，总是立即加载
     if (_isImageCached || _shouldLoadManually) {
-      return _gestureDetector(_image(imageUrl), imageUrl: imageUrl);
+      return _gestureDetector(context, _image(imageUrl), imageUrl: imageUrl);
     }
     // wifi，图片可见时加载
     if (isWifi) {
-      return _visibilityDetector(imageUrl);
+      return _visibilityDetector(context, imageUrl);
     }
     // 没有网络
     if (getINetworkService().isNoNetwork) {
@@ -150,7 +150,7 @@ class _MyImageCacheState extends State<MyImageCache> {
   }
 
   /// 图片可见区域检测
-  Widget _visibilityDetector(String imageUrl) {
+  Widget _visibilityDetector(BuildContext context, String imageUrl) {
     return VisibilityDetector(
       key: Key(imageUrl), // 为每个图片 URL 使用唯一的 key
       onVisibilityChanged: (VisibilityInfo info) {
@@ -163,24 +163,22 @@ class _MyImageCacheState extends State<MyImageCache> {
           );
         }
       },
-      child: _gestureDetector(_image(imageUrl), imageUrl: imageUrl),
+      child: _gestureDetector(context, _image(imageUrl), imageUrl: imageUrl),
     );
   }
 
   /// 图片点击事件
-  Widget _gestureDetector(Widget child, {required String imageUrl}) {
+  Widget _gestureDetector(
+    BuildContext context,
+    Widget child, {
+    required String imageUrl,
+  }) {
     return GestureDetector(
       // <--- 添加 GestureDetector
       onTap: () {
         if (imageUrl.isNotEmpty) {
           // 只有在图片应该加载时才允许点击放大
-          dprint('click to open image view: $imageUrl');
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => MyImageViewerWidget(imageUrl: imageUrl),
-            ),
-          );
+          openImageViewer(context, imageUrl);
         }
       },
       child: child,

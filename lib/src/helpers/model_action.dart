@@ -10,6 +10,12 @@ class ModelAction<T extends IModel> {
   Future<void> Function(T)? _afterInsertSuccess;
   Future<void> Function(int)? _afterDeleteSuccess;
   Future<void> Function(int)? _afterLastIdSuccess;
+  Future<void> Function()? _callback;
+
+  ModelAction callback(Future<void> Function() callback) {
+    _callback = callback;
+    return this;
+  }
 
   /// 添加更新操作，并要求 [action] 返回更新记录的数量
   ModelAction addUpdate(Future<int> Function() action) {
@@ -59,10 +65,12 @@ class ModelAction<T extends IModel> {
     if (_insertAction != null) {
       final result = await _insertAction!();
       await _afterInsertSuccess?.call(result);
+      await _callback?.call();
     } else if (_insertLastIdAction != null) {
       final id = await _insertLastIdAction!();
       if (id > 0) {
         await _afterLastIdSuccess?.call(id);
+        await _callback?.call();
       } else {
         getIMessageService().error('添加数据失败');
       }
@@ -70,6 +78,7 @@ class ModelAction<T extends IModel> {
       final result = await _updateAction!();
       if (result > 0) {
         await _afterUpdateSuccess?.call(result);
+        await _callback?.call();
       } else {
         getIMessageService().error('没有任务记录被更新');
       }
@@ -77,6 +86,7 @@ class ModelAction<T extends IModel> {
       final result = await _deleteAction!();
       if (result > 0) {
         await _afterDeleteSuccess?.call(result);
+        await _callback?.call();
       } else {
         getIMessageService().error('没有任务记录被删除');
       }

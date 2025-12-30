@@ -19,6 +19,17 @@ class DbTypeConverter {
     return TypeCastUtil.mapStringFromJson(json);
   }
 
+  static String mapBoolToJson(Map<String, bool>? data) {
+    return TypeCastUtil.mapToJson(data);
+  }
+
+  static Map<String, bool> mapBoolFromJson(String? json) {
+    if (json == null || json.isEmpty) {
+      return {};
+    }
+    return TypeCastUtil.mapBoolFromJson(json);
+  }
+
   static String mapIntToJson(Map<String, int>? data) {
     return TypeCastUtil.mapToJson(data);
   }
@@ -28,6 +39,40 @@ class DbTypeConverter {
       return {};
     }
     return TypeCastUtil.mapIntFromJson(json);
+  }
+
+  static String mapDoubleToJson(Map<String, double>? data) {
+    return TypeCastUtil.mapToJson(data);
+  }
+
+  static Map<String, double> mapDoubleFromJson(String? json) {
+    if (json == null || json.isEmpty) {
+      return {};
+    }
+    return TypeCastUtil.mapDoubleFromJson(json);
+  }
+
+  static String mapToJson<T extends DbTypeModel<T>>(Map<String, T>? data) {
+    if (data == null || data.isEmpty) {
+      return '';
+    }
+    final Map<String, dynamic> map = data.map((key, value) {
+      return MapEntry(key, value.toMap());
+    });
+    return jsonEncode(map);
+  }
+
+  static Map<String, T> mapFromJson<T extends DbTypeModel<T>>(
+    String? json, {
+    required T Function(Map<String, dynamic>) fromMap,
+  }) {
+    if (json == null || json.isEmpty) {
+      return {};
+    }
+    final Map<String, dynamic> map = TypeCastUtil.mapFromJson(json);
+    return map.map((key, value) {
+      return MapEntry(key, fromMap(value));
+    });
   }
 
   /// 调用 toMap 来生成字符串

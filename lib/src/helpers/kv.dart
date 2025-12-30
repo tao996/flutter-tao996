@@ -22,6 +22,18 @@ List<KV<T>> kvCreateList<T extends Enum>(Map<T, String> maps) {
   return list;
 }
 
+extension KVList<T extends Enum> on List<KV<T>> {
+  T? getValue(String? name) {
+    return kvTryGetValue(this, name);
+  }
+  List<String> labels() {
+    return map((kv) => kv.label).toList();
+  }
+  List<T> values() {
+    return map((kv) => kv.value).toList();
+  }
+}
+
 /// 查询列表中指定值的键
 /// [kvs] 键值对列表;
 /// [name] 枚举属性的字符中,对于枚举类型必须使用 toString() 而不是 .name, name 比 toString 少了一个类型前辍

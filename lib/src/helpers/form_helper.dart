@@ -37,7 +37,7 @@ class FormHelper {
   }
 
   /// 水平布局的 按钮组，可用于多单或单选（oneFilterChip），被选中的选项会打上一个勾（改变了尺寸）
-  /// 跟 [gridCheckbox] 的区别是会自动换行
+  /// 跟 [gridCheckbox] 的区别是会自动换行，你可以需要将这个组件包裹在 Expanded 中
   static Widget filterChipCheckbox<T>({
     required List<KV<T>> items,
     required void Function(bool selected, T item) onSelectionChanged,
@@ -170,6 +170,16 @@ class FormHelper {
   }
 
   /// 注意 [onChanged] 里不需要再次更新 controller.text，否则会触发 auto Fours
+  /// 如果要使用 [validator]，则需要使用 [Form]
+  ///
+  /// ```
+  /// final _formKey = GlobalKey<FormState>();
+  /// Form(
+  ///    key: _formKey, // 关联 key
+  ///    child: Column( children:[ TextFormField() ])
+  /// )
+  /// 使用 formKey.currentState!.validate() 来检查是否通过验证
+  /// ```
   static Widget input({
     TextEditingController? controller,
     String? labelText,
@@ -186,6 +196,7 @@ class FormHelper {
     int? maxLines,
     int? minLines,
     void Function(String)? onChanged,
+    String? Function(String?)? validator,
   }) {
     return MyInput(
       controller: controller,
@@ -203,6 +214,7 @@ class FormHelper {
       maxLines: maxLines,
       minLines: minLines,
       onChanged: onChanged,
+      validator: validator,
     );
   }
 

@@ -132,7 +132,7 @@ class FilepathUtil {
   }
 
   /// 使用 当前代码运行所在平台 的路径风格和分隔符来连接路径片段
-  /// 注意，如果 [parts] 内部成员包含了 \\ ，并不会自动替换为 /
+  /// 注意，会对结果进行 normalize 处理
   /// 几乎所有涉及到 本地文件系统操作 的场景都应该使用 p.join()
   /// ```
   /// p.join('path', 'to', 'foo'); // -> 'path/to/foo'
@@ -158,23 +158,25 @@ class FilepathUtil {
     String? part15,
     String? part16,
   ]) {
-    return p.join(
-      part1,
-      part2,
-      part3,
-      part4,
-      part5,
-      part6,
-      part7,
-      part8,
-      part9,
-      part10,
-      part11,
-      part12,
-      part13,
-      part14,
-      part15,
-      part16,
+    return normalize(
+      p.join(
+        part1,
+        part2,
+        part3,
+        part4,
+        part5,
+        part6,
+        part7,
+        part8,
+        part9,
+        part10,
+        part11,
+        part12,
+        part13,
+        part14,
+        part15,
+        part16,
+      ),
     );
   }
 
@@ -260,14 +262,52 @@ class FilepathUtil {
     File file = File(filePath);
     return p.withoutExtension(file.path);
   }
+
   /// 是否为一个绝对地址
   static bool isAbsolute(String path) {
     return p.isAbsolute(path);
   }
 
-  /// 如果 [filepath] 是一个绝对路径，则直接返回 [filepath]，否则检查 [dir]
-  /// 如果 [dir] 是一个目录，则将 [dir] 与 [filepath] 组合为文件路径返回
-  /// 如果 [dir] 不是一个目录，抛出异常
+  static String absolute(
+    String part1, [
+    String? part2,
+    String? part3,
+    String? part4,
+    String? part5,
+    String? part6,
+    String? part7,
+    String? part8,
+    String? part9,
+    String? part10,
+    String? part11,
+    String? part12,
+    String? part13,
+    String? part14,
+    String? part15,
+  ]) {
+    return p.absolute(
+      part1,
+      part2,
+      part3,
+      part4,
+      part5,
+      part6,
+      part7,
+      part8,
+      part9,
+      part10,
+      part11,
+      part12,
+      part13,
+      part14,
+      part15,
+    );
+  }
+
+  /// 如果 [filepath] 是一个绝对路径，则直接返回 [filepath]，否则检查 [dir]；
+  /// 如果 [dir] 是一个目录，则将 [dir] 与 [filepath] 组合为文件路径返回；
+  /// 如果 [dir] 不是一个目录，抛出异常；
+  /// 注意：会对结果进行 normalize 处理
   static String resolvePath(String filepath, {String? dir}) {
     if (filepath.isEmpty) {
       if (dir != null && dir.isNotEmpty) {
@@ -277,7 +317,7 @@ class FilepathUtil {
     }
     // 检查 filepath 是否为绝对路径
     if (isAbsolute(filepath)) {
-      return filepath;
+      return normalize(filepath);
     }
     if (dir == null || dir.isEmpty) {
       throw Exception('$filepath 不是一个绝对路径，请提供有效的目录路径以拼接路径');
@@ -322,7 +362,7 @@ class FilepathUtil {
   }
 
   /// 根据文件路径推断 MIME 类型
- static String? getMimeTypeFromPath(String filePath) {
+  static String? getMimeTypeFromPath(String filePath) {
     // 1. 获取文件扩展名 (例如 'jpg')
     final extension = p.extension(filePath);
 
@@ -344,7 +384,7 @@ class FilepathUtil {
       dprint('checkResourceLocation: $address');
       if (address.startsWith('assets/')) {
         return ResourceLocation.assets;
-      } else if (isWindowsPath(address) || isAbsolute(address)){
+      } else if (isWindowsPath(address) || isAbsolute(address)) {
         return ResourceLocation.local;
       }
       // 1. 尝试解析地址为 Uri 对象
@@ -386,6 +426,11 @@ class FilepathUtil {
       return ResourceLocation.unknown;
     }
   }
+
+  /// 检查文件或者目录是否存在
+  static bool exists(String path) {
+    return FileSystemEntity.typeSync(path) != FileSystemEntityType.notFound;
+  }
 }
 
 ///
@@ -397,7 +442,10 @@ enum ResourceLocation { local, network, assets, unknown }
 
 extension ResourceLocationExtension on ResourceLocation {
   bool get isLocal => this == ResourceLocation.local;
+
   bool get isNetwork => this == ResourceLocation.network;
+
   bool get isAssets => this == ResourceLocation.assets;
+
   bool get isUnknown => this == ResourceLocation.unknown;
 }

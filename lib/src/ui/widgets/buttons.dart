@@ -81,7 +81,7 @@ class MySaveButton extends StatelessWidget {
       onPressed: onPressed,
       iconData: showIcon ? Icons.save_outlined : null,
       isLoading: isLoading,
-      type: type ?? MyButtonType.text,
+      type: type,
     );
   }
 }
@@ -107,7 +107,7 @@ class MyInsertButton extends StatelessWidget {
       label ?? 'add'.tr,
       onPressed: onPressed,
       icon: showIcon ? const Icon(Icons.add) : null,
-      type: type ?? MyButtonType.text,
+      type: type,
     );
   }
 }
@@ -132,7 +132,7 @@ class MyEditButton extends StatelessWidget {
       label ?? 'edit'.tr,
       onPressed: onPressed,
       icon: showIcon ? const Icon(Icons.edit) : null,
-      type: type ?? MyButtonType.text,
+      type: type,
     );
   }
 }
@@ -159,7 +159,7 @@ class MyDeleteButton extends StatelessWidget {
       onPressed: onPressed,
       icon: showIcon ? const Icon(Icons.delete) : null,
       status: MyButtonStatus.danger,
-      type: type ?? MyButtonType.text,
+      type: type,
     );
   }
 }
@@ -263,15 +263,13 @@ class MyDeleteIconButton extends StatelessWidget {
       icon: Icon(Icons.delete_outline, color: MyColor.error()),
       onPressed: confirm
           ? () async {
-              final result = await getIMessageService().confirm(
-                title: 'deleteConfirmTitle'.tr,
-                content:
-                    (content ?? 'deleteConfirmContent'.tr) +
-                    (cancel ? '' : 'youCannotUndoThis'.tr),
-              );
-              if (result == true && onPressed != null) {
+              final text =
+                  (content ??
+                      'deleteConfirmContent'.trParams({'title': 'record'.tr})) +
+                  (cancel ? '' : 'youCannotUndoThis'.tr);
+              await getIMessageService().deleteConfirm(text, () {
                 onPressed!();
-              }
+              }, textIsContent: true);
             }
           : onPressed,
       tooltip: 'delete'.tr,
@@ -289,6 +287,7 @@ enum MyButtonType { outlined, text, filled, filledTonal, elevated }
 
 /// 定制的多功能按钮（支持四种样式+六种状态+加载动画）
 class MyButton extends StatelessWidget {
+  static MyButtonType defaultType = MyButtonType.text;
   final IconData? iconData;
   final Widget? icon;
   final String label;
@@ -299,6 +298,7 @@ class MyButton extends StatelessWidget {
   final double? radius; // 新增：自定义圆角（默认 8px）
   final EdgeInsetsGeometry? padding; // 新增：自定义内边距
 
+  /// [isLoading] 是否显示加载动画；注意外部组件不需要使用 Obx 包裹，MyButton 内部已经自动处理 isLoading
   const MyButton(
     this.label, {
     super.key,
@@ -322,7 +322,7 @@ class MyButton extends StatelessWidget {
     // 3. 判断是否禁用（加载中或无点击回调时禁用）
     final bool isDisabled = (isLoading?.value ?? false) || onPressed == null;
 
-    final buttonType = type ?? MyButtonType.text;
+    final buttonType = type ?? MyButton.defaultType;
     // 4. 根据 ButtonType 生成对应样式的按钮
     final Widget buttonWidget = _buildButton(
       buttonType,

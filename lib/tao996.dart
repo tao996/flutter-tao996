@@ -13,6 +13,7 @@ export 'src/helpers/model_helper.dart';
 export 'src/helpers/query_builder.dart';
 
 export 'src/mixin/mixin_service.dart';
+export 'src/mixin/mixin_controller.dart';
 
 export 'src/services/database_service.dart';
 export 'src/services/debug_service.dart';
@@ -61,6 +62,7 @@ export 'src/ui/widgets/input.dart';
 export 'src/ui/widgets/input_date.dart';
 export 'src/ui/widgets/input_datetime.dart';
 export 'src/ui/widgets/layout.dart';
+export 'src/ui/widgets/listtile.dart';
 export 'src/ui/widgets/loading.dart';
 export 'src/ui/widgets/message_bar.dart';
 export 'src/ui/widgets/padding.dart';
@@ -83,6 +85,9 @@ export 'src/utils/json_util.dart';
 export 'src/utils/number_util.dart';
 export 'src/utils/stack_util.dart';
 export 'src/utils/url_util.dart';
+export 'src/utils/getx.dart';
+export 'src/utils/nav_util.dart';
+
 export 'src/getx.dart';
 
 export 'src/app/app.dart';

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:tao996/src/const/color.dart';
+import 'package:tao996/tao996.dart';
 
 // 定义一个枚举，用于区分各种输入限制，使代码更清晰
 enum _InputMode {
@@ -41,6 +42,8 @@ class MyInput extends StatefulWidget {
   /// 确定按钮事件
   final void Function(String)? onFieldSubmitted;
 
+  final String? Function(String?)? validator;
+
   const MyInput({
     this.controller,
     this.labelText,
@@ -61,6 +64,7 @@ class MyInput extends StatefulWidget {
     // 回调
     this.onChanged,
     this.onFieldSubmitted,
+    this.validator,
     super.key,
   });
 
@@ -71,35 +75,80 @@ class MyInput extends StatefulWidget {
 class _MyInputState extends State<MyInput> {
   bool isPassword = false;
 
-  // final FocusNode _focusNode = FocusNode();
+  // 使用 late var 或 late final，根据是否由外部传入来决定
   late TextEditingController controller;
+
+  // 标志位：判断 controller 是否是内部创建的
+  bool _isInternalController = false;
 
   @override
   void initState() {
     super.initState();
     isPassword = widget.isPassword;
-    controller =
-        widget.controller ??
-        TextEditingController(text: widget.defaultValue ?? '');
-    // 使用一个私有方法来处理监听器的逻辑
+
+    // 决定是使用外部传入的 controller，还是创建一个内部的 controller
+    if (widget.controller != null) {
+      controller = widget.controller!;
+    } else {
+      controller = TextEditingController(text: widget.defaultValue ?? '');
+      _isInternalController = true; // 标记为内部创建
+    }
+
+    // 为当前使用的 controller 添加监听器
     controller.addListener(_handleControllerChange);
+  }
+
+  // Hot Reload/Hot Restart 或父 Widget 配置变化时会被调用
+  @override
+  void didUpdateWidget(covariant MyInput oldWidget) {
+    super.didUpdateWidget(oldWidget);
+
+    // 如果外部传入的 controller 发生了变化，需要处理旧 controller 的监听器
+    if (widget.controller != oldWidget.controller) {
+      // 移除旧 controller 上的监听器
+      controller.removeListener(_handleControllerChange);
+
+      // 如果旧 controller 是内部创建的，需要销毁它
+      if (_isInternalController) {
+        controller.dispose();
+      }
+
+      // 切换到新的 controller
+      if (widget.controller != null) {
+        controller = widget.controller!;
+        _isInternalController = false;
+      } else {
+        controller = TextEditingController(text: widget.defaultValue ?? '');
+        _isInternalController = true;
+      }
+
+      // 为新 controller 添加监听器
+      controller.addListener(_handleControllerChange);
+    }
+
+    // 确保其他属性如 isPassword 也能在热更新时更新
+    if (widget.isPassword != oldWidget.isPassword) {
+      isPassword = widget.isPassword;
+    }
   }
 
   @override
   void dispose() {
-    // 移除监听器，避免内存泄漏
+    // 1. 移除监听器（必须）
     controller.removeListener(_handleControllerChange);
-    if (widget.controller == null) {
+
+    // 2. 只有当 controller 是 MyInput 内部创建时，才调用 dispose()
+    if (_isInternalController) {
       controller.dispose();
     }
-    // _focusNode.dispose();
+
     super.dispose();
   }
 
   // 添加监听器，每当文本发生变化时都调用 setState；
   void _handleControllerChange() {
     // 仅在需要影响 UI (如 suffixIcon) 时才调用 setState
-    // setState(() {});
+    setState(() {});
   }
 
   // --- 验证器逻辑 ---
@@ -129,6 +178,9 @@ class _MyInputState extends State<MyInput> {
           return '不能大于 ${widget.maxNumber}';
         }
       }
+    }
+    if (widget.validator != null){
+      return widget.validator!(value);
     }
 
     return null;

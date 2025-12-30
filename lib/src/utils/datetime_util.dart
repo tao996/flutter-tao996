@@ -27,12 +27,19 @@ class DatetimeUtil {
   static String format({
     int timestamp = 0,
     DateTime? dateTime,
+    String? iso8601,
     DateTimeFormat format = DateTimeFormat.ymdHms,
   }) {
-    if (dateTime == null && timestamp == 0) {
+    if (dateTime == null &&
+        timestamp == 0 &&
+        (iso8601 == null || iso8601.isEmpty)) {
       return '';
     }
-    dateTime ??= DateTime.fromMillisecondsSinceEpoch(timestamp * 1000);
+    if (iso8601 != null && iso8601.isNotEmpty) {
+      dateTime = DateTime.parse(iso8601);
+    } else {
+      dateTime ??= DateTime.fromMillisecondsSinceEpoch(timestamp * 1000);
+    }
     int year = dateTime.year;
 
     int month = dateTime.month;
@@ -64,26 +71,41 @@ class DatetimeUtil {
     return '$year-$formattedMonth-$formattedDay $formattedHour:$formattedMinute:$formattedSecond';
   }
 
-  static String formatYMD({int timestamp = 0, DateTime? dateTime}) {
+  static String formatYMD({
+    int timestamp = 0,
+    DateTime? dateTime,
+    String? iso8601,
+  }) {
     return format(
       dateTime: dateTime,
       timestamp: timestamp,
+      iso8601: iso8601,
       format: DateTimeFormat.ymd,
     );
   }
 
-  static String formatYMDHM({int timestamp = 0, DateTime? dateTime}) {
+  static String formatYMDHM({
+    int timestamp = 0,
+    DateTime? dateTime,
+    String? iso8601,
+  }) {
     return format(
       dateTime: dateTime,
       timestamp: timestamp,
+      iso8601: iso8601,
       format: DateTimeFormat.ymdHm,
     );
   }
 
-  static String formatYMDHMS({int timestamp = 0, DateTime? dateTime}) {
+  static String formatYMDHMS({
+    int timestamp = 0,
+    DateTime? dateTime,
+    String? iso8601,
+  }) {
     return format(
       dateTime: dateTime,
       timestamp: timestamp,
+      iso8601: iso8601,
       format: DateTimeFormat.ymdHms,
     );
   }
@@ -173,6 +195,7 @@ Z: 解析时区偏移。intl 包的 DateFormat 能够识别 RFC 822 格式中的
     }
     return 0;
   }
+
   /// 获取时间戳
   /// [l10] 10 位的时间戳，用于 php 之类的；
   /// [l13] 13 位毫秒级时间戳（自 Unix 纪元（1970-01-01 00:00:00 UTC）以来的毫秒数）
@@ -184,6 +207,21 @@ Z: 解析时区偏移。intl 包的 DateFormat 能够识别 RFC 822 格式中的
       return dt.millisecondsSinceEpoch;
     }
     return dt.microsecondsSinceEpoch;
+  }
+
+  // 格式化分钟数
+  static String formatMinutes(int totalMinutes) {
+    if (totalMinutes <= 0) return '';
+    final hours = totalMinutes ~/ 60;
+    final minutes = totalMinutes % 60;
+
+    if (hours > 0 && minutes > 0) {
+      return '${hours}h ${minutes}m';
+    } else if (hours > 0) {
+      return '${hours}h';
+    } else {
+      return '${minutes}m';
+    }
   }
 }
 

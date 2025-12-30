@@ -72,22 +72,28 @@ class NumberUtil {
   static int parseInt(String? value) {
     return DataUtil.getInt(value);
   }
+  /// 只有数字/数字字符串才会被处理
+  static String formatNumber(dynamic data) {
+    if (startWithNumber(data)){
+      return formatNumberWithComma(data);
+    }
+    return data;
+  }
 
-  static String formatMinutes(int totalMinutes) {
-    if (totalMinutes <= 0) return '';
-    final hours = totalMinutes ~/ 60;
-    final minutes = totalMinutes % 60;
-
-    if (hours > 0 && minutes > 0) {
-      return '${hours}h ${minutes}m';
-    } else if (hours > 0) {
-      return '${hours}h';
+  static bool startWithNumber(dynamic data) {
+    if (data == null || data == '') {
+      return false;
+    } else if (data is num) {
+      return true;
+    } else if (data is String) {
+      int firstCodeUnit = data.codeUnitAt(0);
+      return firstCodeUnit >= 48 && firstCodeUnit <= 57;
     } else {
-      return '${minutes}m';
+      throw 'Invalid data type in NumberUtil.startWithNumber';
     }
   }
 
-  /// 将多种类型的数字格式化为带逗号分隔的字符串
+  /// 将多种类型的数字格式化为带逗号分隔的字符串,更快捷的方式可以使用 [formatNumber] 代替；
   /// [number]：支持 null、String、int、double 类型
   /// [decimalDigits]：保留的小数位数（默认 null，自动保留有效小数）
   /// [allowTrailingZeros]：是否保留小数末尾的 0（默认 false）
@@ -187,6 +193,7 @@ class NumberUtil {
     return sb.toString();
   }
 
+  /// 去掉小数点后多余的0
   static double formatDoubleWithRegex(double value) {
     String s = value.toString();
     // 匹配字符串末尾的 ".0"
@@ -194,6 +201,10 @@ class NumberUtil {
       return double.parse(s.substring(0, s.length - 2));
     }
     return value;
+  }
+
+  static String formatDouble(String s) {
+    return s.endsWith('.0') ? s.substring(0, s.length - 2) : s;
   }
 
   static num sum(List<num> list) {

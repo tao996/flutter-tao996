@@ -1,5 +1,37 @@
 import 'package:flutter/material.dart';
 
+class MyHeaderColumn {
+  /// 组件
+  Widget? label;
+
+  /// 显示的文字
+  String text;
+
+  /// 固定的宽度
+  double? width;
+
+  /// 占满剩余空间
+  double flex;
+
+  MyHeaderColumn({this.label, this.text = '', this.width, this.flex = 1});
+}
+
+Widget myTableBuilder(List<MyHeaderColumn> headers, List<List<Widget>> rows) {
+  return MyTable(
+    headers: headers.map((c) {
+      return DataColumn(
+        label: c.label ?? Text(c.text),
+        columnWidth: c.width != null
+            ? FixedColumnWidth(c.width!)
+            : FlexColumnWidth(c.flex),
+      );
+    }).toList(),
+    rows: rows.map((es) {
+      return DataRow(cells: es.map((dc) => DataCell(dc)).toList());
+    }).toList(),
+  );
+}
+
 class MyTable extends StatelessWidget {
   final List<DataColumn> headers;
 
@@ -39,12 +71,8 @@ class MyTable extends StatelessWidget {
                 dataRowMinHeight: dataRowMinHeight ?? dataRowHeight,
                 columnSpacing: 24,
                 dividerThickness: 1,
-                headingRowColor: WidgetStateProperty.all(
-                  Colors.transparent,
-                ),
-                dataRowColor: WidgetStateProperty.all(
-                  Colors.transparent,
-                ),
+                headingRowColor: WidgetStateProperty.all(Colors.transparent),
+                dataRowColor: WidgetStateProperty.all(Colors.transparent),
                 headingTextStyle: TextStyle(fontWeight: FontWeight.bold),
                 columns: headers,
                 rows: rows,

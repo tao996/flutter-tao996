@@ -166,6 +166,12 @@ class MyAppBarMenuButtons extends StatelessWidget {
 
 /// 当页面没有记录时显示的空状态 Widget。
 /// 它遵循应用的极简扁平化主题，并引导用户进行初次操作。
+///
+/// [showDesc] 是否显示描述：点击下方按钮，创建你的第一个 [title]
+///
+/// [onAction] 回调函数，如果不为 null，则会显示一个用于创建记录的按钮；你可以通过 [buttonText] 来自定义按钮的文字
+///
+/// [child] 追加的自定义组件
 class MyEmptyStateWidget extends StatelessWidget {
   /// 提示用户可以执行的操作（例如：“添加新活动”）。
   final String? buttonText;

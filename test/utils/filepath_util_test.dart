@@ -30,6 +30,8 @@ void main() {
 
       expect(FilepathUtil.posixJoinAll(['/a', 'b\\c']), '/a/b\\c');
       expect(FilepathUtil.normalize('/a/b\\c'), '/a/b/c');
+
+      expect('/etc/os-release', FilepathUtil.resolvePath('/etc/os-release'));
     });
   });
 }

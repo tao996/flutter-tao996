@@ -39,6 +39,10 @@ class MyColor {
     return getColorScheme().error;
   }
 
+  static Color danger() {
+    return getColorScheme().error;
+  }
+
   /// 背景、表面式，常用于 AlertDialog
   static Color surface() {
     return getColorScheme().surface;
@@ -54,4 +58,3 @@ class MyColor {
     return getColorScheme().onSurface.withAlpha((255 * opacity).toInt());
   }
 }
-

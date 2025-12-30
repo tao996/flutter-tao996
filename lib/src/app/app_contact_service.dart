@@ -4,8 +4,14 @@ import 'package:get/get.dart';
 import 'package:tao996/tao996.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:flutter_svg/svg.dart';
-
-
+enum ContactPlatform {
+  twitter,
+  facebook,
+  wechat,
+  weibo,
+  telegram,
+  github,
+}
 class AppContactService {
   final debugSer = getIDebugService();
   final messageSer = getIMessageService();
@@ -33,28 +39,32 @@ class AppContactService {
 
   /// 尝试打开 URL
   ///
-  /// [account] 账号或者链接，如果是账号，则 [platform] 必须提供
-  Future<void> open(String account, {String? platform}) async {
+  /// [data] 账号或者链接，如果是账号，则 [platform] 必须提供
+  Future<void> open(String data, {ContactPlatform? platform}) async {
     String url;
-    if (account.isEmpty) {
+    if (data.isEmpty) {
       messageSer.error('account is empty');
       return;
     }
-    if (account.startsWith('https')) {
-      url = account;
+    if (data.startsWith('https')) {
+      url = data;
     } else {
-      if (platform == 'facebook') {
-        url = facebookUrl(account);
-      } else if ('twitter' == platform) {
-        url = twitterUrl(account);
-      } else if ('github' == platform) {
-        url = githubUrl(account);
-      } else {
+      switch (platform) {
+        case ContactPlatform.twitter:
+          url = twitterUrl(data);
+          break;
+        case ContactPlatform.facebook:
+          url = facebookUrl(data);
+          break;
+          case ContactPlatform.github:
+          url = githubUrl(data);
+          break;
+        default:
         messageSer.error('platform is not supported');
-        return;
-      }
+          return;
+       }
     }
-    UrlUtil.launch(url, title: platform);
+    UrlUtil.launch(url, title: platform?.name.toString());
   }
 
   String facebookUrl(String account) {
@@ -99,22 +109,25 @@ class AppContactService {
   /// [account] 账号或者链接
   Widget socialCard({
     required String account,
-    required String platform,
+    required ContactPlatform platform,
     bool copyable = true,
   }) {
     Widget icon;
     switch (platform) {
-      case 'twitter':
+      case ContactPlatform.twitter:
         icon = twitterIcon();
         break;
-      case 'facebook':
+      case ContactPlatform.facebook:
         icon = facebookIcon();
         break;
-      case 'wechat':
+      case ContactPlatform.wechat:
         icon = wechatIcon();
         break;
-      case 'weibo':
+      case ContactPlatform.weibo:
         icon = weiboIcon();
+        break;
+      case ContactPlatform.telegram:
+        icon = Icon(Icons.telegram, color: Colors.blue, size: 30);
         break;
       default:
         icon = Icon(Icons.link, color: Colors.grey, size: 30);
@@ -126,28 +139,26 @@ class AppContactService {
       child: ListTile(
         leading: icon,
         title: Text(
-          platform.tr,
+          platform.name.toString(),
           style: const TextStyle(fontWeight: FontWeight.bold),
         ),
         subtitle: Text(account),
-        trailing:
-        copyable
+        trailing: copyable
             ? const Icon(Icons.copy, color: Colors.blueGrey)
             : const Icon(Icons.open_in_new, color: Colors.blue),
-        onTap:
-        account.isEmpty
+        onTap: account.isEmpty
             ? null
             : () async {
-          if (account.isEmpty) {
-            messageSer.error('account is empty'.tr);
-            return;
-          }
-          if (copyable) {
-            copy(account);
-          } else {
-            open(account, platform: platform);
-          }
-        },
+                if (account.isEmpty) {
+                  messageSer.error('account is empty'.tr);
+                  return;
+                }
+                if (copyable) {
+                  copy(account);
+                } else {
+                  open(account, platform: platform);
+                }
+              },
       ),
     );
   }
