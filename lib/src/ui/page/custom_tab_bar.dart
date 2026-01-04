@@ -3,7 +3,7 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:get/get.dart';
-import 'package:tao996/src/utils/fn_util.dart';
+import 'package:tao996/tao996.dart';
 
 mixin MyCustomTabBarController {
   /// ListView.separated(controller) 中滚动位置保存，
@@ -42,6 +42,7 @@ class MyCustomTabBarItem {
 
   MyCustomTabBarItem({required this.key, required this.title});
 
+  @override
   String toString() => 'MyCustomTabBarItem(key: $key, title: $title)';
 }
 

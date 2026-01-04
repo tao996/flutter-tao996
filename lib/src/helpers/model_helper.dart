@@ -417,7 +417,32 @@ abstract class ModelHelper<T extends IModel<T>> {
     }
   }
 
+  /// 获取符合条件的记录ID
   Future<List<int>> getIdsWith({
+    String? fieldName,
+    dynamic value,
+    String? where,
+    List<Object?>? whereArgs,
+    WhereClauseBuilder? clauseBuilder,
+    String? groupBy,
+    String? having,
+    String? orderBy,
+  }) async {
+    return await getListIntColumnWith(
+      'id',
+      fieldName: fieldName,
+      value: value,
+      where: where,
+      whereArgs: whereArgs,
+      clauseBuilder: clauseBuilder,
+      groupBy: groupBy,
+      having: having,
+      orderBy: orderBy,
+    );
+  }
+
+  Future<List<int>> getListIntColumnWith(
+    String column, {
     String? fieldName,
     dynamic value,
     String? where,
@@ -429,6 +454,7 @@ abstract class ModelHelper<T extends IModel<T>> {
   }) async {
     try {
       final records = await getManyMapWith(
+        columns: [column],
         fieldName: fieldName,
         value: value,
         where: where,
@@ -438,10 +464,10 @@ abstract class ModelHelper<T extends IModel<T>> {
         having: having,
         orderBy: orderBy,
       );
-      return records.map((record) => record['id'] as int).toList();
+      return records.map((record) => record[column] as int).toList();
     } catch (e, st) {
       debugService.exception(e, st, log: true);
-      throw 'Failed to getIdsWith data for $tableName; because: $e';
+      throw 'Failed to int column ($column) data for $tableName; because: $e';
     }
   }
 

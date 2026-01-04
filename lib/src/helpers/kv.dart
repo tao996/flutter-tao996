@@ -49,7 +49,7 @@ T kvGetValue<T extends Enum>(
     }
   }
   if (firstIfNotFound) {
-    ColorUtil.print(
+    tu.colorMsg.print(
       'warning:could not find value $name in kvs, return first value',
       MyColor.yellow,
     );

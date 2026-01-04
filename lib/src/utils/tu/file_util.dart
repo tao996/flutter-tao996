@@ -6,9 +6,11 @@ import 'package:get/get.dart';
 import 'package:tao996/tao996.dart';
 import 'package:crypto/crypto.dart';
 
-class MyFileService {
+class FileUtil {
+  const FileUtil();
+
   // 【桌面端专用】通过对话框让用户选择保存路径，并执行文件复制
-  static Future<bool?> _saveFileToUserSelectedPath(
+  Future<bool?> _saveFileToUserSelectedPath(
     String suggestedFileName, {
     File? sourceFile,
     Uint8List? data,
@@ -37,7 +39,7 @@ class MyFileService {
   /// 保存图片到用户相册
   /// 注意：在 iOS 端，需要配置 flutter_image_gallery_saver
   /// [suggestedFileName] 在 [imageBytes] 有值时使用
-  static Future<void> saveImage({
+  Future<void> saveImage({
     File? file,
     Uint8List? imageBytes,
     String? suggestedFileName,
@@ -48,7 +50,7 @@ class MyFileService {
     if (file != null) {
       if (DeviceService.isPc()) {
         // 桌面端：调用通用保存逻辑
-        final suggestedName = FilepathUtil.basename(file.path);
+        final suggestedName = tu.path.basename(file.path);
         await _saveFileToUserSelectedPath(suggestedName, sourceFile: file);
         return;
       }
@@ -57,7 +59,7 @@ class MyFileService {
       if (DeviceService.isPc()) {
         await _saveFileToUserSelectedPath(
           suggestedFileName ??
-              DatetimeUtil.format(
+              tu.date.format(
                 dateTime: DateTime.now(),
                 format: DateTimeFormat.ymdHmFile,
               ),
@@ -69,15 +71,15 @@ class MyFileService {
     }
   }
 
-  /// 保存图片
-  static Future<void> saveFile(String filePath) async {
+  /// 保存文件
+  Future<void> saveFile(String filePath) async {
     final file = File(filePath);
     if (!await file.exists()) {
       throw 'fileNotExists'.tr;
     }
     if (DeviceService.isPc()) {
       // 提取文件名作为建议名称
-      final fileName = FilepathUtil.basename(filePath);
+      final fileName = tu.path.basename(filePath);
       await _saveFileToUserSelectedPath(fileName, sourceFile: file);
       return;
     }
@@ -86,7 +88,7 @@ class MyFileService {
 
   /// 异步计算给定文件的 MD5 哈希值
   /// 返回一个 32 字符的十六进制字符串
-  static Future<String> fileMd5(String filePath) async {
+  Future<String> fileMd5(String filePath) async {
     final file = File(filePath);
 
     if (!await file.exists()) {

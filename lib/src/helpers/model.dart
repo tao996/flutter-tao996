@@ -32,6 +32,7 @@ abstract class IModel<T> extends DbTypeModel<T> {
   /// 删除时间
   DateTime? deletedAt;
 
+  /// 通过 `User(int id, this.name):super(id: id);` 来初始化 id
   IModel({this.id = 0, this.createdAt, this.updatedAt, this.deletedAt});
 
   bool hasRecord() {
@@ -53,11 +54,11 @@ abstract class IModel<T> extends DbTypeModel<T> {
     return data;
   }
 
-  String get createdAtText => DatetimeUtil.formatYMDHMS(dateTime: createdAt);
+  String get createdAtText => tu.date.formatYMDHMS(dateTime: createdAt);
 
-  String get updatedAtText => DatetimeUtil.formatYMDHMS(dateTime: updatedAt);
+  String get updatedAtText => tu.date.formatYMDHMS(dateTime: updatedAt);
 
-  String get deletedAtText => DatetimeUtil.formatYMDHMS(dateTime: deletedAt);
+  String get deletedAtText => tu.date.formatYMDHMS(dateTime: deletedAt);
 
   void copyBaseDataFrom(dynamic model) {
     if (model != null && model is IModel) {

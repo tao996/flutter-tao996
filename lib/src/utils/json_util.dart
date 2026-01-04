@@ -52,23 +52,23 @@ class JsonMap {
   }
 
   int getInt(String key) {
-    return DataUtil.getInt(_map[key]);
+    return tu.data.getInt(_map[key]);
   }
 
   String getString(String key) {
-    return DataUtil.getString(_map[key]);
+    return tu.data.getString(_map[key]);
   }
 
   bool getBool(String key) {
-    return DataUtil.getBool(_map[key]);
+    return tu.data.getBool(_map[key]);
   }
 
   double getDouble(String key) {
-    return DataUtil.getDouble(_map[key]);
+    return tu.data.getDouble(_map[key]);
   }
 
   DateTime? getDateTime(String key) {
-    return DataUtil.getDateTime(_map[key]);
+    return tu.data.getDateTime(_map[key]);
   }
   @override
   String toString() {

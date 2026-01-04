@@ -19,6 +19,7 @@ abstract class IFontService {
 class FontService implements IFontService {
   final ISettingsService _settingsService = getISettingsService();
   final IDebugService _debugService = getIDebugService();
+  String get separator => tu.path.dirSeparator();
 
   /// 获取字体目录
   Future<Directory> _getFontDir() async {
@@ -26,7 +27,7 @@ class FontService implements IFontService {
         ? await getApplicationDocumentsDirectory()
         : await getApplicationSupportDirectory();
     final String fontDirPath =
-        '${appWorkDir.path}${FilepathUtil.dirSeparator()}fonts';
+        '${appWorkDir.path}${separator}fonts';
     final Directory fontDir = Directory(fontDirPath);
     if (!(await fontDir.exists())) {
       await fontDir.create(recursive: true);
@@ -48,7 +49,7 @@ class FontService implements IFontService {
       List<String> fontNameList = [];
       final fontDir = await _getFontDir();
       for (var fontFile in fontDir.listSync()) {
-        final fontName = fontFile.path.split(FilepathUtil.dirSeparator()).last;
+        final fontName = fontFile.path.split(separator).last;
         await _readFont(fontFile.path, fontName);
         fontNameList.add(fontName);
       }
@@ -66,7 +67,7 @@ class FontService implements IFontService {
       if (themeFontName != 'system') {
         final fontFileDir = await _getFontDir();
         await _readFont(
-          '${fontFileDir.path}${FilepathUtil.dirSeparator()}$themeFontName',
+          '${fontFileDir.path}$separator$themeFontName',
           themeFontName,
         );
       }
@@ -83,7 +84,7 @@ class FontService implements IFontService {
     }
     final fontFileDir = await _getFontDir();
     final fontFile = File(
-      '${fontFileDir.path}${FilepathUtil.dirSeparator()}$fontName',
+      '${fontFileDir.path}$separator$fontName',
     );
     try {
       if (await fontFile.exists()) {
@@ -110,10 +111,10 @@ class FontService implements IFontService {
       final fontFileDir = await _getFontDir();
       for (var fontFile in fontFileList) {
         final fontFileName = fontFile.path
-            .split(FilepathUtil.dirSeparator())
+            .split(separator)
             .last;
         final newFontPath =
-            '${fontFileDir.path}${FilepathUtil.dirSeparator()}$fontFileName';
+            '${fontFileDir.path}$separator$fontFileName';
         await fontFile.copy(newFontPath);
         // await fontFile.delete();
       }

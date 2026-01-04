@@ -9,6 +9,7 @@ export 'src/helpers/get_theme.dart';
 export 'src/helpers/kv.dart';
 export 'src/helpers/model.dart';
 export 'src/helpers/model_action.dart';
+export 'src/helpers/model_delegate.dart';
 export 'src/helpers/model_helper.dart';
 export 'src/helpers/query_builder.dart';
 
@@ -19,11 +20,8 @@ export 'src/services/database_service.dart';
 export 'src/services/debug_service.dart';
 export 'src/services/device_service.dart';
 export 'src/services/file_picker_service.dart';
-export 'src/services/file_service.dart';
 export 'src/services/font_service.dart';
-export 'src/services/http_getx_service.dart';
 export 'src/services/http_dio_service.dart';
-export 'src/services/image_picker_service.dart';
 export 'src/services/locale_service.dart';
 export 'src/services/log_service.dart';
 export 'src/services/message_service.dart';
@@ -34,7 +32,6 @@ export 'src/services/setting_service.dart';
 export 'src/services/share_service.dart';
 export 'src/services/theme_service.dart';
 export 'src/services/webview_service.dart';
-export 'src/services/zip_service.dart';
 
 export 'src/translation/translation.dart';
 
@@ -75,19 +72,25 @@ export 'src/ui/widgets/text.dart';
 export 'src/ui/app.dart';
 
 // 工具
+export 'src/utils/function.dart';
 export 'src/utils/typecast_util.dart';
-export 'src/utils/color_util.dart';
-export 'src/utils/data_util.dart';
-export 'src/utils/datetime_util.dart';
-export 'src/utils/filepath_util.dart';
-export 'src/utils/fn_util.dart';
 export 'src/utils/json_util.dart';
-export 'src/utils/number_util.dart';
 export 'src/utils/stack_util.dart';
-export 'src/utils/url_util.dart';
-export 'src/utils/getx.dart';
 export 'src/utils/nav_util.dart';
+
+// 隐藏的服务，常用
+// export 'src/utils/tu/zip_service.dart';
+// export 'src/utils/fn_util.dart';
+// export 'src/utils/number_util.dart';
+// export 'src/utils/permission_util.dart';
+// export 'src/utils/url_util.dart';
+// export 'src/utils/getx.dart';
+// export 'src/utils/filepath_util.dart';
+// export 'src/utils/color_util.dart';
+// export 'src/utils/data_util.dart';
+// export 'src/utils/datetime_util.dart';
 
 export 'src/getx.dart';
 
 export 'src/app/app.dart';
+export 'src/tu.dart';

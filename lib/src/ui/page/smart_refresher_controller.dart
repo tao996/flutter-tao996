@@ -42,7 +42,7 @@ abstract class MySmartRefresherController<T>
 
   /// 绑定搜索，通常是关键字搜索
   void bindSearch(String text) {
-    FnUtil.debounce(() {
+    tu.fn.debounce(() {
       pageIndexReset();
       onReSearch();
     }, milliseconds: 1000);

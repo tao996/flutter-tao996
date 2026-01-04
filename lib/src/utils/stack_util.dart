@@ -51,10 +51,11 @@ class StackUtil {
     if (kDebugMode) {
       for (String line in getStackTraceString()) {
         if (inPackageLine(line)) {
-          if (filterNames != null && filterNames.any((name) => line.contains(name))){
+          if (filterNames != null &&
+              filterNames.any((name) => line.contains(name))) {
             continue;
           }
-          ColorUtil.print(line, color);
+          tu.colorMsg.print(line, color);
           if (first) {
             return;
           }

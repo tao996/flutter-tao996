@@ -67,6 +67,9 @@ class _FakeDatetimeInputState extends State<FakeDatetimeInput> {
 
     // 2. 时间选择器：使用已选时间的 TimeOfDay 作为初始值
     final initialTime = TimeOfDay.fromDateTime(initialDate);
+    if (!context.mounted) {
+      throw Exception('context is not mounted');
+    }
 
     final TimeOfDay? pickedTime = await showTimePicker(
       context: context,

@@ -27,14 +27,13 @@ void registerTao996Services(GetIt locator) {
 
   locator.registerLazySingleton<IFontService>(() => FontService());
   locator.registerLazySingleton<DioHttpService>(() => DioHttpService());
-  locator.registerLazySingleton<ImagePickerService>(() => ImagePickerService());
   // locator.registerLazySingleton<IHttpService>(() => DioHttpClient());
   final localService = LocaleService();
   locator.registerLazySingleton<ILocaleService>(() => localService);
   locator.registerLazySingleton<INetworkService>(() => NetworkService());
   locator.registerLazySingleton<IPathService>(() => PathService());
   locator.registerLazySingleton<IShareService>(() => ShareService());
-  locator.registerLazySingleton<IFilePickerService>(() => FilePickerService());
+  locator.registerLazySingleton<IFilePickerService>(() => tu.filePicker);
   locator.registerLazySingleton<IWebviewService>(() => WebviewService());
 
   // 设置全局异常捕获
@@ -74,10 +73,6 @@ IDioHttpService getIDioHttpService() {
 
 DioHttpService getDioHttpClient() {
   return GetIt.instance<DioHttpService>();
-}
-
-ImagePickerService getImagePickerService() {
-  return GetIt.instance<ImagePickerService>();
 }
 
 ILocaleService getILocaleService() {

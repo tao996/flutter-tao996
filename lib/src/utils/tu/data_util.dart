@@ -1,6 +1,8 @@
 import 'dart:convert';
 
-import '../../tao996.dart';
+import 'package:crypto/crypto.dart';
+
+import '../../../tao996.dart';
 
 // 使用泛型优化的通用转换方法
 T _getValue<T extends num>(dynamic v, T defaultValue) {
@@ -18,12 +20,15 @@ T _getValue<T extends num>(dynamic v, T defaultValue) {
 }
 
 class DataUtil {
-  static final IDebugService _debugService = getIDebugService();
+  const DataUtil();
+
+  IDebugService get _debugService => getIDebugService();
+
   /// 获取 bool 值;
   /// [textCompare] 如果为 true，则会将 0/false/f/F/OFF/off/OFF 转为 false；将 1/true/t/T/ON/on/ON 转为 true
   /// 如果 [v] 为 null/空字符串则返回 [defaultValue] 默认值；
   /// [v] 为整数并且 >0 时，返回 true
-  static bool getBool(
+  bool getBool(
     dynamic v, {
     bool defaultValue = false,
     bool textCompare = false,
@@ -57,7 +62,7 @@ class DataUtil {
     return defaultValue;
   }
 
-  static int getInt(dynamic v, {int defaultValue = 0}) {
+  int getInt(dynamic v, {int defaultValue = 0}) {
     if (v == null || v == '') {
       return defaultValue;
     }
@@ -79,7 +84,7 @@ class DataUtil {
     return defaultValue;
   }
 
-  static double getDouble(dynamic v, {double defaultValue = 0.0}) {
+  double getDouble(dynamic v, {double defaultValue = 0.0}) {
     if (v == null || v == '') {
       return defaultValue;
     }
@@ -101,7 +106,7 @@ class DataUtil {
     return defaultValue;
   }
 
-  static String getString(dynamic v, {String defaultValue = ''}) {
+  String getString(dynamic v, {String defaultValue = ''}) {
     if (v == null) {
       return defaultValue;
     }
@@ -113,7 +118,7 @@ class DataUtil {
     return defaultValue;
   }
 
-  static DateTime? getDateTime(
+  DateTime? getDateTime(
     dynamic v, {
     DateTime? defaultValue,
     String? formatPattern,
@@ -122,7 +127,7 @@ class DataUtil {
       return defaultValue;
     }
     try {
-      final rst = DatetimeUtil.parse(v, formatPattern: formatPattern);
+      final rst = tu.date.parse(v, formatPattern: formatPattern);
       return rst ?? defaultValue;
     } catch (e, stackTrace) {
       _debugService.exception(e, stackTrace);
@@ -130,7 +135,7 @@ class DataUtil {
     return defaultValue;
   }
 
-  static List<T>? getList<T>(
+  List<T>? getList<T>(
     dynamic v,
     T Function(Map<String, dynamic>) fromJson, {
     List<T>? defaultValue,
@@ -149,7 +154,7 @@ class DataUtil {
   }
 
   /// 获取第一个不为 null 的值
-  static dynamic firstValue(Map<String, dynamic> json, List<String> keys) {
+  dynamic firstValue(Map<String, dynamic> json, List<String> keys) {
     for (var key in keys) {
       if (json.containsKey(key)) {
         return json[key];
@@ -158,21 +163,21 @@ class DataUtil {
     return null;
   }
 
-  static int getIntFromBool(bool value) {
+  int getIntFromBool(bool value) {
     return value ? 1 : 0;
   }
 
-  static bool getBoolFromInt(int value) {
+  bool getBoolFromInt(int value) {
     return value == 1;
   }
 
   /// 验证字符串 [data] 是否符合指定的正则表达式 [pattern]
-  static bool hasMatch(String data, String pattern) {
+  bool hasMatch(String data, String pattern) {
     return RegExp(pattern).hasMatch(data);
   }
 
   /// 从字符串 [input] 中获取所有匹配项，匹配项的格式为 [pattern]
-  static List<String> getAllMatches(String pattern, String input) {
+  List<String> getAllMatches(String pattern, String input) {
     // 使用 allMatches() 来获取所有匹配项的迭代器
     final Iterable<RegExpMatch> matches = RegExp(pattern).allMatches(input);
     final List<String> result = [];
@@ -185,19 +190,19 @@ class DataUtil {
   }
 
   /// 从字符串 [input] 中获取第一个匹配项，匹配项的格式为 [pattern]
-  static String? getFirstMatch(String pattern, String input) {
+  String? getFirstMatch(String pattern, String input) {
     final match = RegExp(pattern).firstMatch(input);
     return match?.group(0);
   }
 
   /// 验证用户输入的 [pattern] 是否为一个有效的正则表达式；注意跟原始字符串的区别
-  static bool isValidUserInputRegexPattern(String pattern) {
+  bool isValidUserInputRegexPattern(String pattern) {
     return (pattern.startsWith('r"') && pattern.endsWith('"')) ||
         (pattern.startsWith("r'") && pattern.endsWith("'"));
   }
 
   /// 清除用户输入的正则表达式，返回一个可用户的系统正则表达式；
-  static String getUserInputRegexPattern(String input) {
+  String getUserInputRegexPattern(String input) {
     // 1. 移除字符串两端的空白符
     String cleaned = input.trim();
     // 2. 检查是否为原始字符串字面量格式 (r'...' 或 r"...")
@@ -213,12 +218,22 @@ class DataUtil {
     return cleaned;
   }
 
-  static dynamic copy(dynamic data) {
+  dynamic copy(dynamic data) {
     return jsonDecode(jsonEncode(data));
   }
 
   /// 获取数据运行时的类型
-  static Type getType(dynamic data) {
+  Type getType(dynamic data) {
     return data.runtimeType;
+  }
+
+  /// 将字符串转换为 MD5 哈希值
+  String generateMd5(String input) {
+    // 1. 将字符串转为 UTF-8 字节流
+    var bytes = utf8.encode(input);
+    // 2. 计算 MD5
+    var digest = md5.convert(bytes);
+    // 3. 以十六进制字符串形式输出
+    return digest.toString();
   }
 }

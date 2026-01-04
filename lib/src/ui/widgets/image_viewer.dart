@@ -40,7 +40,7 @@ void openImageViewer(
     context,
     MaterialPageRoute(
       builder: (context) => _MyImageViewer(
-        imageUrl: FilepathUtil.normalize(imageUrl),
+        imageUrl: tu.path.normalize(imageUrl),
         director: director,
         actions: actions,
       ),
@@ -76,7 +76,7 @@ class _MyImageViewerState extends State<_MyImageViewer> {
 
   void _updateImageUrl(String newImageUrl) {
     setState(() {
-      location = FilepathUtil.determineLocation(newImageUrl);
+      location = tu.path.determineLocation(newImageUrl);
       imageUrl = newImageUrl;
     });
   }
@@ -289,7 +289,7 @@ Future<void> _downloadImage({
       }
     }
     if (location.isLocal) {
-      await MyFileService.saveFile(imageUrl);
+      await tu.file.saveFile(imageUrl);
     } else {
       final file = await _getImage(
         imageUrl: imageUrl,
@@ -309,7 +309,7 @@ Future<void> _downloadImage({
         getIMessageService().error('imageDownloadError'.tr);
         return;
       } else {
-        await MyFileService.saveImage(file: file);
+        await tu.file.saveImage(file: file);
       }
     }
     getIDebugService().d('图片保存成功', successMessage: 'downloadAndSaveSuccess'.tr);

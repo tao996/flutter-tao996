@@ -300,6 +300,7 @@ class SqfliteDatabaseService implements IDatabaseService {
   }
 
   /// 执行一个事务
+  @override
   Future<M> transaction<M>(Future<M> Function(ModelTransaction mt) action, {
     bool? exclusive,
   }) async {

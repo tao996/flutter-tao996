@@ -3,13 +3,15 @@ import 'dart:math';
 import 'package:tao996/tao996.dart';
 
 class NumberUtil {
+  const NumberUtil();
+
   /// 将实际的金额（分，int）格式化成字符串（元，String）。
   /// 比如数据库中的 10001 分转换成 "100.01" 元。
   ///
   /// [num]: 存储的金额值，以“分”为单位（整数）。
   /// [fractionDigits]: 小数位数，通常为 2。
   /// [emptyText] 是否返回空字符串。如果为 true，则返回空字符串，否则返回 "0"。
-  static String formatMoney(
+  String formatMoney(
     dynamic num, {
     int fractionDigits = 2,
     bool emptyText = true,
@@ -20,7 +22,7 @@ class NumberUtil {
       return emptyText ? '' : 0.toStringAsFixed(fractionDigits);
     }
 
-    final numData = DataUtil.getDouble(num);
+    final numData = tu.data.getDouble(num);
 
     // 1. 将整数（分）转为 double（元）
     final double valueInCurrency = numData / (100); // 假设 fractionDigits 总是 2
@@ -41,7 +43,7 @@ class NumberUtil {
   /// [money]: 用户输入的金额字符串（可能包含千分位符或空格）。
   ///
   /// 注意：该方法依赖于 money.replaceAll(',', '') 来移除千分位符。
-  static int parseMoney(String? money) {
+  int parseMoney(String? money) {
     if (money == null || money.isEmpty) {
       return 0;
     }
@@ -69,18 +71,19 @@ class NumberUtil {
     return valueInCents;
   }
 
-  static int parseInt(String? value) {
-    return DataUtil.getInt(value);
+  int parseInt(String? value) {
+    return tu.data.getInt(value);
   }
+
   /// 只有数字/数字字符串才会被处理
-  static String formatNumber(dynamic data) {
-    if (startWithNumber(data)){
+  String formatNumber(dynamic data) {
+    if (startWithNumber(data)) {
       return formatNumberWithComma(data);
     }
     return data;
   }
 
-  static bool startWithNumber(dynamic data) {
+  bool startWithNumber(dynamic data) {
     if (data == null || data == '') {
       return false;
     } else if (data is num) {
@@ -98,7 +101,7 @@ class NumberUtil {
   /// [decimalDigits]：保留的小数位数（默认 null，自动保留有效小数）
   /// [allowTrailingZeros]：是否保留小数末尾的 0（默认 false）
   /// 返回：格式化字符串，若无法解析则返回 "0"
-  static String formatNumberWithComma(
+  String formatNumberWithComma(
     dynamic number, {
     int? decimalDigits,
     bool allowTrailingZeros = false,
@@ -177,7 +180,7 @@ class NumberUtil {
   }
 
   /// 给正整数字符串添加逗号分隔
-  static String _addCommaToPositiveInt(String positiveIntStr) {
+  String _addCommaToPositiveInt(String positiveIntStr) {
     final length = positiveIntStr.length;
     if (length <= 3) return positiveIntStr;
 
@@ -194,7 +197,7 @@ class NumberUtil {
   }
 
   /// 去掉小数点后多余的0
-  static double formatDoubleWithRegex(double value) {
+  double formatDoubleWithRegex(double value) {
     String s = value.toString();
     // 匹配字符串末尾的 ".0"
     if (s.endsWith('.0')) {
@@ -203,15 +206,15 @@ class NumberUtil {
     return value;
   }
 
-  static String formatDouble(String s) {
+  String formatDouble(String s) {
     return s.endsWith('.0') ? s.substring(0, s.length - 2) : s;
   }
 
-  static num sum(List<num> list) {
+  num sum(List<num> list) {
     return list.fold(0.0, (previous, current) => previous + current);
   }
 
-  static bool numGte(dynamic a, int b) {
+  bool numGte(dynamic a, int b) {
     if (a == null) {
       return false;
     } else if (a is num) {
@@ -226,7 +229,7 @@ class NumberUtil {
     return false;
   }
 
-  static bool numLte(dynamic a, int b) {
+  bool numLte(dynamic a, int b) {
     if (a == null) {
       return false;
     } else if (a is num) {
@@ -241,7 +244,7 @@ class NumberUtil {
     return false;
   }
 
-  static int numCompare(dynamic a, dynamic b) {
+  int numCompare(dynamic a, dynamic b) {
     if (a == null || b == null) {
       return -1;
     }

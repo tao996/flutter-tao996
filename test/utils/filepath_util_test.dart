@@ -20,18 +20,18 @@ void main() {
       ];
       for (final item in winPaths) {
         expect(
-          FilepathUtil.isWindowsPath(item[0] as String),
+          tu.path.isWindowsPath(item[0] as String),
           item[1] as bool,
           reason: '${item[0] as String} test failed',
         );
       }
 
-      expect(FilepathUtil.normalize('C:\\a\\b.txt'), 'C:/a/b.txt');
+      expect(tu.path.normalize('C:\\a\\b.txt'), 'C:/a/b.txt');
 
-      expect(FilepathUtil.posixJoinAll(['/a', 'b\\c']), '/a/b\\c');
-      expect(FilepathUtil.normalize('/a/b\\c'), '/a/b/c');
+      expect(tu.path.posixJoinAll(['/a', 'b\\c']), '/a/b\\c');
+      expect(tu.path.normalize('/a/b\\c'), '/a/b/c');
 
-      expect('/etc/os-release', FilepathUtil.resolvePath('/etc/os-release'));
+      expect('/etc/os-release', tu.path.resolvePath('/etc/os-release'));
     });
   });
 }

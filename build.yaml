@@ -1,0 +1,18 @@
+targets:
+  $default:
+    builders:
+      # 1. 限制 Mockito 只扫描 mock.dart 所在的文件夹
+      mockito|mockBuilder:
+        generate_for:
+          - lib/src/mocks/*.dart
+
+      # 2. 限制 JSON 序列化只扫描模型定义所在的文件夹
+      json_serializable:
+        generate_for:
+          - lib/src/models/*.dart
+
+      # 3. 彻底禁用不必要的生成器在其他文件夹的扫描
+      source_gen|combining_builder:
+        generate_for:
+          - lib/src/mocks/*.dart
+          - lib/src/models/*.dart

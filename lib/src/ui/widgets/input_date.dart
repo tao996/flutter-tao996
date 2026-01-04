@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:tao996/src/const/color.dart';
-import 'package:tao996/src/utils/fn_util.dart';
 
 // 定义一个新的可复用 Widget 来实现伪输入框效果
 class FakeDateInput extends StatefulWidget {

@@ -19,7 +19,7 @@ abstract class IThemeService {
 abstract class ThemeService implements IThemeService {
   @override
   void systemUIOverlayStyle(Color backgroundColor, Brightness brightness) {
-    FnUtil.debounce(() {
+    tu.fn.debounce(() {
       final isLight = brightness == Brightness.light;
       SystemChrome.setSystemUIOverlayStyle(
         SystemUiOverlayStyle(

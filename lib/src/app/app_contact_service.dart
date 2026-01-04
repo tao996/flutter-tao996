@@ -4,14 +4,9 @@ import 'package:get/get.dart';
 import 'package:tao996/tao996.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:flutter_svg/svg.dart';
-enum ContactPlatform {
-  twitter,
-  facebook,
-  wechat,
-  weibo,
-  telegram,
-  github,
-}
+
+enum ContactPlatform { twitter, facebook, wechat, weibo, telegram, github }
+
 class AppContactService {
   final debugSer = getIDebugService();
   final messageSer = getIMessageService();
@@ -20,7 +15,7 @@ class AppContactService {
     final Uri emailLaunchUri = Uri(
       scheme: 'mailto',
       path: email,
-      query: UrlUtil.encodeQueryParameters(<String, String>{
+      query: tu.url.encodeQueryParameters(<String, String>{
         'subject': '关于应用 ${'appTitle'.tr} 的疑问',
       }),
     );
@@ -56,15 +51,15 @@ class AppContactService {
         case ContactPlatform.facebook:
           url = facebookUrl(data);
           break;
-          case ContactPlatform.github:
+        case ContactPlatform.github:
           url = githubUrl(data);
           break;
         default:
-        messageSer.error('platform is not supported');
+          messageSer.error('platform is not supported');
           return;
-       }
+      }
     }
-    UrlUtil.launch(url, title: platform?.name.toString());
+    tu.url.launch(url, title: platform?.name.toString());
   }
 
   String facebookUrl(String account) {

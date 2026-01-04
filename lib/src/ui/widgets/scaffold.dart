@@ -232,7 +232,7 @@ class MyEmptyStateWidget extends StatelessWidget {
             ),
 
             // 3. 详细说明
-            if (showDesc) ...[
+            if (showDesc && onAction != null) ...[
               const SizedBox(height: 8),
               Text(
                 'clickToCreateYourFirstRecord'.trParams({'title': titleText}),

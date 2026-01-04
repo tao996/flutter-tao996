@@ -70,18 +70,18 @@ class DebugService implements IDebugService {
   String _color = '';
 
   String get color =>
-      _color.isNotEmpty ? _color : ColorUtil.randomConsoleColor();
+      _color.isNotEmpty ? _color : tu.colorMsg.randomConsoleColor();
 
   @override
   IDebugService begin() {
-    _color = ColorUtil.randomConsoleColor();
-    ColorUtil.print('[[[----------', _color);
+    _color = tu.colorMsg.randomConsoleColor();
+    tu.colorMsg.print('[[[----------', _color);
     return this;
   }
 
   @override
   IDebugService end() {
-    ColorUtil.print('----------]]]', _color);
+    tu.colorMsg.print('----------]]]', _color);
     _color = '';
     return this;
   }
@@ -89,7 +89,7 @@ class DebugService implements IDebugService {
   void printCaller() {
     for (String line in StackUtil.getStackTraceString()) {
       if (StackUtil.inPackageLine(line)) {
-        ColorUtil.print(line, color);
+        tu.colorMsg.print(line, color);
       }
     }
   }
@@ -104,7 +104,7 @@ class DebugService implements IDebugService {
   }) {
     final hasColor = _color.isNotEmpty;
     if (!hasColor) {
-      _color = ColorUtil.randomConsoleColor();
+      _color = tu.colorMsg.randomConsoleColor();
     }
     _message(errorMessage, false, log: log);
     _message(successMessage, true, log: log);
@@ -117,9 +117,9 @@ class DebugService implements IDebugService {
         logService.i(args.toString());
       }
     } else if (kDebugMode) {
-      ColorUtil.print('|== $object', _color);
+      tu.colorMsg.print('|== $object', _color);
       if (args != null) {
-        ColorUtil.print('|==|== $args', _color);
+        tu.colorMsg.print('|==|== $args', _color);
       }
       printCaller();
     }
@@ -130,12 +130,12 @@ class DebugService implements IDebugService {
   }
 
   void _printBlock(String tag, List<dynamic> items, {String? color}) {
-    final pColor = color ?? ColorUtil.randomConsoleColor();
-    ColorUtil.print('$tag----------', pColor);
+    final pColor = color ?? tu.colorMsg.randomConsoleColor();
+    tu.colorMsg.print('$tag----------', pColor);
     for (final item in items) {
-      ColorUtil.print(item, pColor);
+      tu.colorMsg.print(item, pColor);
     }
-    ColorUtil.print('----------$tag', pColor);
+    tu.colorMsg.print('----------$tag', pColor);
   }
 
   @override
@@ -166,7 +166,7 @@ class DebugService implements IDebugService {
         stackTrace.toString(),
       ], color: color);
       if (args != null) {
-        ColorUtil.print(args, color);
+        tu.colorMsg.print(args, color);
       }
     }
     return this;
@@ -175,9 +175,9 @@ class DebugService implements IDebugService {
   @override
   IDebugService stack() {
     if (kDebugMode) {
-      ColorUtil.print('<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<', color);
+      tu.colorMsg.print('<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<', color);
       StackUtil.output(color: color);
-      ColorUtil.print('>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>', color);
+      tu.colorMsg.print('>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>', color);
     }
     return this;
   }
@@ -193,22 +193,22 @@ class DebugService implements IDebugService {
   @override
   IDebugService printLists(List<List> items) {
     if (kDebugMode) {
-      ColorUtil.print('<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<', color);
+      tu.colorMsg.print('<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<', color);
       StackTrace stackTrace = StackTrace.current;
       String stackTraceString = stackTrace.toString();
       List<String> stackTraceLines = stackTraceString.split('\n');
 
       for (String line in stackTraceLines) {
         if (StackUtil.inPackageLine(line)) {
-          ColorUtil.print(line, color);
+          tu.colorMsg.print(line, color);
         }
       }
       for (var item in items) {
         for (var e in item) {
-          ColorUtil.print(e.toString(), color);
+          tu.colorMsg.print(e.toString(), color);
         }
       }
-      ColorUtil.print('>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>', color);
+      tu.colorMsg.print('>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>', color);
     }
     return this;
   }

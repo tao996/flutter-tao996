@@ -2,11 +2,12 @@ import 'dart:io';
 import 'package:archive/archive_io.dart';
 import 'package:tao996/tao996.dart';
 
-class MyZipService {
+class ZipUtil {
+  const ZipUtil();
   /// 压缩文件
   /// [zipFilePath] 压缩包名称, [password] 解压密码
   /// [workingDirectory] 工作目录，如果存在，则会与 [zipFilePath] 及 [filePaths]的各部分进行拼接
-  static Future<void> encode(
+  Future<void> encode(
     String zipFilePath,
     List<String> filePaths, {
     String? workingDirectory,
@@ -15,14 +16,14 @@ class MyZipService {
   }) async {
     final encoder = ZipFileEncoder(password: password);
     encoder.create(
-      FilepathUtil.resolvePath(zipFilePath, dir: workingDirectory),
+      tu.path.resolvePath(zipFilePath, dir: workingDirectory),
     );
     for (final filePath in filePaths) {
-      final resolvedPath = FilepathUtil.resolvePath(
+      final resolvedPath = tu.path.resolvePath(
         filePath,
         dir: workingDirectory,
       );
-      final t = FilepathUtil.getFileType(resolvedPath);
+      final t = tu.path.getFileType(resolvedPath);
       if (t == FileSystemEntityType.file) {
         await encoder.addFile(File(resolvedPath));
       } else if (t == FileSystemEntityType.directory) {
@@ -40,14 +41,14 @@ class MyZipService {
   /// [zipFilePath] 压缩包名称, [password] 解压密码
   /// [destinationPath] 解压目录
   /// [workingDirectory] 工作目录，如果存在，则会与 [zipFilePath] 和 [destinationPath] 进行拼接
-  static Future<void> decode(
+  Future<void> decode(
     String zipFilePath,
     String destinationPath, {
     String? workingDirectory,
     String? password,
   }) async {
-    zipFilePath = FilepathUtil.resolvePath(zipFilePath, dir: workingDirectory);
-    destinationPath = FilepathUtil.resolvePath(
+    zipFilePath = tu.path.resolvePath(zipFilePath, dir: workingDirectory);
+    destinationPath = tu.path.resolvePath(
       destinationPath,
       dir: workingDirectory,
     );

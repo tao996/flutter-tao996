@@ -1,8 +1,6 @@
 import 'package:intl/intl.dart';
 
-import '../../tao996.dart';
-
-enum DateTimeFormat { ymd, ymdHm, ymdHms, ymdFile, ymdHmFile, ymdHmsFile }
+import '../../../tao996.dart';
 
 // 正则表达式：匹配 YYYY-MM-DDTXX:XX:XX.XXX... 的格式
 // ^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d+$ 匹配了日期、T、时间、点和至少一位数字
@@ -11,20 +9,22 @@ final RegExp _iso8601Regex = RegExp(
 );
 
 class DatetimeUtil {
+  const DatetimeUtil();
+
   /// 仅使用正则表达式检查字符串是否匹配 toIso8601String() 的格式。
   /// 注意：此方法不验证日期（如 2025-02-30）或时间（如 25:00:00）的有效性。
-  static bool isIso8601FormatRegex(dynamic input) {
+  bool isIso8601FormatRegex(dynamic input) {
     if (input == null || input is! String) {
       return false;
     }
     return _iso8601Regex.hasMatch(input);
   }
 
-  static String getNowTime({String pattern = 'yyyy-MM-dd HH:mm:ss'}) {
+  String getNowTime({String pattern = 'yyyy-MM-dd HH:mm:ss'}) {
     return DateFormat(pattern).format(DateTime.now());
   }
 
-  static String format({
+  String format({
     int timestamp = 0,
     DateTime? dateTime,
     String? iso8601,
@@ -71,11 +71,7 @@ class DatetimeUtil {
     return '$year-$formattedMonth-$formattedDay $formattedHour:$formattedMinute:$formattedSecond';
   }
 
-  static String formatYMD({
-    int timestamp = 0,
-    DateTime? dateTime,
-    String? iso8601,
-  }) {
+  String formatYMD({int timestamp = 0, DateTime? dateTime, String? iso8601}) {
     return format(
       dateTime: dateTime,
       timestamp: timestamp,
@@ -84,11 +80,7 @@ class DatetimeUtil {
     );
   }
 
-  static String formatYMDHM({
-    int timestamp = 0,
-    DateTime? dateTime,
-    String? iso8601,
-  }) {
+  String formatYMDHM({int timestamp = 0, DateTime? dateTime, String? iso8601}) {
     return format(
       dateTime: dateTime,
       timestamp: timestamp,
@@ -97,7 +89,7 @@ class DatetimeUtil {
     );
   }
 
-  static String formatYMDHMS({
+  String formatYMDHMS({
     int timestamp = 0,
     DateTime? dateTime,
     String? iso8601,
@@ -111,14 +103,14 @@ class DatetimeUtil {
   }
 
   /// 时间格式化 [format] 'yyyy年MM月dd日 HH:mm'
-  static String formatWith(String format, DateTime datetime) {
+  String formatWith(String format, DateTime datetime) {
     return DateFormat(format).format(datetime);
   }
 
   /// 日期解析
   /// [nowIfEmpty] 为空时返回当前时间
   /// [formatPattern] 时间格式，如果存在，则优先使用
-  static DateTime? parse(
+  DateTime? parse(
     dynamic dateStr, {
     bool nowIfEmpty = false,
     String? formatPattern,
@@ -176,7 +168,7 @@ Z: 解析时区偏移。intl 包的 DateFormat 能够识别 RFC 822 格式中的
     }
   }
 
-  static int compareTo(dynamic a, dynamic b) {
+  int compareTo(dynamic a, dynamic b) {
     if (a == null || a == '') {
       return -1;
     } else if (b == null || b == '') {
@@ -200,7 +192,7 @@ Z: 解析时区偏移。intl 包的 DateFormat 能够识别 RFC 822 格式中的
   /// [l10] 10 位的时间戳，用于 php 之类的；
   /// [l13] 13 位毫秒级时间戳（自 Unix 纪元（1970-01-01 00:00:00 UTC）以来的毫秒数）
   /// 默认为 16 位微秒级时间戳（自 Unix 纪元以来的微秒数，1毫秒=1000微秒）
-  static int timestamp(DateTime dt, {bool l10 = false, bool l13 = false}) {
+  int timestamp(DateTime dt, {bool l10 = false, bool l13 = false}) {
     if (l10) {
       return dt.millisecondsSinceEpoch % 1000;
     } else if (l13) {
@@ -210,7 +202,7 @@ Z: 解析时区偏移。intl 包的 DateFormat 能够识别 RFC 822 格式中的
   }
 
   // 格式化分钟数
-  static String formatMinutes(int totalMinutes) {
+  String formatMinutes(int totalMinutes) {
     if (totalMinutes <= 0) return '';
     final hours = totalMinutes ~/ 60;
     final minutes = totalMinutes % 60;

@@ -1,0 +1,82 @@
+import 'dart:async';
+
+import 'package:flutter/foundation.dart';
+import 'package:get/get.dart';
+import 'package:tao996/tao996.dart';
+
+void dprint(dynamic message, {bool stack = true}) {
+  if (kDebugMode) {
+    debugPrint(message.toString());
+    if (stack) {
+      StackUtil.output(
+        color: MyColor.yellow,
+        filterNames: ['fn_util.dart'],
+        first: true,
+      );
+    }
+  }
+}
+
+void ddprint(dynamic message, dynamic args) {
+  if (kDebugMode) {
+    getIDebugService().d(message, args: args);
+  }
+}
+
+/// 更新记录列表（不需要 IModel）
+/// [items] 原有的列表；[record] 新的记录；[index] 索引；[unshift] 是否在头部添加
+/// 如果 [record]==null并且 [index]不为0则表示删除
+Future<void> syncListState({
+  RxList<dynamic>? items,
+  required int index,
+  dynamic entity,
+  RxInt? total,
+  bool unshift = true,
+}) async {
+  // 分支 1：删除逻辑 (Entity 为空)
+  if (entity == null) {
+    if (index >= 0 && items != null) {
+      items.removeAt(index);
+      total?.value--;
+    }
+    return;
+  }
+
+  // 分支 2：更新逻辑 (Index 有效)
+  if (index >= 0) {
+    items?[index] = entity;
+  }
+  // 分支 3：新增逻辑 (Index 为负)
+  else {
+    if (items != null) {
+      unshift ? items.insert(0, entity) : items.add(entity);
+      total?.value++;
+    }
+  }
+}
+
+
+///
+/// [network]  HTTP/HTTPS 等网络协议；
+/// [local]  file:// 协议或看起来像一个无协议的本地路径；
+/// [assets]  Flutter 中的 Asset 资源；
+/// [unknown] 无法判断；
+enum ResourceLocation { local, network, assets, unknown }
+
+extension ResourceLocationExtension on ResourceLocation {
+  bool get isLocal => this == ResourceLocation.local;
+
+  bool get isNetwork => this == ResourceLocation.network;
+
+  bool get isAssets => this == ResourceLocation.assets;
+
+  bool get isUnknown => this == ResourceLocation.unknown;
+}
+
+/// 选择类型 [camera] 拍照；[gallery] 相册；[galleryVideo] 从相册选择一个视频；[cameraVideo] 拍摄一个视频；[media] 选择一个图片和视频
+enum ImagePickerSource { camera, gallery, galleryVideo, cameraVideo, media }
+
+enum ImagePickerMultipleSource { image, medio, video }
+
+
+enum DateTimeFormat { ymd, ymdHm, ymdHms, ymdFile, ymdHmFile, ymdHmsFile }
