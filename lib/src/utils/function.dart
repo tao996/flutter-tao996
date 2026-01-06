@@ -10,7 +10,7 @@ void dprint(dynamic message, {bool stack = true}) {
     if (stack) {
       StackUtil.output(
         color: MyColor.yellow,
-        filterNames: ['fn_util.dart'],
+        filterNames: ['function.dart'],
         first: true,
       );
     }
@@ -55,7 +55,6 @@ Future<void> syncListState({
   }
 }
 
-
 ///
 /// [network]  HTTP/HTTPS 等网络协议；
 /// [local]  file:// 协议或看起来像一个无协议的本地路径；
@@ -77,6 +76,5 @@ extension ResourceLocationExtension on ResourceLocation {
 enum ImagePickerSource { camera, gallery, galleryVideo, cameraVideo, media }
 
 enum ImagePickerMultipleSource { image, medio, video }
-
 
 enum DateTimeFormat { ymd, ymdHm, ymdHms, ymdFile, ymdHmFile, ymdHmsFile }

@@ -23,6 +23,10 @@ abstract class DbTypeModel<T> {
 abstract class IModel<T> extends DbTypeModel<T> {
   int id = 0;
 
+  bool hasRecord() {
+    return id > 0;
+  }
+
   /// 创建时间
   DateTime? createdAt;
 
@@ -34,10 +38,6 @@ abstract class IModel<T> extends DbTypeModel<T> {
 
   /// 通过 `User(int id, this.name):super(id: id);` 来初始化 id
   IModel({this.id = 0, this.createdAt, this.updatedAt, this.deletedAt});
-
-  bool hasRecord() {
-    return id > 0;
-  }
 
   Map<String, dynamic> toInsertMap({
     bool addCreatedAt = true,

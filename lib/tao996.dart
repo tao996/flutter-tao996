@@ -69,7 +69,6 @@ export 'src/ui/widgets/separator_line.dart';
 export 'src/ui/widgets/table.dart';
 export 'src/ui/widgets/text.dart';
 
-export 'src/ui/app.dart';
 
 // 工具
 export 'src/utils/function.dart';
@@ -78,19 +77,9 @@ export 'src/utils/json_util.dart';
 export 'src/utils/stack_util.dart';
 export 'src/utils/nav_util.dart';
 
-// 隐藏的服务，常用
-// export 'src/utils/tu/zip_service.dart';
-// export 'src/utils/fn_util.dart';
-// export 'src/utils/number_util.dart';
-// export 'src/utils/permission_util.dart';
-// export 'src/utils/url_util.dart';
-// export 'src/utils/getx.dart';
-// export 'src/utils/filepath_util.dart';
-// export 'src/utils/color_util.dart';
-// export 'src/utils/data_util.dart';
-// export 'src/utils/datetime_util.dart';
 
 export 'src/getx.dart';
+export 'src/tu.dart';
 
 export 'src/app/app.dart';
-export 'src/tu.dart';
+export 'src/app/app_contact_service.dart';

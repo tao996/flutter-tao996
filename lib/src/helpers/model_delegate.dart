@@ -9,180 +9,63 @@ import 'package:tao996/tao996.dart';
 /// final MyModelDelegate<User> delegate // 类型需要指定为 User
 ///   = MyModelDelegate<User>(getUserService());
 /// ```
-class MyModelDelegate<T extends IModel<T>> {
-  IMessageService? _messageService;
-
+class MyModelDelegate<T extends IModel<T>> extends AbstractListDelegate<T> {
+  final IMessageService? _messageService;
   ModelHelper<T>? _service;
-  MyModelDelegate<T>? _parentDelegate;
-  RxList<T>? _items;
-  RxInt? _total;
 
-  ///转换回调, 如果数据库返回的对象和 RxList 里的对象类型不一致时非常有用
-  T Function(T)? onDataTransform;
-  Future<void> Function(int index)? afterUpdate;
-  Future<void> Function(T)? afterInsert;
-  Future<void> Function(T, int)? afterDelete;
-
-  /// [delegate] 使用场景 `PageListA -> PageManagerA -> PageEditA`
   MyModelDelegate({
     ModelHelper<T>? service,
     IMessageService? messageService, // 允许测试时注入 Mock
     MyModelDelegate<T>? delegate,
-    RxList<T>? items,
-    RxInt? total,
-    bool autoInit = false,
+    super.rxItems,
+    super.rxTotal,
+    super.autoInit = false,
   }) : _service = service,
-       _messageService = messageService {
-    _items = items;
-    _total = total;
-    if (autoInit) {
-      _items ??= RxList<T>();
-      _total ??= RxInt(0);
-    }
-    bind(delegate: delegate);
-  }
+       _messageService = messageService,
+       super(delegate: delegate);
 
-  RxList<T>? get _rootItems => _parentDelegate?._items ?? _items;
+  // 消息服务寻根
+  IMessageService get messageService =>
+      _messageService ??
+      (_parentDelegate as MyModelDelegate<T>?)?.messageService ??
+      getIMessageService();
 
-  RxInt? get _rootTotal => _parentDelegate?._total ?? _total;
+  // 服务类寻根
+  ModelHelper<T> get service =>
+      _service ??
+      (_parentDelegate as MyModelDelegate<T>?)?.service ??
+      (throw Exception('MyModelDelegate: 缺少 ModelHelper 服务。'));
 
-  ModelHelper<T>? get _rootService => _service ?? _parentDelegate?._rootService;
+  bool get hasService =>
+      _service != null ||
+      (_parentDelegate as MyModelDelegate<T>?)?.hasService == true;
 
-  // 提供一个内部 getter，如果没注入就去取全局单例
-  IMessageService get messageService => _messageService ?? getIMessageService();
-
-  // 外部便捷访问 (带安全检查)
-  RxList<T> get items {
-    if (_rootItems == null) {
-      throw Exception(
-        'MyModelDelegate: 无法找到可用的 items。请通过 items 属性或 delegate 属性绑定数据源。',
-      );
-    }
-    return _rootItems!;
-  }
-
-  RxInt get total {
-    if (_rootTotal == null) {
-      throw Exception(
-        'MyModelDelegate: 获取 total 失败。请通过 total 获取器或 delegate 绑定数据源。',
-      );
-    }
-    return _rootTotal!;
-  }
-
-  ModelHelper<T> get service {
-    if (_rootService == null) {
-      throw Exception(
-        'MyModelDelegate: 获取 service 失败。请通过 service 获取器或 delegate 绑定数据源。',
-      );
-    }
-    return _rootService!;
-  }
-
-  bool get hasService => _rootService != null;
-
+  @override
   void bind({
     ModelHelper<T>? service,
-    RxList<T>? items,
-    RxInt? total,
-    MyModelDelegate<T>? delegate,
-    T Function(T)? onDataTransform, // 允许数据转换
+    RxList<T>? rxItems,
+    RxInt? rxTotal,
+    AbstractListDelegate<T>? delegate,
     Future<void> Function(int index)? afterUpdate,
     Future<void> Function(T record)? afterInsert,
     Future<void> Function(T oldRecord, int index)? afterDelete,
   }) {
-    if (service != null) _service = service;
-    if (items != null) _items = items;
-    if (total != null) _total = total;
-    if (delegate != null) {
-      _parentDelegate = delegate;
-      // 自动继承父级的核心组件，减少手动 bind 次数
-      _service ??= delegate._rootService;
-      _messageService ??= delegate.messageService;
+    if (service != null) {
+      _service = service;
     }
-    bindCallback(
-      onDataTransform: onDataTransform,
+    super.bind(
+      rxItems: rxItems,
+      rxTotal: rxTotal,
+      delegate: delegate,
       afterUpdate: afterUpdate,
       afterInsert: afterInsert,
       afterDelete: afterDelete,
     );
   }
 
-  void bindCallback({
-    T Function(T)? onDataTransform, // 允许数据转换
-    Future<void> Function(int index)? afterUpdate,
-    Future<void> Function(T record)? afterInsert,
-    Future<void> Function(T oldRecord, int index)? afterDelete,
-  }) {
-    this.afterInsert = afterInsert;
-    this.afterUpdate = afterUpdate;
-    this.afterDelete = afterDelete;
-    this.onDataTransform = onDataTransform;
-  }
-
-  void mustHasCallback() {
-    if (afterInsert == null && afterUpdate == null && afterDelete == null) {
-      throw Exception(
-        '请先调用 bindCallback 方法以绑定 afterInsert、afterUpdate、afterDelete',
-      );
-    }
-  }
-
-  void mustHasAfterInsert() {
-    if (afterInsert == null) {
-      throw Exception('请先调用 bindCallback 方法以绑定 afterInsert');
-    }
-  }
-
-  void mustHasAfterDelete() {
-    if (afterDelete == null) {
-      throw Exception('请先调用 bindCallback 方法以绑定 afterDelete');
-    }
-  }
-
-  void mustHasAfterUpdate() {
-    if (afterUpdate == null) {
-      throw Exception('请先调用 bindCallback 方法以绑定 afterUpdate');
-    }
-  }
-
-  /// 内部同步逻辑：支持回调冒泡
-  Future<void> _sync({
-    required int index,
-    T? entity,
-    bool unshift = true,
-  }) async {
-    final rootItems = _rootItems;
-    final rootTotal = _rootTotal;
-    if (rootItems == null) return;
-
-    if (entity == null) {
-      // 删除逻辑
-      if (index >= 0 && index < rootItems.length) {
-        final removed = rootItems[index];
-        rootItems.removeAt(index);
-        rootTotal?.value--;
-
-        // 1. 执行当前 delegate 回调
-        await afterDelete?.call(removed, index);
-        // 2. 改进：可选地通知父 delegate (如果需要链式通知)
-        // await _parentDelegate?.afterDelete?.call(removed, index);
-      }
-    } else {
-      final processed = onDataTransform?.call(entity) ?? entity;
-      if (index >= 0 && index < rootItems.length) {
-        rootItems[index] = processed;
-        await afterUpdate?.call(index);
-      } else {
-        unshift ? rootItems.insert(0, processed) : rootItems.add(processed);
-        rootTotal?.value++;
-        await afterInsert?.call(processed);
-      }
-    }
-  }
-
   Future<void> insert(
     T entity, {
+    bool syncDb = true,
     bool showMessage = true,
     bool navBack = true,
     bool unshift = true,
@@ -190,6 +73,7 @@ class MyModelDelegate<T extends IModel<T>> {
     await save(
       entity: entity,
       index: -1,
+      syncDb: syncDb,
       showMessage: showMessage,
       navBack: navBack,
       unshift: unshift,
@@ -199,16 +83,16 @@ class MyModelDelegate<T extends IModel<T>> {
   Future<void> update(
     T entity,
     int index, {
+    bool syncDb = true,
     bool showMessage = true,
     bool navBack = true,
-    bool unshift = true,
   }) async {
     await save(
       entity: entity,
       index: index,
+      syncDb: syncDb,
       showMessage: showMessage,
       navBack: navBack,
-      unshift: unshift,
     );
   }
 
@@ -216,16 +100,17 @@ class MyModelDelegate<T extends IModel<T>> {
   Future<void> save({
     required T entity,
     required int index,
+    bool syncDb = true,
     bool showMessage = true,
     bool navBack = true,
     bool unshift = true,
   }) async {
-    if (!hasService) {
-      await _sync(index: index, entity: entity, unshift: unshift);
+    if (!hasService || syncDb == false) {
+      await sync(index: index, entity: entity, unshift: unshift);
       _onFinalize('save'.tr + 'success'.tr, showMessage, navBack);
       return;
     }
-
+    // 2. 使用 ModelAction 处理数据库事务
     final action = ModelAction();
     String? message;
 
@@ -234,14 +119,14 @@ class MyModelDelegate<T extends IModel<T>> {
         _,
       ) async {
         message = 'save'.tr + 'success'.tr;
-        await _sync(index: index, entity: entity, unshift: unshift);
+        await sync(index: index, entity: entity, unshift: unshift);
       });
     } else {
       action.addInsert(() => service.insert(entity)).afterInsertSuccess((
         newRecord,
       ) async {
         message = 'add'.tr + 'success'.tr;
-        await _sync(index: -1, entity: newRecord as T, unshift: unshift);
+        await sync(index: -1, entity: newRecord as T, unshift: unshift);
       });
     }
 
@@ -253,24 +138,30 @@ class MyModelDelegate<T extends IModel<T>> {
   // 抽离公共的收尾逻辑（返回和消息）
   void _onFinalize(String? msg, bool showMessage, bool navBack) {
     if (navBack) goBack();
-    if (showMessage && msg != null) {
-      messageService.success(msg);
+    if (showMessage) {
+      if (msg != null && msg.isNotEmpty) {
+        messageService.success(msg);
+      } else {
+        messageService.success('success'.tr);
+      }
     }
   }
 
   /// 删除指定索引记录，返回删除的记录数
   Future<int> remoteAt({
     required int index,
-    bool deleteConfirm = true,
     String? title,
+    bool syncDb = true,
+    bool deleteConfirm = true,
     bool showMessage = true,
     bool navBack = true,
   }) async {
     return await removeWithId(
-      id: items[index].id,
+      id: rxItems[index].id,
       index: index,
-      deleteConfirm: deleteConfirm,
       title: title,
+      syncDb: syncDb,
+      deleteConfirm: deleteConfirm,
       showMessage: showMessage,
       navBack: navBack,
     );
@@ -280,8 +171,9 @@ class MyModelDelegate<T extends IModel<T>> {
   Future<int> removeWithId({
     required int id,
     int? index,
-    bool deleteConfirm = true,
     String? title,
+    bool syncDb = true,
+    bool deleteConfirm = true,
     bool showMessage = true,
     bool navBack = true,
   }) async {
@@ -293,12 +185,12 @@ class MyModelDelegate<T extends IModel<T>> {
     }
 
     // 使用寻根后的 items 进行查找
-    final currentItems = items;
+    final currentItems = rxItems;
     index ??= currentItems.indexWhere((element) => element.id == id);
 
-    if (!hasService) {
+    if (!hasService || syncDb == false) {
       if (index >= 0) {
-        await _sync(index: index);
+        await sync(index: index);
         _onFinalize('delete'.tr + 'success'.tr, showMessage, navBack);
         return 1;
       }
@@ -309,7 +201,7 @@ class MyModelDelegate<T extends IModel<T>> {
 
     final effect = await service.deleteById(id);
     if (effect > 0) {
-      await _sync(index: index);
+      await sync(index: index);
       _onFinalize('delete'.tr + 'success'.tr, showMessage, navBack);
     } else if (showMessage) {
       messageService.error('noRecordDelete'.tr);
@@ -329,48 +221,140 @@ class MyModelDelegate<T extends IModel<T>> {
     bool showMessage = true,
     bool navBack = true,
   }) async {
-    // 1. 删除模式
     if (entity == null) {
-      if (index < 0 || index >= items.length) return;
-
-      bool toDelete = true;
-      if (deleteConfirm) {
-        toDelete =
-            await messageService.deleteConfirm(title ?? 'record'.tr, () {}) ??
-            false;
+      if (index < 0 || index >= rxItems.length) {
+        throw Exception(
+          'MyModelDelegate: index($index) out of range. must in range [0, ${rxItems.length})',
+        );
       }
 
-      if (toDelete) {
-        if (syncDb) {
-          // 这里的 remoteAt 内部会处理同步逻辑
-          await remoteAt(
-            index: index,
-            navBack: navBack,
-            showMessage: showMessage,
-          );
-        } else {
-          await _sync(index: index, entity: entity);
-          if (navBack) {
-            goBack();
-          }
-        }
-      }
-      return;
-    }
-
-    // 2. 保存/修改模式
-    if (syncDb) {
+      await removeWithId(
+        id: rxItems[index].id,
+        index: index,
+        syncDb: syncDb,
+        deleteConfirm: deleteConfirm,
+        title: title,
+        showMessage: showMessage,
+        navBack: navBack,
+      );
+    } else {
       await save(
         entity: entity,
         index: index,
-        navBack: navBack,
+        syncDb: syncDb,
         showMessage: showMessage,
+        navBack: navBack,
       );
-    } else {
-      await _sync(index: index, entity: entity);
+    }
+  }
+}
 
-      if (navBack) {
-        goBack();
+class MyListDelegate<T> extends AbstractListDelegate<T> {
+  MyListDelegate({
+    super.delegate,
+    super.rxItems,
+    super.rxTotal,
+    super.autoInit,
+  });
+
+  Future<void> save(T entity, int index, {bool unshift = true}) async {
+    await sync(index: index, entity: entity, unshift: unshift);
+  }
+
+  Future<void> insert(T entity, {bool unshift = true}) async {
+    await save(entity, -1, unshift: unshift);
+  }
+
+  Future<void> update(T entity, int index) async {
+    await save(entity, index);
+  }
+
+  Future<void> removeAt(int index) async => await sync(index: index);
+}
+
+abstract class AbstractListDelegate<T> {
+  AbstractListDelegate<T>? _parentDelegate;
+  RxList<T>? _rxItems;
+  RxInt? _rxTotal;
+
+  // 回调函数
+  Future<void> Function(int index)? afterUpdate;
+  Future<void> Function(T record)? afterInsert;
+  Future<void> Function(T oldRecord, int index)? afterDelete;
+
+  AbstractListDelegate({
+    AbstractListDelegate<T>? delegate,
+    RxList<T>? rxItems,
+    RxInt? rxTotal,
+    bool autoInit = true,
+  }) {
+    if (autoInit) {
+      rxItems ??= RxList<T>();
+      rxTotal ??= RxInt(0);
+    }
+    bind(rxItems: rxItems, rxTotal: rxTotal, delegate: delegate);
+  }
+
+  /// 统一的寻根逻辑;  注意，如果你直接修改 items，则不会触发回调函数
+  RxList<T> get rxItems =>
+      _parentDelegate?.rxItems ?? _rxItems ?? (throw _err('rxItems'));
+
+  RxInt get rxTotal =>
+      _parentDelegate?.rxTotal ?? _rxTotal ?? (throw _err('rxTotal'));
+
+  RxInt? get __rxTotal => _parentDelegate?.rxTotal ?? _rxTotal;
+
+  Exception _err(String name) => Exception('$runtimeType: 无法找到 $name。请绑定数据源。');
+
+  void bind({
+    RxList<T>? rxItems,
+    RxInt? rxTotal,
+    AbstractListDelegate<T>? delegate,
+    Future<void> Function(int index)? afterUpdate,
+    Future<void> Function(T record)? afterInsert,
+    Future<void> Function(T oldRecord, int index)? afterDelete,
+  }) {
+    if (rxItems != null) _rxItems = rxItems;
+    if (rxTotal != null) _rxTotal = rxTotal;
+    if (delegate != null) _parentDelegate = delegate;
+
+    this.afterInsert = afterInsert ?? this.afterInsert;
+    this.afterUpdate = afterUpdate ?? this.afterUpdate;
+    this.afterDelete = afterDelete ?? this.afterDelete;
+  }
+
+  /// 核心同步逻辑（合并后的唯一真相来源）
+  /// 注意：你如果不设置 items，那么 afterUpdate 将不被触发
+  Future<void> sync({
+    required int index,
+    T? entity,
+    bool unshift = true,
+  }) async {
+    final rootItems = rxItems;
+    final rootTotal = __rxTotal;
+
+    if (entity == null) {
+      if (index >= 0 && index < rootItems.length) {
+        final removed = rootItems.removeAt(index);
+        rootTotal?.value--;
+        await afterDelete?.call(removed, index);
+      } else {
+        throw Exception(
+          'AbstractListDelegate: index($index) out of range. must in range [0, ${rootItems.length})',
+        );
+      }
+    } else {
+      if (index >= 0 && index < rootItems.length) {
+        rootItems[index] = entity;
+        await afterUpdate?.call(index);
+      } else if (index == -1) {
+        unshift ? rootItems.insert(0, entity) : rootItems.add(entity);
+        rootTotal?.value++;
+        await afterInsert?.call(entity);
+      } else {
+        throw Exception(
+          'AbstractListDelegate: index($index) out of range. must in range [0, ${rootItems.length})',
+        );
       }
     }
   }

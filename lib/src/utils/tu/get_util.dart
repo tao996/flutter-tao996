@@ -22,6 +22,7 @@ class GetUtil {
   }
 
   /// 注册一个控制
+  /// `tu.get.putController(SimpleReportController(Get.arguments));`
   S putController<S>(S dependency) {
     return Get.put(dependency);
   }

@@ -6,7 +6,7 @@ import 'package:tao996/src/utils/tu/file_picker.dart';
 import 'package:tao996/src/utils/tu/file_util.dart';
 import 'package:tao996/src/utils/tu/fpath_util.dart';
 import 'package:tao996/src/utils/tu/fn_util.dart';
-import 'package:tao996/src/utils/tu/getx.dart';
+import 'package:tao996/src/utils/tu/get_util.dart';
 import 'package:tao996/src/utils/tu/image_picker.dart';
 import 'package:tao996/src/utils/tu/number_util.dart';
 import 'package:tao996/src/utils/tu/permission_util.dart';
@@ -34,7 +34,7 @@ class _TUtils {
   final device = const DeviceUtil();
 }
 
-final tu = _TUtils();
+const tu = _TUtils();
 
 // void test(){
 //
