@@ -85,12 +85,13 @@ class MySearchInput extends StatelessWidget {
         onSubmitted: c.bindSubmitted,
         style: TextStyle(fontSize: fontSize),
         // textAlign: TextAlign.center,
-        textAlignVertical: TextAlignVertical.bottom,
+        // textAlignVertical: TextAlignVertical.bottom,
         maxLines: 1,
         // 设置垂直居中
         decoration: InputDecoration(
           border: const OutlineInputBorder(),
-          isDense: true,
+          contentPadding: const EdgeInsets.symmetric(vertical: 0),
+          // isDense: true,
           // 移除内部 padding
           hintText: hintText ?? 'search'.tr,
           hintStyle: const TextStyle(color: Colors.grey),

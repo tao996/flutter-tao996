@@ -17,7 +17,7 @@ class MyAnimatedIcon extends StatefulWidget {
   });
 
   @override
-  _AnimatedIconState createState() => _AnimatedIconState();
+  State<MyAnimatedIcon> createState() => _AnimatedIconState();
 }
 
 class _AnimatedIconState extends State<MyAnimatedIcon>

@@ -30,7 +30,7 @@ class MySmartRefresher {
     return SmartRefresher(
       enablePullDown: enablePullDown,
       enablePullUp: enablePullUp,
-      header: customHeader ?? const WaterDropHeader(),
+      header: customHeader ??  const WaterDropHeader(),
       footer: customFooter ?? footer(controller),
       controller: controller.refreshController,
       onRefresh: onRefresh ?? controller.onRefresh,

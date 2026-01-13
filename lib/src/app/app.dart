@@ -104,3 +104,33 @@ class MyCustomScrollBehavior extends MaterialScrollBehavior {
     // etc.
   };
 }
+
+// 在 PC 端启动 app 失败的时候可调用
+void runAppWhenFailed(Object e, StackTrace st) {
+  // 或者直接退出，如果错误是不可恢复的
+  // exit(1);
+  getIDebugService().exception(e, st);
+  runApp(
+    MaterialApp(
+      home: Scaffold(
+        body: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Center(
+              child: Text(
+                'appStartFailed'.tr,
+                style: const TextStyle(color: Colors.red, fontSize: 20),
+              ),
+            ),
+            Center(
+              child: Text(
+                e.toString(),
+                style: const TextStyle(color: Colors.red, fontSize: 20),
+              ),
+            ),
+          ],
+        ),
+      ),
+    ),
+  );
+}

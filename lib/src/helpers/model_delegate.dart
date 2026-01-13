@@ -1,7 +1,7 @@
 import 'package:get/get.dart';
 import 'package:tao996/tao996.dart';
 
-// enum MAction { insert, update, delete }
+enum DelegateAction { insert, update, delete }
 
 /// 使用示例
 ///
@@ -19,7 +19,7 @@ class MyModelDelegate<T extends IModel<T>> extends AbstractListDelegate<T> {
     MyModelDelegate<T>? delegate,
     super.rxItems,
     super.rxTotal,
-    super.autoInit = false,
+    super.autoInit = true,
   }) : _service = service,
        _messageService = messageService,
        super(delegate: delegate);
@@ -49,6 +49,8 @@ class MyModelDelegate<T extends IModel<T>> extends AbstractListDelegate<T> {
     Future<void> Function(int index)? afterUpdate,
     Future<void> Function(T record)? afterInsert,
     Future<void> Function(T oldRecord, int index)? afterDelete,
+    Future<void> Function(DelegateAction action, {T? record, int? index})?
+    delegateCallback,
   }) {
     if (service != null) {
       _service = service;
@@ -60,15 +62,16 @@ class MyModelDelegate<T extends IModel<T>> extends AbstractListDelegate<T> {
       afterUpdate: afterUpdate,
       afterInsert: afterInsert,
       afterDelete: afterDelete,
+      delegateCallback: delegateCallback,
     );
   }
 
+  /// 插入1条记录到最前面
   Future<void> insert(
     T entity, {
     bool syncDb = true,
     bool showMessage = true,
     bool navBack = true,
-    bool unshift = true,
   }) async {
     await save(
       entity: entity,
@@ -76,7 +79,24 @@ class MyModelDelegate<T extends IModel<T>> extends AbstractListDelegate<T> {
       syncDb: syncDb,
       showMessage: showMessage,
       navBack: navBack,
-      unshift: unshift,
+      unshift: true,
+    );
+  }
+
+  /// 追加1条记录到最后面
+  Future<void> push(
+    T entity, {
+    bool syncDb = true,
+    bool showMessage = true,
+    bool navBack = true,
+  }) async {
+    await save(
+      entity: entity,
+      index: -1,
+      syncDb: syncDb,
+      showMessage: showMessage,
+      navBack: navBack,
+      unshift: false,
     );
   }
 
@@ -261,8 +281,14 @@ class MyListDelegate<T> extends AbstractListDelegate<T> {
     await sync(index: index, entity: entity, unshift: unshift);
   }
 
-  Future<void> insert(T entity, {bool unshift = true}) async {
-    await save(entity, -1, unshift: unshift);
+  /// 添加到最前面
+  Future<void> insert(T entity) async {
+    await save(entity, -1, unshift: true);
+  }
+
+  /// 添加到后面
+  Future<void> push(T entity) async {
+    await save(entity, -1, unshift: false);
   }
 
   Future<void> update(T entity, int index) async {
@@ -281,6 +307,8 @@ abstract class AbstractListDelegate<T> {
   Future<void> Function(int index)? afterUpdate;
   Future<void> Function(T record)? afterInsert;
   Future<void> Function(T oldRecord, int index)? afterDelete;
+  Future<void> Function(DelegateAction action, {T? record, int? index})?
+  delegateCallback;
 
   AbstractListDelegate({
     AbstractListDelegate<T>? delegate,
@@ -313,6 +341,8 @@ abstract class AbstractListDelegate<T> {
     Future<void> Function(int index)? afterUpdate,
     Future<void> Function(T record)? afterInsert,
     Future<void> Function(T oldRecord, int index)? afterDelete,
+    Future<void> Function(DelegateAction action, {T? record, int? index})?
+    delegateCallback,
   }) {
     if (rxItems != null) _rxItems = rxItems;
     if (rxTotal != null) _rxTotal = rxTotal;
@@ -321,6 +351,7 @@ abstract class AbstractListDelegate<T> {
     this.afterInsert = afterInsert ?? this.afterInsert;
     this.afterUpdate = afterUpdate ?? this.afterUpdate;
     this.afterDelete = afterDelete ?? this.afterDelete;
+    this.delegateCallback = delegateCallback ?? this.delegateCallback;
   }
 
   /// 核心同步逻辑（合并后的唯一真相来源）
@@ -338,6 +369,11 @@ abstract class AbstractListDelegate<T> {
         final removed = rootItems.removeAt(index);
         rootTotal?.value--;
         await afterDelete?.call(removed, index);
+        delegateCallback?.call(
+          DelegateAction.delete,
+          record: removed,
+          index: index,
+        );
       } else {
         throw Exception(
           'AbstractListDelegate: index($index) out of range. must in range [0, ${rootItems.length})',
@@ -347,10 +383,20 @@ abstract class AbstractListDelegate<T> {
       if (index >= 0 && index < rootItems.length) {
         rootItems[index] = entity;
         await afterUpdate?.call(index);
+        delegateCallback?.call(
+          DelegateAction.update,
+          record: entity,
+          index: index,
+        );
       } else if (index == -1) {
         unshift ? rootItems.insert(0, entity) : rootItems.add(entity);
         rootTotal?.value++;
         await afterInsert?.call(entity);
+        delegateCallback?.call(
+          DelegateAction.insert,
+          record: entity,
+          index: index,
+        );
       } else {
         throw Exception(
           'AbstractListDelegate: index($index) out of range. must in range [0, ${rootItems.length})',

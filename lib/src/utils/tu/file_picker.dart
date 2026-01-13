@@ -1,5 +1,3 @@
-
-
 import 'dart:io';
 
 import 'package:file_picker/file_picker.dart';
@@ -36,6 +34,27 @@ class FilePickerService implements IFilePickerService {
       readSequential: readSequential,
     );
     return result?.files;
+  }
+  /// 选择文件，并返回它们的路径
+  Future<List<String>> pickFilesPath({
+    bool allowMultiple = true,
+    List<String>? allowedExtensions,
+  }) async {
+    final files = await pickFiles(
+      allowMultiple: allowMultiple,
+      type: PickerFileType.custom,
+      // 开放常用的文件类型供用户选择
+      allowedExtensions:
+          allowedExtensions ??
+          ['jpg', 'jpeg', 'png', 'mp4', 'pdf', 'doc', 'mp3', 'zip'],
+    );
+    if (files == null || files.isEmpty) {
+      return [];
+    }
+    return files
+        .where((f) => f.path != null && f.path!.isNotEmpty)
+        .map((f) => f.path!)
+        .toList();
   }
 
   /// 获取选择的文件，可以使用 FilepathUtil.getFileNames 来获取文件名

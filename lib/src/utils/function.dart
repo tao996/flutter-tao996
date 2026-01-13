@@ -54,27 +54,3 @@ Future<void> syncListState({
     }
   }
 }
-
-///
-/// [network]  HTTP/HTTPS 等网络协议；
-/// [local]  file:// 协议或看起来像一个无协议的本地路径；
-/// [assets]  Flutter 中的 Asset 资源；
-/// [unknown] 无法判断；
-enum ResourceLocation { local, network, assets, unknown }
-
-extension ResourceLocationExtension on ResourceLocation {
-  bool get isLocal => this == ResourceLocation.local;
-
-  bool get isNetwork => this == ResourceLocation.network;
-
-  bool get isAssets => this == ResourceLocation.assets;
-
-  bool get isUnknown => this == ResourceLocation.unknown;
-}
-
-/// 选择类型 [camera] 拍照；[gallery] 相册；[galleryVideo] 从相册选择一个视频；[cameraVideo] 拍摄一个视频；[media] 选择一个图片和视频
-enum ImagePickerSource { camera, gallery, galleryVideo, cameraVideo, media }
-
-enum ImagePickerMultipleSource { image, medio, video }
-
-enum DateTimeFormat { ymd, ymdHm, ymdHms, ymdFile, ymdHmFile, ymdHmsFile }

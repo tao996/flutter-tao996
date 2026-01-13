@@ -15,13 +15,13 @@ class MockIMessageService implements IMessageService {
   @override
   void success(String message, {bool snackBar = false}) {
     lastSuccessMsg = message;
-    print('Mock Success: $message');
+    dprint('Mock Success: $message');
   }
 
   @override
   void error(String message, {bool snackBar = false}) {
     lastErrorMsg = message;
-    print('Mock Error: $message');
+    dprint('Mock Error: $message');
   }
 
   @override

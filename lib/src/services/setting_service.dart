@@ -63,6 +63,10 @@ abstract class ISettingsService {
   void updateServerHost(String value);
 
   Future<void> init(); // 添加 init 方法到接口
+
+  Future<bool> remove(String key);
+
+  Future<bool> clean();
 }
 
 Future<SharedPreferences> getSharedPreferences() async {
@@ -78,6 +82,16 @@ abstract class SettingService implements ISettingsService {
   }
 
   SharedPreferences get prefs => _prefs;
+
+  @override
+  Future<bool> remove(String key) async {
+    return await prefs.remove(key);
+  }
+
+  @override
+  Future<bool> clean() async {
+    return await prefs.clear();
+  }
 
   @override
   String get language => _prefs.getString('language') ?? 'system';

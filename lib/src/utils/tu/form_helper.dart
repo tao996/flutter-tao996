@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:tao996/tao996.dart';
 
-class FormHelper {
+class FormHelperUtil {
+  const FormHelperUtil();
+
   /// 网络布局的 checkbox 按钮组
   /// [crossAxisCount] 列数，会根据列数自动计算自身的尺寸
   /// 跟 FlowChipBar 有点类似，但 FlowChipBar 是单选，并且不是网络布局
-  static Widget gridCheckbox({
+  Widget gridCheckbox({
     required List<String> items,
     required ValueChanged<List<String>> onSelectionChanged,
     List<String>? values,
@@ -22,7 +24,7 @@ class FormHelper {
   }
 
   /// 列表布局的 checkbox 复选列表（占据最宽），可用于多项选择
-  static Widget listCheckbox<T>({
+  Widget listCheckbox<T>({
     required List<KV<T>> items,
     required ValueChanged<List<T>> onSelectionChanged,
     List<T>? values,
@@ -38,7 +40,7 @@ class FormHelper {
 
   /// 水平布局的 按钮组，可用于多单或单选（oneFilterChip），被选中的选项会打上一个勾（改变了尺寸）
   /// 跟 [gridCheckbox] 的区别是会自动换行，你可以需要将这个组件包裹在 Expanded 中
-  static Widget filterChipCheckbox<T>({
+  Widget filterChipCheckbox<T>({
     required List<KV<T>> items,
     required void Function(bool selected, T item) onSelectionChanged,
     List<T>? values,
@@ -61,7 +63,7 @@ class FormHelper {
   }
 
   /// 水平布局的 按钮组，可用于单选
-  static Widget oneFilterChip<T>({
+  Widget oneFilterChip<T>({
     required List<KV<T>> items,
     required void Function(T? item) onSelectionChanged,
     T? value,
@@ -94,7 +96,7 @@ class FormHelper {
 
   /// 分段按钮，2-3个选项时可使用，如果选项太多或内容太长则不建议使用，因为文字换行显示很难看
   /// [multiSelectionEnabled] 是否支持多选; [emptySelectionAllowed] 是否允许空选项
-  static Widget segmentedButton<T>({
+  Widget segmentedButton<T>({
     required List<KV<T>> items,
     required void Function(Set<T> items) onSelectionChanged,
     required List<T> values,
@@ -117,7 +119,7 @@ class FormHelper {
   }
 
   /// 单选分段按钮
-  static Widget oneSegmentedButton<T>({
+  Widget oneSegmentedButton<T>({
     required List<KV<T>> items,
     required void Function(T value) onSelectionChanged,
     T? value,
@@ -137,8 +139,43 @@ class FormHelper {
     return child;
   }
 
+  Widget radioGroup<T>({
+    required List<KV<T>> items,
+    T? value,
+    required void Function(T value) onSelectionChanged,
+    bool horizontal = true,
+  }) {
+    final children = items.map((kv) {
+      return IntrinsicWidth(
+        // 让子组件只占用它需要的最小宽度
+        child: RadioListTile.adaptive(
+          value: kv.value,
+
+          title: Text(kv.label),
+
+          visualDensity: VisualDensity.compact,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(80),
+          ),
+        ),
+      );
+    }).toList();
+
+    return RadioGroup<T>(
+      groupValue: value,
+      onChanged: (T? newValue) {
+        if (newValue != null && newValue != value) {
+          onSelectionChanged(newValue);
+        }
+      },
+      child: horizontal
+          ? Wrap(spacing: 8.0, children: children)
+          : MyLayout.miniColumn(children),
+    );
+  }
+
   /// 水平列表框
-  static Widget select<T>({
+  Widget select<T>({
     required String label,
     required List<KV<T>> items,
     required ValueChanged<T?> onChanged,
@@ -180,7 +217,7 @@ class FormHelper {
   /// )
   /// 使用 formKey.currentState!.validate() 来检查是否通过验证
   /// ```
-  static Widget input({
+  Widget input({
     TextEditingController? controller,
     String? labelText,
     String? hintText,
@@ -196,6 +233,7 @@ class FormHelper {
     int? maxLines,
     int? minLines,
     void Function(String)? onChanged,
+    void Function(String)? onSubmit,
     String? Function(String?)? validator,
   }) {
     return MyInput(
@@ -214,11 +252,12 @@ class FormHelper {
       maxLines: maxLines,
       minLines: minLines,
       onChanged: onChanged,
+      onFieldSubmitted: onSubmit,
       validator: validator,
     );
   }
 
-  static Widget dateInput({
+  Widget dateInput({
     DateTime? initDate,
     required String labelText,
     required Function(DateTime?) onDateSelected,
@@ -232,7 +271,7 @@ class FormHelper {
     );
   }
 
-  static Widget timeInput({
+  Widget timeInput({
     DateTime? initTime,
     required String labelText,
     required Function(DateTime?) onTimeSelected,
@@ -246,7 +285,7 @@ class FormHelper {
     );
   }
 
-  static Widget datetimeInput({
+  Widget datetimeInput({
     DateTime? initialDatetime,
     required String labelText,
     required Function(DateTime?) onDatetimeSelected,
@@ -260,7 +299,7 @@ class FormHelper {
     );
   }
 
-  static Widget checkboxListTile({
+  Widget checkboxListTile({
     required String title,
     required void Function(bool) onChanged,
     String? subtitle,
@@ -279,13 +318,13 @@ class FormHelper {
   }
 
   /// 一个普通的简单复选组件
-  static Widget checkbox(
-    String label, {
-    bool? value,
-    required void Function(bool?)? onChanged,
-    String? helperText,
-    bool helperTextBottom = true,
-  }) {
+  Widget checkbox(
+      String label, {
+        bool? value,
+        required void Function(bool?)? onChanged,
+        String? helperText,
+        bool helperTextBottom = true,
+      }) {
     bool initValue = value ?? false;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -340,16 +379,14 @@ class FormHelper {
     );
   }
 
-  // static Widget radioGroup(){}
-
   /// 搜索框 [data] 原始数据，在用户输入或提交时会同时将原始数据返回
-  static Widget search(
-    MySearchInputMethods method, {
-    double fontSize = 16,
-    String? hintText,
-    String? value,
-    dynamic data,
-  }) {
+  Widget search(
+      MySearchInputMethods method, {
+        double fontSize = 16,
+        String? hintText,
+        String? value,
+        dynamic data,
+      }) {
     return MySearchInput(
       method,
       fontSize: fontSize,
@@ -360,28 +397,28 @@ class FormHelper {
   }
 
   /// 用来模拟一个输入框，如果只是单纯需要显示文字，使用 MyText.label
-  static InputDecorator inputDecoration(
-    String label,
-    Widget child, {
-    InputDecoration? decoration,
-    bool isRequired = false,
-    String? helperText,
-  }) {
+  InputDecorator inputDecoration(
+      String label,
+      Widget child, {
+        InputDecoration? decoration,
+        bool isRequired = false,
+        String? helperText,
+      }) {
     final textWidget = MyInputLabel(label: label, isRequired: isRequired);
 
     final usedDecoration =
-        (decoration ??
-                InputDecoration(
-                  border: const OutlineInputBorder(),
-                  isDense: true,
-                  helperText: helperText,
-                  // 适当调整内容内边距，确保内容不会顶到边框
-                  contentPadding: const EdgeInsets.symmetric(
-                    horizontal: 12,
-                    vertical: 20,
-                  ),
-                ))
-            .copyWith(label: textWidget);
+    (decoration ??
+        InputDecoration(
+          border: const OutlineInputBorder(),
+          isDense: true,
+          helperText: helperText,
+          // 适当调整内容内边距，确保内容不会顶到边框
+          contentPadding: const EdgeInsets.symmetric(
+            horizontal: 12,
+            vertical: 20,
+          ),
+        ))
+        .copyWith(label: textWidget);
 
     return InputDecorator(
       decoration: usedDecoration,

@@ -5,16 +5,23 @@ import '../../../tao996.dart';
 
 abstract class MySmartRefresherController<T>
     extends IMySmartRefresherBodyController {
+  AbstractListDelegate<T> delegate;
+
   int pageIndex = 1;
   int pageSize = 15;
 
   /// 是否有更多数据
   final RxBool hasMore = true.obs;
-  final RxList<T> items = <T>[].obs;
+
+  RxList<T> get items => delegate.rxItems;
 
   RxBool isRequesting = false.obs;
 
-  MySmartRefresherController({bool autoLoad = true, this.pageSize = 15}) {
+  MySmartRefresherController({
+    bool autoLoad = true,
+    this.pageSize = 15,
+    AbstractListDelegate<T>? delegate,
+  }) : delegate = delegate ?? MyListDelegate<T>() {
     refreshController = RefreshController(initialRefresh: autoLoad);
   }
 
@@ -56,12 +63,56 @@ abstract class MySmartRefresherController<T>
   /// 加载数据，在 smartRefresh 中被调用；不需要设置 isRequesting 或者 assignItems 等操作
   /// [isRefresh] 是否是刷新，如果是，则需要重置搜索条件
   /// ```dart
+  /// 控制器 通常 extends MySmartRefresherController<T> implements MySearchInputMethods
+  /// 1. 创建搜索条件
+  /// class _SearchCondition {
+  ///   String keyword = '';
+  ///   String toString(){
+  ///     if (keyword.isNotEmpty){
+  ///       return "name like '%$keyword%'";
+  ///     }
+  ///     return '';
+  ///   }
+  /// }
+  /// 2. 实现加载数据方法
   /// Future<List<ServerFeed>?> loadData() async {
   ///    return await userService.getPaginationData(where: _getWhere(), pageSize: pageSize,pageIndex: pageIndex,);
+  /// }
+  /// 3. 实现搜索方法
+  /// @override
+  /// Future<void> onChanged(String text, {data}) async {
+  ///    searchConditions.keyword = text;
+  ///    await onReSearch();
+  /// }
+  ///
+  /// @override
+  /// Future<void> onSubmitted(String text, {data}) async {}
+  ///
+  /// 视图
+  /// body: Column(
+  ///    children: [
+  ///       FormHelper.search( c,
+  ///          hintText: 'search'.tr,
+  ///          value: c.searchConditions.keyword,
+  ///       ),
+  ///       Expanded(child: MyEvents.unfocusOnTap(body())),
+  ///     ],
+  /// )
+  /// Widget body(BuildContext context) {
+  ///     return Obx( () => MySmartRefresher.obxListView( c,
+  ///         canLoadMore: c.hasMore,
+  ///         empty:  MyEmptyStateWidget(title: 'record'.tr, onAction: c.bindInsertRecord,),
+  ///         itemCount: c.items.value.length,
+  ///         itemBuilder: (context, index) {
+  ///           return Obx( () => ?, );
+  ///         },
+  ///       ),
+  ///     );
   /// }
   /// ```
   Future<List<T>?> loadData({required bool isRefresh});
 
+  /// 在搜索结果之后调用
   void assignItems(List<T> newItems, {bool isRefresh = false}) {
     if (isRefresh) {
       items.clear();

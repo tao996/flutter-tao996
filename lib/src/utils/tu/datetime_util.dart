@@ -47,8 +47,9 @@ class DatetimeUtil {
 
     int day = dateTime.day;
     String formattedDay = day.toString().padLeft(2, '0');
-
-    if (format == DateTimeFormat.ymd) {
+    if (format == DateTimeFormat.ym) {
+      return '$year-$formattedMonth';
+    } else if (format == DateTimeFormat.ymd) {
       return '$year-$formattedMonth-$formattedDay';
     } else if (format == DateTimeFormat.ymdFile) {
       return '$year$formattedMonth$formattedDay';
@@ -69,6 +70,15 @@ class DatetimeUtil {
       return '$year$formattedMonth$formattedDay-$formattedHour$formattedMinute$formattedSecond';
     }
     return '$year-$formattedMonth-$formattedDay $formattedHour:$formattedMinute:$formattedSecond';
+  }
+
+  String formatYM({int timestamp = 0, DateTime? dateTime, String? iso8601}) {
+    return format(
+      dateTime: dateTime,
+      timestamp: timestamp,
+      iso8601: iso8601,
+      format: DateTimeFormat.ym,
+    );
   }
 
   String formatYMD({int timestamp = 0, DateTime? dateTime, String? iso8601}) {

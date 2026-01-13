@@ -38,27 +38,27 @@ class _MyDemoFormHelperState extends State<MyDemoFormHelper> {
         Column(
           children: [
             const SizedBox(height: 16),
-            FormHelper.input(
+            tu.form.input(
               controller: createController(),
               labelText: '普通输入框',
               hintText: '请输入内容',
               helperText: '请输入内容',
             ),
             const SizedBox(height: 16),
-            FormHelper.input(
+            tu.form.input(
               controller: createController(),
               labelText: '密码输入框',
               isPassword: true,
             ),
             const SizedBox(height: 16),
-            FormHelper.input(
+            tu.form.input(
               controller: createController(),
               labelText: '数字输入框',
               isInteger: true,
               helperText: '请输入一个整数',
             ),
             const SizedBox(height: 16),
-            FormHelper.input(
+            tu.form.input(
               controller: createController(),
               labelText: '货币输入框',
               isMoney: true,
@@ -66,25 +66,25 @@ class _MyDemoFormHelperState extends State<MyDemoFormHelper> {
             ),
 
             const SizedBox(height: 16),
-            FormHelper.select(
+            tu.form.select(
               label: '公司',
               items: ConstHelper.kvTitles,
               onChanged: (value) {
                 dprint('select: $value');
               },
               value: 'abc',
-              hintText: 'FormHelper.select',
+              hintText: 'tu.form.select',
             ),
 
             const SizedBox(height: 16),
-            FormHelper.dateInput(
+            tu.form.dateInput(
               labelText: '日期',
               onDateSelected: (dt) {
                 dprint(dt);
               },
             ),
             const SizedBox(height: 16),
-            FormHelper.datetimeInput(
+            tu.form.datetimeInput(
               labelText: '日期时间',
               onDatetimeSelected: (dt) {
                 dprint(dt);
@@ -93,7 +93,7 @@ class _MyDemoFormHelperState extends State<MyDemoFormHelper> {
 
             const SizedBox(height: 16),
             Obx(
-              () => FormHelper.checkbox(
+              () => tu.form.checkbox(
                 '同意协议',
                 value: agree.value,
                 onChanged: (value) {
@@ -105,7 +105,7 @@ class _MyDemoFormHelperState extends State<MyDemoFormHelper> {
             const SizedBox(height: 16),
             MyText.h3('gridCheckbox'),
             const SizedBox(height: 16),
-            FormHelper.gridCheckbox(
+            tu.form.gridCheckbox(
               items: ConstHelper.titles,
               onSelectionChanged: (title) {
                 dprint('title:$title');
@@ -116,7 +116,7 @@ class _MyDemoFormHelperState extends State<MyDemoFormHelper> {
             const SizedBox(height: 16),
             MyText.h3('listCheckbox'),
             const SizedBox(height: 16),
-            FormHelper.listCheckbox(
+            tu.form.listCheckbox(
               items: ConstHelper.kvTitles,
               onSelectionChanged: (values) {
                 dprint('values: $values');
@@ -127,7 +127,7 @@ class _MyDemoFormHelperState extends State<MyDemoFormHelper> {
             MyText.h3('filterChipCheckbox'),
             const SizedBox(height: 16),
             Obx(
-              () => FormHelper.filterChipCheckbox<Company>(
+              () => tu.form.filterChipCheckbox<Company>(
                 items: ConstHelper.kvTitles,
                 values: kvCompanyValues,
                 onSelectionChanged: (selected, item) {
@@ -144,7 +144,7 @@ class _MyDemoFormHelperState extends State<MyDemoFormHelper> {
             MyText.h3('segmentedButton'),
             const SizedBox(height: 16),
             Obx(
-              () => FormHelper.segmentedButton(
+              () => tu.form.segmentedButton(
                 multiSelectionEnabled: true,
                 items: ConstHelper.kvTitles,
                 onSelectionChanged: (items) {

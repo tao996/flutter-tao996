@@ -31,30 +31,30 @@ class MyColor {
 
   /// 代表成功的颜色，通常用于表示成功、完成、通过等操作
   static Color success() {
-    return getColorScheme().secondary;
+    return tu.colorScheme.secondary;
   }
 
   /// 代表失败的颜色，通常用于表示失败、错误、拒绝等操作
   static Color error() {
-    return getColorScheme().error;
+    return tu.colorScheme.error;
   }
 
   static Color danger() {
-    return getColorScheme().error;
+    return tu.colorScheme.error;
   }
 
   /// 背景、表面式，常用于 AlertDialog
   static Color surface() {
-    return getColorScheme().surface;
+    return tu.colorScheme.surface;
   }
 
   /// 高亮或信息提示
   static Color info() {
-    return getColorScheme().primary;
+    return tu.colorScheme.primary;
   }
 
   /// 文本颜色
   static Color text(double opacity) {
-    return getColorScheme().onSurface.withAlpha((255 * opacity).toInt());
+    return tu.colorScheme.onSurface.withAlpha((255 * opacity).toInt());
   }
 }

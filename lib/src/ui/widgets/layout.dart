@@ -2,16 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:tao996/tao996.dart';
 
 class MyLayout {
-  static Widget emptyWidget() => const SizedBox.shrink();
+  static Widget get height8 => const SizedBox(height: 8);
+  static Widget get height => const SizedBox(height: 16);
+  static Widget get height24 => const SizedBox(height: 24);
 
-  static Widget height() => const SizedBox(height: 16);
+  static Widget get width8 => const SizedBox(width: 8);
+  static Widget get width => const SizedBox(width: 16);
 
-  static Widget height8() => const SizedBox(height: 8);
-
-  static Widget width() => const SizedBox(width: 16);
-
-  static Widget width8() => const SizedBox(width: 8);
-
+  static Widget get emptyWidget => const SizedBox.shrink();
   static Widget miniColumn(
     List<Widget> children, {
     MainAxisAlignment mainAxisAlignment = MainAxisAlignment.start,

@@ -121,8 +121,8 @@ class MessageService implements IMessageService {
           ),
           ElevatedButton(
             style: ElevatedButton.styleFrom(
-              backgroundColor: getColorScheme().error, // 使用 Error Color 强调删除操作
-              foregroundColor: getColorScheme().onError,
+              backgroundColor: tu.colorScheme.error, // 使用 Error Color 强调删除操作
+              foregroundColor: tu.colorScheme.onError,
             ),
             onPressed: () async {
               Get.back(result: true); // 必须提前关闭
@@ -155,7 +155,7 @@ class MessageService implements IMessageService {
       return;
     }
     Fluttertoast.cancel();
-    Fluttertoast.showToast(msg: message, textColor: getColorScheme().onSurface);
+    Fluttertoast.showToast(msg: message, textColor: tu.colorScheme.onSurface);
   }
 
   @override

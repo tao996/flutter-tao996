@@ -11,7 +11,7 @@ class MyDialog {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          Expanded(child: Text(title, style: getTextTheme().titleLarge)),
+          Expanded(child: Text(title, style: tu.textTheme.titleLarge)),
           if (actions != null) ...actions,
           IconButton(
             onPressed: () {
@@ -50,7 +50,9 @@ class MyDialog {
         height = height.toInt().toDouble();
       }
     }
-    dprint('MyDialog.fullScreenDialog num:$num; width: $width; height: $height');
+    dprint(
+      'MyDialog.fullScreenDialog num:$num; width: $width; height: $height',
+    );
     return showDialog(
       context: context,
       barrierDismissible: barrierDismissible ?? DeviceService.isMobile(),
@@ -322,7 +324,7 @@ class MyDialog {
           alignment: Alignment.topCenter,
           // 使用 Material 组件，以便内容具有背景和阴影
           child: Material(
-            color: Colors.white, // 内容背景色
+            // color: Colors.white, // 内容背景色
             elevation: 10, // 阴影
             borderRadius: const BorderRadius.vertical(
               bottom: Radius.circular(12),

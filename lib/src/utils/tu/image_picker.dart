@@ -37,4 +37,25 @@ class ImagePickerUtil {
         return await picker.pickMultiVideo();
     }
   }
+
+  /// 选择一张图片，并返回路径
+  Future<String?> pickPath({
+    ImagePickerSource source = ImagePickerSource.gallery,
+  }) async {
+    final file = await pick(source: source);
+    if (file != null) {
+      return file.path;
+    }
+    return null;
+  }
+  /// 选择多份资源（默认图片），并返回路径
+  Future<List<String>> pickMultiplePath({
+    ImagePickerMultipleSource source = ImagePickerMultipleSource.image,
+  }) async {
+    final files = await pickMultiple(source: source);
+    if (files == null || files.isEmpty) {
+      return [];
+    }
+    return files.map((f) => f.path).toList();
+  }
 }

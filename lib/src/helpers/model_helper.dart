@@ -213,6 +213,18 @@ abstract class ModelHelper<T extends IModel<T>> {
     );
   }
 
+  Future<List<T>> getByIds(
+    List<int> ids, {
+    bool tryCache = true,
+    ModelTransaction? mtn,
+  }) async {
+    if (ids.isEmpty) {
+      return [];
+    }
+    final where = 'id IN (${ids.join(',')})';
+    return await getManyBy(where: where);
+  }
+
   /// 检查记录在数据库中是否存在
   Future<bool> exists(
     dynamic value, {
@@ -699,8 +711,11 @@ abstract class ModelHelper<T extends IModel<T>> {
       if (entity != null) {
         await afterDelete(deletedCount, entity: entity);
       }
-
-      debugService.d('Deleted $deletedCount records in $tableName');
+      debugService.d(
+        'Deleted $deletedCount records in $tableName',
+        args: '=x=x=x=x=x=x=x=x=x==x=x=x=x=x=x=x=x=x==x=x',
+        log: true,
+      );
       return deletedCount;
     } catch (e, st) {
       debugService.exception(e, st, log: true);
