@@ -19,8 +19,6 @@ import 'package:tao996/src/utils/tu/text_util.dart';
 import 'package:tao996/src/utils/tu/zip.dart';
 import 'package:tao996/src/utils/tu/url_util.dart';
 
-import 'utils/tu/pc_form_helper.dart';
-
 class _TUtils {
   const _TUtils();
 
@@ -42,8 +40,6 @@ class _TUtils {
   final device = const DeviceUtil();
   final context = const ContextUtil();
   final text = const TextUtil();
-
-  final pcForm = const PcFormHelperUtil();
   final form = const FormHelperUtil();
 
   final api = const ApiUtil();

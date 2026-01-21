@@ -35,18 +35,29 @@ class FilePickerService implements IFilePickerService {
     );
     return result?.files;
   }
-  /// 选择文件，并返回它们的路径
+
+  /// 选择文件，并返回它们的路径 [suggestExtensions] 常见的文件类型
   Future<List<String>> pickFilesPath({
     bool allowMultiple = true,
     List<String>? allowedExtensions,
+    bool suggestExtensions = true,
   }) async {
+    if (allowedExtensions == null && suggestExtensions) {
+      allowedExtensions = [
+        'jpg',
+        'jpeg',
+        'png',
+        'mp4',
+        'pdf',
+        'doc',
+        'mp3',
+        'zip',
+      ];
+    }
     final files = await pickFiles(
       allowMultiple: allowMultiple,
       type: PickerFileType.custom,
-      // 开放常用的文件类型供用户选择
-      allowedExtensions:
-          allowedExtensions ??
-          ['jpg', 'jpeg', 'png', 'mp4', 'pdf', 'doc', 'mp3', 'zip'],
+      allowedExtensions: allowedExtensions,
     );
     if (files == null || files.isEmpty) {
       return [];
@@ -55,6 +66,18 @@ class FilePickerService implements IFilePickerService {
         .where((f) => f.path != null && f.path!.isNotEmpty)
         .map((f) => f.path!)
         .toList();
+  }
+
+  /// 返回第1个选择文件的路径
+  Future<String?> pickFirstPath({List<String>? allowedExtensions}) async {
+    FilePickerResult? result = await FilePicker.platform.pickFiles(
+      allowedExtensions: allowedExtensions,
+    );
+
+    if (result != null) {
+      return result.files.single.path!;
+    }
+    return null;
   }
 
   /// 获取选择的文件，可以使用 FilepathUtil.getFileNames 来获取文件名

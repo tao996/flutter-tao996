@@ -9,7 +9,7 @@ import 'package:crypto/crypto.dart';
 class FileUtil {
   const FileUtil();
 
-  // 【桌面端专用】通过对话框让用户选择保存路径，并执行文件复制
+  /// 【桌面端专用】通过对话框让用户选择保存路径，并执行文件复制
   Future<bool?> _saveFileToUserSelectedPath(
     String suggestedFileName, {
     File? sourceFile,
@@ -86,6 +86,11 @@ class FileUtil {
     await FlutterImageGallerySaver.saveFile(filePath);
   }
 
+  Future<bool> exists(String filePath) async {
+    final file = File(filePath);
+    return await file.exists();
+  }
+
   /// 异步计算给定文件的 MD5 哈希值
   /// 返回一个 32 字符的十六进制字符串
   Future<String> fileMd5(String filePath) async {
@@ -112,5 +117,10 @@ class FileUtil {
       // 生产环境中，如果计算失败，可以抛出异常或返回一个基于时间的唯一ID
       rethrow;
     }
+  }
+
+  Future<String> getContent(String filePath) async {
+    final file = File(filePath);
+    return await file.readAsString();
   }
 }

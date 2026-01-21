@@ -500,7 +500,7 @@ class TranslationService extends Translations {
   @override
   Map<String, Map<String, String>> get keys => _keys;
 
-  void addKeys(Map<String, Map<String, String>> newKeys) {
+  void addDict(Map<String, Map<String, String>> newKeys) {
     newKeys.forEach((key, value) {
       if (_keys.containsKey(key)) {
         _keys[key]!.addAll(value);
@@ -508,6 +508,15 @@ class TranslationService extends Translations {
         _keys[key] = value;
       }
     });
+  }
+
+  // 将翻译添加到语言上
+  void addKeys(Map<String, String> newKeys, {String locale = 'zh_CN'}) {
+    if (_keys.containsKey(locale)) {
+      _keys[locale]!.addAll(newKeys);
+    } else {
+      _keys[locale] = newKeys;
+    }
   }
 }
 

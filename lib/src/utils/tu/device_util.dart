@@ -1,7 +1,8 @@
 import 'dart:io';
 import 'dart:convert';
 
-import 'package:tao996/src/services/device_service.dart';
+import 'package:flutter/services.dart';
+import 'package:tao996/tao996.dart';
 
 class DeviceUtil {
   const DeviceUtil();
@@ -98,5 +99,34 @@ class DeviceUtil {
 
       return false;
     }
+  }
+
+  void copyToClipboard(String text) {
+    Clipboard.setData(ClipboardData(text: text));
+  }
+
+  Future<Directory> getTemporaryDirectory() async {
+    return await getIPathService().getTemporaryDirectoryPath();
+  }
+
+  Future<Directory> getApplicationDocumentsDirectory() async {
+    return await getIPathService().getApplicationDocumentsDirectoryPath();
+  }
+
+  Future<Directory> getApplicationSupportDirectory() async {
+    return await getIPathService().getApplicationSupportDirectoryPath();
+  }
+
+  Future<Directory> getApplicationCacheDirectory() async {
+    return await getIPathService().getApplicationCacheDirectoryPath();
+  }
+
+  Future<Directory?> getDownloadsDirectory() async {
+    return await getIPathService().getDownloadsDirectoryPath();
+  }
+
+  /// 获取用户的家目录
+  Future<String> homeDir() async {
+    return await getIPathService().homeDir();
   }
 }

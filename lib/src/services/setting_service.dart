@@ -67,6 +67,8 @@ abstract class ISettingsService {
   Future<bool> remove(String key);
 
   Future<bool> clean();
+
+  SharedPreferences get prefs;
 }
 
 Future<SharedPreferences> getSharedPreferences() async {
@@ -81,6 +83,7 @@ abstract class SettingService implements ISettingsService {
     _prefs = await SharedPreferences.getInstance();
   }
 
+  @override
   SharedPreferences get prefs => _prefs;
 
   @override

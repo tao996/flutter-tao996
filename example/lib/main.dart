@@ -77,7 +77,7 @@ Future<void> _initAppServices() async {
   locator.registerSingleton<IRouteService>(routeSer);
 
   // 语言
-  getTranslationService().addKeys(AppTranslation.keys);
+  getTranslationService().addDict(AppTranslation.keys);
   // dprint(getTranslationService().keys);
 
   // 主题

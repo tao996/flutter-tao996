@@ -44,6 +44,9 @@ class MyInput extends StatefulWidget {
 
   final String? Function(String?)? validator;
 
+  final Widget? suffix;
+  final TextAlign textAlign;
+
   const MyInput({
     this.controller,
     this.labelText,
@@ -61,6 +64,8 @@ class MyInput extends StatefulWidget {
     this.remStep = -1,
     this.addStep = 1,
     this.isMoney = false,
+    this.suffix,
+    this.textAlign = TextAlign.start,
     // 回调
     this.onChanged,
     this.onFieldSubmitted,
@@ -179,7 +184,7 @@ class _MyInputState extends State<MyInput> {
         }
       }
     }
-    if (widget.validator != null){
+    if (widget.validator != null) {
       return widget.validator!(value);
     }
 
@@ -254,6 +259,7 @@ class _MyInputState extends State<MyInput> {
       inputFormatters: _inputFormatters,
       // 新增：验证器
       validator: _validator,
+      textAlign: widget.textAlign,
       onChanged: (value) {
         // 由于控制器监听器已经处理了 setState，这里只需要调用外部回调;
         // 注意不要在外部再给 controller 赋值，否则会出现错误
@@ -268,7 +274,10 @@ class _MyInputState extends State<MyInput> {
         helperText: widget.helperText,
         border: const OutlineInputBorder(),
         // 只有当文本不为空且输入不是密码时才显示后缀图标（密码图标已包含在 _suffix 中）
-        suffixIcon: (widget.isPassword || controller.text.isNotEmpty)
+        suffixIcon:
+            (widget.isPassword ||
+                controller.text.isNotEmpty ||
+                widget.suffix != null)
             ? _suffix()
             : null,
         isDense: true,
@@ -321,6 +330,9 @@ class _MyInputState extends State<MyInput> {
               widget.onChanged?.call('');
             },
           ),
+
+        // 追加其它后缀组件
+        if (widget.suffix != null) widget.suffix!,
       ],
     );
   }

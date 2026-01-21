@@ -129,7 +129,9 @@ class FormHelperUtil {
     final child = segmentedButton<T>(
       items: items,
       onSelectionChanged: (data) {
-        onSelectionChanged(data.first);
+        if (data.isNotEmpty) {
+          onSelectionChanged(data.first);
+        }
       },
       values: value == null ? [] : [value],
     );
@@ -232,6 +234,8 @@ class FormHelperUtil {
     bool isMoney = false,
     int? maxLines,
     int? minLines,
+    Widget? suffix,
+    TextAlign textAlign = TextAlign.start,
     void Function(String)? onChanged,
     void Function(String)? onSubmit,
     String? Function(String?)? validator,
@@ -251,9 +255,11 @@ class FormHelperUtil {
       isMoney: isMoney,
       maxLines: maxLines,
       minLines: minLines,
+      suffix: suffix,
       onChanged: onChanged,
       onFieldSubmitted: onSubmit,
       validator: validator,
+      textAlign: textAlign,
     );
   }
 
@@ -319,12 +325,12 @@ class FormHelperUtil {
 
   /// 一个普通的简单复选组件
   Widget checkbox(
-      String label, {
-        bool? value,
-        required void Function(bool?)? onChanged,
-        String? helperText,
-        bool helperTextBottom = true,
-      }) {
+    String label, {
+    bool? value,
+    required void Function(bool?)? onChanged,
+    String? helperText,
+    bool helperTextBottom = true,
+  }) {
     bool initValue = value ?? false;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -381,12 +387,12 @@ class FormHelperUtil {
 
   /// 搜索框 [data] 原始数据，在用户输入或提交时会同时将原始数据返回
   Widget search(
-      MySearchInputMethods method, {
-        double fontSize = 16,
-        String? hintText,
-        String? value,
-        dynamic data,
-      }) {
+    MySearchInputMethods method, {
+    double fontSize = 16,
+    String? hintText,
+    String? value,
+    dynamic data,
+  }) {
     return MySearchInput(
       method,
       fontSize: fontSize,
@@ -398,32 +404,98 @@ class FormHelperUtil {
 
   /// 用来模拟一个输入框，如果只是单纯需要显示文字，使用 MyText.label
   InputDecorator inputDecoration(
-      String label,
-      Widget child, {
-        InputDecoration? decoration,
-        bool isRequired = false,
-        String? helperText,
-      }) {
+    String label,
+    Widget child, {
+    InputDecoration? decoration,
+    bool isRequired = false,
+    String? helperText,
+  }) {
     final textWidget = MyInputLabel(label: label, isRequired: isRequired);
 
     final usedDecoration =
-    (decoration ??
-        InputDecoration(
-          border: const OutlineInputBorder(),
-          isDense: true,
-          helperText: helperText,
-          // 适当调整内容内边距，确保内容不会顶到边框
-          contentPadding: const EdgeInsets.symmetric(
-            horizontal: 12,
-            vertical: 20,
-          ),
-        ))
-        .copyWith(label: textWidget);
+        (decoration ??
+                InputDecoration(
+                  border: const OutlineInputBorder(),
+                  isDense: true,
+                  helperText: helperText,
+                  // 适当调整内容内边距，确保内容不会顶到边框
+                  contentPadding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 20,
+                  ),
+                ))
+            .copyWith(label: textWidget);
 
     return InputDecorator(
       decoration: usedDecoration,
       // child 内部的 padding 用于调整芯片内容与装饰器内边距的契合度
       child: child,
+    );
+  }
+
+  static const double myFormLeftWidth = 120;
+
+  /// 左侧控件 + 右侧控件
+  Widget leftWidgetRightWidget({
+    required Widget right,
+    Widget? left,
+    double? width,
+    EdgeInsetsGeometry? padding,
+    bool pZero = false,
+  }) {
+    return Padding(
+      padding: pZero
+          ? const EdgeInsets.all(0)
+          : (padding ?? const EdgeInsets.symmetric(vertical: 8.0)),
+      child: Row(
+        // crossAxisAlignment: CrossAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.baseline,
+        textBaseline: TextBaseline.alphabetic, // 必须设置 textBaseline
+        children: [
+          Padding(
+            padding: const EdgeInsets.only(top: 4),
+            child: SizedBox(
+              width: width ?? myFormLeftWidth,
+              child: left ?? Container(),
+            ),
+          ),
+          Expanded(child: right),
+        ],
+      ),
+    );
+  }
+
+  Widget leftNullRightWidget(Widget child, {EdgeInsetsGeometry? padding}) {
+    return Padding(
+      padding:
+          padding ??
+          const EdgeInsets.only(top: 8, bottom: 8, left: myFormLeftWidth),
+      child: child,
+    );
+  }
+
+  Widget leftStringRightWidget(
+    String label, {
+    required Widget child,
+    bool isRequired = false,
+    double? width,
+  }) {
+    return leftWidgetRightWidget(
+      width: width,
+      left: Row(
+        // crossAxisAlignment: CrossAxisAlignment.start, // 开启后红点上浮
+        // mainAxisAlignment: MainAxisAlignment.start,
+        children: [
+          Padding(
+            padding: EdgeInsets.only(right: isRequired ? 4.0 : 10),
+            child: isRequired
+                ? const Icon(Icons.circle, size: 8, color: Colors.red)
+                : null,
+          ),
+          MyText.h4(label),
+        ],
+      ),
+      right: child,
     );
   }
 }

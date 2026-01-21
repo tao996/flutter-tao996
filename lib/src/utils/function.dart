@@ -4,14 +4,14 @@ import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
 import 'package:tao996/tao996.dart';
 
-void dprint(dynamic message, {bool stack = true}) {
+void dprint(dynamic message, {bool stack = true, bool first = true}) {
   if (kDebugMode) {
     debugPrint(message.toString());
     if (stack) {
       StackUtil.output(
         color: MyColor.yellow,
         filterNames: ['function.dart'],
-        first: true,
+        first: first,
       );
     }
   }
