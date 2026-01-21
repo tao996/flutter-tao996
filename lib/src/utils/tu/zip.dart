@@ -4,6 +4,7 @@ import 'package:tao996/tao996.dart';
 
 class ZipUtil {
   const ZipUtil();
+
   /// 压缩文件
   /// [zipFilePath] 压缩包名称, [password] 解压密码
   /// [workingDirectory] 工作目录，如果存在，则会与 [zipFilePath] 及 [filePaths]的各部分进行拼接
@@ -15,14 +16,9 @@ class ZipUtil {
     String app = 'zip',
   }) async {
     final encoder = ZipFileEncoder(password: password);
-    encoder.create(
-      tu.path.resolvePath(zipFilePath, dir: workingDirectory),
-    );
+    encoder.create(tu.path.resolvePath(zipFilePath, dir: workingDirectory));
     for (final filePath in filePaths) {
-      final resolvedPath = tu.path.resolvePath(
-        filePath,
-        dir: workingDirectory,
-      );
+      final resolvedPath = tu.path.resolvePath(filePath, dir: workingDirectory);
       final t = tu.path.getFileType(resolvedPath);
       if (t == FileSystemEntityType.file) {
         await encoder.addFile(File(resolvedPath));
@@ -34,7 +30,7 @@ class ZipUtil {
       }
     }
 
-    encoder.close();
+    await encoder.close();
   }
 
   /// 解压文件

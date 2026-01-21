@@ -369,7 +369,7 @@ abstract class AbstractListDelegate<T> {
         final removed = rootItems.removeAt(index);
         rootTotal?.value--;
         await afterDelete?.call(removed, index);
-        delegateCallback?.call(
+        await delegateCallback?.call(
           DelegateAction.delete,
           record: removed,
           index: index,
@@ -383,7 +383,7 @@ abstract class AbstractListDelegate<T> {
       if (index >= 0 && index < rootItems.length) {
         rootItems[index] = entity;
         await afterUpdate?.call(index);
-        delegateCallback?.call(
+        await delegateCallback?.call(
           DelegateAction.update,
           record: entity,
           index: index,
@@ -392,7 +392,7 @@ abstract class AbstractListDelegate<T> {
         unshift ? rootItems.insert(0, entity) : rootItems.add(entity);
         rootTotal?.value++;
         await afterInsert?.call(entity);
-        delegateCallback?.call(
+        await delegateCallback?.call(
           DelegateAction.insert,
           record: entity,
           index: index,

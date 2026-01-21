@@ -219,7 +219,7 @@ class FilepathUtil {
     return p.dirname(file.path);
   }
 
-  /// 获取文件及其扩展名
+  /// 获取文件名+扩展名
   /// ```
   /// p.basename('path/to/foo.dart'); // -> 'foo.dart'
   /// p.basename('path/to');          // -> 'to'
@@ -351,12 +351,12 @@ class FilepathUtil {
     return p.fromUri(uri);
   }
 
-  /// 获取当前脚本目录
+  /// 获取当前脚本目录（应用所在目录）
   String scriptDir() {
     return p.dirname(Platform.script.toFilePath());
   }
 
-  /// 获取字符串的文件名
+  /// 获取字符串的文件名列表
   List<String> getFileNames(List<File> files) {
     return files.map((file) => file.path.split(dirSeparator()).last).toList();
   }
@@ -378,7 +378,6 @@ class FilepathUtil {
   }
 
   /// 判断给定的地址是网络地址还是本地文件路径。
-
   ResourceLocation determineLocation(String address) {
     try {
       if (address.startsWith('assets/')) {

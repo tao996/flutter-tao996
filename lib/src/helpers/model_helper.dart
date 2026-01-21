@@ -832,8 +832,8 @@ abstract class ModelHelper<T extends IModel<T>> {
       ids.add(id);
       entity.id = id; // 回填 ID
       if (callback) {
-        afterInsert(entity);
-        afterSave(entity, true);
+        await afterInsert(entity);
+        await afterSave(entity, true);
       }
     }
     return ids;
@@ -889,7 +889,7 @@ abstract class ModelHelper<T extends IModel<T>> {
     );
     // 调用后置钩子
     if (entity != null) {
-      afterSave(entity, false);
+      await afterSave(entity, false);
     }
     return updatedRows;
   }

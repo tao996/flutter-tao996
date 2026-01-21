@@ -74,7 +74,7 @@ class FileUtil {
   /// 保存文件
   Future<void> saveFile(String filePath) async {
     final file = File(filePath);
-    if (!await file.exists()) {
+    if (!file.existsSync()) {
       throw 'fileNotExists'.tr;
     }
     if (DeviceService.isPc()) {
@@ -86,9 +86,8 @@ class FileUtil {
     await FlutterImageGallerySaver.saveFile(filePath);
   }
 
-  Future<bool> exists(String filePath) async {
-    final file = File(filePath);
-    return await file.exists();
+  bool exists(String filePath) {
+    return File(filePath).existsSync();
   }
 
   /// 异步计算给定文件的 MD5 哈希值
@@ -96,7 +95,7 @@ class FileUtil {
   Future<String> fileMd5(String filePath) async {
     final file = File(filePath);
 
-    if (!await file.exists()) {
+    if (!file.existsSync()) {
       throw FileSystemException('File not found', filePath);
     }
 

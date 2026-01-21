@@ -1,7 +1,5 @@
-
 import 'package:tao996/tao996.dart';
 import 'package:flutter_test/flutter_test.dart';
-
 
 class User extends IModel<User> {
   final String name;
@@ -10,19 +8,16 @@ class User extends IModel<User> {
 
   @override
   User fromMap(Map<String, dynamic> map) {
-    // TODO: implement fromMap
     throw UnimplementedError();
   }
 
   @override
   Map<String, dynamic> toJson() {
-    // TODO: implement toJson
     throw UnimplementedError();
   }
 
   @override
   Map<String, dynamic> toMap() {
-    // TODO: implement toMap
     throw UnimplementedError();
   }
 }

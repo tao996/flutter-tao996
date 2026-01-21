@@ -134,7 +134,7 @@ class FilePickerService implements IFilePickerService {
 
       // 创建文件对象并读取其内容
       final file = File(filePath);
-      if (await file.exists()) {
+      if (file.existsSync()) {
         final keyContent = await file.readAsString();
         return keyContent;
       } else {

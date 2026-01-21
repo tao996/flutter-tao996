@@ -28,7 +28,7 @@ class AppContactService {
   }
 
   Future<void> copy(String account) async {
-    Clipboard.setData(ClipboardData(text: account));
+    await Clipboard.setData(ClipboardData(text: account));
     messageSer.success('Copy success'.tr);
   }
 
@@ -59,7 +59,7 @@ class AppContactService {
           return;
       }
     }
-    tu.url.launch(url, title: platform?.name.toString());
+    await tu.url.launch(url, title: platform?.name.toString());
   }
 
   String facebookUrl(String account) {
@@ -149,9 +149,9 @@ class AppContactService {
                   return;
                 }
                 if (copyable) {
-                  copy(account);
+                  await copy(account);
                 } else {
-                  open(account, platform: platform);
+                  await open(account, platform: platform);
                 }
               },
       ),

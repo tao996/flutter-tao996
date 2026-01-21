@@ -1,4 +1,16 @@
 include: package:flutter_lints/flutter.yaml
 
-# Additional information about this file can be found at
-# https://dart.dev/guides/language/analysis-options
+linter:
+  rules:
+    # 要求所有 Future 必须被 await 或显式处理; 如果不想等待，则必须使用 unawaited(logData());
+    # 关闭提醒 // ignore: unawaited_futures
+    unawaited_futures: true
+    avoid_slow_async_io: true
+    # 避免在非 Future 对象上使用 await（减少冗余代码）
+    await_only_futures: true
+    prefer_const_constructors: false # 是否强制使用 const 构造函数
+    prefer_final_fields: false # 是否强制将字段声明为 final
+    use_key_in_widget_constructors: false # 是否强制在 Widget 构造函数中使用 key
+    prefer_const_literals_to_create_immutables: false
+    prefer_const_constructors_in_immutables: false
+    avoid_print: false # 是否在代码中使用 print 函数

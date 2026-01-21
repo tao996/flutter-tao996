@@ -26,10 +26,9 @@ class FontService implements IFontService {
     final Directory appWorkDir = Platform.isAndroid
         ? await getApplicationDocumentsDirectory()
         : await getApplicationSupportDirectory();
-    final String fontDirPath =
-        '${appWorkDir.path}${separator}fonts';
+    final String fontDirPath = '${appWorkDir.path}${separator}fonts';
     final Directory fontDir = Directory(fontDirPath);
-    if (!(await fontDir.exists())) {
+    if (!fontDir.existsSync()) {
       await fontDir.create(recursive: true);
     }
     return fontDir;
@@ -40,7 +39,7 @@ class FontService implements IFontService {
     final fontFileBytes = await fontFile.readAsBytes();
     final fontLoad = FontLoader(fontName);
     fontLoad.addFont(Future.value(ByteData.view(fontFileBytes.buffer)));
-    fontLoad.load();
+    await fontLoad.load();
   }
 
   @override
@@ -83,11 +82,9 @@ class FontService implements IFontService {
       return;
     }
     final fontFileDir = await _getFontDir();
-    final fontFile = File(
-      '${fontFileDir.path}$separator$fontName',
-    );
+    final fontFile = File('${fontFileDir.path}$separator$fontName');
     try {
-      if (await fontFile.exists()) {
+      if (fontFile.existsSync()) {
         await fontFile.delete();
       }
     } catch (error, stackTrace) {
@@ -110,11 +107,8 @@ class FontService implements IFontService {
 
       final fontFileDir = await _getFontDir();
       for (var fontFile in fontFileList) {
-        final fontFileName = fontFile.path
-            .split(separator)
-            .last;
-        final newFontPath =
-            '${fontFileDir.path}$separator$fontFileName';
+        final fontFileName = fontFile.path.split(separator).last;
+        final newFontPath = '${fontFileDir.path}$separator$fontFileName';
         await fontFile.copy(newFontPath);
         // await fontFile.delete();
       }

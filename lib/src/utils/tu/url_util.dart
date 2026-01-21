@@ -18,7 +18,7 @@ class UrlUtil {
     return uri != null && uri.hasScheme && uri.hasAuthority;
   }
 
-  /// 连接主机与路径 [host] 主机；[path] 路径
+  /// 连接主机与路径， [host] 主机；[path] 路径
   Uri concat(String host, String path) {
     return Uri.parse(host).resolveUri(Uri.parse(path));
   }
