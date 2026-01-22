@@ -33,7 +33,7 @@ void registerTao996Services(GetIt locator) {
   locator.registerLazySingleton<INetworkService>(() => NetworkService());
   locator.registerLazySingleton<IPathService>(() => PathService());
   locator.registerLazySingleton<IShareService>(() => ShareService());
-  locator.registerLazySingleton<IFilePickerService>(() => tu.filePicker);
+  locator.registerLazySingleton<IFilePickerService>(() => tu.file);
   locator.registerLazySingleton<IWebviewService>(() => WebviewService());
 
   // 设置全局异常捕获
@@ -50,6 +50,7 @@ void registerTao996Services(GetIt locator) {
 IDatabaseService getIDatabaseService() {
   return GetIt.instance<IDatabaseService>();
 }
+
 /// 如果你自己手动注册（通常用于替换数据库）
 SqfliteDatabaseService getSqfliteDatabaseService() {
   return GetIt.instance<SqfliteDatabaseService>();

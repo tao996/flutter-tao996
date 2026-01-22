@@ -96,7 +96,7 @@ class FontService implements IFontService {
   @override
   Future<bool> loadLocalFont() async {
     try {
-      List<File> fontFileList = await getIFilePickerService().quickPickFiles(
+      List<File> fontFileList = await getIFilePickerService().pickFiles(
         type: FileType.custom,
         allowedExtensions: ['ttf', 'otf', 'ttc'],
         allowMultiple: true,

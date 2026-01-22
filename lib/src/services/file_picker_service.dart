@@ -41,7 +41,7 @@ abstract class IFilePickerService {
   /// [lockParentWindow] 仅支持 windows, 如果设置为 true，文件选择窗口会锁定 Flutter 父窗口（像模态窗口一样）。确保用户必须处理文件选择对话框才能继续操作主应用。
   ///
   /// [readSequential] 确保在 Web 端导入文件时，保持文件选择的顺序。
-  Future<List<PlatformFile>?> pickFiles({
+  Future<List<PlatformFile>?> pickPlatformFile({
     String? dialogTitle,
     String? initialDirectory,
     PickerFileType type = PickerFileType.any,
@@ -55,7 +55,7 @@ abstract class IFilePickerService {
     bool readSequential = false,
   });
 
-  Future<List<File>> quickPickFiles({
+  Future<List<File>> pickFiles({
     FileType type = FileType.any,
     List<String>? allowedExtensions,
     String? initialDirectory,
@@ -66,7 +66,7 @@ abstract class IFilePickerService {
   Future<String?> getDirectory();
 
   /// 成功读取文件内容后返回 String，否则返回 null。
-  Future<String?> pickAndRead({
+  Future<String?> getPickFileContent({
     FileType type = FileType.any,
     String? initialDirectory,
     List<String>? allowedExtensions,

@@ -72,7 +72,8 @@ abstract class IDatabaseService {
   });
 
   /// 执行一个事务，注意事务内部全部都需要传递 mt.txn 来执行，否则会导致锁
-  Future<M> transaction<M>(Future<M> Function(ModelTransaction mt) action, {
+  Future<M> transaction<M>(
+    Future<M> Function(ModelTransaction mt) action, {
     bool? exclusive,
   });
 }
@@ -91,13 +92,18 @@ class SqfliteDatabaseService implements IDatabaseService {
     required String databaseDir,
     String databaseName = 'main.sqlite.db',
     this.printSQL = false,
-  }){
+  }) {
     databasePath = path.join(databaseDir, databaseName);
     dprint('db path: $databasePath');
   }
 
   @override
-  Database getDatabase() => _database!;
+  Database getDatabase() {
+    if (_database == null) {
+      throw Exception('database is not open');
+    }
+    return _database!;
+  }
 
   /// 使用注意：在手机上禁止将全部语句合并成一条
   /// ```
@@ -301,7 +307,8 @@ class SqfliteDatabaseService implements IDatabaseService {
 
   /// 执行一个事务
   @override
-  Future<M> transaction<M>(Future<M> Function(ModelTransaction mt) action, {
+  Future<M> transaction<M>(
+    Future<M> Function(ModelTransaction mt) action, {
     bool? exclusive,
   }) async {
     try {

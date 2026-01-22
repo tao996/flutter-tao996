@@ -289,7 +289,7 @@ Future<void> _downloadImage({
       }
     }
     if (location.isLocal) {
-      await tu.file.saveFile(imageUrl);
+      await tu.file.saveFileToGallery(imageUrl);
     } else {
       final file = await _getImage(
         imageUrl: imageUrl,
@@ -309,7 +309,7 @@ Future<void> _downloadImage({
         getIMessageService().error('imageDownloadError'.tr);
         return;
       } else {
-        await tu.file.saveImage(file: file);
+        await tu.file.saveImageToGallery(file: file);
       }
     }
     getIDebugService().d('图片保存成功', successMessage: 'downloadAndSaveSuccess'.tr);

@@ -512,15 +512,11 @@ class _TUtils {
   final data = const DataUtil();
   final date = const DatetimeUtil();
   final fn = const FnUtil();
-  final get = const GetUtil();
   final number = const NumberUtil();
   final permission = const PermissionUtil();
   final url = const UrlUtil();
   final zip = const ZipUtil();
   final imagePicker = const ImagePickerUtil();
-
-  /// 直接调用将可能无法测试，建议使用 getIFilePickerService()
-  final filePicker = const FilePickerService();
   final device = const DeviceUtil();
   final context = const ContextUtil();
   final text = const TextUtil();
@@ -632,13 +628,18 @@ class DatetimeUtil {
 * `Future<Directory?> getDownloadsDirectory()`
 * `Future<String> homeDir()` 用户家目录
 
-#### 文件选择 FilePickerService
+#### 文件操作 FileUtil
 
-内部引入了 [file_picker](https://pub.dev/packages/file_picker)
+内部引入了 
+* [file_picker](https://pub.dev/packages/file_picker)
+* [image_picker](https://pub.dev/packages/image_picker)
+* [file_selector](https://pub.dev/packages/file_selector)
+* [flutter_image_gallery_saver](https://pub.dev/packages/flutter_image_gallery_saver)
+
 
 ```dart
 /// 选择多个文件
-Future<List<PlatformFile>?> pickFiles({
+Future<List<PlatformFile>?> pickPlatformFile({
   String? dialogTitle,
   String? initialDirectory,
   FileType type = FileType.any,
@@ -651,17 +652,17 @@ Future<List<PlatformFile>?> pickFiles({
   bool lockParentWindow = false,
   bool readSequential = false,
 });
-/// 选择文件，并返回它们的路径 [suggestExtensions] 常见的文件类型
+/// 选择文件 [pickPlatformFile]，并返回它们的路径 [suggestExtensions] 常见的文件类型
 Future<List<String>> pickFilesPath({
   bool allowMultiple = true,
   List<String>? allowedExtensions,
   bool suggestExtensions = true,
 });
-/// 返回第1个选择文件的路径
+/// 选择文件 [pickPlatformFile] 并返回第1个选择文件的路径
 Future<String?> pickFirstPath({List<String>? allowedExtensions});
 
-/// 获取选择的文件，可以使用 FilepathUtil.getFileNames 来获取文件名
-Future<List<File>> quickPickFiles({
+/// 选择文件 [pickPlatformFile]，返回转换后的 [File]
+Future<List<File>> pickFiles({
   FileType type = FileType.any,
   List<String>? allowedExtensions,
   String? initialDirectory,
@@ -672,44 +673,44 @@ Future<List<File>> quickPickFiles({
 Future<String?> getDirectory();
 
 /// 选择文件并读取文件内容
-Future<String?> pickAndRead({
+Future<String?> getPickFileContent({
   FileType type = FileType.any,
   String? initialDirectory,
   List<String>? allowedExtensions,
 });
-```
 
-#### 相册文件操作 FileUtil
-
-内部引入了 [file_selector](https://pub.dev/packages/file_selector) 和 [flutter_image_gallery_saver](https://pub.dev/packages/flutter_image_gallery_saver)
-
-```dart
 /// 保存图片到用户相册
-Future<void> saveImage({
+Future<void> saveImageToGallery({
   File? file,
   Uint8List? imageBytes,
   String? suggestedFileName,
 });
 
-/// 保存文件
-Future<void> saveFile(String filePath);
-Future<bool> exists(String filePath);
+/// 保存文件到用户相册
+Future<void> saveFileToGallery(String filePath);
+
+/// 判断文件是否存在
+bool exists(String filePath);
 
 /// 异步计算给定文件的 MD5 哈希值
 /// 返回一个 32 字符的十六进制字符串
 Future<String> fileMd5(String filePath);
 
 Future<String> getContent(String filePath) async;
+
+/// 选择/拍摄一个图片或视频；
+Future<XFile?> take({ ImagePickerSource source = ImagePickerSource.gallery,});
+
+/// 返回选择/拍摄图片或视频的路径
+Future<String?> taskPath({ ImagePickerSource source = ImagePickerSource.gallery,});
+
+/// 从相册中选择多份文件
+Future<List<XFile>?> pickXFilesFromGallery({ ImagePickerMultipleSource source = ImagePickerMultipleSource.image, });
+
+/// 选择多份资源（默认图片），并返回路径
+Future<List<String>> pickXFilePathFromGallery({ ImagePickerMultipleSource source = ImagePickerMultipleSource.image, });
+
 ```
-
-#### 图片拍摄 ImagePickerUtil
-
-内部引入了 [image_picker](https://pub.dev/packages/image_picker)]
-
-* `Future<XFile?> pick({ ImagePickerSource source = ImagePickerSource.gallery,})` 选择/拍摄一个图片或视频；
-* `Future<List<XFile>?> pickMultiple({ ImagePickerMultipleSource source = ImagePickerMultipleSource.image, })`
-* `Future<String?> pickPath({ ImagePickerSource source = ImagePickerSource.gallery,})`
-* `Future<List<String>> pickMultiplePath({ ImagePickerMultipleSource source = ImagePickerMultipleSource.image, })` 选择多份资源（默认图片），并返回路径
 
 #### 数字处理 NumberUtil
 
