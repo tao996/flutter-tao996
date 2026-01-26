@@ -283,4 +283,45 @@ class MyPs extends ChangeNotifier {
 
     if (changed) notifyListeners();
   }
+
+  /// 导出画布为图片
+  /// [size] 导出的目标尺寸，如果不指定则使用 canvasSize
+  ///
+  /// ```dart
+  /// // 1. 导出为 4K 高清图
+  /// ui.Image highResImage = await myPs.exportImage(size: Size(3840, 2160));
+
+  /// // 2. 将 ui.Image 转换为字节流以保存或分享
+  /// ByteData? byteData = await highResImage.toByteData(format: ui.ImageByteFormat.png);
+  /// Uint8List pngBytes = byteData!.buffer.asUint8List();
+  /// ```
+  Future<ui.Image> exportImage({Size? size}) async {
+    final exportSize = size ?? canvasSize;
+
+    // 1. 创建记录器和画布
+    final recorder = ui.PictureRecorder();
+    final canvas = Canvas(recorder, Offset.zero & exportSize);
+
+    // 2. 创建 Painter 实例
+    // 我们直接复用现有的 MyPainter 逻辑
+    final layer = PsLayer(nodes: nodes, mask: mask);
+    final painter = MyPainter(layer, style);
+
+    // 3. 执行绘制
+    // 注意：painter.paint 内部已经处理了从 canvasSize 到 exportSize 的缩放
+    painter.paint(canvas, exportSize);
+
+    // 4. 结束录制并生成图片
+    final picture = recorder.endRecording();
+    return await picture.toImage(
+      exportSize.width.toInt(),
+      exportSize.height.toInt(),
+    );
+  }
+
+  // 清空画布的方法，方便重新创作
+  void clear() {
+    nodes.clear();
+    notifyListeners();
+  }
 }

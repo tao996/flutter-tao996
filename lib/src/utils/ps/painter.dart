@@ -79,27 +79,65 @@ class MyPainter extends CustomPainter {
     }
 
     // --- 3. 背景填充 (支持颜色或渐变) ---
+    // --- 3. 背景填充 (包含颜色、渐变、背景图片) ---
     final bool hasBgGradient = style.backgroundGradient != null;
     final bool hasBgColor =
         style.backgroundColor != null &&
         style.backgroundColor != Colors.transparent;
+    final bool hasBgImage = style.backgroundImage != null;
+    final bool hasBlur = style.blur != null && style.blur! > 0;
 
-    if (hasBgGradient || hasBgColor) {
-      final fillPaint = Paint()..style = PaintingStyle.fill;
+    if (hasBgGradient || hasBgColor || hasBgImage || hasBlur) {
+      canvas.save(); // 开启局部状态
 
-      if (hasBgGradient) {
-        fillPaint.shader = style.backgroundGradient!.createShader(rect);
+      // 【统一裁切口】只要定义好这个“洞”的形状，里面的填充逻辑就变简单了
+      if (node.type == PsNodeType.circle) {
+        canvas.clipPath(Path()..addOval(rect));
       } else {
-        fillPaint.color = style.backgroundColor!.withOpacity(
-          style.opacity ?? 1.0,
+        canvas.clipRRect(rrect);
+      }
+
+      // --- 新增：毛玻璃模糊逻辑 ---
+      if (hasBlur) {
+        // 开启一个带有模糊滤镜的图层
+        canvas.saveLayer(
+          rect,
+          Paint()
+            ..imageFilter = ui.ImageFilter.blur(
+              sigmaX: style.blur!,
+              sigmaY: style.blur!,
+            ),
         );
       }
 
-      if (node.type == PsNodeType.circle) {
-        canvas.drawCircle(rect.center, rect.shortestSide / 2, fillPaint);
-      } else {
-        canvas.drawRRect(rrect, fillPaint);
+      // A. 填充底色/渐变 (直接画 Rect 即可，会被 clip 裁切成形状)
+      if (hasBgGradient || hasBgColor) {
+        final fillPaint = Paint()..style = PaintingStyle.fill;
+        if (hasBgGradient) {
+          fillPaint.shader = style.backgroundGradient!.createShader(rect);
+        } else {
+          fillPaint.color = style.backgroundColor!.withOpacity(
+            style.opacity ?? 1.0,
+          );
+        }
+        canvas.drawRect(rect, fillPaint);
       }
+
+      // B. 填充背景图
+      if (hasBgImage) {
+        paintImage(
+          canvas: canvas,
+          rect: rect,
+          image: style.backgroundImage!,
+          fit: style.backgroundFit,
+          opacity: style.opacity ?? 1.0,
+          alignment: Alignment.center,
+        );
+      }
+      if (hasBlur) {
+        canvas.restore(); // 结束模糊图层
+      }
+      canvas.restore(); // 恢复状态，关闭裁切
     }
 
     // --- 4. 内容绘制 (Line / Text / Image) ---
@@ -210,7 +248,7 @@ class MyPainter extends CustomPainter {
           style.opacity ?? 1.0,
         );
       }
-
+      // 因为边框是画在形状“边缘”上的线，而不是填满内部
       if (node.type == PsNodeType.circle) {
         canvas.drawCircle(rect.center, rect.shortestSide / 2, borderPaint);
       } else {

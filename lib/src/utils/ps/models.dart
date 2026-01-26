@@ -1,3 +1,5 @@
+import 'dart:ui' as ui;
+
 import 'package:flutter/material.dart';
 
 /// 定义支持叠加的样式对象
@@ -35,6 +37,10 @@ class PsStyle {
   Gradient? foregroundGradient; // 用于前景（比如文字颜色或边框颜色）的渐变
   BoxShadow? textShadow; // 新增文字阴影
 
+  ui.Image? backgroundImage; // 背景图片
+  BoxFit backgroundFit; // 背景图片适配方式，默认 cover
+  double? blur; // 模糊半径，用于制作毛玻璃效果，若为 null 则不模糊
+
   PsStyle({
     this.size,
     this.radius,
@@ -57,6 +63,9 @@ class PsStyle {
     this.backgroundGradient,
     this.foregroundGradient,
     this.textShadow,
+    this.backgroundImage,
+    this.backgroundFit = BoxFit.cover,
+    this.blur,
   });
 
   PsStyle copyWith(PsStyle? other) {
@@ -83,6 +92,9 @@ class PsStyle {
       backgroundGradient: other.backgroundGradient ?? backgroundGradient,
       foregroundGradient: other.foregroundGradient ?? foregroundGradient,
       textShadow: other.textShadow ?? textShadow,
+      backgroundImage: other.backgroundImage ?? backgroundImage,
+      backgroundFit: other.backgroundFit,
+      blur: other.blur ?? blur,
     );
   }
 

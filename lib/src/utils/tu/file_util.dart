@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:ui' as ui;
 
 import 'package:file_picker/file_picker.dart';
 import 'dart:typed_data';
@@ -45,10 +46,20 @@ class FileUtil implements IFilePickerService {
   Future<void> saveImageToGallery({
     File? file,
     Uint8List? imageBytes,
+    ui.Image? image,
     String? suggestedFileName,
   }) async {
+    // 1. 如果传入的是 ui.Image，先将其转换为 Uint8List
+    if (image != null && imageBytes == null) {
+      final byteData = await image.toByteData(format: ui.ImageByteFormat.png);
+      if (byteData != null) {
+        imageBytes = byteData.buffer.asUint8List();
+      }
+    }
+
+    // 2. 原有的参数校验逻辑
     if (file == null && imageBytes == null) {
-      throw 'file or imageBytes is null';
+      throw 'file, imageBytes or image is null';
     }
     if (file != null) {
       if (DeviceService.isPc()) {

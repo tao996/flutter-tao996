@@ -14,7 +14,12 @@ class _CanvasTestPageState extends State<CanvasTestPage> {
   bool isReady = false;
 
   late MyPs ps;
+
+  /// 渐变色
   late MyPs ps2;
+
+  /// 图片
+  late MyPs ps3;
 
   @override
   void initState() {
@@ -26,6 +31,9 @@ class _CanvasTestPageState extends State<CanvasTestPage> {
     ps2 = MyPs(
       style: PsStyle(size: Size(300, 300), backgroundColor: Colors.grey),
     );
+    ps3 = MyPs(
+      style: PsStyle(size: Size(300, 300), backgroundColor: Colors.grey),
+    );
 
     _prepareData();
   }
@@ -35,12 +43,14 @@ class _CanvasTestPageState extends State<CanvasTestPage> {
     // 统一销毁 GPU 资源，防止内存泄漏
     ps.onDestroy();
     ps2.onDestroy();
+    ps3.onDestroy();
     super.dispose();
   }
 
   Future<void> _prepareData() async {
     await _preparePsScene();
     await _preparePs2Scene();
+    await _preparePs3Scene();
     if (mounted) setState(() => isReady = true);
   }
 
@@ -130,7 +140,6 @@ class _CanvasTestPageState extends State<CanvasTestPage> {
     );
   }
 
-  /// 文字比较场景：展示自动贴边与缩放效果
   Future<void> _preparePs2Scene() async {
     // 1. 画一个从左到右的渐变背景矩形
     ps2.addRectNode(
@@ -199,6 +208,50 @@ class _CanvasTestPageState extends State<CanvasTestPage> {
     );
   }
 
+  Future<void> _preparePs3Scene() async {
+    // 假设你已经加载了一张名为 bgImg 的 ui.Image
+    final bgImg = await tu.draw.renderImage(
+      'D:\\demo\\test\\images\\avatar\\0.png',
+    );
+    ps3.addRectNode(
+      tag: 'card',
+      inlineStyle: PsStyle(
+        size: Size(260, 160),
+        center: true,
+        radius: 20,
+        backgroundImage: bgImg,
+        backgroundFit: BoxFit.cover,
+        shadow: BoxShadow(color: Colors.black26, blurRadius: 15),
+      ),
+    );
+
+    // 在卡片上加文字
+    await ps3.addTextNode(
+      "IMAGE BACKGROUND",
+      inlineStyle: PsStyle(
+        color: Colors.white,
+        fontSize: 20,
+        fontWeight: FontWeight.bold,
+        textShadow: BoxShadow(color: Colors.black, blurRadius: 4),
+      ),
+    );
+
+    ps3.addRectNode(
+      tag: 'glass-card',
+      inlineStyle: PsStyle(
+        size: Size(80, 80),
+        center: true,
+        radius: 30,
+        // 关键：半透明白色背景 + 高斯模糊
+        backgroundColor: Colors.white.withOpacity(0.2),
+        blur: 10.0,
+        borderWidth: 1.5,
+        borderColor: Colors.white.withOpacity(0.3), // 细微的白色边框增加质感
+        shadow: BoxShadow(color: Colors.black12, blurRadius: 20),
+      ),
+    );
+  }
+
   void toggleMaskBorder() {
     if (ps.mask != null) {
       setState(() {
@@ -225,6 +278,18 @@ class _CanvasTestPageState extends State<CanvasTestPage> {
       appBar: AppBar(
         title: const Text("MyPs Canvas Engine"),
         actions: [
+          MyButton(
+            '高清保存',
+            onPressed: () async {
+              final p = ps3;
+              ui.Image exported = await p.exportImage(size: p.canvasSize * 2.0);
+              await tu.file.saveImageToGallery(
+                image: exported,
+                suggestedFileName:
+                    "my_artwork_${DateTime.now().millisecondsSinceEpoch}.png",
+              );
+            },
+          ),
           MyButton(
             'scale',
             onPressed: () {
@@ -257,6 +322,7 @@ class _CanvasTestPageState extends State<CanvasTestPage> {
             },
           ),
           MyButton('蒙板边框', onPressed: toggleMaskBorder),
+          MyButton('蒙板边框', onPressed: toggleMaskBorder),
           MyButton('刷新重绘', onPressed: _refresh),
         ].withRowWidth(),
       ),
@@ -276,6 +342,10 @@ class _CanvasTestPageState extends State<CanvasTestPage> {
                   const Text('渐变功能'),
                   MyLayout.height,
                   Center(child: ps2.build()),
+
+                  const Text('背景图'),
+                  MyLayout.height,
+                  Center(child: ps3.build()),
                 ]),
           MyLayout.height24,
         ],
