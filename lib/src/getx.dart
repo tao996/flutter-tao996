@@ -25,7 +25,7 @@ void registerTao996Services(GetIt locator) {
   // locator.registerLazySingleton<IThemeService>(() => ThemeService());
   // locator.registerLazySingleton<IDatabaseService>(() => SqfliteDatabaseService());
 
-  locator.registerLazySingleton<IFontService>(() => FontService());
+  locator.registerLazySingleton<FontService>(() => FontService());
   locator.registerLazySingleton<DioHttpService>(() => DioHttpService());
   // locator.registerLazySingleton<IHttpService>(() => DioHttpClient());
   final localService = LocaleService();
@@ -64,8 +64,8 @@ IFilePickerService getIFilePickerService() {
   return GetIt.instance<IFilePickerService>();
 }
 
-IFontService getIFontService() {
-  return GetIt.instance<IFontService>();
+FontService getIFontService() {
+  return GetIt.instance<FontService>();
 }
 
 IDioHttpService getIDioHttpService() {

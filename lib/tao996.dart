@@ -67,14 +67,13 @@ export 'src/ui/widgets/table.dart';
 export 'src/ui/widgets/tags.dart';
 export 'src/ui/widgets/text.dart';
 
-
 // 工具
 export 'src/utils/function.dart';
 export 'src/utils/typecast_util.dart';
 export 'src/utils/json_util.dart';
+export 'src/utils/ps_util.dart';
 export 'src/utils/stack_util.dart';
 export 'src/utils/nav_util.dart';
-
 
 export 'src/getx.dart';
 export 'src/tu.dart';

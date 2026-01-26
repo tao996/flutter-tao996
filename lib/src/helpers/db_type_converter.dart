@@ -1,17 +1,115 @@
 // 封装工具类处理类型转换
 import 'dart:convert';
+import 'dart:ui';
 
+import 'package:json_annotation/json_annotation.dart';
 import 'package:tao996/tao996.dart';
+
+class ColorConverter implements JsonConverter<Color, int> {
+  const ColorConverter();
+
+  @override
+  Color fromJson(int json) => Color(json);
+
+  @override
+  int toJson(Color object) => object.value;
+}
+
+class BoolConverter implements JsonConverter<bool, int> {
+  const BoolConverter();
+
+  @override
+  bool fromJson(int json) => DbTypeConverter.boolFromJson(json);
+
+  @override
+  int toJson(bool object) => DbTypeConverter.boolToJson(object);
+}
+
+class MapStringStringConverter
+    implements JsonConverter<Map<String, String>, String> {
+  const MapStringStringConverter();
+
+  @override
+  Map<String, String> fromJson(String? json) =>
+      DbTypeConverter.mapStringFromJson(json);
+
+  @override
+  String toJson(Map<String, String>? data) =>
+      DbTypeConverter.mapStringToJson(data);
+}
+
+class MapStringBoolConverter
+    implements JsonConverter<Map<String, bool>, String> {
+  const MapStringBoolConverter();
+
+  @override
+  Map<String, bool> fromJson(String? json) =>
+      DbTypeConverter.mapBoolFromJson(json);
+
+  @override
+  String toJson(Map<String, bool>? data) => DbTypeConverter.mapBoolToJson(data);
+}
+
+class MapStringIntConverter implements JsonConverter<Map<String, int>, String> {
+  const MapStringIntConverter();
+
+  @override
+  Map<String, int> fromJson(String? json) =>
+      DbTypeConverter.mapIntFromJson(json);
+
+  @override
+  String toJson(Map<String, int>? data) => DbTypeConverter.mapIntToJson(data);
+}
+
+class MapStringDoubleConverter
+    implements JsonConverter<Map<String, double>, String> {
+  const MapStringDoubleConverter();
+
+  @override
+  Map<String, double> fromJson(String? json) =>
+      DbTypeConverter.mapDoubleFromJson(json);
+
+  @override
+  String toJson(Map<String, double>? data) =>
+      DbTypeConverter.mapDoubleToJson(data);
+}
+
+class ListIntConverter implements JsonConverter<List<int>, String> {
+  const ListIntConverter();
+
+  @override
+  List<int> fromJson(String? json) => DbTypeConverter.listIntFromJson(json);
+
+  @override
+  String toJson(List<int>? data) => DbTypeConverter.listIntToJson(data);
+}
+
+class ListDoubleConverter implements JsonConverter<List<double>, String> {
+  const ListDoubleConverter();
+
+  @override
+  List<double> fromJson(String? json) =>
+      DbTypeConverter.listDoubleFromJson(json);
+
+  @override
+  String toJson(List<double>? data) => DbTypeConverter.listDoubleToJson(data);
+}
+
+class ListStringConverter implements JsonConverter<List<String>, String> {
+  const ListStringConverter();
+  @override
+  List<String> fromJson(String? json) =>
+      DbTypeConverter.listStringFromJson(json);
+  @override
+  String toJson(List<String>? data) => DbTypeConverter.listStringToJson(data);
+}
 
 class DbTypeConverter {
   static bool boolFromJson(int value) => value == 1;
 
   static int boolToJson(bool value) => value ? 1 : 0;
 
-  static String mapStringToJson(Map<String, String>? data) {
-    return TypeCastUtil.mapToJson(data);
-  }
-
+  // Map<String, String>
   static Map<String, String> mapStringFromJson(String? json) {
     if (json == null || json.isEmpty) {
       return {};
@@ -19,6 +117,11 @@ class DbTypeConverter {
     return TypeCastUtil.mapStringFromJson(json);
   }
 
+  static String mapStringToJson(Map<String, String>? data) {
+    return TypeCastUtil.mapToJson(data);
+  }
+
+  // Map<String, bool>
   static String mapBoolToJson(Map<String, bool>? data) {
     return TypeCastUtil.mapToJson(data);
   }
@@ -30,6 +133,7 @@ class DbTypeConverter {
     return TypeCastUtil.mapBoolFromJson(json);
   }
 
+  // Map<String, int>
   static String mapIntToJson(Map<String, int>? data) {
     return TypeCastUtil.mapToJson(data);
   }
@@ -41,6 +145,7 @@ class DbTypeConverter {
     return TypeCastUtil.mapIntFromJson(json);
   }
 
+  // Map<String, double>
   static String mapDoubleToJson(Map<String, double>? data) {
     return TypeCastUtil.mapToJson(data);
   }
@@ -97,6 +202,7 @@ class DbTypeConverter {
     });
   }
 
+  // List<int>
   /// 将 JSON 字符串转为 `List<int>`
   /// 支持的 JSON 格式：[1,2,3] 或 null / 空字符串
   static List<int> listIntFromJson(String? json) {
@@ -185,5 +291,26 @@ class DbTypeConverter {
     } catch (e) {
       return '[]';
     }
+  }
+
+  /// 处理任何继承自 DbTypeModel 的嵌套对象
+  ///
+  /// ```
+  /// @JsonKey(
+  ///   fromJson: (v) => DbObjectConverter.fromJson(v, SaveSetting.fromJson),
+  ///   toJson: DbObjectConverter.toJson,
+  /// )
+  /// ```
+  static T fromJson<T>(dynamic json, T Function(Map<String, dynamic>) factory) {
+    if (json == null) return null as T;
+    if (json is String) {
+      return factory(jsonDecode(json));
+    }
+    return factory(json as Map<String, dynamic>);
+  }
+
+  static String toJson(dynamic model) {
+    if (model == null) return '';
+    return jsonEncode(model.toJson());
   }
 }

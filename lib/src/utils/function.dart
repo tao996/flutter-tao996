@@ -23,6 +23,10 @@ void ddprint(dynamic message, dynamic args) {
   }
 }
 
+int colorWithOpacity(double opacity) {
+  return (255 * opacity).toInt();
+}
+
 /// 更新记录列表（不需要 IModel）
 /// [items] 原有的列表；[record] 新的记录；[index] 索引；[unshift] 是否在头部添加
 /// 如果 [record]==null并且 [index]不为0则表示删除

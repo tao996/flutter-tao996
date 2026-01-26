@@ -1,5 +1,6 @@
 import 'package:get/get.dart';
 import 'package:tao996/tao996.dart';
+import 'package:tao996_example/demo/page/canvas.dart';
 import 'package:tao996_example/demo/page/easy_refresh.dart';
 import 'package:tao996_example/demo/page/image.dart';
 import 'package:tao996_example/demo/page/network.dart';
@@ -38,6 +39,7 @@ class RouteHelper extends IRouteService {
     GetPage(name: '/image', page: () => MyDemoImage()),
     GetPage(name: '/network', page: () => MyDemoNetwork()),
     GetPage(name: '/qrcode', page: () => MyDemoQrcodeView()),
+    GetPage(name: '/canvas', page: () => CanvasTestPage()),
   ];
 
   Future<dynamic> gotoName(String name) async {
@@ -76,6 +78,7 @@ class RouteHelper extends IRouteService {
       RouteItem(title: 'Image', name: '/image', subtitle: '图片组件'),
       RouteItem(title: 'Network', name: '/network', subtitle: '网络请求组件'),
       RouteItem(title: 'QrcodeView', name: '/qrcode', subtitle: '二维码组件'),
+      RouteItem(title: 'CanvasTestPage', name: '/canvas', subtitle: '绘图测试'),
     ];
   }
 }

@@ -131,7 +131,7 @@ class FileUtil implements IFilePickerService {
   Future<List<PlatformFile>?> pickPlatformFile({
     String? dialogTitle,
     String? initialDirectory,
-    FileType type = FileType.any,
+    PickerFileType type = PickerFileType.any,
     List<String>? allowedExtensions,
     Function(FilePickerStatus)? onFileLoading,
     int compressionQuality = 0,
@@ -201,7 +201,7 @@ class FileUtil implements IFilePickerService {
   /// 获取选择的文件，可以使用 FilepathUtil.getFileNames 来获取文件名
   @override
   Future<List<File>> pickFiles({
-    FileType type = FileType.any,
+    PickerFileType type = PickerFileType.any,
     List<String>? allowedExtensions,
     String? initialDirectory,
     bool allowMultiple = false,
@@ -219,14 +219,22 @@ class FileUtil implements IFilePickerService {
   }
 
   @override
-  Future<String?> getDirectory() async {
+  Future<String?> getDirectory({
+    String? dialogTitle,
+    bool lockParentWindow = false,
+    String? initialDirectory,
+  }) async {
     // 这会打开一个原生文件选择对话框，只允许用户选择目录，而不是文件。
-    return await FilePicker.platform.getDirectoryPath();
+    return await FilePicker.platform.getDirectoryPath(
+      dialogTitle: dialogTitle,
+      lockParentWindow: lockParentWindow,
+      initialDirectory: initialDirectory,
+    );
   }
 
   @override
   Future<String?> getPickFileContent({
-    FileType type = FileType.any,
+    PickerFileType type = PickerFileType.any,
     String? initialDirectory,
     List<String>? allowedExtensions,
   }) async {

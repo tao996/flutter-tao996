@@ -43,6 +43,8 @@ dependencies:
   file_selector: ^1.0.4
   mime: ^2.0.0
   crypto: ^3.0.7
+  http: ^1.6.0
+  flex_color_picker: ^3.7.2
 #  collection: ^1.19.1
 
 dev_dependencies:

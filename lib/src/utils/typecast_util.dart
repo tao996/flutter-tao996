@@ -99,6 +99,7 @@ class TypeCastUtil {
     final dynamic decoded = safeJsonDecode(jsonString, isList: false);
     return castMap<String, int>(decoded);
   }
+
   static Map<String, double> mapDoubleFromJson(String? jsonString) {
     final dynamic decoded = safeJsonDecode(jsonString, isList: false);
     return castMap<String, double>(decoded);
@@ -194,5 +195,23 @@ class TypeCastUtil {
     final typedData = (data).cast<String, dynamic>();
 
     return fromData(typedData);
+  }
+
+  static Map<String, Map<String, String>> stringToNestedMap(String jsonString) {
+    // 1. 先解析为原始 Map
+    final dynamic rawData = jsonDecode(jsonString);
+
+    // 2. 显式转换为嵌套结构
+    if (rawData is Map) {
+      return rawData.map((key, value) {
+        return MapEntry(
+          key.toString(),
+          // 关键点：将内部的 dynamic Map 转换为 Map<String, String>
+          Map<String, String>.from(value as Map),
+        );
+      });
+    }
+
+    return {};
   }
 }

@@ -1,3 +1,7 @@
+import 'package:file_picker/file_picker.dart';
+
+typedef PickerFileType = FileType;
+typedef PickerPlatformFile = PlatformFile;
 
 ///
 /// [network]  HTTP/HTTPS 等网络协议；
@@ -22,7 +26,6 @@ enum ImagePickerSource { camera, gallery, galleryVideo, cameraVideo, media }
 enum ImagePickerMultipleSource { image, medio, video }
 
 enum DateTimeFormat { ym, ymd, ymdHm, ymdHms, ymdFile, ymdHmFile, ymdHmsFile }
-
 
 class MyPaginationParams {
   /// 每页默认记录数。
@@ -63,7 +66,11 @@ class MyApiResponse {
   final String message;
   final dynamic data;
 
-  MyApiResponse({required this.code, required this.message, required this.data});
+  MyApiResponse({
+    required this.code,
+    required this.message,
+    required this.data,
+  });
 
   factory MyApiResponse.fromJson(Map<String, dynamic> json) {
     return MyApiResponse(
@@ -96,18 +103,18 @@ class MyPaginatedResponse<T> {
   /// 从 JSON Map 创建 PaginatedResponse 实例。
   /// [itemBuilder] 是一个函数，用于将 `List<Map<String, dynamic>>` 转换为 `List<T>`。
   factory MyPaginatedResponse.fromJson(
-      Map<String, dynamic> json,
-      List<T> Function(List<Map<String, dynamic>>)? itemBuilder,
-      ) {
+    Map<String, dynamic> json,
+    List<T> Function(List<Map<String, dynamic>>)? itemBuilder,
+  ) {
     return MyPaginatedResponse(
       totalCount: (json[mapTotalCountName] as num? ?? 0).toInt(),
       // 更安全的类型转换和默认值
       items:
-      (json[mapItemsName] == null || itemBuilder == null) // 字段名改为 'list'
+          (json[mapItemsName] == null || itemBuilder == null) // 字段名改为 'list'
           ? null
           : itemBuilder(
-        (json[mapItemsName] as List).cast<Map<String, dynamic>>(),
-      ),
+              (json[mapItemsName] as List).cast<Map<String, dynamic>>(),
+            ),
     );
   }
 }

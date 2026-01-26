@@ -218,10 +218,6 @@ class DataUtil {
     return cleaned;
   }
 
-  dynamic copy(dynamic data) {
-    return jsonDecode(jsonEncode(data));
-  }
-
   /// 获取数据运行时的类型
   Type getType(dynamic data) {
     return data.runtimeType;
@@ -235,5 +231,35 @@ class DataUtil {
     var digest = md5.convert(bytes);
     // 3. 以十六进制字符串形式输出
     return digest.toString();
+  }
+
+  /// 无法适用于 Map
+  dynamic copy(dynamic data) {
+    return jsonDecode(jsonEncode(data));
+  }
+
+  /// 专门克隆 `Map<String, Map<String, String>>` 的方法
+  Map<String, Map<String, String>> cloneNestedMap(
+    Map<String, Map<String, String>> source,
+  ) {
+    return source.map(
+      (key, value) => MapEntry(
+        key,
+        Map<String, String>.from(value), // 这里对子 Map 进行了克隆
+      ),
+    );
+  }
+
+  /// 更通用的泛型克隆方法 (支持` Map<String, T>`)
+  Map<String, T> cloneMap<T>(Map<String, T> source) {
+    return Map<String, T>.from(
+      source.map((key, value) {
+        if (value is Map) {
+          // 如果内部还是 Map，递归克隆
+          return MapEntry(key, Map.from(value) as T);
+        }
+        return MapEntry(key, value);
+      }),
+    );
   }
 }

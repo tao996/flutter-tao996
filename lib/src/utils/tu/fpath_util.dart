@@ -265,7 +265,7 @@ class FilepathUtil {
     return p.withoutExtension(file.path);
   }
 
-  /// 是否为一个绝对地址
+  /// 是否为一个绝对地址(本地的，或者网络的)
   bool isAbsolute(String path) {
     return p.isAbsolute(path);
   }

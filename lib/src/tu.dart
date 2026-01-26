@@ -2,11 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:tao996/src/utils/tu/api_util.dart';
 import 'package:tao996/src/utils/tu/color_message_util.dart';
+import 'package:tao996/src/utils/tu/color_util.dart';
 import 'package:tao996/src/utils/tu/context_util.dart';
 import 'package:tao996/src/utils/tu/data_util.dart';
 import 'package:tao996/src/utils/tu/datetime_util.dart';
 import 'package:tao996/src/utils/tu/device_util.dart';
+import 'package:tao996/src/utils/tu/draw_util.dart';
 import 'package:tao996/src/utils/tu/file_util.dart';
+import 'package:tao996/src/utils/tu/font_util.dart';
 import 'package:tao996/src/utils/tu/form_helper.dart';
 import 'package:tao996/src/utils/tu/fpath_util.dart';
 import 'package:tao996/src/utils/tu/fn_util.dart';
@@ -16,6 +19,7 @@ import 'package:tao996/src/utils/tu/permission_util.dart';
 import 'package:tao996/src/utils/tu/text_util.dart';
 import 'package:tao996/src/utils/tu/zip.dart';
 import 'package:tao996/src/utils/tu/url_util.dart';
+import 'package:tao996/tao996.dart';
 
 class _TUtils {
   const _TUtils();
@@ -23,6 +27,7 @@ class _TUtils {
   final path = const FilepathUtil();
   final file = const FileUtil();
   final colorMsg = const ColorMessageUtil();
+  final color = const ColorUtil();
   final data = const DataUtil();
   final date = const DatetimeUtil();
   final fn = const FnUtil();
@@ -35,6 +40,9 @@ class _TUtils {
   final context = const ContextUtil();
   final text = const TextUtil();
   final form = const FormHelperUtil();
+  final draw = const DrawUtil();
+  final font = const FontUtil();
+  final ps = const PsUtil();
 
   final api = const ApiUtil();
 

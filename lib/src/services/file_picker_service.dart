@@ -1,9 +1,7 @@
 import 'dart:io';
 
 import 'package:file_picker/file_picker.dart';
-
-typedef PickerFileType = FileType;
-typedef PickerPlatformFile = PlatformFile;
+import 'package:tao996/src/tu_headers.dart';
 
 abstract class IFilePickerService {
   /// 选择文件，注意只有在 [withData] 或 [withReadStream] 有一个为 true 时，才会读取文件的内容；都为 false 时，只会获取到文件的元数据（如名称、路径）

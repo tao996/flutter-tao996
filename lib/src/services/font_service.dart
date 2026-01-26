@@ -1,71 +1,20 @@
 import 'dart:io';
 import 'package:file_picker/file_picker.dart';
-import 'package:flutter/services.dart';
 import 'package:get/get.dart';
-import 'package:path_provider/path_provider.dart';
 
 import '../../tao996.dart';
 
-abstract class IFontService {
-  Future<List<String>> readAllFont();
-
-  Future<void> readThemeFont();
-
-  Future<void> deleteFont(String fontName);
-
-  Future<bool> loadLocalFont();
-}
-
-class FontService implements IFontService {
+class FontService {
   final ISettingsService _settingsService = getISettingsService();
   final IDebugService _debugService = getIDebugService();
   String get separator => tu.path.dirSeparator();
 
-  /// 获取字体目录
-  Future<Directory> _getFontDir() async {
-    final Directory appWorkDir = Platform.isAndroid
-        ? await getApplicationDocumentsDirectory()
-        : await getApplicationSupportDirectory();
-    final String fontDirPath = '${appWorkDir.path}${separator}fonts';
-    final Directory fontDir = Directory(fontDirPath);
-    if (!fontDir.existsSync()) {
-      await fontDir.create(recursive: true);
-    }
-    return fontDir;
-  }
-
-  Future<void> _readFont(String fontFilePath, String fontName) async {
-    final fontFile = File(fontFilePath);
-    final fontFileBytes = await fontFile.readAsBytes();
-    final fontLoad = FontLoader(fontName);
-    fontLoad.addFont(Future.value(ByteData.view(fontFileBytes.buffer)));
-    await fontLoad.load();
-  }
-
-  @override
-  Future<List<String>> readAllFont() async {
-    try {
-      List<String> fontNameList = [];
-      final fontDir = await _getFontDir();
-      for (var fontFile in fontDir.listSync()) {
-        final fontName = fontFile.path.split(separator).last;
-        await _readFont(fontFile.path, fontName);
-        fontNameList.add(fontName);
-      }
-      return fontNameList;
-    } catch (error, stackTrace) {
-      _debugService.exception(error, stackTrace);
-      throw Exception('failedToReadFontFiles'.tr);
-    }
-  }
-
-  @override
   Future<void> readThemeFont() async {
     try {
       final String themeFontName = _settingsService.themeFont;
       if (themeFontName != 'system') {
-        final fontFileDir = await _getFontDir();
-        await _readFont(
+        final fontFileDir = await tu.font.getFontDir();
+        await tu.font.readFont(
           '${fontFileDir.path}$separator$themeFontName',
           themeFontName,
         );
@@ -76,12 +25,11 @@ class FontService implements IFontService {
     }
   }
 
-  @override
   Future<void> deleteFont(String fontName) async {
     if (fontName == 'system') {
       return;
     }
-    final fontFileDir = await _getFontDir();
+    final fontFileDir = await tu.font.getFontDir();
     final fontFile = File('${fontFileDir.path}$separator$fontName');
     try {
       if (fontFile.existsSync()) {
@@ -93,7 +41,6 @@ class FontService implements IFontService {
     }
   }
 
-  @override
   Future<bool> loadLocalFont() async {
     try {
       List<File> fontFileList = await getIFilePickerService().pickFiles(
@@ -105,7 +52,7 @@ class FontService implements IFontService {
         return false;
       }
 
-      final fontFileDir = await _getFontDir();
+      final fontFileDir = await tu.font.getFontDir();
       for (var fontFile in fontFileList) {
         final fontFileName = fontFile.path.split(separator).last;
         final newFontPath = '${fontFileDir.path}$separator$fontFileName';
