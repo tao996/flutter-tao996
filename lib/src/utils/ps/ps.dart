@@ -48,7 +48,7 @@ class MyPs extends ChangeNotifier {
       )..layout();
       finalStyle.size = tp.size;
     }
-
+    finalStyle.inherit = false; // [重要] 确保文字使用 tp.size 而不是继承画布
     final img = await tu.draw.renderText(
       text,
       size: finalStyle.size!,
@@ -223,11 +223,7 @@ class MyPs extends ChangeNotifier {
           width: canvasSize.width,
           height: canvasSize.height,
           child: CustomPaint(
-            painter: MyPainter(
-              PsLayer(nodes: nodes, mask: mask),
-              style,
-              enableHitTest: enableHitTest,
-            ),
+            painter: MyPainter(this, enableHitTest: enableHitTest),
             size: Size.infinite,
           ),
         );
@@ -236,13 +232,8 @@ class MyPs extends ChangeNotifier {
     if (enableHitTest) {
       return GestureDetector(
         onTapDown: (details) {
-          // 只有在开启了交互功能时才调用
-          final clickedNode = findNodeAt(details.localPosition);
-          if (clickedNode != null) {
-            print("点中了: ${clickedNode.tag}");
-            // 你可以在这里把该节点设为“选中状态”，或者通过 bringToFront 将它提上来
-            bringToFront(clickedNode.tag!);
-          }
+          final node = findNodeAt(details.localPosition);
+          toggleSelection(node?.tag); // 点击节点选中，点击空白或再次点击取消
         },
         child: child,
       );
@@ -323,8 +314,7 @@ class MyPs extends ChangeNotifier {
 
     // 2. 创建 Painter 实例
     // 我们直接复用现有的 MyPainter 逻辑
-    final layer = PsLayer(nodes: nodes, mask: mask);
-    final painter = MyPainter(layer, style);
+    final painter = MyPainter(this);
 
     // 3. 执行绘制
     // 注意：painter.paint 内部已经处理了从 canvasSize 到 exportSize 的缩放
@@ -397,62 +387,66 @@ class MyPs extends ChangeNotifier {
     notifyListeners();
   }
 
-  /// 查找被点击的节点
-  /// [localOffset] 手指在 CustomPaint 上的坐标
   PsNode? findNodeAt(Offset localOffset) {
-    // 1. 将屏幕坐标转换为画布逻辑坐标 (反向缩放)
-    // 假设渲染区域大小是 renderSize，逻辑大小是 canvasSize
-    // 注意：这里的 localOffset 应该是相对于 CustomPaint 左上角的偏移
-
-    // 2. 从后往前遍历（先检测最顶层的节点）
+    // 1. 必须从后往前找，因为最后加入（zIndex更高）的在上面
     final sortedNodes = List<PsNode>.from(nodes);
     sortedNodes.sort((a, b) {
-      int cmp = (b.style.zIndex).compareTo(a.style.zIndex); // 注意这里是降序
+      int cmp = (b.style.zIndex).compareTo(a.style.zIndex);
       if (cmp != 0) return cmp;
       return nodes.indexOf(b).compareTo(nodes.indexOf(a));
     });
 
     for (var node in sortedNodes) {
-      final rect = node.rect;
+      // 2. 获取你那个强大的公式算出来的 rect
 
-      // 处理旋转情况下的点击检测
+      Rect rect = node.rect;
+      // print("TextRect:${node.tag} => $rect, Click: $localOffset");
+      // 3. 【关键修正】如果是文字，手动扩大它的判定矩形
+      // inflate(15) 会让感应区域向四周各延伸 15 像素
+      if (node.type == PsNodeType.text) {
+        rect = rect.inflate(15.0);
+      }
+
+      // 4. 处理旋转点击（如果你的文字旋转了）
       if (node.style.rotate != 0) {
-        // 创建一个包含旋转的路径进行检测
-        final path = Path();
-        if (node.type == PsNodeType.circle) {
-          path.addOval(rect);
-        } else {
-          path.addRRect(
-            RRect.fromRectAndRadius(
-              rect,
-              Radius.circular(node.style.radius ?? 0),
-            ),
-          );
-        }
-
-        // 利用 Matrix4 旋转路径 (绕中心)
-        final center = rect.center;
+        final path = Path()..addRect(rect);
+        final center = node.rect.center;
         final matrix = Matrix4.identity()
           ..translate(center.dx, center.dy)
           ..rotateZ(node.style.rotate)
           ..translate(-center.dx, -center.dy);
 
-        final transformedPath = path.transform(matrix.storage);
-
-        if (transformedPath.contains(localOffset)) {
+        if (path.transform(matrix.storage).contains(localOffset)) {
           return node;
         }
       } else {
-        // 普通矩形/圆形检测
-        if (node.type == PsNodeType.circle) {
-          final center = rect.center;
-          final radius = rect.shortestSide / 2;
-          if ((localOffset - center).distance <= radius) return node;
-        } else {
-          if (rect.contains(localOffset)) return node;
+        // 5. 普通矩形判定
+        if (rect.contains(localOffset)) {
+          return node;
         }
       }
     }
     return null;
+  }
+
+  String? selectedTag; // 当前选中的节点标签
+  double _dashOffset = 0.0; // 蚂蚁线的偏移量
+  double get dashOffset => _dashOffset;
+  // 切换选中状态
+  void toggleSelection(String? tag) {
+    if (tag == null || selectedTag == tag) {
+      selectedTag = null; // 再次点击取消选中
+    } else {
+      selectedTag = tag;
+    }
+    dprint('选中了节点 $selectedTag');
+    notifyListeners();
+  }
+
+  // 驱动蚂蚁线滚动的更新方法
+  void updateDashOffset() {
+    _dashOffset += 0.5; // 控制滚动速度
+    if (_dashOffset > 100) _dashOffset = 0;
+    notifyListeners();
   }
 }

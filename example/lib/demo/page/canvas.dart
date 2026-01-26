@@ -10,8 +10,11 @@ class CanvasTestPage extends StatefulWidget {
   State<CanvasTestPage> createState() => _CanvasTestPageState();
 }
 
-class _CanvasTestPageState extends State<CanvasTestPage> {
+class _CanvasTestPageState extends State<CanvasTestPage>
+    with SingleTickerProviderStateMixin {
   bool isReady = false;
+
+  late AnimationController _animationController;
 
   late MyPs ps;
 
@@ -35,11 +38,21 @@ class _CanvasTestPageState extends State<CanvasTestPage> {
       style: PsStyle(size: Size(300, 300), backgroundColor: Colors.grey),
     );
 
+    // 创建一个无限循环的动画，用来驱动蚂蚁线
+    _animationController = AnimationController(
+      vsync: this,
+      duration: Duration(seconds: 1),
+    )..repeat();
+    _animationController.addListener(() {
+      ps3.updateDashOffset(); // 每一帧都更新偏移并通知重绘
+    });
+
     _prepareData();
   }
 
   @override
   void dispose() {
+    _animationController.dispose();
     // 统一销毁 GPU 资源，防止内存泄漏
     ps.onDestroy();
     ps2.onDestroy();
@@ -228,6 +241,7 @@ class _CanvasTestPageState extends State<CanvasTestPage> {
     // 在卡片上加文字
     await ps3.addTextNode(
       "IMAGE BACKGROUND",
+      tag: 'text',
       inlineStyle: PsStyle(
         color: Colors.white,
         fontSize: 20,

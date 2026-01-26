@@ -148,7 +148,7 @@ class PsNode {
     }
 
     // 3. 应用缩放 (如果有 scale 属性)
-    final s = baseSize * (style.scale ?? 1.0);
+    final s = baseSize * style.scale;
 
     // 4. 计算最终位置
     if (style.center) {

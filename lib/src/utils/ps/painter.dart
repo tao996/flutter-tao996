@@ -4,12 +4,10 @@ import 'package:flutter/material.dart';
 import 'package:tao996/tao996.dart';
 
 class MyPainter extends CustomPainter {
-  final PsLayer layer;
-  final PsStyle psStyle; // 传入 MyPs 的整体样式
+  final MyPs ps; // 传入 MyPs 的整体样式
   final bool enableHitTest; // 新增：是否开启点击检测支持
   MyPainter(
-    this.layer,
-    this.psStyle, {
+    this.ps, {
     this.enableHitTest = false, // 默认关闭，仅在交互界面开启
   });
 
@@ -17,7 +15,7 @@ class MyPainter extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     // 1. 坐标系适配：确保逻辑尺寸与物理尺寸一致
 
-    final canvasSize = psStyle.drawSize;
+    final canvasSize = ps.style.drawSize;
     canvas.scale(
       size.width / canvasSize.width,
       size.height / canvasSize.height,
@@ -25,19 +23,19 @@ class MyPainter extends CustomPainter {
     // --- 新增：强制画布边界裁切，防止任何元素（包括线头）超出 ---
     canvas.clipRect(Offset.zero & canvasSize);
     // --- 关键修正：绘制画布背景色 ---
-    if (psStyle.backgroundColor != null) {
+    if (ps.style.backgroundColor != null) {
       final backgroundPaint = Paint()
-        ..color = psStyle.backgroundColor!
+        ..color = ps.style.backgroundColor!
         ..style = PaintingStyle.fill;
       // 绘制撑满 canvasSize 的矩形
       canvas.drawRect(Offset.zero & canvasSize, backgroundPaint);
     }
     // 2. 处理全局蒙版
-    if (layer.mask != null) {
+    if (ps.mask != null) {
       canvas.clipRRect(
         RRect.fromRectAndRadius(
-          layer.mask!.rect,
-          Radius.circular(layer.mask!.radius),
+          ps.mask!.rect,
+          Radius.circular(ps.mask!.radius),
         ),
       );
     }
@@ -45,14 +43,14 @@ class MyPainter extends CustomPainter {
     // 3. 遍历并绘制节点
     // 1. 获取排序后的节点列表 (稳定排序)
     // 增加 zIndex 支持
-    final sortedNodes = List<PsNode>.from(layer.nodes);
+    final sortedNodes = List<PsNode>.from(ps.nodes);
 
     // 按照 zIndex 排序
     sortedNodes.sort((a, b) {
       int cmp = (a.style.zIndex).compareTo(b.style.zIndex);
       if (cmp != 0) return cmp;
       // 如果 zIndex 相同，则维持原 List 中的顺序 (即谁先加进来谁在下面)
-      return layer.nodes.indexOf(a).compareTo(layer.nodes.indexOf(b));
+      return ps.nodes.indexOf(a).compareTo(ps.nodes.indexOf(b));
     });
     for (var node in sortedNodes) {
       _drawNode(canvas, node);
@@ -271,10 +269,67 @@ class MyPainter extends CustomPainter {
         canvas.drawRRect(rrect, borderPaint);
       }
     }
+    if (enableHitTest &&
+        ps.selectedTag != null &&
+        ps.selectedTag!.isNotEmpty &&
+        ps.selectedTag == node.tag) {
+      _drawSelectionBox(canvas, node, ps.dashOffset);
+    }
 
     // --- 6. 恢复变换状态 ---
     if (hasScale || hasRotate) {
       canvas.restore();
+    }
+  }
+
+  void _drawSelectionBox(Canvas canvas, PsNode node, double dashOffset) {
+    final rect = node.rect.inflate(4.0); // 稍微比节点大一点点
+    final style = node.style;
+
+    // 1. 准备虚线画笔
+    final Paint dashPaint = Paint()
+      ..color = Colors.blueAccent
+      ..strokeWidth = 2.0
+      ..style = PaintingStyle.stroke;
+
+    // 2. 创建路径（考虑圆角）
+    final Path path = Path();
+    path.addRRect(
+      RRect.fromRectAndRadius(rect, Radius.circular((style.radius ?? 0) + 4)),
+    );
+
+    // 3. 绘制虚线（核心逻辑）
+    final double dashWidth = 5.0; // 实线长度
+    final double dashSpace = 5.0; // 间隔长度
+
+    final Path dashPath = Path();
+    for (final ui.PathMetric metric in path.computeMetrics()) {
+      double distance = dashOffset % (dashWidth + dashSpace); // 应用偏移量实现动态效果
+      while (distance < metric.length) {
+        dashPath.addPath(
+          metric.extractPath(distance, distance + dashWidth),
+          Offset.zero,
+        );
+        distance += dashWidth + dashSpace;
+      }
+    }
+    canvas.drawPath(dashPath, dashPaint);
+
+    // 4. 可选：在四个角画小手柄
+    final Paint dotPaint = Paint()
+      ..color = Colors.white
+      ..style = PaintingStyle.fill;
+    final Paint dotBorder = Paint()
+      ..color = Colors.blueAccent
+      ..style = PaintingStyle.stroke;
+    for (var offset in [
+      rect.topLeft,
+      rect.topRight,
+      rect.bottomLeft,
+      rect.bottomRight,
+    ]) {
+      canvas.drawCircle(offset, 4, dotPaint);
+      canvas.drawCircle(offset, 4, dotBorder);
     }
   }
 
