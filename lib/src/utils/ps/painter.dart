@@ -43,42 +43,31 @@ class MyPainter extends CustomPainter {
     }
   }
 
-  /// 具体的节点绘制逻辑：处理阴影、填充、内容和边框
   void _drawNode(Canvas canvas, PsNode node) {
     final style = node.style;
-    final rect = node.rect; //
-    // --- 新增：缩放变换逻辑 ---
-    // 检查是否需要变换
-    final bool hasScale = style.scale != 1.0;
-    final bool hasRotate = style.rotate != 0.0;
-
-    if (hasScale || hasRotate) {
-      canvas.save();
-      // 1. 将画布原点移至节点中心
-      final center = rect.center;
-      canvas.translate(center.dx, center.dy);
-
-      // 2. 执行旋转
-      if (hasRotate) canvas.rotate(style.rotate);
-
-      // 3. 执行缩放
-      if (hasScale) canvas.scale(style.scale);
-
-      // 4. 将原点移回
-      canvas.translate(-center.dx, -center.dy);
-    }
+    final rect = node.rect;
     final rrect = RRect.fromRectAndRadius(
       rect,
       Radius.circular(style.radius ?? 0),
     );
 
-    // --- 1. 绘制阴影 (修正：解决透明背景下的阴影渗透问题) ---
+    // --- 1. 坐标变换 (旋转 & 缩放) ---
+    final bool hasScale = style.scale != 1.0;
+    final bool hasRotate = style.rotate != 0.0;
+
+    if (hasScale || hasRotate) {
+      canvas.save();
+      final center = rect.center;
+      canvas.translate(center.dx, center.dy);
+      if (hasRotate) canvas.rotate(style.rotate);
+      if (hasScale) canvas.scale(style.scale);
+      canvas.translate(-center.dx, -center.dy);
+    }
+
+    // --- 2. 绘制阴影 (镂空处理，防止渗透) ---
     if (style.shadow != null) {
       canvas.save();
       final Path shadowPath = Path()..addRRect(rrect);
-
-      // 创建一个无限大的外部矩形，并与当前的 rrect 路径取差集
-      // 这样 Canvas 就只会渲染 rrect 外部的模糊效果
       final Path clipPath = Path()
         ..addRect(rect.inflate(style.shadow!.blurRadius))
         ..addRRect(rrect)
@@ -89,15 +78,22 @@ class MyPainter extends CustomPainter {
       canvas.restore();
     }
 
-    // --- 2. 准备填充 Paint ---
+    // --- 3. 背景填充 (支持颜色或渐变) ---
+    final bool hasBgGradient = style.backgroundGradient != null;
+    final bool hasBgColor =
+        style.backgroundColor != null &&
+        style.backgroundColor != Colors.transparent;
 
-    final fillColor = style.backgroundColor ?? Colors.transparent;
-    final bool shouldFill = fillColor != Colors.transparent;
-    Paint? fillPaint;
-    if (shouldFill) {
-      fillPaint = Paint()
-        ..color = fillColor.withOpacity(style.opacity ?? 1.0)
-        ..style = PaintingStyle.fill;
+    if (hasBgGradient || hasBgColor) {
+      final fillPaint = Paint()..style = PaintingStyle.fill;
+
+      if (hasBgGradient) {
+        fillPaint.shader = style.backgroundGradient!.createShader(rect);
+      } else {
+        fillPaint.color = style.backgroundColor!.withOpacity(
+          style.opacity ?? 1.0,
+        );
+      }
 
       if (node.type == PsNodeType.circle) {
         canvas.drawCircle(rect.center, rect.shortestSide / 2, fillPaint);
@@ -106,33 +102,83 @@ class MyPainter extends CustomPainter {
       }
     }
 
-    // --- 3. 内容绘制 ---
+    // --- 4. 内容绘制 (Line / Text / Image) ---
     switch (node.type) {
       case PsNodeType.line:
         final linePaint = Paint()
-          ..color = style.borderColor ?? style.color ?? Colors.black
           ..strokeWidth = style.borderWidth ?? 1.0
-          ..strokeCap = StrokeCap
-              .round // 让线条两端圆润一点
+          ..strokeCap = StrokeCap.round
           ..style = PaintingStyle.stroke;
-        // 从 Rect 的左上角画到右下角
+
+        // 线条优先使用前景渐变，其次是边框色，最后是普通色
+        if (style.foregroundGradient != null) {
+          linePaint.shader = style.foregroundGradient!.createShader(rect);
+        } else {
+          linePaint.color = (style.borderColor ?? style.color ?? Colors.black)
+              .withOpacity(style.opacity ?? 1.0);
+        }
         canvas.drawLine(rect.topLeft, rect.bottomRight, linePaint);
         break;
-      case PsNodeType.rect:
-        if (shouldFill) canvas.drawRRect(rrect, fillPaint!);
-        break;
-      case PsNodeType.circle:
-        if (shouldFill) {
-          canvas.drawCircle(rect.center, rect.shortestSide / 2, fillPaint!);
+
+      case PsNodeType.text:
+        if (node.data is ui.Image) {
+          final img = node.data as ui.Image;
+          final rect = node.rect;
+
+          // --- 1. 绘制文字阴影 (如果存在) ---
+          if (style.textShadow != null) {
+            final shadow = style.textShadow!;
+            final shadowPaint = Paint()
+              ..colorFilter = ColorFilter.mode(shadow.color, BlendMode.srcIn)
+              ..maskFilter = MaskFilter.blur(
+                BlurStyle.normal,
+                shadow.blurRadius,
+              );
+
+            // 根据 shadow.offset 进行偏移绘制
+            canvas.drawImageRect(
+              img,
+              Rect.fromLTWH(0, 0, img.width.toDouble(), img.height.toDouble()),
+              rect.shift(shadow.offset),
+              shadowPaint,
+            );
+          }
+
+          // --- 2. 绘制渐变或普通文字 ---
+          if (style.foregroundGradient != null) {
+            canvas.saveLayer(rect, Paint());
+            canvas.drawImageRect(
+              img,
+              Rect.fromLTWH(0, 0, img.width.toDouble(), img.height.toDouble()),
+              rect,
+              Paint(),
+            );
+
+            final gradientPaint = Paint()
+              ..shader = style.foregroundGradient!.createShader(rect)
+              ..blendMode = BlendMode.srcIn;
+
+            canvas.drawRect(rect, gradientPaint);
+            canvas.restore();
+          } else {
+            final Paint textPaint = Paint()
+              ..colorFilter = ColorFilter.mode(
+                (style.color ?? Colors.black).withOpacity(style.opacity ?? 1.0),
+                BlendMode.srcIn,
+              );
+            canvas.drawImageRect(
+              img,
+              Rect.fromLTWH(0, 0, img.width.toDouble(), img.height.toDouble()),
+              rect,
+              textPaint,
+            );
+          }
         }
         break;
-      case PsNodeType.text:
+
       case PsNodeType.image:
       case PsNodeType.svg:
         if (node.data is ui.Image) {
-          if (shouldFill) {
-            canvas.drawRRect(rrect, fillPaint!);
-          }
           final img = node.data as ui.Image;
           canvas.drawImageRect(
             img,
@@ -142,16 +188,28 @@ class MyPainter extends CustomPainter {
           );
         }
         break;
+
+      case PsNodeType.rect:
+      case PsNodeType.circle:
+        // 已经在背景填充步骤完成
+        break;
     }
 
-    // --- 4. 绘制边框 ---
+    // --- 5. 绘制边框 (支持渐变) ---
     if (node.type != PsNodeType.line &&
         style.borderWidth != null &&
         style.borderWidth! > 0) {
       final borderPaint = Paint()
-        ..color = style.borderColor ?? Colors.black
         ..strokeWidth = style.borderWidth!
         ..style = PaintingStyle.stroke;
+
+      if (style.foregroundGradient != null) {
+        borderPaint.shader = style.foregroundGradient!.createShader(rect);
+      } else {
+        borderPaint.color = (style.borderColor ?? Colors.black).withOpacity(
+          style.opacity ?? 1.0,
+        );
+      }
 
       if (node.type == PsNodeType.circle) {
         canvas.drawCircle(rect.center, rect.shortestSide / 2, borderPaint);
@@ -159,6 +217,8 @@ class MyPainter extends CustomPainter {
         canvas.drawRRect(rrect, borderPaint);
       }
     }
+
+    // --- 6. 恢复变换状态 ---
     if (hasScale || hasRotate) {
       canvas.restore();
     }

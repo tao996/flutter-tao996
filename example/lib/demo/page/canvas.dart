@@ -13,14 +13,17 @@ class CanvasTestPage extends StatefulWidget {
 class _CanvasTestPageState extends State<CanvasTestPage> {
   bool isReady = false;
 
-  // 定义两个场景管理器
   late MyPs ps;
+  late MyPs ps2;
 
   @override
   void initState() {
     super.initState();
     // 初始化管理器
     ps = MyPs(
+      style: PsStyle(size: Size(300, 300), backgroundColor: Colors.grey),
+    );
+    ps2 = MyPs(
       style: PsStyle(size: Size(300, 300), backgroundColor: Colors.grey),
     );
 
@@ -31,17 +34,18 @@ class _CanvasTestPageState extends State<CanvasTestPage> {
   void dispose() {
     // 统一销毁 GPU 资源，防止内存泄漏
     ps.onDestroy();
+    ps2.onDestroy();
     super.dispose();
   }
 
   Future<void> _prepareData() async {
-    await _prepareBasicScene();
-    await _prepareTextScene();
+    await _preparePsScene();
+    await _preparePs2Scene();
     if (mounted) setState(() => isReady = true);
   }
 
   /// 基础场景：展示 Rect, Circle 和 Gemini 文字
-  Future<void> _prepareBasicScene() async {
+  Future<void> _preparePsScene() async {
     // 1. 背景
     ps.addRectNode(inlineStyle: PsStyle(color: Colors.grey));
 
@@ -127,7 +131,73 @@ class _CanvasTestPageState extends State<CanvasTestPage> {
   }
 
   /// 文字比较场景：展示自动贴边与缩放效果
-  Future<void> _prepareTextScene() async {}
+  Future<void> _preparePs2Scene() async {
+    // 1. 画一个从左到右的渐变背景矩形
+    ps2.addRectNode(
+      inlineStyle: PsStyle(
+        size: Size(200, 100),
+        center: true,
+        radius: 15,
+        backgroundGradient: LinearGradient(
+          colors: [Colors.purple, Colors.orange],
+          begin: Alignment.centerLeft,
+          end: Alignment.centerRight,
+        ),
+        shadow: BoxShadow(
+          color: Colors.black45,
+          blurRadius: 10,
+          offset: Offset(5, 5),
+        ),
+      ),
+    );
+
+    // 2. 一个文字带渐变色
+    await ps2.addTextNode(
+      "Gradient Text",
+      tag: 'grad_text',
+      inlineStyle: PsStyle(
+        position: Offset(0, -80),
+        center: true,
+        fontSize: 30,
+        foregroundGradient: RadialGradient(
+          colors: [Colors.yellow, Colors.red],
+          stops: [0.0, 1.0],
+        ),
+      ),
+    );
+
+    await ps2.addTextNode(
+      "SHADOW TEXT",
+      inlineStyle: PsStyle(
+        center: true,
+        fontSize: 40,
+        // 1. 设置渐变前景
+        foregroundGradient: LinearGradient(
+          colors: [Colors.cyan, Colors.blueAccent],
+        ),
+        // 2. 设置文字阴影
+        textShadow: BoxShadow(
+          color: Colors.black.withOpacity(0.5),
+          offset: Offset(4, 4),
+          blurRadius: 6,
+        ),
+      ),
+    );
+
+    // 3. 一条渐变色的线条
+    ps2.addLine(
+      from: Offset(50, 200),
+      to: Offset(250, 100),
+      inlineStyle: PsStyle(
+        borderWidth: 8,
+        foregroundGradient: LinearGradient(
+          colors: [Colors.green, Colors.blue],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+      ),
+    );
+  }
 
   void toggleMaskBorder() {
     if (ps.mask != null) {
@@ -202,6 +272,10 @@ class _CanvasTestPageState extends State<CanvasTestPage> {
                   const Text('基本使用 (Rect, Circle, Text)'),
                   MyLayout.height,
                   Center(child: ps.build()),
+
+                  const Text('渐变功能'),
+                  MyLayout.height,
+                  Center(child: ps2.build()),
                 ]),
           MyLayout.height24,
         ],

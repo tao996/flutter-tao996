@@ -30,6 +30,11 @@ class PsStyle {
   EdgeInsets? margin; // 供节点使用
   double rotate; // 旋转弧度，默认 0.0
 
+  // --- 新增：渐变属性 ---
+  Gradient? backgroundGradient; // 用于背景填充的渐变
+  Gradient? foregroundGradient; // 用于前景（比如文字颜色或边框颜色）的渐变
+  BoxShadow? textShadow; // 新增文字阴影
+
   PsStyle({
     this.size,
     this.radius,
@@ -49,6 +54,9 @@ class PsStyle {
     this.padding,
     this.margin,
     this.rotate = 0.0,
+    this.backgroundGradient,
+    this.foregroundGradient,
+    this.textShadow,
   });
 
   PsStyle copyWith(PsStyle? other) {
@@ -72,6 +80,9 @@ class PsStyle {
       padding: other.padding ?? padding,
       margin: other.margin ?? margin,
       rotate: other.rotate != 0.0 ? other.rotate : rotate,
+      backgroundGradient: other.backgroundGradient ?? backgroundGradient,
+      foregroundGradient: other.foregroundGradient ?? foregroundGradient,
+      textShadow: other.textShadow ?? textShadow,
     );
   }
 
