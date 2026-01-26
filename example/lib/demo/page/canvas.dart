@@ -121,6 +121,7 @@ class _CanvasTestPageState extends State<CanvasTestPage> {
     // 2. 绝对居中的文字 (不需要计算 Offset，设置 center: true 即可)
     await ps.addTextNode(
       "HELLO WORLD",
+      tag: 'label',
       inlineStyle: PsStyle(fontSize: 20, color: Colors.white),
     );
   }
@@ -154,6 +155,37 @@ class _CanvasTestPageState extends State<CanvasTestPage> {
       appBar: AppBar(
         title: const Text("MyPs Canvas Engine"),
         actions: [
+          MyButton(
+            'scale',
+            onPressed: () {
+              final factory = tu.number.getRandomElement<double>([
+                0.5,
+                1,
+                1.5,
+                2,
+              ]);
+              dprint('随机因子：$factory');
+              ps.scale(factory, tag: 'label');
+            },
+          ),
+          MyButton(
+            'rotate',
+            onPressed: () {
+              final factory = tu.number.getRandomElement<double>([
+                0,
+                45,
+                90,
+                135,
+                180,
+                225,
+                270,
+                315,
+                360,
+              ]);
+              dprint('随机因子：$factory');
+              ps.rotate(factory, tag: 'label');
+            },
+          ),
           MyButton('蒙板边框', onPressed: toggleMaskBorder),
           MyButton('刷新重绘', onPressed: _refresh),
         ].withRowWidth(),
@@ -169,9 +201,7 @@ class _CanvasTestPageState extends State<CanvasTestPage> {
               : MyLayout.miniColumn([
                   const Text('基本使用 (Rect, Circle, Text)'),
                   MyLayout.height,
-                  Center(
-                    child: ps.build(), // 使用 MyPs.build()
-                  ),
+                  Center(child: ps.build()),
                 ]),
           MyLayout.height24,
         ],

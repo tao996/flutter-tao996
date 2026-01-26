@@ -47,6 +47,26 @@ class MyPainter extends CustomPainter {
   void _drawNode(Canvas canvas, PsNode node) {
     final style = node.style;
     final rect = node.rect; //
+    // --- 新增：缩放变换逻辑 ---
+    // 检查是否需要变换
+    final bool hasScale = style.scale != 1.0;
+    final bool hasRotate = style.rotate != 0.0;
+
+    if (hasScale || hasRotate) {
+      canvas.save();
+      // 1. 将画布原点移至节点中心
+      final center = rect.center;
+      canvas.translate(center.dx, center.dy);
+
+      // 2. 执行旋转
+      if (hasRotate) canvas.rotate(style.rotate);
+
+      // 3. 执行缩放
+      if (hasScale) canvas.scale(style.scale);
+
+      // 4. 将原点移回
+      canvas.translate(-center.dx, -center.dy);
+    }
     final rrect = RRect.fromRectAndRadius(
       rect,
       Radius.circular(style.radius ?? 0),
@@ -138,6 +158,9 @@ class MyPainter extends CustomPainter {
       } else {
         canvas.drawRRect(rrect, borderPaint);
       }
+    }
+    if (hasScale || hasRotate) {
+      canvas.restore();
     }
   }
 

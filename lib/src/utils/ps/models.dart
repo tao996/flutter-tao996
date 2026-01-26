@@ -25,6 +25,10 @@ class PsStyle {
   /// 阴影 BoxShadow(  color: Colors.black.withOpacity(0.2),  blurRadius: 10, offset: const Offset(5, 5),)
   BoxShadow? shadow; // 使用 Flutter 原生的 BoxShadow 方便配置颜色、模糊和偏移
   Size? canvasSize; // 将画布尺寸整合进样式
+  double scale; // 新增缩放属性
+  EdgeInsets? padding; // 仅供 MyPs 使用
+  EdgeInsets? margin; // 供节点使用
+  double rotate; // 旋转弧度，默认 0.0
 
   PsStyle({
     this.size,
@@ -35,12 +39,16 @@ class PsStyle {
     this.fontSize,
     this.fontWeight,
     this.position = Offset.zero,
+    this.scale = 1.0, // 默认为 1.0 (不缩放)
     this.center = true,
     this.inherit = true,
     this.borderWidth,
     this.borderColor,
     this.shadow,
     this.canvasSize,
+    this.padding,
+    this.margin,
+    this.rotate = 0.0,
   });
 
   PsStyle copyWith(PsStyle? other) {
@@ -60,6 +68,10 @@ class PsStyle {
       borderColor: other.borderColor ?? borderColor,
       shadow: other.shadow ?? shadow,
       canvasSize: other.canvasSize ?? canvasSize,
+      scale: other.scale != 1.0 ? other.scale : scale, // 简单的合并逻辑
+      padding: other.padding ?? padding,
+      margin: other.margin ?? margin,
+      rotate: other.rotate != 0.0 ? other.rotate : rotate,
     );
   }
 
@@ -91,21 +103,44 @@ class PsNode {
 
   /// 计算节点在画布上的物理 Rect
   Rect get rect {
-    // 逻辑：如果设置了 inherit 且没有 size，则继承 style 里的 canvasSize
-    final s =
-        style.size ??
-        (style.inherit ? (style.canvasSize ?? Size.zero) : Size.zero);
-    final p = style.position;
+    // 1. 获取画布尺寸和由 MyPs padding 转化来的 margin
     final cs = style.canvasSize ?? Size.zero;
+    final m = style.margin ?? EdgeInsets.zero;
 
-    if (style.center && cs != Size.zero) {
+    // 2. 计算节点的基础尺寸
+    // 如果 inherit 为 true，基础尺寸应该是画布尺寸减去四周的 margin
+    Size baseSize;
+    if (style.size != null) {
+      baseSize = style.size!;
+    } else if (style.inherit) {
+      baseSize = Size(
+        cs.width - m.left - m.right,
+        cs.height - m.top - m.bottom,
+      );
+    } else {
+      baseSize = Size.zero;
+    }
+
+    // 3. 应用缩放 (如果有 scale 属性)
+    final s = baseSize * (style.scale ?? 1.0);
+
+    // 4. 计算最终位置
+    if (style.center) {
+      // 居中模式：在画布中心点基础上，叠加 margin 带来的偏移量偏移
+      // 公式：画布中心 - 节点中心 + (左偏移-右偏移)/2 (用于处理非对称margin)
       return Offset(
-            (cs.width - s.width) / 2 + p.dx,
-            (cs.height - s.height) / 2 + p.dy,
+            (cs.width - s.width) / 2 +
+                (m.left - m.right) / 2 +
+                style.position.dx,
+            (cs.height - s.height) / 2 +
+                (m.top - m.bottom) / 2 +
+                style.position.dy,
           ) &
           s;
+    } else {
+      // 绝对定位模式：从画布左上角 (0,0) 出发，先移过 margin，再移过 style.position
+      return Offset(m.left + style.position.dx, m.top + style.position.dy) & s;
     }
-    return p & s;
   }
 }
 

@@ -268,4 +268,10 @@ class NumberUtil {
     }
     return -1;
   }
+
+  T getRandomElement<T>(List<T> list) {
+    final random = Random();
+    // nextInt 生成一个从 0 到 list.length - 1 的随机整数
+    return list[random.nextInt(list.length)];
+  }
 }

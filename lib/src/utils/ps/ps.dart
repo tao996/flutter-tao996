@@ -3,11 +3,12 @@
 * Mask (蒙板定义): 仅作为一个 Path 或 Alpha 区域。
 * Composite (合成器): 遍历节点，按顺序在 saveLayer 的上下文中绘制。
 */
+import 'dart:math' as math;
 import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import 'package:tao996/tao996.dart';
 
-class MyPs {
+class MyPs extends ChangeNotifier {
   final PsStyle style;
   final List<PsClass> classes = [];
   final List<PsNode> nodes = [];
@@ -23,6 +24,9 @@ class MyPs {
   PsStyle _prepareStyle(List<String>? names, PsStyle? inline) {
     PsStyle style = _mergeStyles(names, inline);
     style.canvasSize = canvasSize; // 强制注入当前画布尺寸
+    style.margin =
+        (this.style.padding ?? EdgeInsets.zero) +
+        (inline?.margin ?? EdgeInsets.zero);
     return style;
   }
 
@@ -174,15 +178,6 @@ class MyPs {
     return this;
   }
 
-  /// 根据 Tag 修改位置
-  void move(String tag, Offset offset) {
-    for (var node in nodes) {
-      if (node.tag == tag) {
-        node.style.position = (node.style.position ?? Offset.zero) + offset;
-      }
-    }
-  }
-
   /// 样式合并逻辑
   PsStyle _mergeStyles(List<String>? names, PsStyle? inline) {
     PsStyle base = PsStyle();
@@ -208,14 +203,84 @@ class MyPs {
   }
 
   /// 构建最终渲染组件
+  ///
+  /// ```dart
+  /// // 如何在 Rx 中应用，在 Controller 中
+  /// var scaleFactor = 1.0.obs;
+  /// // 在 UI 中
+  /// myPs.build(),
+  /// // 监听 Rx 变化并同步给 MyPs
+  /// once(scaleFactor, (val) {
+  ///   myPs.scale(val, tag: 'logo');
+  /// });
+  /// ```
   Widget build() {
-    return SizedBox(
-      width: canvasSize.width,
-      height: canvasSize.height,
-      child: CustomPaint(
-        painter: MyPainter(PsLayer(nodes: nodes, mask: mask), style),
-        size: Size.infinite,
-      ),
+    return ListenableBuilder(
+      listenable: this, // 监听 myPs 的变化
+      builder: (context, child) {
+        // 每当 notifyListeners 被调用，这里都会重新执行
+        return SizedBox(
+          width: canvasSize.width,
+          height: canvasSize.height,
+          child: CustomPaint(
+            painter: MyPainter(PsLayer(nodes: nodes, mask: mask), style),
+            size: Size.infinite,
+          ),
+        );
+      },
     );
+  }
+
+  /// 缩放功能
+  void scale(double factor, {String? tag}) {
+    bool changed = false;
+    if (tag == null) {
+      for (var node in nodes) {
+        node.style.scale = factor;
+        changed = true;
+      }
+    } else {
+      for (var node in nodes) {
+        if (node.tag == tag) {
+          node.style.scale = factor;
+          changed = true;
+        }
+      }
+    }
+
+    // 2. 关键：通知 UI 刷新
+    if (changed) notifyListeners();
+  }
+
+  // move 方法也需要加上
+  void move(String tag, Offset offset) {
+    for (var node in nodes) {
+      if (node.tag == tag) {
+        node.style.position = (node.style.position) + offset;
+        notifyListeners(); // 刷新
+      }
+    }
+  }
+
+  /// 旋转功能：angle 为角度（0-360）
+  void rotate(double angle, {String? tag}) {
+    final double radians = angle * (math.pi / 180); // 角度转弧度
+    bool changed = false;
+
+    if (tag == null) {
+      for (var node in nodes) {
+        node.style.rotate = radians;
+        changed = true;
+      }
+    } else {
+      for (var node in nodes) {
+        if (node.tag == tag) {
+          node.style.rotate = radians;
+          changed = true;
+        }
+      }
+    }
+
+    if (changed) notifyListeners();
   }
 }
