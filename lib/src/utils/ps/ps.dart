@@ -202,6 +202,9 @@ class MyPs extends ChangeNotifier {
     nodes.clear();
   }
 
+  // 1. 在 MyPs 中增加一个临时变量记录上一次的手指位置
+  Offset? _lastPanOffset;
+
   /// 构建最终渲染组件
   ///
   /// ```dart
@@ -229,16 +232,70 @@ class MyPs extends ChangeNotifier {
         );
       },
     );
-    if (enableHitTest) {
-      return GestureDetector(
-        onTapDown: (details) {
-          final node = findNodeAt(details.localPosition);
-          toggleSelection(node?.tag); // 点击节点选中，点击空白或再次点击取消
-        },
-        child: child,
-      );
+    if (!enableHitTest) {
+      return child;
     }
-    return child;
+
+    return LayoutBuilder(
+      // 使用 LayoutBuilder 方便获取实时约束
+      builder: (context, constraints) {
+        // 这里的 constraints.biggest 就是显示的 Size
+        final double sX = constraints.biggest.width / canvasSize.width;
+        final double sY = constraints.biggest.height / canvasSize.height;
+
+        return GestureDetector(
+          onTapDown: (details) {
+            dprint('onTapDown');
+            final node = findNodeAt(details.localPosition);
+
+            // 核心逻辑优化：
+            if (node == null) {
+              // 1. 点击空白处，取消当前所有选中
+              toggleSelection(null);
+            } else {
+              // 2. 如果点击的节点不是当前选中的节点，才去切换它
+              // 这样如果点中的是已选中的节点，就不会触发 toggle 里的“取消选中”逻辑
+              if (selectedTag != node.tag) {
+                toggleSelection(node.tag);
+              }
+            }
+          },
+          onPanStart: (details) {
+            _lastPanOffset = details.localPosition; // 记录起点
+            if (selectedTag != null) {
+              bringToFront(selectedTag!);
+            }
+          },
+          onPanEnd: (_) {
+            _lastPanOffset = null; // 清空记录
+          },
+          onPanUpdate: (details) {
+            if (selectedTag != null && _lastPanOffset != null) {
+              // 计算手指在画布上的实际位移 (当前点 - 上一个点)
+              final Offset screenDelta =
+                  details.localPosition - _lastPanOffset!;
+              _lastPanOffset = details.localPosition; // 更新记录点
+
+              // 关键修正：计算画布的物理缩放比
+              // 我们直接用 renderBox 拿到 CustomPaint 渲染在屏幕上的真实大小
+              final RenderBox renderBox =
+                  context.findRenderObject() as RenderBox;
+              final double sx = renderBox.size.width / canvasSize.width;
+              final double sy = renderBox.size.height / canvasSize.height;
+
+              // 转换为逻辑坐标位移
+              final logicalDelta = Offset(
+                screenDelta.dx / sx,
+                screenDelta.dy / sy,
+              );
+
+              updateNodePosition(selectedTag!, logicalDelta);
+            }
+          },
+          child: child,
+        );
+      },
+    );
   }
 
   /// 缩放功能
@@ -447,6 +504,31 @@ class MyPs extends ChangeNotifier {
   void updateDashOffset() {
     _dashOffset += 0.5; // 控制滚动速度
     if (_dashOffset > 100) _dashOffset = 0;
+    notifyListeners();
+  }
+
+  /// 处理节点拖拽
+  /// [tag] 被拖拽节点的标签
+  /// [delta] 手指滑动的偏移增量 (details.delta)
+  void updateNodePosition(String tag, Offset delta) {
+    final index = nodes.indexWhere((n) => n.tag == tag);
+    if (index < 0) {
+      print('Node with tag $tag not found');
+      return;
+    }
+    final node = nodes[index];
+    // 计算新位置
+    Offset newPosition = node.style.position + delta;
+
+    // 【可选】边缘限制逻辑
+    // 如果你想让节点中心不超出画布，可以这样限制：
+
+    newPosition = Offset(
+      newPosition.dx.clamp(-canvasSize.width / 2, canvasSize.width / 2),
+      newPosition.dy.clamp(-canvasSize.height / 2, canvasSize.height / 2),
+    );
+
+    node.style.position = newPosition;
     notifyListeners();
   }
 }
