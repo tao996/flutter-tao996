@@ -3,6 +3,7 @@ import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:tao996/tao996.dart';
 
 class DrawUtil {
   const DrawUtil();
@@ -24,19 +25,62 @@ class DrawUtil {
   }
 
   /// 3. 渲染 SVG 字符串：直接通过 Picture 转换，不再经过 PNG 中转
+  // Future<ui.Image> renderSvg(
+  //   String svgContent, {
+  //   Size size = const Size(512, 512),
+  // }) async {
+  //   final pictureInfo = await vg.loadPicture(SvgStringLoader(svgContent), null);
+  //   // 直接在 GPU 录制 picture 并转为 image
+  //   final image = await pictureInfo.picture.toImage(
+  //     size.width.toInt(),
+  //     size.height.toInt(),
+  //   );
+
+  //   print("SVG 加载成功: ${pictureInfo.size} -> (${image.width},${image.height})");
+
+  //   pictureInfo.picture.dispose(); // 及时释放 picture
+  //   return image;
+  // }
+
   Future<ui.Image> renderSvg(
     String svgContent, {
     Size size = const Size(512, 512),
   }) async {
+    // 1. 加载 Picture
     final pictureInfo = await vg.loadPicture(SvgStringLoader(svgContent), null);
 
-    // 直接在 GPU 录制 picture 并转为 image
-    final image = await pictureInfo.picture.toImage(
+    // 2. 获取 SVG 的原始尺寸 (来自 viewBox 或 width/height)
+    // 如果没有获取到，默认使用 512
+    final double rawWidth = pictureInfo.size.width > 0
+        ? pictureInfo.size.width
+        : 512;
+    final double rawHeight = pictureInfo.size.height > 0
+        ? pictureInfo.size.height
+        : 512;
+
+    final recorder = ui.PictureRecorder();
+    final canvas = Canvas(recorder);
+
+    // 3. 计算缩放比例，实现 BoxFit.contain 效果
+    final double scaleX = size.width / rawWidth;
+    final double scaleY = size.height / rawHeight;
+    // 如果想保持等比缩放不拉伸，取两者中的最小值
+    // final double scale = scaleX < scaleY ? scaleX : scaleY;
+    // canvas.scale(scale, scale);
+
+    // 强制拉伸到目标 Size
+    canvas.scale(scaleX, scaleY);
+
+    // 4. 绘制到 Recorder
+    canvas.drawPicture(pictureInfo.picture);
+
+    // 5. 转换为 ui.Image
+    final image = await recorder.endRecording().toImage(
       size.width.toInt(),
       size.height.toInt(),
     );
 
-    pictureInfo.picture.dispose(); // 及时释放 picture
+    pictureInfo.picture.dispose();
     return image;
   }
 
@@ -44,47 +88,55 @@ class DrawUtil {
   Future<ui.Image> renderText(
     String text, {
     required Size size,
-    String? fontFamily,
-    Color? color,
-    FontWeight? fontWeight,
     double? fontSize,
-    double pixelRatio = 3.0, // 替代原本的 scale，根据设备像素比调整清晰度
+    Color? color,
+    String? fontFamily,
+    FontWeight? fontWeight,
+    double pixelRatio = 3.0,
   }) async {
-    final pictureRecorder = ui.PictureRecorder();
-    final canvas = Canvas(pictureRecorder);
+    final recorder = ui.PictureRecorder();
+    final canvas = Canvas(recorder);
 
-    // 这里的 scale 只是为了增加位图的分辨率，保证缩放时不糊
+    // 缩放画布以匹配高分辨率
     canvas.scale(pixelRatio);
 
-    final textStyle = TextStyle(
-      fontFamily: fontFamily,
-      fontSize: fontSize ?? size.width,
-      color: color ?? Colors.black,
-      fontWeight: fontWeight,
-      height: 1.0,
-    );
-
-    final textPainter = TextPainter(
-      text: TextSpan(text: text, style: textStyle),
+    final tp = TextPainter(
+      text: TextSpan(
+        text: text,
+        style: TextStyle(
+          fontFamily: fontFamily,
+          fontSize: fontSize ?? size.width,
+          color: color ?? Colors.black,
+          fontWeight: fontWeight,
+          height: 1.0,
+          // 移除 height: 1.0，让字体回归自然行高
+        ),
+      ),
       textDirection: TextDirection.ltr,
     );
 
-    textPainter.layout(maxWidth: size.width);
+    // 必须先布局，才能拿到 tp.width 和 tp.height
+    tp.layout(maxWidth: size.width);
 
-    // 在 DrawUtil.renderText 中
-    // 修改前 居中：final offset = Offset((size.width - tp.width)/2, (size.height - tp.height)/2);
-    // 修改后：直接使用 Offset.zero，让文字从左上角开始绘制
+    // 计算垂直居中的偏移量
+    // dy = (容器总高度 - 文字实际排版高度) / 2
+    final double dy = (size.height - tp.height) / 2;
 
-    textPainter.paint(canvas, Offset.zero);
+    // 如果你希望左右也居中，可以设置 dx = (size.width - tp.width) / 2
+    // 如果希望左对齐，dx 则为 0
+    final double dx = (size.width - tp.width) / 2;
 
-    final picture = pictureRecorder.endRecording();
-    // 生成对应倍率大小的图片
-    final uiImage = await picture.toImage(
+    // dprint(
+    //   'text:$text --- size($size), tp(${tp.width}, ${tp.height}, d($dx, $dy))',
+    // );
+    // 关键绘制：传入计算好的 Offset
+    tp.paint(canvas, Offset(dx, dy));
+    // tp.paint(canvas, Offset.zero);
+
+    final picture = recorder.endRecording();
+    return await picture.toImage(
       (size.width * pixelRatio).toInt(),
       (size.height * pixelRatio).toInt(),
     );
-
-    picture.dispose();
-    return uiImage;
   }
 }

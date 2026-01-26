@@ -19,7 +19,6 @@ import 'package:tao996/src/utils/tu/permission_util.dart';
 import 'package:tao996/src/utils/tu/text_util.dart';
 import 'package:tao996/src/utils/tu/zip.dart';
 import 'package:tao996/src/utils/tu/url_util.dart';
-import 'package:tao996/tao996.dart';
 
 class _TUtils {
   const _TUtils();
@@ -42,7 +41,6 @@ class _TUtils {
   final form = const FormHelperUtil();
   final draw = const DrawUtil();
   final font = const FontUtil();
-  final ps = const PsUtil();
 
   final api = const ApiUtil();
 

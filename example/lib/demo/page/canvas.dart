@@ -12,203 +12,147 @@ class CanvasTestPage extends StatefulWidget {
 
 class _CanvasTestPageState extends State<CanvasTestPage> {
   bool isReady = false;
-  PsLayer? testLayer;
-  PsLayer? textLayer;
+
+  // 定义两个场景管理器
+  late MyPs ps;
 
   @override
   void initState() {
     super.initState();
+    // 初始化管理器
+    ps = MyPs(
+      style: PsStyle(size: Size(300, 300), backgroundColor: Colors.grey),
+    );
+
     _prepareData();
   }
 
+  @override
+  void dispose() {
+    // 统一销毁 GPU 资源，防止内存泄漏
+    ps.onDestroy();
+    super.dispose();
+  }
+
   Future<void> _prepareData() async {
-    await _testLayer();
-    await _prepareTextData();
-    setState(() => isReady = true);
+    await _prepareBasicScene();
+    await _prepareTextScene();
+    if (mounted) setState(() => isReady = true);
   }
 
-  Future<void> _testLayer() async {
-    // 1. 预渲染一个文字节点 (转为 ui.Image)
-    final textImage = await tu.draw.renderText(
-      "Gemini",
-      size: const Size(200, 100),
-      color: Colors.white,
-      fontSize: 40,
-      fontWeight: FontWeight.bold,
+  /// 基础场景：展示 Rect, Circle 和 Gemini 文字
+  Future<void> _prepareBasicScene() async {
+    // 1. 背景
+    ps.addRectNode(inlineStyle: PsStyle(color: Colors.grey));
+
+    // 3. 居中偏下 100 像素的 SVG
+    await ps.addSvgNode(
+      '''
+<svg width="100" height="100" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+  <circle cx="50" cy="50" r="40" stroke="black" stroke-width="3" fill="red" />
+</svg>
+''',
+      size: Size(200, 200),
+      inlineStyle: PsStyle(
+        position: Offset(0, 150), // 垂直向下偏移 150
+      ),
     );
 
-    // 2. 构建图层模型
-    testLayer = PsLayer(
-      // 定义蒙板：整个图层的可见区域是一个圆角矩形
-      mask: PsMask(rect: const Rect.fromLTWH(50, 50, 300, 300), radius: 40.0),
-      nodes: [
-        // 背景：基础矢量矩形
-        PsNode(
-          type: PsNodeType.rect,
-          size: const Size(300, 300),
-          position: const Offset(50, 50),
-          radius: 0,
-          data: null,
-          style: {'color': Colors.blueGrey},
+    ps.addRectNode(
+      inlineStyle: PsStyle(
+        size: Size(50, 50),
+        center: true, // 居中
+        backgroundColor: Colors.blue,
+        radius: 15, // 圆角
+        borderWidth: 1, // 边框宽度
+        borderColor: Colors.red, // 边框颜色
+        shadow: BoxShadow(
+          // 阴影
+          color: Colors.green,
+          blurRadius: 1,
+          offset: Offset(1, 1),
         ),
-        // 圆形：基础矢量圆形
-        PsNode(
-          type: PsNodeType.circle,
-          size: const Size(100, 100),
-          position: const Offset(80, 80),
-          radius: 0,
-          data: null,
-          style: {'color': Colors.amber},
+      ),
+    );
+    ps.addRectNode(
+      inlineStyle: PsStyle(
+        size: Size(150, 150),
+        center: true,
+        radius: 20,
+        borderWidth: 2,
+        borderColor: Colors.blue,
+        // backgroundColor 为 null
+        shadow: BoxShadow(
+          color: Colors.blue.withOpacity(0.5),
+          blurRadius: 20,
+          offset: Offset(0, 10),
         ),
+      ),
+    );
+    // 1. 创建一个只有红边的空心圆
+    ps.addCircleNode(
+      inlineStyle: PsStyle(
+        size: Size(100, 100),
+        center: true,
+        borderWidth: 2,
+        borderColor: Colors.red,
+        // backgroundColor 保持为 null，自动透明
+      ),
+    );
 
-        // 文字：已经通过 DrawUtil 转换后的图像节点
-        PsNode(
-          type: PsNodeType.text,
-          size: const Size(200, 100),
-          position: const Offset(100, 150),
-          radius: 0,
-          data: textImage,
-          style: {'opacity': 0.9},
-        ),
-      ],
+    // 2. 创建一个带阴影但透明的矩形框
+    ps.addRectNode(
+      inlineStyle: PsStyle(
+        size: Size(300, 200),
+        center: true,
+        radius: 12,
+        borderWidth: 1,
+        borderColor: Colors.blue,
+        shadow: BoxShadow(color: Colors.black),
+      ),
+    );
+
+    ps.addLine(
+      from: Offset(0, 0),
+      to: Offset(300, 300), // 300x300 画布的对角线
+      inlineStyle: PsStyle(borderColor: Colors.red, borderWidth: 5),
+    );
+
+    // 2. 绝对居中的文字 (不需要计算 Offset，设置 center: true 即可)
+    await ps.addTextNode(
+      "HELLO WORLD",
+      inlineStyle: PsStyle(fontSize: 20, color: Colors.white),
     );
   }
 
-  void updateLayer() async {
-    // 1. 如果需要生成新的 ui.Image 资源
-    final newTextImage = await tu.draw.renderText(
-      "Updated!",
-      size: const Size(200, 100),
-      color: Colors.red,
-    );
-
-    // 2. 释放旧资源 (非常重要，防止内存泄漏)
-    for (var node in testLayer!.nodes) {
-      if (node.data is ui.Image) {
-        (node.data as ui.Image).dispose();
-      }
-    }
-
-    // 3. 构建新的 Layer 并通知 UI
-    setState(() {
-      testLayer = PsLayer(
-        mask: PsMask(rect: const Rect.fromLTWH(0, 0, 400, 400), radius: 20),
-        nodes: [
-          PsNode(
-            type: PsNodeType.text,
-            size: const Size(200, 100),
-            position: const Offset(50, 50), // 修改了位置
-            radius: 0,
-            data: newTextImage,
-          ),
-        ],
-      );
-    });
-  }
+  /// 文字比较场景：展示自动贴边与缩放效果
+  Future<void> _prepareTextScene() async {}
 
   void toggleMaskBorder() {
-    setState(() {
-      final oldMask = testLayer!.mask!;
-      testLayer = PsLayer(
-        nodes: testLayer!.nodes,
-        mask: PsMask(
+    if (ps.mask != null) {
+      setState(() {
+        final oldMask = ps.mask!;
+        ps.mask = PsMask(
           rect: oldMask.rect,
           radius: oldMask.radius,
-          showBorder: !oldMask.showBorder, // 切换显示
-        ),
-      );
-    });
+          showBorder: !oldMask.showBorder,
+        );
+      });
+    }
   }
 
   void _refresh() async {
-    updateLayer();
-  }
-
-  Future<void> _prepareTextData() async {
-    final List<PsNode> nodes = [];
-
-    // 定义统一的字号
-    const double testFontSize = 40;
-
-    nodes.add(
-      await tu.ps.textNode(
-        "a",
-        position: const Offset(300, 10),
-        size: const Size(40, 40),
-        fontSize: testFontSize,
-        color: Colors.orange,
-        backgroundColor: Colors.lime,
-      ),
-    );
-    nodes.add(
-      await tu.ps.textNode(
-        "a",
-        position: const Offset(300, 70),
-        size: const Size(30, 30),
-        fontSize: testFontSize,
-        color: Colors.orange,
-        backgroundColor: Colors.lime,
-      ),
-    );
-
-    // 自动计算尺寸 (贴边)
-    nodes.add(
-      await tu.ps.textNode(
-        "a",
-        position: const Offset(350, 10),
-        size: null, // 传入 null 触发自动计算
-        fontSize: 40,
-        backgroundColor: Colors.lime,
-      ),
-    );
-
-    // 1. 标准大小 (1:1)
-    nodes.add(
-      await tu.ps.textNode(
-        "Standard 40",
-        position: const Offset(50, 60),
-        size: const Size(200, 50),
-        fontSize: testFontSize,
-        color: Colors.blue,
-        backgroundColor: Colors.grey,
-      ),
-    );
-
-    // 2. 容器缩小 (由于 fontSize 还是 40，渲染出来的 ui.Image 很大，但在画布上会被缩小，看起来会更锐利)
-    nodes.add(
-      await tu.ps.textNode(
-        "Shrink 40",
-        position: const Offset(50, 130),
-        size: const Size(100, 25), // 容器减半
-        fontSize: testFontSize,
-        color: Colors.green,
-        backgroundColor: Colors.grey,
-      ),
-    );
-
-    // 3. 容器放大 (由于 fontSize 还是 40，渲染出来的图片分辨率有限，拉伸到 400 宽可能会出现模糊)
-    nodes.add(
-      await tu.ps.textNode(
-        "Stretch 40",
-        position: const Offset(50, 180),
-        size: const Size(400, 100), // 容器翻倍
-        fontSize: testFontSize,
-        color: Colors.red,
-        backgroundColor: Colors.grey,
-      ),
-    );
-
-    textLayer = PsLayer(
-      mask: PsMask(rect: const Rect.fromLTWH(0, 0, 500, 400), showBorder: true),
-      nodes: nodes,
-    );
+    // 释放并清空现有资源
+    ps.onDestroy();
+    setState(() => isReady = false);
+    await _prepareData();
   }
 
   @override
   Widget build(BuildContext context) {
     return MyScaffold(
       appBar: AppBar(
-        title: const Text("Canvas Test1"),
+        title: const Text("MyPs Canvas Engine"),
         actions: [
           MyButton('蒙板边框', onPressed: toggleMaskBorder),
           MyButton('刷新重绘', onPressed: _refresh),
@@ -218,28 +162,15 @@ class _CanvasTestPageState extends State<CanvasTestPage> {
       body: Column(
         children: [
           !isReady
-              ? const Center(child: CircularProgressIndicator())
+              ? const SizedBox(
+                  height: 400,
+                  child: Center(child: CircularProgressIndicator()),
+                )
               : MyLayout.miniColumn([
-                  Text('基本使用'),
+                  const Text('基本使用 (Rect, Circle, Text)'),
                   MyLayout.height,
                   Center(
-                    child: Container(
-                      width: 400,
-                      height: 400,
-                      color: Colors.grey[200],
-                      child: testLayer!.draw(),
-                    ),
-                  ),
-
-                  Text('文字比较'),
-                  MyLayout.height,
-                  Center(
-                    child: Container(
-                      width: 400,
-                      height: 400,
-                      color: Colors.grey[200],
-                      child: textLayer!.draw(),
-                    ),
+                    child: ps.build(), // 使用 MyPs.build()
                   ),
                 ]),
           MyLayout.height24,
