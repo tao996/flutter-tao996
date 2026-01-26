@@ -6,7 +6,12 @@ import 'package:tao996/tao996.dart';
 class MyPainter extends CustomPainter {
   final PsLayer layer;
   final PsStyle psStyle; // 传入 MyPs 的整体样式
-  MyPainter(this.layer, this.psStyle);
+  final bool enableHitTest; // 新增：是否开启点击检测支持
+  MyPainter(
+    this.layer,
+    this.psStyle, {
+    this.enableHitTest = false, // 默认关闭，仅在交互界面开启
+  });
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -38,7 +43,18 @@ class MyPainter extends CustomPainter {
     }
 
     // 3. 遍历并绘制节点
-    for (var node in layer.nodes) {
+    // 1. 获取排序后的节点列表 (稳定排序)
+    // 增加 zIndex 支持
+    final sortedNodes = List<PsNode>.from(layer.nodes);
+
+    // 按照 zIndex 排序
+    sortedNodes.sort((a, b) {
+      int cmp = (a.style.zIndex).compareTo(b.style.zIndex);
+      if (cmp != 0) return cmp;
+      // 如果 zIndex 相同，则维持原 List 中的顺序 (即谁先加进来谁在下面)
+      return layer.nodes.indexOf(a).compareTo(layer.nodes.indexOf(b));
+    });
+    for (var node in sortedNodes) {
       _drawNode(canvas, node);
     }
   }

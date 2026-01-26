@@ -214,8 +214,8 @@ class MyPs extends ChangeNotifier {
   ///   myPs.scale(val, tag: 'logo');
   /// });
   /// ```
-  Widget build() {
-    return ListenableBuilder(
+  Widget build({bool enableHitTest = false}) {
+    final child = ListenableBuilder(
       listenable: this, // 监听 myPs 的变化
       builder: (context, child) {
         // 每当 notifyListeners 被调用，这里都会重新执行
@@ -223,12 +223,31 @@ class MyPs extends ChangeNotifier {
           width: canvasSize.width,
           height: canvasSize.height,
           child: CustomPaint(
-            painter: MyPainter(PsLayer(nodes: nodes, mask: mask), style),
+            painter: MyPainter(
+              PsLayer(nodes: nodes, mask: mask),
+              style,
+              enableHitTest: enableHitTest,
+            ),
             size: Size.infinite,
           ),
         );
       },
     );
+    if (enableHitTest) {
+      return GestureDetector(
+        onTapDown: (details) {
+          // 只有在开启了交互功能时才调用
+          final clickedNode = findNodeAt(details.localPosition);
+          if (clickedNode != null) {
+            print("点中了: ${clickedNode.tag}");
+            // 你可以在这里把该节点设为“选中状态”，或者通过 bringToFront 将它提上来
+            bringToFront(clickedNode.tag!);
+          }
+        },
+        child: child,
+      );
+    }
+    return child;
   }
 
   /// 缩放功能
@@ -319,9 +338,121 @@ class MyPs extends ChangeNotifier {
     );
   }
 
+  /// 快速置顶：获取当前最大值并 +1
+  void bringToFront(String tag) {
+    final index = nodes.indexWhere((n) => n.tag == tag);
+    if (index < 0) {
+      print('Node with tag $tag not found');
+      return;
+    }
+    final node = nodes[index];
+    int maxZ = nodes.fold(
+      0,
+      (max, n) => n.style.zIndex > max ? n.style.zIndex : max,
+    );
+
+    node.style.zIndex = maxZ + 1;
+    notifyListeners();
+  }
+
+  /// 快速置底：获取当前最小值并 -1
+  void sendToBack(String tag) {
+    final index = nodes.indexWhere((n) => n.tag == tag);
+    if (index < 0) {
+      print('Node with tag $tag not found');
+      return;
+    }
+    final node = nodes[index];
+    int minZ = nodes.fold(
+      0,
+      (min, n) => n.style.zIndex < min ? n.style.zIndex : min,
+    );
+    node.style.zIndex = minZ - 1;
+    notifyListeners();
+  }
+
+  /// 向上移动一层
+  void moveUp(String tag) {
+    int index = nodes.indexWhere((n) => n.tag == tag);
+    if (index != -1 && index < nodes.length - 1) {
+      final node = nodes.removeAt(index);
+      nodes.insert(index + 1, node);
+      notifyListeners();
+    }
+  }
+
+  /// 向下移动一层
+  void moveDown(String tag) {
+    int index = nodes.indexWhere((n) => n.tag == tag);
+    if (index != -1 && index > 0) {
+      final node = nodes.removeAt(index);
+      nodes.insert(index - 1, node);
+      notifyListeners();
+    }
+  }
+
   // 清空画布的方法，方便重新创作
   void clear() {
     nodes.clear();
     notifyListeners();
+  }
+
+  /// 查找被点击的节点
+  /// [localOffset] 手指在 CustomPaint 上的坐标
+  PsNode? findNodeAt(Offset localOffset) {
+    // 1. 将屏幕坐标转换为画布逻辑坐标 (反向缩放)
+    // 假设渲染区域大小是 renderSize，逻辑大小是 canvasSize
+    // 注意：这里的 localOffset 应该是相对于 CustomPaint 左上角的偏移
+
+    // 2. 从后往前遍历（先检测最顶层的节点）
+    final sortedNodes = List<PsNode>.from(nodes);
+    sortedNodes.sort((a, b) {
+      int cmp = (b.style.zIndex).compareTo(a.style.zIndex); // 注意这里是降序
+      if (cmp != 0) return cmp;
+      return nodes.indexOf(b).compareTo(nodes.indexOf(a));
+    });
+
+    for (var node in sortedNodes) {
+      final rect = node.rect;
+
+      // 处理旋转情况下的点击检测
+      if (node.style.rotate != 0) {
+        // 创建一个包含旋转的路径进行检测
+        final path = Path();
+        if (node.type == PsNodeType.circle) {
+          path.addOval(rect);
+        } else {
+          path.addRRect(
+            RRect.fromRectAndRadius(
+              rect,
+              Radius.circular(node.style.radius ?? 0),
+            ),
+          );
+        }
+
+        // 利用 Matrix4 旋转路径 (绕中心)
+        final center = rect.center;
+        final matrix = Matrix4.identity()
+          ..translate(center.dx, center.dy)
+          ..rotateZ(node.style.rotate)
+          ..translate(-center.dx, -center.dy);
+
+        final transformedPath = path.transform(matrix.storage);
+
+        if (transformedPath.contains(localOffset)) {
+          return node;
+        }
+      } else {
+        // 普通矩形/圆形检测
+        if (node.type == PsNodeType.circle) {
+          final center = rect.center;
+          final radius = rect.shortestSide / 2;
+          if ((localOffset - center).distance <= radius) return node;
+        } else {
+          if (rect.contains(localOffset)) return node;
+        }
+      }
+    }
+    return null;
   }
 }

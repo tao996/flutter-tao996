@@ -345,7 +345,7 @@ class _CanvasTestPageState extends State<CanvasTestPage> {
 
                   const Text('背景图'),
                   MyLayout.height,
-                  Center(child: ps3.build()),
+                  Center(child: ps3.build(enableHitTest: true)),
                 ]),
           MyLayout.height24,
         ],

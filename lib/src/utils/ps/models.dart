@@ -40,6 +40,7 @@ class PsStyle {
   ui.Image? backgroundImage; // 背景图片
   BoxFit backgroundFit; // 背景图片适配方式，默认 cover
   double? blur; // 模糊半径，用于制作毛玻璃效果，若为 null 则不模糊
+  int zIndex; //
 
   PsStyle({
     this.size,
@@ -66,6 +67,7 @@ class PsStyle {
     this.backgroundImage,
     this.backgroundFit = BoxFit.cover,
     this.blur,
+    this.zIndex = 0,
   });
 
   PsStyle copyWith(PsStyle? other) {
@@ -95,6 +97,7 @@ class PsStyle {
       backgroundImage: other.backgroundImage ?? backgroundImage,
       backgroundFit: other.backgroundFit,
       blur: other.blur ?? blur,
+      zIndex: other.zIndex != 0 ? other.zIndex : zIndex,
     );
   }
 
