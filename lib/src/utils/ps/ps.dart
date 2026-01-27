@@ -14,12 +14,43 @@ class MyPs extends ChangeNotifier {
   final PsStyle style;
   final List<PsClass> classes = [];
   final List<PsNode> nodes = [];
+  // 缓存变量
+  List<PsNode>? _sortedNodesCache;
+
+  // 当外部访问排序列表时
+  List<PsNode> get sortedNodes {
+    // 如果缓存为空，则进行一次排序
+    _sortedNodesCache ??= _getSortedNodesForHitTest();
+    return _sortedNodesCache!;
+  }
+
   final List<ui.Image> _resources = [];
   late final Size canvasSize;
   PsMask? mask;
 
   MyPs({this.mask, required this.style}) {
     canvasSize = style.drawSize;
+  }
+
+  List<PsNode> _getSortedNodesForHitTest() {
+    final sortedNodes = List<PsNode>.from(nodes);
+    sortedNodes.sort((a, b) {
+      int cmp = (b.style.zIndex).compareTo(a.style.zIndex);
+      if (cmp != 0) return cmp;
+      return nodes.indexOf(b).compareTo(nodes.indexOf(a));
+    });
+    return sortedNodes;
+  }
+
+  // 关键：在任何可能影响顺序的操作后，清空缓存
+  void addNode(PsNode node) {
+    nodes.add(node);
+    _clearCache();
+  }
+
+  void _clearCache() {
+    _sortedNodesCache = null;
+    notifyListeners();
   }
 
   /// 内部工具：合并样式并注入 canvasSize
@@ -59,7 +90,7 @@ class MyPs extends ChangeNotifier {
     );
 
     _resources.add(img);
-    nodes.add(
+    addNode(
       PsNode(type: PsNodeType.text, data: img, style: finalStyle, tag: tag),
     );
     return this;
@@ -71,7 +102,7 @@ class MyPs extends ChangeNotifier {
     List<String>? classNames,
     PsStyle? inlineStyle,
   }) {
-    nodes.add(
+    addNode(
       PsNode(
         type: PsNodeType.rect,
         data: null,
@@ -88,7 +119,7 @@ class MyPs extends ChangeNotifier {
     List<String>? classNames,
     PsStyle? inlineStyle,
   }) {
-    nodes.add(
+    addNode(
       PsNode(
         type: PsNodeType.circle,
         data: null,
@@ -110,7 +141,7 @@ class MyPs extends ChangeNotifier {
     finalStyle.size ??= Size(image.width.toDouble(), image.height.toDouble());
     _resources.add(image);
 
-    nodes.add(
+    addNode(
       PsNode(
         type: PsNodeType.image,
         data: null,
@@ -134,7 +165,7 @@ class MyPs extends ChangeNotifier {
     finalStyle.size ??= size;
     final img = await tu.draw.renderSvg(svgString, size: finalStyle.size!);
     _resources.add(img);
-    nodes.add(
+    addNode(
       PsNode(
         type: PsNodeType.svg,
         data: null,
@@ -174,7 +205,7 @@ class MyPs extends ChangeNotifier {
       );
     }
 
-    nodes.add(
+    addNode(
       PsNode(type: PsNodeType.line, data: null, style: finalStyle, tag: tag),
     );
     return this;
@@ -249,26 +280,28 @@ class MyPs extends ChangeNotifier {
           onTapDown: (details) {
             // 1. 先探测点击位置是否有节点（此时 findNodeAt 已经变聪明了，能感知到圆点范围）
             final node = findNodeAt(details.localPosition);
-
             // 2. 探测是否点中了某个手柄
-            final handle = getHandleAt(details.localPosition);
+            final handle = _getHandleAt(details.localPosition);
 
-            if (handle != HandleType.none) {
+            dprint('onTapDown: ${node?.tag}; handle: $handle');
+            if (handle != HandleType.none && handle != HandleType.body) {
               // 如果点中了手柄（即使在节点外），我们保持当前选中，不进行 toggle
               // 这能有效防止“点击圆点导致取消选择”
               return;
             }
 
             if (node == null) {
-              toggleSelection(null); // 点在纯空白处，取消选择
+              dprint('取消选择');
+              _toggleSelection(null); // 点在纯空白处，取消选择
             } else {
+              dprint('当前选中：${node.tag}; 原有选中：$selectedTag');
               if (selectedTag != node.tag) {
-                toggleSelection(node.tag); // 点中了新节点，切换选中
+                _toggleSelection(node.tag); // 点中了新节点，切换选中
               }
             }
           },
           onPanStart: (details) {
-            final handle = getHandleAt(details.localPosition);
+            final handle = _getHandleAt(details.localPosition);
             activeHandle = handle; // 记录当前按住的是什么
             _lastPanOffset = details.localPosition;
           },
@@ -288,9 +321,9 @@ class MyPs extends ChangeNotifier {
               final Offset logicalDelta = screenDelta / sx;
 
               if (activeHandle == HandleType.body) {
-                updateNodePosition(selectedTag!, logicalDelta);
+                _updateNodePosition(selectedTag!, logicalDelta);
               } else if (activeHandle != HandleType.none) {
-                updateNodeResize(selectedTag!, logicalDelta);
+                _updateNodeResize(selectedTag!, logicalDelta);
               }
             }
           },
@@ -401,7 +434,7 @@ class MyPs extends ChangeNotifier {
     );
 
     node.style.zIndex = maxZ + 1;
-    notifyListeners();
+    _clearCache();
   }
 
   /// 快速置底：获取当前最小值并 -1
@@ -417,7 +450,7 @@ class MyPs extends ChangeNotifier {
       (min, n) => n.style.zIndex < min ? n.style.zIndex : min,
     );
     node.style.zIndex = minZ - 1;
-    notifyListeners();
+    _clearCache();
   }
 
   /// 向上移动一层
@@ -426,7 +459,7 @@ class MyPs extends ChangeNotifier {
     if (index != -1 && index < nodes.length - 1) {
       final node = nodes.removeAt(index);
       nodes.insert(index + 1, node);
-      notifyListeners();
+      _clearCache();
     }
   }
 
@@ -436,29 +469,18 @@ class MyPs extends ChangeNotifier {
     if (index != -1 && index > 0) {
       final node = nodes.removeAt(index);
       nodes.insert(index - 1, node);
-      notifyListeners();
+      _clearCache();
     }
   }
 
   // 清空画布的方法，方便重新创作
   void clear() {
     nodes.clear();
-    notifyListeners();
-  }
-
-  List<PsNode> _getSortedNodesForHitTest() {
-    final sortedNodes = List<PsNode>.from(nodes);
-    sortedNodes.sort((a, b) {
-      int cmp = (b.style.zIndex).compareTo(a.style.zIndex);
-      if (cmp != 0) return cmp;
-      return nodes.indexOf(b).compareTo(nodes.indexOf(a));
-    });
-    return sortedNodes;
+    _clearCache();
   }
 
   PsNode? findNodeAt(Offset localOffset) {
     // 1. 必须从后往前找，因为最后加入（zIndex更高）的在上面
-    final sortedNodes = _getSortedNodesForHitTest();
     for (var node in sortedNodes) {
       // 2. 获取你那个强大的公式算出来的 rect
 
@@ -498,13 +520,12 @@ class MyPs extends ChangeNotifier {
   double _dashOffset = 0.0; // 蚂蚁线的偏移量
   double get dashOffset => _dashOffset;
   // 切换选中状态
-  void toggleSelection(String? tag) {
+  void _toggleSelection(String? tag) {
     if (tag == null || selectedTag == tag) {
       selectedTag = null; // 再次点击取消选中
     } else {
       selectedTag = tag;
     }
-    dprint('选中了节点 $selectedTag');
     notifyListeners();
   }
 
@@ -518,13 +539,9 @@ class MyPs extends ChangeNotifier {
   /// 处理节点拖拽
   /// [tag] 被拖拽节点的标签
   /// [delta] 手指滑动的偏移增量 (details.delta)
-  void updateNodePosition(String tag, Offset delta) {
-    final index = nodes.indexWhere((n) => n.tag == tag);
-    if (index < 0) {
-      print('Node with tag $tag not found');
-      return;
-    }
-    final node = nodes[index];
+  void _updateNodePosition(String tag, Offset delta) {
+    final node = getNodeByTag(tag);
+    if (node == null) return;
     // 计算新位置
     Offset newPosition = node.style.position + delta;
 
@@ -543,20 +560,24 @@ class MyPs extends ChangeNotifier {
   HandleType activeHandle = HandleType.none;
 
   // 判断点击位置属于哪个部分
-  HandleType getHandleAt(Offset localOffset) {
+  HandleType _getHandleAt(Offset localOffset) {
     if (selectedTag == null) return HandleType.none;
     final node = nodes.firstWhere((n) => n.tag == selectedTag);
     final rect = node.rect.inflate(4.0);
     final double threshold = 20.0; // 手指点击的容差范围
 
-    if ((localOffset - rect.topLeft).distance < threshold)
+    if ((localOffset - rect.topLeft).distance < threshold) {
       return HandleType.topLeft;
-    if ((localOffset - rect.topRight).distance < threshold)
+    }
+    if ((localOffset - rect.topRight).distance < threshold) {
       return HandleType.topRight;
-    if ((localOffset - rect.bottomLeft).distance < threshold)
+    }
+    if ((localOffset - rect.bottomLeft).distance < threshold) {
       return HandleType.bottomLeft;
-    if ((localOffset - rect.bottomRight).distance < threshold)
+    }
+    if ((localOffset - rect.bottomRight).distance < threshold) {
       return HandleType.bottomRight;
+    }
 
     // 如果点在矩形内但不是角，则是拖动主体
     if (node.rect.contains(localOffset)) return HandleType.body;
@@ -569,7 +590,7 @@ class MyPs extends ChangeNotifier {
     return index < 0 ? null : nodes[index];
   }
 
-  void updateNodeResize(String tag, Offset delta) {
+  void _updateNodeResize(String tag, Offset delta) {
     final node = getNodeByTag(tag);
     if (node == null || node.style.size == null) return;
 
