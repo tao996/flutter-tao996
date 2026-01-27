@@ -54,6 +54,8 @@ dev_dependencies:
   test: ^1.25.15
   mockito: ^5.5.0
   build_runner: ^2.7.1
+  #  flutter pub run build_runner build
+  # 注意 build.yaml 中限制了扫描范围
   json_serializable: ^6.11.1
 
 flutter:

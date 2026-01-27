@@ -315,21 +315,27 @@ class MyPainter extends CustomPainter {
     }
     canvas.drawPath(dashPath, dashPaint);
 
-    // 4. 可选：在四个角画小手柄
-    final Paint dotPaint = Paint()
+    // 4. 绘制四个角的手柄 (Handles)
+    final double handleRadius = 6.0;
+    final Paint handlePaint = Paint()
       ..color = Colors.white
       ..style = PaintingStyle.fill;
-    final Paint dotBorder = Paint()
+    final Paint handleBorder = Paint()
       ..color = Colors.blueAccent
+      ..strokeWidth = 2.0
       ..style = PaintingStyle.stroke;
-    for (var offset in [
+
+    // 定义四个角的位置
+    final handles = [
       rect.topLeft,
       rect.topRight,
       rect.bottomLeft,
       rect.bottomRight,
-    ]) {
-      canvas.drawCircle(offset, 4, dotPaint);
-      canvas.drawCircle(offset, 4, dotBorder);
+    ];
+
+    for (var pos in handles) {
+      canvas.drawCircle(pos, handleRadius, handlePaint);
+      canvas.drawCircle(pos, handleRadius, handleBorder);
     }
   }
 

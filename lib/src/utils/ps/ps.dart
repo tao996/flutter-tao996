@@ -8,6 +8,8 @@ import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import 'package:tao996/tao996.dart';
 
+enum HandleType { none, topLeft, topRight, bottomLeft, bottomRight, body }
+
 class MyPs extends ChangeNotifier {
   final PsStyle style;
   final List<PsClass> classes = [];
@@ -245,51 +247,51 @@ class MyPs extends ChangeNotifier {
 
         return GestureDetector(
           onTapDown: (details) {
-            dprint('onTapDown');
+            // 1. 先探测点击位置是否有节点（此时 findNodeAt 已经变聪明了，能感知到圆点范围）
             final node = findNodeAt(details.localPosition);
 
-            // 核心逻辑优化：
+            // 2. 探测是否点中了某个手柄
+            final handle = getHandleAt(details.localPosition);
+
+            if (handle != HandleType.none) {
+              // 如果点中了手柄（即使在节点外），我们保持当前选中，不进行 toggle
+              // 这能有效防止“点击圆点导致取消选择”
+              return;
+            }
+
             if (node == null) {
-              // 1. 点击空白处，取消当前所有选中
-              toggleSelection(null);
+              toggleSelection(null); // 点在纯空白处，取消选择
             } else {
-              // 2. 如果点击的节点不是当前选中的节点，才去切换它
-              // 这样如果点中的是已选中的节点，就不会触发 toggle 里的“取消选中”逻辑
               if (selectedTag != node.tag) {
-                toggleSelection(node.tag);
+                toggleSelection(node.tag); // 点中了新节点，切换选中
               }
             }
           },
           onPanStart: (details) {
-            _lastPanOffset = details.localPosition; // 记录起点
-            if (selectedTag != null) {
-              bringToFront(selectedTag!);
-            }
+            final handle = getHandleAt(details.localPosition);
+            activeHandle = handle; // 记录当前按住的是什么
+            _lastPanOffset = details.localPosition;
           },
           onPanEnd: (_) {
             _lastPanOffset = null; // 清空记录
           },
           onPanUpdate: (details) {
             if (selectedTag != null && _lastPanOffset != null) {
-              // 计算手指在画布上的实际位移 (当前点 - 上一个点)
               final Offset screenDelta =
                   details.localPosition - _lastPanOffset!;
-              _lastPanOffset = details.localPosition; // 更新记录点
+              _lastPanOffset = details.localPosition;
 
-              // 关键修正：计算画布的物理缩放比
-              // 我们直接用 renderBox 拿到 CustomPaint 渲染在屏幕上的真实大小
+              // 计算逻辑偏移（逻辑同之前）
               final RenderBox renderBox =
                   context.findRenderObject() as RenderBox;
               final double sx = renderBox.size.width / canvasSize.width;
-              final double sy = renderBox.size.height / canvasSize.height;
+              final Offset logicalDelta = screenDelta / sx;
 
-              // 转换为逻辑坐标位移
-              final logicalDelta = Offset(
-                screenDelta.dx / sx,
-                screenDelta.dy / sy,
-              );
-
-              updateNodePosition(selectedTag!, logicalDelta);
+              if (activeHandle == HandleType.body) {
+                updateNodePosition(selectedTag!, logicalDelta);
+              } else if (activeHandle != HandleType.none) {
+                updateNodeResize(selectedTag!, logicalDelta);
+              }
             }
           },
           child: child,
@@ -444,24 +446,30 @@ class MyPs extends ChangeNotifier {
     notifyListeners();
   }
 
-  PsNode? findNodeAt(Offset localOffset) {
-    // 1. 必须从后往前找，因为最后加入（zIndex更高）的在上面
+  List<PsNode> _getSortedNodesForHitTest() {
     final sortedNodes = List<PsNode>.from(nodes);
     sortedNodes.sort((a, b) {
       int cmp = (b.style.zIndex).compareTo(a.style.zIndex);
       if (cmp != 0) return cmp;
       return nodes.indexOf(b).compareTo(nodes.indexOf(a));
     });
+    return sortedNodes;
+  }
 
+  PsNode? findNodeAt(Offset localOffset) {
+    // 1. 必须从后往前找，因为最后加入（zIndex更高）的在上面
+    final sortedNodes = _getSortedNodesForHitTest();
     for (var node in sortedNodes) {
       // 2. 获取你那个强大的公式算出来的 rect
 
       Rect rect = node.rect;
-      // print("TextRect:${node.tag} => $rect, Click: $localOffset");
-      // 3. 【关键修正】如果是文字，手动扩大它的判定矩形
-      // inflate(15) 会让感应区域向四周各延伸 15 像素
-      if (node.type == PsNodeType.text) {
-        rect = rect.inflate(15.0);
+      // 如果这个节点已经是当前选中的节点，我们要扩大它的“感应区”
+      // 确保手指点在稍远一点的小圆点（Handle）上时，依然能判定为选中该节点
+      if (node.tag == selectedTag) {
+        // 这里的 20.0 应该略大于你画的小圆点半径 + 偏移量
+        rect = rect.inflate(20.0);
+      } else if (node.type == PsNodeType.text) {
+        rect = rect.inflate(15.0); // 保持文字的容差
       }
 
       // 4. 处理旋转点击（如果你的文字旋转了）
@@ -529,6 +537,74 @@ class MyPs extends ChangeNotifier {
     );
 
     node.style.position = newPosition;
+    notifyListeners();
+  }
+
+  HandleType activeHandle = HandleType.none;
+
+  // 判断点击位置属于哪个部分
+  HandleType getHandleAt(Offset localOffset) {
+    if (selectedTag == null) return HandleType.none;
+    final node = nodes.firstWhere((n) => n.tag == selectedTag);
+    final rect = node.rect.inflate(4.0);
+    final double threshold = 20.0; // 手指点击的容差范围
+
+    if ((localOffset - rect.topLeft).distance < threshold)
+      return HandleType.topLeft;
+    if ((localOffset - rect.topRight).distance < threshold)
+      return HandleType.topRight;
+    if ((localOffset - rect.bottomLeft).distance < threshold)
+      return HandleType.bottomLeft;
+    if ((localOffset - rect.bottomRight).distance < threshold)
+      return HandleType.bottomRight;
+
+    // 如果点在矩形内但不是角，则是拖动主体
+    if (node.rect.contains(localOffset)) return HandleType.body;
+
+    return HandleType.none;
+  }
+
+  PsNode? getNodeByTag(String tag) {
+    final index = nodes.indexWhere((n) => n.tag == tag);
+    return index < 0 ? null : nodes[index];
+  }
+
+  void updateNodeResize(String tag, Offset delta) {
+    final node = getNodeByTag(tag);
+    if (node == null || node.style.size == null) return;
+
+    final currentSize = node.style.size!;
+    double newWidth = currentSize.width;
+    double newHeight = currentSize.height;
+
+    // 根据拖动的角来计算尺寸变化
+    // 注意：这里简化处理，只处理宽高增加，不处理位置反向偏移
+    switch (activeHandle) {
+      case HandleType.bottomRight:
+        newWidth += delta.dx;
+        newHeight += delta.dy;
+        break;
+      case HandleType.bottomLeft:
+        newWidth -= delta.dx;
+        newHeight += delta.dy;
+        node.style.position += Offset(delta.dx, 0); // 左侧缩放需要补偿位置
+        break;
+      case HandleType.topRight:
+        newWidth += delta.dx;
+        newHeight -= delta.dy;
+        node.style.position += Offset(0, delta.dy);
+        break;
+      case HandleType.topLeft:
+        newWidth -= delta.dx;
+        newHeight -= delta.dy;
+        node.style.position += delta;
+        break;
+      default:
+        break;
+    }
+
+    // 限制最小尺寸，防止缩成负数
+    node.style.size = Size(newWidth.clamp(10, 1000), newHeight.clamp(10, 1000));
     notifyListeners();
   }
 }

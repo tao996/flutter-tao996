@@ -1,17 +1,34 @@
+import 'dart:convert';
+
+import 'package:json_annotation/json_annotation.dart';
 import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
+import 'package:tao996/tao996.dart';
+
+part 'models.g.dart';
 
 /// 定义支持叠加的样式对象
-class PsStyle {
+@JsonSerializable()
+class PsStyle extends DbTypeModel<PsStyle> {
+  @JsonSizeConverter()
   Size? size;
+
   double? radius;
   double? opacity;
+
+  @JsonColorConverter()
   Color? color;
+
+  @JsonColorConverter()
   Color? backgroundColor;
+
   double? fontSize;
+
+  @JsonFontWeightConverter()
   FontWeight? fontWeight;
   // 距离中心的偏移量
+  @JsonOffsetConverter()
   Offset position;
   // 是否以画布中心为参考点
   bool center;
@@ -22,23 +39,51 @@ class PsStyle {
   double? borderWidth;
 
   /// 边框颜色: Colors.blueGrey
+  @JsonColorConverter()
   Color? borderColor;
 
   /// 阴影 BoxShadow(  color: Colors.black.withOpacity(0.2),  blurRadius: 10, offset: const Offset(5, 5),)
-  BoxShadow? shadow; // 使用 Flutter 原生的 BoxShadow 方便配置颜色、模糊和偏移
-  Size? canvasSize; // 将画布尺寸整合进样式
-  double scale; // 新增缩放属性
-  EdgeInsets? padding; // 仅供 MyPs 使用
-  EdgeInsets? margin; // 供节点使用
+  /// 使用 Flutter 原生的 BoxShadow 方便配置颜色、模糊和偏移
+  @JsonBoxShadowConverter()
+  BoxShadow? shadow;
+
+  /// 将画布尺寸整合进样式
+  @JsonSizeConverter()
+  Size? canvasSize;
+
+  /// 新增缩放属性
+  double scale;
+
+  // 仅供 MyPs 使用
+  @JsonEdgeInsetsConverter()
+  EdgeInsets? padding;
+
+  // 供节点使用
+  @JsonEdgeInsetsConverter()
+  EdgeInsets? margin;
+
   double rotate; // 旋转弧度，默认 0.0
 
   // --- 新增：渐变属性 ---
-  Gradient? backgroundGradient; // 用于背景填充的渐变
-  Gradient? foregroundGradient; // 用于前景（比如文字颜色或边框颜色）的渐变
-  BoxShadow? textShadow; // 新增文字阴影
+  // 用于背景填充的渐变
+  @JsonGradientConverter()
+  Gradient? backgroundGradient;
 
+  // 用于前景（比如文字颜色或边框颜色）的渐变
+  @JsonGradientConverter()
+  Gradient? foregroundGradient;
+
+  // 新增文字阴影
+  @JsonBoxShadowConverter()
+  BoxShadow? textShadow;
+
+  @JsonKey(includeFromJson: false, includeToJson: false)
   ui.Image? backgroundImage; // 背景图片
-  BoxFit backgroundFit; // 背景图片适配方式，默认 cover
+
+  // 背景图片适配方式，默认 cover
+  @JsonBoxFitConverter()
+  BoxFit backgroundFit;
+
   double? blur; // 模糊半径，用于制作毛玻璃效果，若为 null 则不模糊
   int zIndex; //
 
@@ -102,22 +147,60 @@ class PsStyle {
   }
 
   Size get drawSize => canvasSize ?? size ?? Size.zero;
+
+  @override
+  Map<String, dynamic> toJson() => _$PsStyleToJson(this);
+  @override
+  Map<String, dynamic> toMap() => toJson();
+  @override
+  PsStyle fromMap(Map<String, dynamic> map) => PsStyle.fromMap(map);
+  factory PsStyle.fromJson(Map<String, dynamic> json) =>
+      _$PsStyleFromJson(json);
+  factory PsStyle.fromMap(Map<String, dynamic> map) => PsStyle.fromJson(map);
+  static PsStyle instanceFromJson(Object? json) {
+    if (json is String) return PsStyle.fromJson(jsonDecode(json));
+    return PsStyle.fromJson(json as Map<String, dynamic>);
+  }
+
+  static String instanceToJson(PsStyle instance) =>
+      jsonEncode(instance.toJson());
 }
 
-class PsClass {
+@JsonSerializable()
+class PsClass extends DbTypeModel<PsClass> {
   final String name;
   final PsStyle style;
   PsClass({required this.name, required this.style});
+
+  @override
+  Map<String, dynamic> toJson() => _$PsClassToJson(this);
+  @override
+  Map<String, dynamic> toMap() => toJson();
+  @override
+  PsClass fromMap(Map<String, dynamic> map) => PsClass.fromMap(map);
+  factory PsClass.fromJson(Map<String, dynamic> json) =>
+      _$PsClassFromJson(json);
+  factory PsClass.fromMap(Map<String, dynamic> map) => PsClass.fromJson(map);
+  static PsClass instanceFromJson(Object? json) {
+    if (json is String) return PsClass.fromJson(jsonDecode(json));
+    return PsClass.fromJson(json as Map<String, dynamic>);
+  }
+
+  static String instanceToJson(PsClass instance) =>
+      jsonEncode(instance.toJson());
 }
 
 enum PsNodeType { rect, circle, svg, text, image, line }
 
-class PsNode {
+@JsonSerializable()
+class PsNode extends DbTypeModel<PsNode> {
   final String? tag;
+
+  @JsonListStringConverter()
   final List<String> classes;
   final PsNodeType type;
-  final dynamic data;
   final PsStyle style;
+  dynamic data;
 
   PsNode({
     this.tag,
@@ -168,19 +251,75 @@ class PsNode {
       return Offset(m.left + style.position.dx, m.top + style.position.dy) & s;
     }
   }
+
+  @override
+  Map<String, dynamic> toJson() => _$PsNodeToJson(this);
+  @override
+  Map<String, dynamic> toMap() => toJson();
+  @override
+  PsNode fromMap(Map<String, dynamic> map) => PsNode.fromMap(map);
+  factory PsNode.fromJson(Map<String, dynamic> json) => _$PsNodeFromJson(json);
+  factory PsNode.fromMap(Map<String, dynamic> map) => PsNode.fromJson(map);
+  static PsNode instanceFromJson(Object? json) {
+    if (json is String) return PsNode.fromJson(jsonDecode(json));
+    return PsNode.fromJson(json as Map<String, dynamic>);
+  }
+
+  static String instanceToJson(PsNode instance) =>
+      jsonEncode(instance.toJson());
 }
 
-class PsMask {
-  final Rect rect; // 蒙板区域
+@JsonSerializable()
+class PsMask extends DbTypeModel<PsMask> {
+  // 蒙板区域
+  @JsonRectConverter()
+  final Rect rect;
+
   final double radius; // 圆角
-  final bool showBorder; // 新增：是否显示调试边框
+
+  // 新增：是否显示调试边框
+  @JsonBoolConverter()
+  final bool showBorder;
 
   PsMask({required this.rect, this.radius = 0, this.showBorder = false});
+  @override
+  Map<String, dynamic> toJson() => _$PsMaskToJson(this);
+  @override
+  Map<String, dynamic> toMap() => toJson();
+  @override
+  PsMask fromMap(Map<String, dynamic> map) => PsMask.fromMap(map);
+  factory PsMask.fromJson(Map<String, dynamic> json) => _$PsMaskFromJson(json);
+  factory PsMask.fromMap(Map<String, dynamic> map) => PsMask.fromJson(map);
+  static PsMask instanceFromJson(Object? json) {
+    if (json is String) return PsMask.fromJson(jsonDecode(json));
+    return PsMask.fromJson(json as Map<String, dynamic>);
+  }
+
+  static String instanceToJson(PsMask instance) =>
+      jsonEncode(instance.toJson());
 }
 
-class PsLayer {
+@JsonSerializable()
+class PsLayer extends DbTypeModel<PsLayer> {
   final List<PsNode> nodes; // 图形列表
   final PsMask? mask; // 蒙板
 
   PsLayer({required this.nodes, this.mask});
+
+  @override
+  Map<String, dynamic> toJson() => _$PsLayerToJson(this);
+  @override
+  Map<String, dynamic> toMap() => toJson();
+  @override
+  PsLayer fromMap(Map<String, dynamic> map) => PsLayer.fromMap(map);
+  factory PsLayer.fromJson(Map<String, dynamic> json) =>
+      _$PsLayerFromJson(json);
+  factory PsLayer.fromMap(Map<String, dynamic> map) => PsLayer.fromJson(map);
+  static PsLayer instanceFromJson(Object? json) {
+    if (json is String) return PsLayer.fromJson(jsonDecode(json));
+    return PsLayer.fromJson(json as Map<String, dynamic>);
+  }
+
+  static String instanceToJson(PsLayer instance) =>
+      jsonEncode(instance.toJson());
 }

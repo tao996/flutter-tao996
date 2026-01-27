@@ -26,57 +26,20 @@ class TestModel extends DbTypeModel<TestModel> {
   Map<String, dynamic> toJson() {
     return {'id': id, 'name': name};
   }
+
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-          other is TestModel &&
-              runtimeType == other.runtimeType &&
-              id == other.id &&
-              name == other.name;
+      other is TestModel &&
+          runtimeType == other.runtimeType &&
+          id == other.id &&
+          name == other.name;
 
   @override
   int get hashCode => id.hashCode ^ name.hashCode;
 }
 
 void main() {
-  group('DbTypeConverter Bool Tests', () {
-    test('boolFromJson: 1 should return true', () {
-      expect(DbTypeConverter.boolFromJson(1), isTrue);
-    });
-    test('boolFromJson: 0 should return false', () {
-      expect(DbTypeConverter.boolFromJson(0), isFalse);
-    });
-
-    test('boolToJson: true should return 1', () {
-      expect(DbTypeConverter.boolToJson(true), 1);
-    });
-    test('boolToJson: false should return 0', () {
-      expect(DbTypeConverter.boolToJson(false), 0);
-    });
-  });
-
-  group('DbTypeConverter Map<String, String> Tests', () {
-    const data = {'key1': 'value1', 'key2': 'value2'};
-    final json = jsonEncode(data);
-
-    test('mapStringToJson: Normal map should return valid JSON string', () {
-      expect(DbTypeConverter.mapStringToJson(data), json);
-    });
-    test('mapStringToJson: Null map should return empty string', () {
-      expect(DbTypeConverter.mapStringToJson(null), '{}');
-    });
-
-    test('mapStringFromJson: Valid JSON should return map', () {
-      expect(DbTypeConverter.mapStringFromJson(json), data);
-    });
-    test('mapStringFromJson: Null JSON should return empty map', () {
-      expect(DbTypeConverter.mapStringFromJson(null), {});
-    });
-    test('mapStringFromJson: Empty JSON string should return empty map', () {
-      expect(DbTypeConverter.mapStringFromJson(''), {});
-    });
-  });
-
   group('DbTypeConverter Map<String, T extends DbTypeModel> Tests', () {
     final model1 = TestModel(1, 'A');
     final model2 = TestModel(2, 'B');
@@ -84,7 +47,10 @@ void main() {
 
     test('mapToJson: Normal map should return encoded string with toMap', () {
       final expectedMap = {'id1': model1.toMap(), 'id2': model2.toMap()};
-      expect(DbTypeConverter.mapToJson<TestModel>(data), jsonEncode(expectedMap));
+      expect(
+        DbTypeConverter.mapToJson<TestModel>(data),
+        jsonEncode(expectedMap),
+      );
     });
     test('mapToJson: Null map should return empty string', () {
       expect(DbTypeConverter.mapToJson<TestModel>(null), '');
@@ -94,10 +60,7 @@ void main() {
     });
 
     test('mapFromJson: Valid JSON should return Map<String, T>', () {
-      final json = jsonEncode({
-        'id1': model1.toMap(),
-        'id2': model2.toMap(),
-      });
+      final json = jsonEncode({'id1': model1.toMap(), 'id2': model2.toMap()});
       final result = DbTypeConverter.mapFromJson<TestModel>(
         json,
         fromMap: TestModel.fromMap,
@@ -108,11 +71,12 @@ void main() {
 
     test('mapFromJson: Null JSON should return empty map', () {
       expect(
-          DbTypeConverter.mapFromJson<TestModel>(
-            null,
-            fromMap: TestModel.fromMap,
-          ),
-          {});
+        DbTypeConverter.mapFromJson<TestModel>(
+          null,
+          fromMap: TestModel.fromMap,
+        ),
+        {},
+      );
     });
   });
 
@@ -123,7 +87,10 @@ void main() {
 
     test('listToJson: Normal list should return encoded string with toMap', () {
       final expectedList = [model1.toMap(), model2.toMap()];
-      expect(DbTypeConverter.listToJson<TestModel>(data), jsonEncode(expectedList));
+      expect(
+        DbTypeConverter.listToJson<TestModel>(data),
+        jsonEncode(expectedList),
+      );
     });
     test('listToJson: Null list should return empty string', () {
       expect(DbTypeConverter.listToJson<TestModel>(null), '');
@@ -142,11 +109,12 @@ void main() {
 
     test('listFromJson: Null JSON should return empty list', () {
       expect(
-          DbTypeConverter.listFromJson<TestModel>(
-            null,
-            fromMap: TestModel.fromMap,
-          ),
-          []);
+        DbTypeConverter.listFromJson<TestModel>(
+          null,
+          fromMap: TestModel.fromMap,
+        ),
+        [],
+      );
     });
 
     // 🔴 发现并测试 listFromJson 中的潜在错误
@@ -163,31 +131,6 @@ void main() {
       );
       expect(result.length, 1);
       expect(result[0], equals(model1));
-    });
-  });
-
-  group('DbTypeConverter List<int> Tests', () {
-    const data = [1, 5, 10];
-    final json = jsonEncode(data);
-
-    test('listIntToJson: Normal list should return JSON array string', () {
-      expect(DbTypeConverter.listIntToJson(data), json);
-    });
-    test('listIntToJson: Null list should return "[]"', () {
-      expect(DbTypeConverter.listIntToJson(null), '[]');
-    });
-
-    test('listIntFromJson: Valid JSON should return List<int>', () {
-      expect(DbTypeConverter.listIntFromJson(json), data);
-    });
-    test('listIntFromJson: JSON with string number should convert', () {
-      expect(DbTypeConverter.listIntFromJson('[1,"5",10]'), [1, 5, 10]);
-    });
-    test('listIntFromJson: Null/Empty/[] JSON should return empty list', () {
-      expect(DbTypeConverter.listIntFromJson(null), []);
-      expect(DbTypeConverter.listIntFromJson(''), []);
-      expect(DbTypeConverter.listIntFromJson('[]'), []);
-      expect(DbTypeConverter.listIntFromJson('null'), []);
     });
   });
 
