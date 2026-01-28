@@ -47,6 +47,7 @@ export 'src/ui/widgets/avatar.dart';
 export 'src/ui/widgets/buttons.dart';
 export 'src/ui/widgets/dialog.dart';
 export 'src/ui/widgets/event.dart';
+export 'src/ui/widgets/font.dart';
 export 'src/ui/widgets/list_checkbox.dart';
 export 'src/ui/widgets/grid_checkbox.dart';
 export 'src/ui/widgets/icon.dart';

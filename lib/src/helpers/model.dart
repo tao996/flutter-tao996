@@ -11,7 +11,7 @@ await db.execute('''CREATE TABLE $_tableName(
  */
 import 'package:tao996/tao996.dart';
 
-/// 使用 xxx extends DbTypeModel<xxx>
+/// 使用 xxx extends `DbTypeModel<xxx>`
 abstract class DbTypeModel<T> {
   Map<String, dynamic> toJson();
 

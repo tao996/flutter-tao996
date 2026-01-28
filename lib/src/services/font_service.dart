@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 
 import '../../tao996.dart';
 
+/// 只用于移动端
 class FontService {
   final ISettingsService _settingsService = getISettingsService();
   final IDebugService _debugService = getIDebugService();
@@ -13,11 +14,9 @@ class FontService {
     try {
       final String themeFontName = _settingsService.themeFont;
       if (themeFontName != 'system') {
-        final fontFileDir = await tu.font.getFontDir();
-        await tu.font.readFont(
-          '${fontFileDir.path}$separator$themeFontName',
-          themeFontName,
-        );
+        for (final dir in await tu.font.getFontDirectories()) {
+          await tu.font.readFont('${dir.path}$separator$themeFontName');
+        }
       }
     } catch (error, stackTrace) {
       _debugService.exception(error, stackTrace);
@@ -25,23 +24,22 @@ class FontService {
     }
   }
 
+  /// 删除字体文件
   Future<void> deleteFont(String fontName) async {
     if (fontName == 'system') {
       return;
     }
-    final fontFileDir = await tu.font.getFontDir();
-    final fontFile = File('${fontFileDir.path}$separator$fontName');
-    try {
+    for (final dir in await tu.font.getFontDirectories()) {
+      final fontFile = File('${dir.path}$separator$fontName');
+
       if (fontFile.existsSync()) {
         await fontFile.delete();
       }
-    } catch (error, stackTrace) {
-      _debugService.exception(error, stackTrace);
-      throw Exception('failedToDeleteFont'.tr);
     }
   }
 
-  Future<bool> loadLocalFont() async {
+  /// 导入本地文件导入
+  Future<bool> importFont() async {
     try {
       List<File> fontFileList = await getIFilePickerService().pickFiles(
         type: FileType.custom,
@@ -52,7 +50,11 @@ class FontService {
         return false;
       }
 
-      final fontFileDir = await tu.font.getFontDir();
+      final fontFileDir = Directory((await tu.font.getFontDirPathes()).first);
+      if (!fontFileDir.existsSync()) {
+        await fontFileDir.create(recursive: true);
+      }
+
       for (var fontFile in fontFileList) {
         final fontFileName = fontFile.path.split(separator).last;
         final newFontPath = '${fontFileDir.path}$separator$fontFileName';

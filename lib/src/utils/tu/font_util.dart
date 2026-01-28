@@ -9,84 +9,18 @@ import 'package:tao996/tao996.dart';
 class FontUtil {
   const FontUtil();
 
-  Future<List<String>> getSystemFonts() async {
-    // 桌面平台字体枚举
-    if (Platform.isMacOS) {
-      return _getMacOSFonts();
-    } else if (Platform.isWindows) {
-      return _getWindowsFonts();
-    } else if (Platform.isLinux) {
-      return _getLinuxFonts();
-    }
-    return await _getMobileFont();
-  }
-
-  Future<List<String>> _getMacOSFonts() async {
-    try {
-      final result = await Process.run('fc-list', [':family']);
-      final fonts =
-          result.stdout
-              .toString()
-              .split('\n')
-              .where((line) => line.isNotEmpty)
-              .map((line) => line.split(',').first.trim())
-              .toSet()
-              .toList()
-            ..sort();
-      return fonts;
-    } catch (e) {
-      return ['Arial', 'Helvetica', 'Times New Roman', 'Courier New'];
-    }
-  }
-
-  Future<List<String>> _getWindowsFonts() async {
-    try {
-      final fontsDir = Directory(r'C:\Windows\Fonts');
-      final fonts =
-          (await fontsDir
-                  .list()
-                  .where(
-                    (entity) =>
-                        entity.path.endsWith('.ttf') ||
-                        entity.path.endsWith('.otf'),
-                  )
-                  .map(
-                    (entity) => tu.path.basenameWithoutExtension(entity.path),
-                  )
-                  .toSet())
-              .toList()
-            ..sort();
-      return fonts;
-    } catch (e) {
-      return ['Arial', 'Helvetica', 'Times New Roman', 'Courier New'];
-    }
-  }
-
-  Future<List<String>> _getLinuxFonts() async {
-    try {
-      final result = await Process.run('fc-list', [':family']);
-      final fonts =
-          result.stdout
-              .toString()
-              .split('\n')
-              .where((line) => line.isNotEmpty)
-              .map((line) => line.split(',').first.trim())
-              .toSet()
-              .toList()
-            ..sort();
-      return fonts;
-    } catch (e) {
-      return ['Arial', 'Helvetica', 'Times New Roman', 'Courier New'];
-    }
-  }
-
-  Future<List<String>> _getMobileFont() async {
+  Future<List<String>> loadFonts() async {
     try {
       List<String> fontNameList = [];
-      final fontDir = await getFontDir();
-      for (var fontFile in fontDir.listSync()) {
-        final fontName = fontFile.path.split(separator).last;
-        fontNameList.add(fontName);
+      for (final dir in await getFontDirectories()) {
+        for (var fontFile in dir.listSync()) {
+          final fontName = fontFile.path.toLowerCase();
+          if (fontName.endsWith('.ttf') ||
+              fontName.endsWith('.otf') ||
+              fontName.endsWith('.ttc')) {
+            fontNameList.add(tu.path.basenameWithoutExtension(fontName));
+          }
+        }
       }
       return fontNameList;
     } catch (error, stackTrace) {
@@ -95,27 +29,59 @@ class FontUtil {
     }
   }
 
-  /// 获取字体目录
-  Future<Directory> getFontDir() async {
+  /// 获取字体目录，注意，没有检查目录是否存在
+  Future<List<String>> getFontDirPathes() async {
     if (Platform.isWindows) {
-      return Directory(r'C:\Windows\Fonts');
+      return [
+        '${Platform.environment['windir']}/fonts/',
+        '${Platform.environment['USERPROFILE']}/AppData/Local/Microsoft/Windows/Fonts/',
+      ];
+    }
+    if (Platform.isMacOS) {
+      return [
+        '/Library/Fonts/',
+        '/System/Library/Fonts/',
+        '${Platform.environment['HOME']}/Library/Fonts/',
+      ];
+    }
+    if (Platform.isLinux) {
+      return [
+        '/usr/share/fonts/',
+        '/usr/local/share/fonts/',
+        '${Platform.environment['HOME']}/.local/share/fonts/',
+      ];
     }
     final Directory appWorkDir = Platform.isAndroid
         ? await getApplicationDocumentsDirectory()
         : await getApplicationSupportDirectory();
     final String fontDirPath = '${appWorkDir.path}${separator}fonts';
-    final Directory fontDir = Directory(fontDirPath);
-    if (!fontDir.existsSync()) {
-      await fontDir.create(recursive: true);
-    }
-    return fontDir;
+    return [fontDirPath];
   }
 
-  Future<void> readFont(String fontFilePath, String fontName) async {
+  /// 获取字体存在的目录
+  Future<List<Directory>> getFontDirectories() async {
+    final List<Directory> dirs = [];
+    for (final dirPath in await getFontDirPathes()) {
+      final dir = Directory(dirPath);
+      if (dir.existsSync()) {
+        dirs.add(dir);
+      }
+    }
+    return dirs;
+  }
+
+  /// 是否成功加载了文件
+  /// [fontFilePath] 字体文件路径, [fontName] 字体名称
+  Future<bool> readFont(String fontFilePath, {String? fontName}) async {
     final fontFile = File(fontFilePath);
+    if (!fontFile.existsSync()) {
+      return false;
+    }
     final fontFileBytes = await fontFile.readAsBytes();
+    fontName ??= tu.path.basenameWithoutExtension(fontFilePath);
     final fontLoad = FontLoader(fontName);
     fontLoad.addFont(Future.value(ByteData.view(fontFileBytes.buffer)));
     await fontLoad.load();
+    return true;
   }
 }

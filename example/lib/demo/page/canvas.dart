@@ -110,7 +110,7 @@ class _CanvasTestPageState extends State<CanvasTestPage>
         borderColor: Colors.blue,
         // backgroundColor 为 null
         shadow: BoxShadow(
-          color: Colors.blue.withOpacity(0.5),
+          color: Colors.blue.withAlpha(123),
           blurRadius: 20,
           offset: Offset(0, 10),
         ),
@@ -199,7 +199,7 @@ class _CanvasTestPageState extends State<CanvasTestPage>
         ),
         // 2. 设置文字阴影
         textShadow: BoxShadow(
-          color: Colors.black.withOpacity(0.5),
+          color: Colors.black.withAlpha(123),
           offset: Offset(4, 4),
           blurRadius: 6,
         ),
@@ -257,10 +257,10 @@ class _CanvasTestPageState extends State<CanvasTestPage>
         center: true,
         radius: 30,
         // 关键：半透明白色背景 + 高斯模糊
-        backgroundColor: Colors.white.withOpacity(0.2),
+        backgroundColor: Colors.white.withAlpha(51),
         blur: 10.0,
         borderWidth: 1.5,
-        borderColor: Colors.white.withOpacity(0.3), // 细微的白色边框增加质感
+        borderColor: Colors.white.withAlpha(75), // 细微的白色边框增加质感
         shadow: BoxShadow(color: Colors.black12, blurRadius: 20),
       ),
     );

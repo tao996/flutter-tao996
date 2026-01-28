@@ -1,6 +1,5 @@
 // 封装工具类处理类型转换
 import 'dart:convert';
-import 'dart:ui';
 
 import 'package:flutter/widgets.dart';
 import 'package:json_annotation/json_annotation.dart';
@@ -13,7 +12,7 @@ class JsonColorConverter implements JsonConverter<Color, int> {
   Color fromJson(int json) => Color(json);
 
   @override
-  int toJson(Color object) => object.value;
+  int toJson(Color object) => object.toARGB32();
 }
 
 class JsonBoolConverter implements JsonConverter<bool, int> {

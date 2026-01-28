@@ -194,17 +194,31 @@ class FormHelperUtil {
     }
 
     return DropdownButtonFormField<T>(
+      isExpanded: true, // 🚀 必须设置为 true
       initialValue: value,
       decoration: InputDecoration(
         label: MyInputLabel(label: label, isRequired: isRequired),
         helperText: helperText,
         border: OutlineInputBorder(),
       ),
+      // 下拉菜单列表里显示完整文字，但选中后在输入框里只显示一行缩略文字
+      selectedItemBuilder: (BuildContext context) {
+        return items.map<Widget>((KV item) {
+          return Text(
+            item.label,
+            overflow: TextOverflow.ellipsis, // 选中后只显示一行+省略号
+            maxLines: 1,
+          );
+        }).toList();
+      },
       items: items.map((KV kv) {
-        return DropdownMenuItem<T>(value: kv.value, child: Text(kv.label));
+        return DropdownMenuItem<T>(
+          value: kv.value,
+          child: Text(kv.label, softWrap: true),
+        );
       }).toList(),
       onChanged: onChanged,
-      hint: hintText != null ? Text(hintText) : null,
+      hint: hintText != null ? Text(hintText, softWrap: true) : null,
     );
   }
 

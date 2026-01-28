@@ -273,8 +273,8 @@ class MyPs extends ChangeNotifier {
       // 使用 LayoutBuilder 方便获取实时约束
       builder: (context, constraints) {
         // 这里的 constraints.biggest 就是显示的 Size
-        final double sX = constraints.biggest.width / canvasSize.width;
-        final double sY = constraints.biggest.height / canvasSize.height;
+        // final double sX = constraints.biggest.width / canvasSize.width;
+        // final double sY = constraints.biggest.height / canvasSize.height;
 
         return GestureDetector(
           onTapDown: (details) {
@@ -499,9 +499,9 @@ class MyPs extends ChangeNotifier {
         final path = Path()..addRect(rect);
         final center = node.rect.center;
         final matrix = Matrix4.identity()
-          ..translate(center.dx, center.dy)
+          ..translateByDouble(center.dx, center.dy, 0, 0)
           ..rotateZ(node.style.rotate)
-          ..translate(-center.dx, -center.dy);
+          ..translateByDouble(-center.dx, -center.dy, 0, 0);
 
         if (path.transform(matrix.storage).contains(localOffset)) {
           return node;

@@ -130,9 +130,11 @@ class MyPainter extends CustomPainter {
         if (hasBgGradient) {
           fillPaint.shader = style.backgroundGradient!.createShader(rect);
         } else {
-          fillPaint.color = style.backgroundColor!.withOpacity(
-            style.opacity ?? 1.0,
-          );
+          if (style.opacity != null) {
+            fillPaint.color = style.backgroundColor!.withAlpha(
+              (style.opacity! * 255).toInt(),
+            );
+          }
         }
         canvas.drawRect(rect, fillPaint);
       }
