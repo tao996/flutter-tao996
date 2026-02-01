@@ -2,6 +2,7 @@ export 'src/const/color.dart';
 export 'src/const/icon.dart';
 export 'src/const/space.dart';
 
+export 'src/helpers/db_migrate.dart';
 export 'src/helpers/db_type_converter.dart';
 export 'src/helpers/kv.dart';
 export 'src/helpers/model.dart';
@@ -24,7 +25,7 @@ export 'src/services/log_service.dart';
 export 'src/services/message_service.dart';
 export 'src/services/network_service.dart';
 export 'src/services/path_service.dart';
-export 'src/services/route_service.dart';
+export 'src/app/app_routes.dart';
 export 'src/services/setting_service.dart';
 export 'src/services/share_service.dart';
 export 'src/services/theme_service.dart';

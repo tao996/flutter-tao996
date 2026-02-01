@@ -287,7 +287,7 @@ class MyDialog {
   static Future<T?> showTopSheet<T>(
     BuildContext context, {
     required Widget child,
-    bool scrollView = false,
+    bool scrollView = true,
   }) {
     return showGeneralDialog<T>(
       context: context,

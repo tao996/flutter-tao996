@@ -69,6 +69,27 @@ abstract class IModel<T> extends DbTypeModel<T> {
       deletedAt = model.deletedAt;
     }
   }
+
+  T copyBaseDataWith({
+    int? id,
+    DateTime? createdAt,
+    DateTime? updatedAt,
+    DateTime? deletedAt,
+  }) {
+    if (id != null) {
+      this.id = id;
+    }
+    if (createdAt != null) {
+      this.createdAt = createdAt;
+    }
+    if (updatedAt != null) {
+      this.updatedAt = updatedAt;
+    }
+    if (deletedAt != null) {
+      this.deletedAt = deletedAt;
+    }
+    return this as T;
+  }
 }
 
 abstract class INoTimeModel<T> extends IModel<T> {

@@ -9,7 +9,8 @@ class Tao996 {
 }
 
 /// 注册无依赖的服务
-void registerTao996Dependencies(GetIt locator) {
+Future<void> registerTao996Dependencies(GetIt locator) async {
+  await initSharedPreferences();
   locator.registerLazySingleton<IMessageService>(() => MessageService());
   final ILogService logService = LogService();
   locator.registerSingleton<ILogService>(logService);
@@ -111,10 +112,6 @@ IThemeService getIThemeService() {
 
 TranslationService getTranslationService() {
   return GetIt.instance<TranslationService>();
-}
-
-IRouteService getIRouteService() {
-  return GetIt.instance<IRouteService>();
 }
 
 IWebviewService getIWebviewService() {

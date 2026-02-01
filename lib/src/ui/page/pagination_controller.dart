@@ -1,6 +1,7 @@
 import 'package:get/get.dart';
 import 'package:tao996/src/helpers/model_delegate.dart';
 
+/// 简单的分页控制器，通过 “上一页”，“下一页” 按钮进行翻页
 abstract class MyPaginationController<T> extends GetxController {
   RxList<T> get items => delegate.rxItems;
 

@@ -13,6 +13,7 @@ class MyDemoFormHelper extends StatefulWidget {
 class _MyDemoFormHelperState extends State<MyDemoFormHelper> {
   final List<TextEditingController> controllers = [];
   final RxList<Company> kvCompanyValues = [Company.apple].obs;
+  final Rx<Company?> kvCompanyValue = Rx<Company?>(null);
   var agree = false.obs;
 
   TextEditingController createController() {
@@ -97,7 +98,7 @@ class _MyDemoFormHelperState extends State<MyDemoFormHelper> {
                 '同意协议',
                 value: agree.value,
                 onChanged: (value) {
-                  agree.value = value!;
+                  agree.value = value;
                 },
               ),
             ),
@@ -136,6 +137,17 @@ class _MyDemoFormHelperState extends State<MyDemoFormHelper> {
                   } else {
                     kvCompanyValues.remove(item);
                   }
+                },
+              ),
+            ),
+            const SizedBox(height: 16),
+            MyText.h3('oneFilterChip'),
+            Obx(
+              () => tu.form.oneFilterChip<Company>(
+                items: ConstHelper.kvTitles,
+                value: kvCompanyValue.value,
+                onSelectionChanged: (item) {
+                  kvCompanyValue.value = item;
                 },
               ),
             ),

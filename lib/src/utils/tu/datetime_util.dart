@@ -59,7 +59,9 @@ class DatetimeUtil {
 
     int minute = dateTime.minute;
     String formattedMinute = minute.toString().padLeft(2, '0');
-    if (format == DateTimeFormat.ymdHm) {
+    if (format == DateTimeFormat.hm) {
+      return '$formattedHour:$formattedMinute';
+    } else if (format == DateTimeFormat.ymdHm) {
       return '$year-$formattedMonth-$formattedDay $formattedHour:$formattedMinute';
     } else if (format == DateTimeFormat.ymdHmFile) {
       return '$year$formattedMonth$formattedDay-$formattedHour$formattedMinute';

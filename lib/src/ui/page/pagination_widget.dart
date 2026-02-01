@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'pagination_controller.dart';
 
+/// 简单的分页控制器，通过 “上一页”，“下一页” 按钮进行翻页
 class MyPaginationWidget extends StatelessWidget {
   final MyPaginationController c;
   final bool showTotalPages;
@@ -23,9 +24,7 @@ class MyPaginationWidget extends StatelessWidget {
         // 记录数量
         if (showTotalPages)
           Text(
-            '显示 ${(c.pageIndex.value - 1) * c.pageSize.value + 1}-${(c
-                .pageIndex.value * c.pageSize.value).clamp(
-                0, c.total.value)} 条，共 ${c.total.value} 条',
+            '显示 ${(c.pageIndex.value - 1) * c.pageSize.value + 1}-${(c.pageIndex.value * c.pageSize.value).clamp(0, c.total.value)} 条，共 ${c.total.value} 条',
           ),
         // 分页按钮
         Row(

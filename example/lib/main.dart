@@ -12,12 +12,7 @@ import 'helper/route_helper.dart';
 void main() async {
   try {
     await _initAppServices();
-    runApp(
-      MyTao996App(
-        settingService: getISettingsService(),
-        fallbackLocale: const Locale('zh', 'CN'),
-      ),
-    );
+    runApp(MyTao996App(fallbackLocale: const Locale('zh', 'CN')));
   } catch (e, st) {
     getIDebugService().exception(e, st);
 
@@ -74,7 +69,6 @@ Future<void> _initAppServices() async {
   // 路由
   final routeSer = RouteHelper();
   locator.registerSingleton<RouteHelper>(routeSer);
-  locator.registerSingleton<IRouteService>(routeSer);
 
   // 语言
   getTranslationService().addDict(AppTranslation.keys);
@@ -86,7 +80,6 @@ Future<void> _initAppServices() async {
   themeHelper.defaultSystemUIOverlayStyle();
 
   final setting = SettingHelper();
-  await setting.init();
   locator.registerSingleton<SettingHelper>(setting);
   locator.registerSingleton<ISettingsService>(setting);
 

@@ -10,7 +10,7 @@ abstract class ModelHelper<T extends IModel<T>> {
   final String _tableName;
 
   /// 是否启用缓存
-  final bool enableCache;
+  final bool smallTable;
 
   /// 是否开启软删除 deletedAt 字段
   final bool enableSoftDelete;
@@ -38,11 +38,11 @@ abstract class ModelHelper<T extends IModel<T>> {
     'id': (entity) => entity.id,
   };
 
-  /// [enableCache] 是否使用缓存，通常用于小表使用;
+  /// [smallTable] 是否为小表，如果是，将一次性加载全部数据
   /// [enableSoftDelete] 是否使用软删除功能，注意：如果你的表中包含了 unique 索引，请不要使用软删除功能
   ModelHelper(
     this._tableName, {
-    this.enableCache = false,
+    this.smallTable = false,
     this.enableSoftDelete = false,
     this.enableCreatedAt = true,
     this.enableUpdatedAt = true,
@@ -50,8 +50,8 @@ abstract class ModelHelper<T extends IModel<T>> {
 
   Future<void> init(String language) async {
     debugService.d('Initializing $tableName...');
-    if (enableCache) {
-      await getAllFromDb();
+    if (smallTable) {
+      await getAll();
       debugService.d(' $tableName cache loaded with ${_cache.length} items.');
     }
   }
@@ -96,12 +96,11 @@ abstract class ModelHelper<T extends IModel<T>> {
   Future<dynamic> afterDelete(int deletedCount, {T? entity}) async => null;
 
   /// 获取全部的记录（可能使用缓存）
-  Future<List<T>> getAll() async {
-    if (enableCache) {
-      return _cache.isNotEmpty ? Future.value(_cache) : await getAllFromDb();
-    } else {
-      return await getAllFromDb();
+  Future<List<T>> getAll({bool force = false}) async {
+    if (_cache.isEmpty || force) {
+      _cache.assignAll(await _getAllFromDb());
     }
+    return _cache;
   }
 
   /// 如果启用了软删除，则在 where 条件中自动添加 `deletedAt IS NULL AND`
@@ -114,7 +113,7 @@ abstract class ModelHelper<T extends IModel<T>> {
   }
 
   /// 从数据库中查询全部的记录并更新缓存。
-  Future<List<T>> getAllFromDb() async {
+  Future<List<T>> _getAllFromDb() async {
     try {
       final List<Map<String, dynamic>> maps = await dbService.query(
         tableName,
@@ -122,7 +121,7 @@ abstract class ModelHelper<T extends IModel<T>> {
         orderBy: 'id DESC',
       );
       final rows = maps.map((map) => fromMap(map)).toList();
-      if (enableCache) {
+      if (smallTable) {
         _cache = rows; // 直接赋值以更新缓存
       }
       return rows;
@@ -139,7 +138,7 @@ abstract class ModelHelper<T extends IModel<T>> {
     bool tryCache = true,
     ModelTransaction? mtn,
   }) async {
-    if (tryCache && enableCache && cacheFieldGetters.containsKey(fieldName)) {
+    if (tryCache && smallTable && cacheFieldGetters.containsKey(fieldName)) {
       final getter = cacheFieldGetters[fieldName]!;
       return _cache.firstWhereOrNull((element) => getter(element) == value);
     } else {
@@ -269,7 +268,7 @@ abstract class ModelHelper<T extends IModel<T>> {
     List<Object?>? arguments,
     bool forceRefresh = false,
   }) async {
-    if (enableCache && !forceRefresh) {
+    if (smallTable && !forceRefresh) {
       // 若有查询条件，缓存无法覆盖，需查数据库
       if (where == null && arguments == null) {
         return _cache.length;
@@ -613,7 +612,7 @@ abstract class ModelHelper<T extends IModel<T>> {
               where: appendWhere(where),
               whereArgs: whereArgs,
             );
-      if (mtn == null && enableCache) await getAllFromDb();
+      if (mtn == null && smallTable) await _getAllFromDb();
 
       if (entity != null) {
         await afterUpdate(entity);
@@ -707,7 +706,7 @@ abstract class ModelHelper<T extends IModel<T>> {
                     whereArgs: whereArgs,
                   ));
       // 更新缓存 + 后置钩子
-      if (mtn == null && enableCache && deletedCount > 0) await getAllFromDb();
+      if (mtn == null && smallTable && deletedCount > 0) await _getAllFromDb();
       if (entity != null) {
         await afterDelete(deletedCount, entity: entity);
       }
@@ -783,8 +782,8 @@ abstract class ModelHelper<T extends IModel<T>> {
       debugService.d('Inserted new record into $tableName with new ID: $newId');
 
       /// 更新缓存
-      if (mtn == null && enableCache) {
-        await getAllFromDb();
+      if (mtn == null && smallTable) {
+        await _getAllFromDb();
       }
       // 更新后置钩子
       await afterInsert(record);

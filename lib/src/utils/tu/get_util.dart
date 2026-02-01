@@ -33,4 +33,8 @@ class GetUtil {
   S putController<S>(S dependency) {
     return Get.put(dependency);
   }
+
+  dynamic arguments() {
+    return Get.arguments;
+  }
 }

@@ -11,16 +11,16 @@ enum DelegateAction { insert, update, delete }
 /// ```
 class MyModelDelegate<T extends IModel<T>> extends AbstractListDelegate<T> {
   final IMessageService? _messageService;
-  ModelHelper<T>? _service;
+  ModelHelper<T>? _helper;
 
   MyModelDelegate({
-    ModelHelper<T>? service,
+    ModelHelper<T>? helper,
     IMessageService? messageService, // 允许测试时注入 Mock
     MyModelDelegate<T>? delegate,
     super.rxItems,
     super.rxTotal,
     super.autoInit = true,
-  }) : _service = service,
+  }) : _helper = helper,
        _messageService = messageService,
        super(delegate: delegate);
 
@@ -31,18 +31,18 @@ class MyModelDelegate<T extends IModel<T>> extends AbstractListDelegate<T> {
       getIMessageService();
 
   // 服务类寻根
-  ModelHelper<T> get service =>
-      _service ??
-      (_parentDelegate as MyModelDelegate<T>?)?.service ??
+  ModelHelper<T> get helper =>
+      _helper ??
+      (_parentDelegate as MyModelDelegate<T>?)?.helper ??
       (throw Exception('MyModelDelegate: 缺少 ModelHelper 服务。'));
 
-  bool get hasService =>
-      _service != null ||
-      (_parentDelegate as MyModelDelegate<T>?)?.hasService == true;
+  bool get hasHelper =>
+      _helper != null ||
+      (_parentDelegate as MyModelDelegate<T>?)?.hasHelper == true;
 
   @override
   void bind({
-    ModelHelper<T>? service,
+    ModelHelper<T>? helper,
     RxList<T>? rxItems,
     RxInt? rxTotal,
     AbstractListDelegate<T>? delegate,
@@ -52,8 +52,8 @@ class MyModelDelegate<T extends IModel<T>> extends AbstractListDelegate<T> {
     Future<void> Function(DelegateAction action, {T? record, int? index})?
     delegateCallback,
   }) {
-    if (service != null) {
-      _service = service;
+    if (helper != null) {
+      _helper = helper;
     }
     super.bind(
       rxItems: rxItems,
@@ -125,7 +125,7 @@ class MyModelDelegate<T extends IModel<T>> extends AbstractListDelegate<T> {
     bool navBack = true,
     bool unshift = true,
   }) async {
-    if (!hasService || syncDb == false) {
+    if (!hasHelper || syncDb == false) {
       await sync(index: index, entity: entity, unshift: unshift);
       _onFinalize('save'.tr + 'success'.tr, showMessage, navBack);
       return;
@@ -135,14 +135,14 @@ class MyModelDelegate<T extends IModel<T>> extends AbstractListDelegate<T> {
     String? message;
 
     if (index >= 0) {
-      action.addUpdate(() => service.update(entity)).afterUpdateSuccess((
+      action.addUpdate(() => helper.update(entity)).afterUpdateSuccess((
         _,
       ) async {
         message = 'save'.tr + 'success'.tr;
         await sync(index: index, entity: entity, unshift: unshift);
       });
     } else {
-      action.addInsert(() => service.insert(entity)).afterInsertSuccess((
+      action.addInsert(() => helper.insert(entity)).afterInsertSuccess((
         newRecord,
       ) async {
         message = 'add'.tr + 'success'.tr;
@@ -208,7 +208,7 @@ class MyModelDelegate<T extends IModel<T>> extends AbstractListDelegate<T> {
     final currentItems = rxItems;
     index ??= currentItems.indexWhere((element) => element.id == id);
 
-    if (!hasService || syncDb == false) {
+    if (!hasHelper || syncDb == false) {
       if (index >= 0) {
         await sync(index: index);
         _onFinalize('delete'.tr + 'success'.tr, showMessage, navBack);
@@ -217,9 +217,9 @@ class MyModelDelegate<T extends IModel<T>> extends AbstractListDelegate<T> {
       return 0;
     }
 
-    if (index == -1) return await service.deleteById(id);
+    if (index == -1) return await helper.deleteById(id);
 
-    final effect = await service.deleteById(id);
+    final effect = await helper.deleteById(id);
     if (effect > 0) {
       await sync(index: index);
       _onFinalize('delete'.tr + 'success'.tr, showMessage, navBack);
@@ -354,8 +354,10 @@ abstract class AbstractListDelegate<T> {
     this.delegateCallback = delegateCallback ?? this.delegateCallback;
   }
 
-  /// 核心同步逻辑（合并后的唯一真相来源）
-  /// 注意：你如果不设置 items，那么 afterUpdate 将不被触发
+  /// 核心同步逻辑，同时更新 rxItems 和 rxTotal
+  /// 删除: entity == null && index >= 0 触发 afterDelete 和 delegateCallback
+  /// 添加: entity != null && index < 0 触发 afterInsert 和 delegateCallback
+  /// 修改: entity != null && index >= 0 触发 afterUpdate 和 delegateCallback
   Future<void> sync({
     required int index,
     T? entity,

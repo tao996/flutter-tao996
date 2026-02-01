@@ -62,30 +62,19 @@ abstract class ISettingsService {
 
   void updateServerHost(String value);
 
-  Future<void> init(); // 添加 init 方法到接口
-
   Future<bool> remove(String key);
 
   Future<bool> clean();
-
-  SharedPreferences get prefs;
 }
 
-Future<SharedPreferences> getSharedPreferences() async {
-  return await SharedPreferences.getInstance();
+SharedPreferences? _prefs;
+SharedPreferences get prefs => _prefs!;
+
+Future<void> initSharedPreferences() async {
+  _prefs = await SharedPreferences.getInstance();
 }
 
 abstract class SettingService implements ISettingsService {
-  late SharedPreferences _prefs;
-
-  @override
-  Future<void> init() async {
-    _prefs = await SharedPreferences.getInstance();
-  }
-
-  @override
-  SharedPreferences get prefs => _prefs;
-
   @override
   Future<bool> remove(String key) async {
     return await prefs.remove(key);
@@ -97,10 +86,10 @@ abstract class SettingService implements ISettingsService {
   }
 
   @override
-  String get language => _prefs.getString('language') ?? 'system';
+  String get language => prefs.getString('language') ?? 'system';
 
   @override
-  set language(String value) => _prefs.setString('language', value);
+  set language(String value) => prefs.setString('language', value);
 
   @override
   int get themeMode => prefs.getInt('themeMode') ?? 0;
@@ -164,28 +153,28 @@ abstract class SettingService implements ISettingsService {
   set readTextAlign(String value) => prefs.setString('readTextAlign', value);
 
   @override
-  bool get useProxy => _prefs.getBool('useProxy') ?? false;
+  bool get useProxy => prefs.getBool('useProxy') ?? false;
 
   @override
-  set useProxy(bool value) => _prefs.setBool('useProxy', value);
+  set useProxy(bool value) => prefs.setBool('useProxy', value);
 
   @override
-  String get proxyAddress => _prefs.getString('proxyAddress') ?? '';
+  String get proxyAddress => prefs.getString('proxyAddress') ?? '';
 
   @override
-  set proxyAddress(String value) => _prefs.setString('proxyAddress', value);
+  set proxyAddress(String value) => prefs.setString('proxyAddress', value);
 
   @override
-  String get proxyPort => _prefs.getString('proxyPort') ?? '';
+  String get proxyPort => prefs.getString('proxyPort') ?? '';
 
   @override
-  set proxyPort(String value) => _prefs.setString('proxyPort', value);
+  set proxyPort(String value) => prefs.setString('proxyPort', value);
 
   @override
   void updateServerHost(String value) {
     final newHost = value.endsWith('/')
         ? value.substring(0, value.length - 1)
         : value;
-    _prefs.setString('serverHost', newHost);
+    prefs.setString('serverHost', newHost);
   }
 }

@@ -11,7 +11,7 @@ class NumberUtil {
   /// [num]: 存储的金额值，以“分”为单位（整数）。
   /// [fractionDigits]: 小数位数，通常为 2。
   /// [emptyText] 是否返回空字符串。如果为 true，则返回空字符串，否则返回 "0"。
-  String formatMoney(
+  String fenToYuan(
     dynamic num, {
     int fractionDigits = 2,
     bool emptyText = true,
@@ -43,7 +43,7 @@ class NumberUtil {
   /// [money]: 用户输入的金额字符串（可能包含千分位符或空格）。
   ///
   /// 注意：该方法依赖于 money.replaceAll(',', '') 来移除千分位符。
-  int parseMoney(String? money) {
+  int yuanToFen(String? money) {
     if (money == null || money.isEmpty) {
       return 0;
     }
@@ -73,6 +73,10 @@ class NumberUtil {
 
   int parseInt(String? value) {
     return tu.data.getInt(value);
+  }
+
+  double parseDouble(String? value) {
+    return tu.data.getDouble(value);
   }
 
   /// 只有数字/数字字符串才会被处理

@@ -22,25 +22,26 @@ class RouteItem {
   RouteItem({required this.title, required this.name, required this.subtitle});
 }
 
-class RouteHelper extends IRouteService {
-  @override
-  String get initRoute => '/';
-
-  @override
-  List<GetPage> get routes => [
-    GetPage(name: '/', page: () => HomePage()),
-    GetPage(name: '/plugin_pull_to_refresh', page: () => PluginPullToRefresh()),
-    GetPage(name: '/smartRefresh', page: () => MyDemoSmartRefresherPage()),
-    GetPage(name: '/formHelper', page: () => MyDemoFormHelper()),
-    GetPage(name: '/customTabBar', page: () => MyDemoCustomTabBar()),
-    GetPage(name: '/easyRefresh', page: () => MyDemoEasyRefresh()),
-    GetPage(name: '/searchInput', page: () => MyDemoSearchInput()),
-    GetPage(name: '/paginationWidget', page: () => MyDemoPagination()),
-    GetPage(name: '/image', page: () => MyDemoImage()),
-    GetPage(name: '/network', page: () => MyDemoNetwork()),
-    GetPage(name: '/qrcode', page: () => MyDemoQrcodeView()),
-    GetPage(name: '/canvas', page: () => CanvasTestPage()),
-  ];
+class RouteHelper {
+  RouteHelper() {
+    AppRoutes.routes = [
+      GetPage(name: '/', page: () => HomePage()),
+      GetPage(
+        name: '/plugin_pull_to_refresh',
+        page: () => PluginPullToRefresh(),
+      ),
+      GetPage(name: '/smartRefresh', page: () => MyDemoSmartRefresherPage()),
+      GetPage(name: '/formHelper', page: () => MyDemoFormHelper()),
+      GetPage(name: '/customTabBar', page: () => MyDemoCustomTabBar()),
+      GetPage(name: '/easyRefresh', page: () => MyDemoEasyRefresh()),
+      GetPage(name: '/searchInput', page: () => MyDemoSearchInput()),
+      GetPage(name: '/paginationWidget', page: () => MyDemoPagination()),
+      GetPage(name: '/image', page: () => MyDemoImage()),
+      GetPage(name: '/network', page: () => MyDemoNetwork()),
+      GetPage(name: '/qrcode', page: () => MyDemoQrcodeView()),
+      GetPage(name: '/canvas', page: () => CanvasTestPage()),
+    ];
+  }
 
   Future<dynamic> gotoName(String name) async {
     return Get.toNamed(name);

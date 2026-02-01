@@ -63,13 +63,14 @@ class FormHelperUtil {
   }
 
   /// 水平布局的 按钮组，可用于单选
+  /// [isRequired] 是否必填，如果为 false，则必须使用显示声明 `final Rx<Company?> kvCompanyValue = Rx<Company?>(null);`
   Widget oneFilterChip<T>({
     required List<KV<T>> items,
     required void Function(T? item) onSelectionChanged,
     T? value,
     String? label,
     InputDecoration? decoration, // 允许传入自定义 decoration
-    bool isRequired = false,
+    bool isRequired = true,
   }) {
     final child = filterChipCheckbox<T>(
       items: items,
@@ -180,7 +181,7 @@ class FormHelperUtil {
   Widget select<T>({
     required String label,
     required List<KV<T>> items,
-    required ValueChanged<T?> onChanged,
+    required ValueChanged<T> onChanged,
     T? value,
     String? hintText,
     String? helperText,
@@ -217,7 +218,11 @@ class FormHelperUtil {
           child: Text(kv.label, softWrap: true),
         );
       }).toList(),
-      onChanged: onChanged,
+      onChanged: (v) {
+        if (v != null) {
+          onChanged(v);
+        }
+      },
       hint: hintText != null ? Text(hintText, softWrap: true) : null,
     );
   }
@@ -319,8 +324,8 @@ class FormHelperUtil {
     );
   }
 
-  Widget checkboxListTile({
-    required String title,
+  Widget checkboxListTile(
+    String title, {
     required void Function(bool) onChanged,
     String? subtitle,
     bool value = false,
@@ -341,9 +346,8 @@ class FormHelperUtil {
   Widget checkbox(
     String label, {
     bool? value,
-    required void Function(bool?)? onChanged,
-    String? helperText,
-    bool helperTextBottom = true,
+    required void Function(bool)? onChanged,
+    String? subtitle,
   }) {
     bool initValue = value ?? false;
     return Column(
@@ -368,30 +372,21 @@ class FormHelperUtil {
                 Checkbox(
                   value: initValue,
                   onChanged: (yes) {
-                    initValue = yes ?? false;
-                    onChanged?.call(yes);
+                    if (yes != null) {
+                      onChanged?.call(yes);
+                    }
                   },
                 ),
                 Text(label),
-                if (helperText != null &&
-                    helperText.isNotEmpty &&
-                    !helperTextBottom)
-                  Padding(
-                    padding: EdgeInsets.only(left: 20),
-                    child: Text(
-                      helperText,
-                      style: TextStyle(fontSize: 12, color: Colors.grey),
-                    ),
-                  ),
               ],
             ),
           ),
         ),
-        if (helperText != null && helperText.isNotEmpty && helperTextBottom)
+        if (subtitle != null && subtitle.isNotEmpty)
           Padding(
             padding: EdgeInsets.only(left: 40),
             child: Text(
-              helperText,
+              subtitle,
               style: TextStyle(fontSize: 12, color: Colors.grey),
             ),
           ),

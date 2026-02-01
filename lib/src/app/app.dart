@@ -10,7 +10,6 @@ import 'package:pull_to_refresh/pull_to_refresh.dart';
 import '../../tao996.dart';
 
 class MyTao996App extends StatelessWidget {
-  final ISettingsService settingService;
   final Iterable<LocalizationsDelegate<dynamic>>? localizationsDelegates;
 
   /// 在 app 构建之前执行
@@ -19,7 +18,6 @@ class MyTao996App extends StatelessWidget {
 
   const MyTao996App({
     super.key,
-    required this.settingService,
     this.beforeBuild,
     this.fallbackLocale,
     this.localizationsDelegates,
@@ -28,10 +26,7 @@ class MyTao996App extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final IThemeService themeService = getIThemeService();
-    final IRouteService routeService = getIRouteService();
-    if (routeService.routes.isEmpty) {
-      throw Exception('app routes is empty');
-    }
+    final ISettingsService settingService = getISettingsService();
 
     DeviceService.calScreenSize(context);
     if (beforeBuild != null) {
@@ -69,8 +64,8 @@ class MyTao996App extends StatelessWidget {
             ThemeMode.light,
             ThemeMode.dark,
           ][settingService.themeMode],
-          initialRoute: routeService.initRoute,
-          getPages: routeService.routes,
+          initialRoute: '/',
+          getPages: AppRoutes.routes,
           defaultTransition: {
             'cupertino': Transition.cupertino,
             'fade': Transition.fade,

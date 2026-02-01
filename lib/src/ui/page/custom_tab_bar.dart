@@ -3,38 +3,6 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:get/get.dart';
-import 'package:tao996/tao996.dart';
-
-mixin MyCustomTabBarController {
-  /// ListView.separated(controller) 中滚动位置保存，
-  /// 需要自己手动 dispose
-  final ScrollController scrollController = ScrollController();
-  final cachePosition = <String, double>{};
-
-  void savePosition(String key) {
-    if (scrollController.hasClients) {
-      cachePosition[key] = scrollController.offset;
-    }
-  }
-
-  void restorePosition(String key) {
-    // 确保控制器连接后再跳转
-    final double? position = cachePosition[key];
-    if (position == null) return;
-    // 如果已连接，直接跳转
-    if (scrollController.hasClients) {
-      scrollController.jumpTo(cachePosition[key] ?? 0);
-    } else {
-      dprint('scrollController has not clients');
-      // 如果未连接，等待下一帧 Widget 布局完成后再跳转
-      SchedulerBinding.instance.addPostFrameCallback((_) {
-        if (scrollController.hasClients) {
-          scrollController.jumpTo(position);
-        }
-      });
-    }
-  }
-}
 
 class MyCustomTabBarItem {
   final String key;
@@ -46,8 +14,14 @@ class MyCustomTabBarItem {
   String toString() => 'MyCustomTabBarItem(key: $key, title: $title)';
 }
 
-/// 显示样式 [bookMark] 书签样式（滚动）；[flow] 流式样式；[horizontal] 水平样式（滚动）
-enum MyCustomTabBarStyle { bookMark, horizontal, flow, flowChip }
+/// 显示样式，
+///
+/// `horizontal` 水平滚动 + 激活时：显示下划线；
+/// `flow` 自动换行 + 激活时：显示下划线；
+/// `bookMark` 水平滚动 + 激活时：显示圆角背景；
+/// `flowChip` 自动换行 + 激活时：显示圆角边框；
+///
+enum MyCustomTabBarStyle { horizontal, flow, bookMark, flowChip }
 
 class MyCustomTabBar extends StatefulWidget {
   final double height;
@@ -64,8 +38,8 @@ class MyCustomTabBar extends StatefulWidget {
   /// 选中的 TabBar 背景色，默认为 theme.scaffoldBackgroundColor
   final Color? notebookBgColor;
 
-  /// 最后一个标签添加按钮
-  final void Function()? lastAction;
+  /// 在最后显示一个添加按钮
+  final void Function()? onInsert;
 
   const MyCustomTabBar({
     super.key,
@@ -76,7 +50,7 @@ class MyCustomTabBar extends StatefulWidget {
     this.onDoubleTap,
     required this.children,
     this.notebookBgColor,
-    this.lastAction,
+    this.onInsert,
   });
 
   @override
@@ -369,7 +343,7 @@ class _MyCustomTabBarState extends State<MyCustomTabBar> {
       width: double.infinity,
       color: theme.dividerColor.withAlpha(25), // 模拟 Tab Bar 的背景底色
 
-      child: widget.lastAction == null
+      child: widget.onInsert == null
           ? child
           : Row(
               crossAxisAlignment: CrossAxisAlignment.end, // 关键：将所有标签页对齐到底部
@@ -377,7 +351,10 @@ class _MyCustomTabBarState extends State<MyCustomTabBar> {
                 Expanded(child: child),
                 SizedBox(
                   width: 50,
-                  child: IconButton(onPressed: widget.lastAction, icon: Icon(Icons.add)),
+                  child: IconButton(
+                    onPressed: widget.onInsert,
+                    icon: Icon(Icons.add),
+                  ),
                 ),
               ],
             ),

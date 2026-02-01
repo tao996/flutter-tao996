@@ -1,12 +1,12 @@
 import 'package:get/get.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
-
-import '../../../tao996.dart';
+import 'package:tao996/tao996.dart';
 
 abstract class MySmartRefresherController<T>
     extends IMySmartRefresherBodyController {
   AbstractListDelegate<T> delegate;
 
+  /// 当前页面，默认为1
   int pageIndex = 1;
   int pageSize = 15;
 
@@ -15,10 +15,14 @@ abstract class MySmartRefresherController<T>
 
   RxList<T> get items => delegate.rxItems;
 
+  /// 数据请求中
   RxBool isRequesting = false.obs;
 
+  /// [autoLoad] 是否自动加载数据；注意：如果 [autoLoad] 设置为 false，则需要将 delegate 的绑定存放到构造函数中
+  ///
+  /// [pageSize] 每页数量
   MySmartRefresherController({
-    bool autoLoad = true,
+    bool autoLoad = false,
     this.pageSize = 15,
     AbstractListDelegate<T>? delegate,
   }) : delegate = delegate ?? MyListDelegate<T>() {
@@ -32,6 +36,8 @@ abstract class MySmartRefresherController<T>
     super.onInit();
     if (_initCount == 0 && refreshController.initialRefresh == false) {
       _initCount++;
+
+      /// 必须提前设计好 delegate，才能请求成功
       initData();
     }
   }
@@ -57,7 +63,14 @@ abstract class MySmartRefresherController<T>
 
   /// 初始化数据，在控制器 onInit 时被调用
   Future<void> initData() async {
-    await smartRefresh(isRefresh: true);
+    isIniting.value = true;
+    try {
+      await smartRefresh(isRefresh: true);
+    } catch (e, st) {
+      getIDebugService().exception(e, st, errorMessage: e.toString());
+    } finally {
+      isIniting.value = false;
+    }
   }
 
   /// 加载数据，在 smartRefresh 中被调用；不需要设置 isRequesting 或者 assignItems 等操作
@@ -180,7 +193,7 @@ abstract class MySmartRefresherController<T>
 
   Future<void> afterOnRefresh() async {}
 
-  /// 普通搜索
+  /// 普通条件搜索
   Future<void> onReSearch() async {
     dprint('smartRefreshController onReSearch');
     isRequesting.value = true;

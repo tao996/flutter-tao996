@@ -25,7 +25,16 @@ enum ImagePickerSource { camera, gallery, galleryVideo, cameraVideo, media }
 
 enum ImagePickerMultipleSource { image, medio, video }
 
-enum DateTimeFormat { ym, ymd, ymdHm, ymdHms, ymdFile, ymdHmFile, ymdHmsFile }
+enum DateTimeFormat {
+  ym,
+  ymd,
+  ymdHm,
+  ymdHms,
+  hm,
+  ymdFile,
+  ymdHmFile,
+  ymdHmsFile,
+}
 
 class MyPaginationParams {
   /// 每页默认记录数。

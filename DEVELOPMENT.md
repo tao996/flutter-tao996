@@ -2,44 +2,97 @@
 
 使用以下 API 必须导入 `import 'package:tao996/tao996.dart';`
 
-
-#### 全局服务获取函数
+## mixin
 
 ```dart
-// 数据库服务
-IDatabaseService getIDatabaseService()
-SqfliteDatabaseService getSqfliteDatabaseService()
-
-// 功能服务
-IMessageService getIMessageService()
-INetworkService getINetworkService()
-IThemeService getIThemeService()
-IRouteService getIRouteService()
-ILocaleService getILocaleService()
-IShareService getIShareService()
-IFilePickerService getIFilePickerService()
-IWebviewService getIWebviewService()
-
-// 工具服务
-IDebugService getIDebugService()
-ILogService getILogService()
-IDioHttpService getIDioHttpService()
-IFontService getIFontService()
-IPathService getIPathService()
-
-// 翻译服务
-TranslationService getTranslationService()
+mixin MixinTao996Service {
+  final IMessageService messageService = getIMessageService();
+  final IDebugService debugService = getIDebugService();
+}
 ```
 
----
+### `IMessageService`
+
+提供用户提示、确认对话框等功能，通常用在 `Controller` 中。
+
+**核心方法：**
+
+```dart
+// 确认对话框
+Future<bool?> confirm({
+  String? title,
+  String? content,
+  String? cancelText,
+  String? confirmText,
+  void Function()? yes, // 点击确认时执行
+  void Function()? no,
+})
+
+// 警告对话框
+Future<void> alert(String title, {String? content, Widget? icon})
+
+// 删除确认
+Future<bool?> deleteConfirm(
+  String text,
+  void Function() yes, {
+  bool textIsContent = false,
+})
+
+// Toast 提示
+void toast(String message)
+
+// Snackbar
+SnackbarController snackbar(
+  String title,
+  String message, {
+  SnackPosition snackPosition = SnackPosition.BOTTOM,
+  bool? successIcon,
+  int seconds = 3,
+})
+
+// 成功/错误提示
+void success(String message, {bool snackBar = false})
+void error(String message, {bool snackBar = false})
+```
+
+
+### `IDebugService`
+
+用于打印日志，调试信息。
+
+```dart
+IDebugService d(
+  Object? object, {
+  Object? args,
+  bool? log,
+  String? errorMessage,
+  String? successMessage,
+});
+
+/// 捕获异常，用在 try catch 中，会自动打印错误信息，并显示错误信息
+IDebugService exception(
+  Object error,
+  StackTrace stackTrace, {
+  Object? args,
+  bool log = true,
+  String? errorMessage,
+});
+```
+
+### `MixinPositionCache`
+
+用于记录滚动的位置
+
+```dart
+void savePosition(String key);
+void restorePosition(String key); 
+```
 
 ## 服务层 (Services)
 
-### 数据库服务 (Database Service)
+### 数据库服务 `IDatabaseService`
 
-#### `IDatabaseService` / `SqfliteDatabaseService`
-
-提供数据库操作的抽象接口和 SQLite 实现。
+提供数据库操作的抽象接口和 SQLite 实现
 
 **核心方法：**
 
@@ -126,59 +179,94 @@ await db.transaction((txn) async {
 });
 ```
 
----
+#### 查询构建器 (Query Builder)
 
-### 消息服务 (Message Service)
-
-#### `IMessageService` / `MessageService`
-
-提供用户提示、确认对话框等功能。
-
-**核心方法：**
+用于快速生成 `IDatabaseService` 查询条件
 
 ```dart
-// 确认对话框
-Future<bool?> confirm({
-  String? title,
-  String? content,
-  String? cancelText,
-  String? confirmText,
-  void Function()? yes,
-  void Function()? no,
-})
-
-// 警告对话框
-Future<void> alert(String title, {String? content, Widget? icon})
-
-// 删除确认
-Future<bool?> deleteConfirm(
-  String text,
-  void Function() yes, {
-  bool textIsContent = false,
-})
-
-// Toast 提示
-void toast(String message)
-
-// Snackbar
-SnackbarController snackbar(
-  String title,
-  String message, {
-  SnackPosition snackPosition = SnackPosition.BOTTOM,
-  bool? successIcon,
-  int seconds = 3,
-})
-
-// 成功/错误提示
-void success(String message, {bool snackBar = false})
-void error(String message, {bool snackBar = false})
+class QueryBuilder<T> {
+  QueryBuilder<T> where(String field, String operator, dynamic value);
+  QueryBuilder<T> andWhere(String field, String operator, dynamic value);
+  (String, List<Object?>) build();
+}
 ```
 
----
+#### DDL
 
-### 网络状态服务 (Network Service)
+```dart
 
-#### `INetworkService` / `NetworkService`
+enum DDLColumnType { integer, text, real }
+
+class DDLColumn {
+  final String name;
+  final DDLColumnType type;
+  bool isPrimaryKey;
+  bool isAutoIncrement;
+  bool isUnique;
+  String defaultValue;
+
+  DDLColumn(
+    this.name,
+    this.type, {
+    this.isPrimaryKey = false,
+    this.isAutoIncrement = false,
+    this.isUnique = false,
+    this.defaultValue = '',
+  });
+
+  @override
+  String toString() {
+    // return the sql
+  }
+}
+
+class DDLQueryBuilder {
+  static void createTable( Database db, {
+    required String tableName,
+    required List<DDLColumn> columns,
+  });
+  static void addColumn( Database db, {
+    required String tableName,
+    required DDLColumn column,
+  });
+  static void dropColumn( Database db, {
+    required String tableName,
+    required String columnName,
+  });
+  static void renameColumn( Database db, {
+    required String tableName,
+    required String columnName,
+    required String newColumnName,
+  });
+  /// 唯一索引
+  static void createUniqueIndex( Database db, {
+    required String tableName,
+    required String columnName,
+  });
+  /// 唯一联合索引
+  static void createUniqueIndexWithColumns( Database db, {
+    required String tableName,
+    required List<String> columnNames,
+  });
+  /// 普通索引
+  static void createIndex( Database db, {
+    required String tableName,
+    required String columnName,
+  });
+  /// 普通联合索引
+  static void createIndexWithColumns( Database db, {
+    required String tableName,
+    required List<String> columnNames,
+  });
+  /// 删除索引
+  static void dropIndex(Database db, String indexName);
+  /// 索引是否存在
+  static Future<bool> indexExists(Database db, String indexName);
+  static String indexName( String tableName,String columnName, { String prefix = 'idx_',});
+}
+```
+
+### 网络状态 `INetworkService`
 
 监听网络状态变化。
 
@@ -213,11 +301,7 @@ void onInit({Future<void> Function()? callback});
 void dispose();
 ```
 
----
-
-### 设置服务 (Settings Service)
-
-#### `ISettingsService` / `SettingService`
+### 系统设置 `ISettingsService`
 
 管理应用设置，使用 SharedPreferences 持久化。
 
@@ -231,11 +315,49 @@ SharedPreferences get prefs
 
 ## 数据模型层 (Models & Helpers)
 
-### 1. 基础模型
+### 基础模型
 
-#### `IModel<T>`
+模型使用 `@JsonSerializable()` 注释后，手动执行 `flutter pub run build_runner build` 以生成模型对应的 `g.dart` 文件，并自动生成以下方法。
 
-所有数据模型的基类，提供标准字段和方法。用户需要手动执行 `flutter pub run build_runner build` 以生成模型对应的 `g.dart` 文件。
+```dart
+Map<String, dynamic> toJson() => _$YourModelToJson(this);
+Map<String, dynamic> toMap() => toJson();
+YourModel fromMap(Map<String, dynamic> map) => YourModel.fromMap(map);
+factory YourModel.fromJson(Map<String, dynamic> json) => _$YourModelFromJson(json);
+factory YourModel.fromMap(Map<String, dynamic> map) => YourModel.fromJson(map);
+// 当其它模型引用到当前模型时
+// @JsonKey( fromJson: YourModel.instanceFromJson, toJson: YourModel.instanceToJson, )
+static YourModel instanceFromJson(Object? json) {
+  if (json is String) return YourModel.fromJson(jsonDecode(json));
+  return YourModel.fromJson(json as Map<String, dynamic>);
+}
+static String instanceToJson(YourModel instance) => jsonEncode(instance.toJson());
+```
+
+以下类都实现了 `JsonConverter` 用于指定类型转换
+
+* `@JsonColorConverter()` for `Color`
+* `@JsonBoolConverter` for `bool`
+* `@JsonMapStringStringConverter()` for `Map<String, String>`
+* `@JsonNestedMapStringConverter()` for `Map<String, Map<String, String>>`
+* `@JsonMapStringBoolConverter() ` form `Map<String, bool>`
+* `@JsonMapStringIntConverter()` for `Map<String, int>`
+* `@JsonMapStringDoubleConverter()` for `Map<String, double>`
+* `@JsonListIntConverter()` for `List<int>`
+* `@JsonListDoubleConverter()` for `List<double>`
+* `@JsonListStringConverter()` for `List<String>`
+* `@JsonRectConverter()` for `Rect`
+* `@JsonSizeConverter()` for `Size`
+* `@JsonOffsetConverter()` for `Offset`
+* `@JsonEdgeInsetsConverter()` for `EdgeInsets`
+* `@JsonBoxShadowConverter()` for `BoxShadow`
+* `@JsonFontWeightConverter()` for `FontWeight`
+* `@JsonBoxFitConverter()` for `BoxFit`
+* `@JsonGradientConverter()` for `Gradient`
+
+#### 数据库模型 `IModel<T>`
+
+需要保存到数据库的模型
 
 ```dart
 abstract class IModel<T> extends DbTypeModel<T> {
@@ -262,47 +384,37 @@ abstract class IModel<T> extends DbTypeModel<T> {
 
   // 复制基础数据
   void copyBaseDataFrom(dynamic model);
+  T copyBaseDataWith({
+    int? id,
+    DateTime? createdAt,
+    DateTime? updatedAt,
+    DateTime? deletedAt,
+  });
+}
+```
+**使用方式**
+
+```dart
+@JsonSerializable()
+class YourModel extends IModel<YourModel> {
+  // 无需定义 id、createdAt 等字段
+  final String title;
+  final String description;
+  
+  YourModel({
+    required this.title,
+    required this.description,
+  });
+  
+  
 }
 ```
 
-#### `DbTypeConverter` 模型属性注解
+#### 普通模型 `INoTimeModel<T>`
 
-内部都是静态方法，为模型属性添加转换器，成对使用。
+不需要保存到数据库，不包含时间戳的模型基类（JSON 序列化时忽略时间字段）。
 
-* 用于 `bool` 类型的 `static bool boolFromJson(int value)`,`static int boolToJson(bool value)`
-* `static String mapStringToJson(Map<String, String>? data)`, `static Map<String, String> mapStringFromJson(String? json)`
-* `static String mapBoolToJson(Map<String, bool>? data)`, `static Map<String, bool> mapBoolFromJson(String? json)`
-* `static String mapIntToJson(Map<String, int>? data)`, `static Map<String, int> mapIntFromJson(String? json)`
-* `static String mapDoubleToJson(Map<String, double>? data)`, `static Map<String, double> mapDoubleFromJson(String? json)`
-* `static String mapToJson<T extends DbTypeModel<T>>(Map<String, T>? data)` 和 `static Map<String, T> mapFromJson<T extends DbTypeModel<T>>( String? json, {required T Function(Map<String, dynamic>) fromMap,})`，mapFromJson 无法直接使用，需要在使用中二次调用
-* `static String listToJson<T extends DbTypeModel<T>>(List<T>? items)`,`static List<T> listFromJson<T extends DbTypeModel<T>>`
-* `static List<int> listIntFromJson(String? json)`, `static String listIntToJson(List<int>? items)`
-* `static List<double> listDoubleFromJson(String? json)`, `static String listDoubleToJson(List<double>? items)`
-* `static List<String> listStringFromJson(String? json)`, `static String listStringToJson(List<String>? items)`
-
-```dart
-import 'package:json_annotation/json_annotation.dart';
-
-@JsonKey(
-  fromJson: DbTypeConverter.boolFromJson,
-  toJson: DbTypeConverter.boolToJson,
-)
-final bool required;
-
-@JsonKey(
-  fromJson: DbTypeConverter.mapStringFromJson,
-  toJson: DbTypeConverter.mapStringToJson,
-)
-final Map<String, String> options;
-```
-
-#### `INoTimeModel<T>`
-
-不包含时间戳的模型基类（JSON 序列化时忽略时间字段）。
-
----
-
-### 2. 模型助手 (Model Helper)
+### 模型助手 (Model Helper)
 
 #### `ModelHelper<T extends IModel<T>>`
 
@@ -313,10 +425,18 @@ final Map<String, String> options;
 ```dart
 abstract class ModelHelper<T extends IModel<T>> {
   final String _tableName;
-  final bool enableCache;        // 是否启用缓存
+  final bool smallTable;         // 是否是小表，如果是小表，则一次性加载所有数据
   final bool enableSoftDelete;   // 是否启用软删除
   final bool enableCreatedAt;    // 是否有 createdAt 字段
   final bool enableUpdatedAt;    // 是否有 updatedAt 字段
+
+  ModelHelper(
+    this._tableName, {
+    this.smallTable = false,
+    this.enableSoftDelete = false,
+    this.enableCreatedAt = true,
+    this.enableUpdatedAt = true,
+  });
 
   // 必须实现的转换方法
   T fromMap(Map<String, dynamic> map);
@@ -332,8 +452,7 @@ abstract class ModelHelper<T extends IModel<T>> {
   Future<dynamic> afterDelete(int deletedCount, {T? entity});
 
   // 查询操作
-  Future<List<T>> getAll();
-  Future<List<T>> getAllFromDb();
+  Future<List<T>> getAll({bool force = false}); // 一次性将所有数据查询出来
   Future<T?> getFirstBy({required String fieldName, required dynamic value, bool tryCache = true, ModelTransaction? mtn});
   Future<T?> getFirstWith(String where, {List<Object?>? whereArgs, List<String>? columns, String? orderBy, ModelTransaction? mtn});
   Future<T?> getById(int id, {bool tryCache = true, ModelTransaction? mtn});
@@ -411,20 +530,61 @@ await userService.transaction((mtn) async {
 });
 ```
 
----
 
-### 3. 模型委托 (Model Delegate)
+
+### 模型委托 (Model Delegate)
+
+通常用在列表页控制器中，提供列表操作和数据库同步。
 
 #### `MyModelDelegate<T extends IModel<T>>`
 
-结合 ModelHelper 和响应式列表，提供列表操作和数据库同步。
+结合 ModelHelper 和响应式列表，提供列表操作和数据库同步，通常用在列表页控制器中。
 
 ```dart
-class MyModelDelegate<T extends IModel<T>> {
-  final ModelHelper<T>? service;
-  final IMessageService? messageService;
-  final RxList<T>? rxItems;
-  final RxInt? rxTotal;
+abstract class AbstractListDelegate<T> {
+  AbstractListDelegate<T>? _parentDelegate; // 父级代理
+  RxList<T>? _rxItems;
+  RxInt? _rxTotal;
+
+   // 回调函数
+  Future<void> Function(int index)? afterUpdate;
+  Future<void> Function(T record)? afterInsert;
+  Future<void> Function(T oldRecord, int index)? afterDelete;
+  Future<void> Function(DelegateAction action, {T? record, int? index})?
+  delegateCallback;
+
+  AbstractListDelegate({
+    AbstractListDelegate<T>? delegate, // parent delegate
+    RxList<T>? rxItems,
+    RxInt? rxTotal,
+    bool autoInit = true,
+  });
+
+  void bind({
+    RxList<T>? rxItems,
+    RxInt? rxTotal,
+    AbstractListDelegate<T>? delegate,
+    Future<void> Function(int index)? afterUpdate,
+    Future<void> Function(T record)? afterInsert,
+    Future<void> Function(T oldRecord, int index)? afterDelete,
+    Future<void> Function(DelegateAction action, {T? record, int? index})?
+    delegateCallback,
+  });
+  /// 核心同步逻辑，同时更新 rxItems 和 rxTotal
+  /// 删除: entity == null && index >= 0 触发 afterDelete 和 delegateCallback
+  /// 添加: entity != null && index < 0 触发 afterInsert 和 delegateCallback
+  /// 修改: entity != null && index >= 0 触发 afterUpdate 和 delegateCallback
+  Future<void> sync({
+    required int index,
+    T? entity,
+    bool unshift = true,
+  });
+}
+class MyModelDelegate<T extends IModel<T>> extends AbstractListDelegate<T> {
+  
+  IMessageService get messageService; // ...
+  ModelHelper<T> get helper; // ...
+  bool get hasHelper; //...
 
   // 插入到最前面
   Future<void> insert(T entity, {bool syncDb = true, bool showMessage = true, bool navBack = true});
@@ -434,6 +594,10 @@ class MyModelDelegate<T extends IModel<T>> {
 
   // 更新记录
   Future<void> update(T entity, int index, {bool syncDb = true, bool showMessage = true, bool navBack = true});
+  
+  // index > 0 call update; index < 0 call push 
+  Future<void> save({required T entity, required int index, bool syncDb = true, bool showMessage = true, bool navBack = true, bool unshift = true,
+  });
 
   // 删除记录
   Future<int> remoteAt({required int index, String? title, bool syncDb = true, bool deleteConfirm = true, bool showMessage = true, bool navBack = true});
@@ -442,13 +606,12 @@ class MyModelDelegate<T extends IModel<T>> {
   Future<int> removeWithId({required int id, int? index, String? title, bool syncDb = true, bool deleteConfirm = true, bool showMessage = true, bool navBack = true});
 
   // 通用触发器（保存或删除）
-  Future<void> trigger(T? entity, int index, {...});
+  // delegate set at ListController, `trigger` be called at DetailController
+  Future<void> trigger(T? entity, int index, { bool syncDb = true, bool deleteConfirm = true, String? title, bool showMessage = true, bool navBack = true, });
 }
 ```
 
----
-
-### 4. 模型操作 (Model Action)
+### 模型操作 (Model Action)
 
 #### `ModelAction<T extends IModel>`
 
@@ -483,19 +646,16 @@ action.addInsert(() => userService.insert(user))
       });
 ```
 
----
-
-### 5. 查询构建器 (Query Builder)
+### 模型迁移
 
 ```dart
-class QueryBuilder<T> {
-  QueryBuilder<T> where(String field, String operator, dynamic value);
-  QueryBuilder<T> andWhere(String field, String operator, dynamic value);
-  (String, List<Object?>) build();
+abstract class DbMigrateModule {
+  String get id;
+  int get version;
+  void onCreate(Batch batch);
+  void onUpgrade(Batch batch, int installVersion);
 }
 ```
-
----
 
 ## 工具类库 (Utils)
 
@@ -505,27 +665,171 @@ class QueryBuilder<T> {
 
 class _TUtils {
   const _TUtils();
-
   final path = const FilepathUtil();
   final file = const FileUtil();
-  final colorMsg = const ColorMessageUtil();
+  final color = const ColorUtil();
   final data = const DataUtil();
   final date = const DatetimeUtil();
   final fn = const FnUtil();
+  final get = const GetUtil();
   final number = const NumberUtil();
   final permission = const PermissionUtil();
   final url = const UrlUtil();
   final zip = const ZipUtil();
-  final imagePicker = const ImagePickerUtil();
   final device = const DeviceUtil();
   final context = const ContextUtil();
   final text = const TextUtil();
   final form = const FormHelperUtil();
-
+  final draw = const DrawUtil();
+  final font = const FontUtil();
   final api = const ApiUtil();
 }
 
 const tu = _TUtils();
+```
+
+* 枚举辅助，用于 tu 中
+
+```dart
+typedef PickerFileType = FileType;
+typedef PickerPlatformFile = PlatformFile;
+enum ResourceLocation { local, network, assets, unknown }
+/// 选择类型 [camera] 拍照；[gallery] 相册；[galleryVideo] 从相册选择一个视频；[cameraVideo] 拍摄一个视频；[media] 选择一个图片和视频
+enum ImagePickerSource { camera, gallery, galleryVideo, cameraVideo, media }
+enum ImagePickerMultipleSource { image, medio, video }
+enum DateTimeFormat { ym, ymd, ymdHm, ymdHms, ymdFile, ymdHmFile, ymdHmsFile }
+```
+
+
+#### 路径 FilepathUtil
+
+内部引入了 [path](https://pub.dev/packages/path)
+
+* `String normalize(String userPath)` 标准化用户输入的文件或目录路径，并统一使用 '/' 作为分隔符。
+* `bool isWindowsPath(String path)`
+* `String separator()`, `String dirSeparator()`
+* `List<String> split(String path)` => `p.split(path)`
+* `String posixJoinAll(Iterable<String> parts)` => `p.posix.joinAll(parts)`
+* `String joinAll(Iterable<String> parts)` => `p.joinAll(parts)`
+* `String posixJoin(String part1, String part2 ...)` => `p.posix.join(part1, part2 ...)`
+* `String join(String part1, String part2 ...)` => `normalize(p.join(part1, part2 ...))`
+* `FileSystemEntityType getFileType(String path)` 获取路径类型
+* `String relative(String path, {required String from})`
+* `String dirname(String filePath)` 文件或目录所在的目录
+* `String basename(String filePath)` 文件名+扩展名
+* `String basenameWithoutExtension(String filePath)` 文件名
+* `String extension(String filePath)` 扩展名
+* `String withoutExtension(String filePath)`
+* `bool isAbsolute(String path)`
+* `String absolute(String part1, String part2 ...)`
+* `String resolvePath(String filepath, {String? dir})`
+* `String fromUri(Object? uri)`
+* `String scriptDir()` 当前脚本所在目录
+* `List<String> getFileNames(List<File> files)` 文件名列表
+* `String? getMimeTypeFromPath(String filePath)` 
+* `ResourceLocation determineLocation(String address)` 判断给定的地址是网络地址还是本地文件路径
+* `bool exists(String path)` 检查文件或者目录是否存在
+
+
+#### 文件操作 FileUtil
+
+内部引入了 
+* [file_picker](https://pub.dev/packages/file_picker)
+* [image_picker](https://pub.dev/packages/image_picker)
+* [file_selector](https://pub.dev/packages/file_selector)
+* [flutter_image_gallery_saver](https://pub.dev/packages/flutter_image_gallery_saver)
+
+
+```dart
+/// 选择多个文件
+Future<List<PlatformFile>?> pickPlatformFile({
+  String? dialogTitle,
+  String? initialDirectory,
+  FileType type = FileType.any,
+  List<String>? allowedExtensions,
+  Function(FilePickerStatus)? onFileLoading,
+  int compressionQuality = 0,
+  bool allowMultiple = false,
+  bool withData = false,
+  bool withReadStream = false,
+  bool lockParentWindow = false,
+  bool readSequential = false,
+});
+/// 选择文件 [pickPlatformFile]，并返回它们的路径 [suggestExtensions] 常见的文件类型
+Future<List<String>> pickFilesPath({
+  bool allowMultiple = true,
+  List<String>? allowedExtensions,
+  bool suggestExtensions = true,
+});
+/// 选择文件 [pickPlatformFile] 并返回第1个选择文件的路径
+Future<String?> pickFirstPath({List<String>? allowedExtensions});
+
+/// 选择文件 [pickPlatformFile]，返回转换后的 [File]
+Future<List<File>> pickFiles({
+  FileType type = FileType.any,
+  List<String>? allowedExtensions,
+  String? initialDirectory,
+  bool allowMultiple = false,
+});
+
+// 这会打开一个原生文件选择对话框，只允许用户选择目录，而不是文件。
+Future<String?> getDirectory();
+
+/// 选择文件并读取文件内容
+Future<String?> getPickFileContent({
+  FileType type = FileType.any,
+  String? initialDirectory,
+  List<String>? allowedExtensions,
+});
+
+/// 保存图片到用户相册
+Future<void> saveImageToGallery({
+  File? file,
+  Uint8List? imageBytes,
+  String? suggestedFileName,
+});
+
+/// 保存文件到用户相册
+Future<void> saveFileToGallery(String filePath);
+
+/// 判断文件是否存在
+bool exists(String filePath);
+
+/// 异步计算给定文件的 MD5 哈希值
+/// 返回一个 32 字符的十六进制字符串
+Future<String> fileMd5(String filePath);
+
+Future<String> getContent(String filePath) async;
+
+/// 选择/拍摄一个图片或视频；
+Future<XFile?> take({ ImagePickerSource source = ImagePickerSource.gallery,});
+
+/// 返回选择/拍摄图片或视频的路径
+Future<String?> taskPath({ ImagePickerSource source = ImagePickerSource.gallery,});
+
+/// 从相册中选择多份文件
+Future<List<XFile>?> pickXFilesFromGallery({ ImagePickerMultipleSource source = ImagePickerMultipleSource.image, });
+
+/// 选择多份资源（默认图片），并返回路径
+Future<List<String>> pickXFilePathFromGallery({ ImagePickerMultipleSource source = ImagePickerMultipleSource.image, });
+```
+
+#### 颜色 ColorUtil
+
+```dart
+bool isFullyTransparent(Color color);
+bool isTransparent(Color color);
+/// 创建一个 8x8 的棋盘背景,用于表示一个透明颜色
+Widget buildCheckerboard({double squareSize = 8});
+Color success();
+Color error();
+Color danger();
+Color info();
+Color warning();
+Color text(double opacity);
+Color hexToColor(String hexCode, {double opacity = 1.0});
+Color rgbToColor(String rgbString, {double opacity = 1.0});
+Color parseToColor(String input, {double opacity = 1.0});
 ```
 
 #### 数据查询类 DataUtil
@@ -628,89 +932,6 @@ class DatetimeUtil {
 * `Future<Directory?> getDownloadsDirectory()`
 * `Future<String> homeDir()` 用户家目录
 
-#### 文件操作 FileUtil
-
-内部引入了 
-* [file_picker](https://pub.dev/packages/file_picker)
-* [image_picker](https://pub.dev/packages/image_picker)
-* [file_selector](https://pub.dev/packages/file_selector)
-* [flutter_image_gallery_saver](https://pub.dev/packages/flutter_image_gallery_saver)
-
-
-```dart
-/// 选择多个文件
-Future<List<PlatformFile>?> pickPlatformFile({
-  String? dialogTitle,
-  String? initialDirectory,
-  FileType type = FileType.any,
-  List<String>? allowedExtensions,
-  Function(FilePickerStatus)? onFileLoading,
-  int compressionQuality = 0,
-  bool allowMultiple = false,
-  bool withData = false,
-  bool withReadStream = false,
-  bool lockParentWindow = false,
-  bool readSequential = false,
-});
-/// 选择文件 [pickPlatformFile]，并返回它们的路径 [suggestExtensions] 常见的文件类型
-Future<List<String>> pickFilesPath({
-  bool allowMultiple = true,
-  List<String>? allowedExtensions,
-  bool suggestExtensions = true,
-});
-/// 选择文件 [pickPlatformFile] 并返回第1个选择文件的路径
-Future<String?> pickFirstPath({List<String>? allowedExtensions});
-
-/// 选择文件 [pickPlatformFile]，返回转换后的 [File]
-Future<List<File>> pickFiles({
-  FileType type = FileType.any,
-  List<String>? allowedExtensions,
-  String? initialDirectory,
-  bool allowMultiple = false,
-});
-
-// 这会打开一个原生文件选择对话框，只允许用户选择目录，而不是文件。
-Future<String?> getDirectory();
-
-/// 选择文件并读取文件内容
-Future<String?> getPickFileContent({
-  FileType type = FileType.any,
-  String? initialDirectory,
-  List<String>? allowedExtensions,
-});
-
-/// 保存图片到用户相册
-Future<void> saveImageToGallery({
-  File? file,
-  Uint8List? imageBytes,
-  String? suggestedFileName,
-});
-
-/// 保存文件到用户相册
-Future<void> saveFileToGallery(String filePath);
-
-/// 判断文件是否存在
-bool exists(String filePath);
-
-/// 异步计算给定文件的 MD5 哈希值
-/// 返回一个 32 字符的十六进制字符串
-Future<String> fileMd5(String filePath);
-
-Future<String> getContent(String filePath) async;
-
-/// 选择/拍摄一个图片或视频；
-Future<XFile?> take({ ImagePickerSource source = ImagePickerSource.gallery,});
-
-/// 返回选择/拍摄图片或视频的路径
-Future<String?> taskPath({ ImagePickerSource source = ImagePickerSource.gallery,});
-
-/// 从相册中选择多份文件
-Future<List<XFile>?> pickXFilesFromGallery({ ImagePickerMultipleSource source = ImagePickerMultipleSource.image, });
-
-/// 选择多份资源（默认图片），并返回路径
-Future<List<String>> pickXFilePathFromGallery({ ImagePickerMultipleSource source = ImagePickerMultipleSource.image, });
-
-```
 
 #### 数字处理 NumberUtil
 
@@ -740,7 +961,7 @@ Future<List<String>> pickXFilePathFromGallery({ ImagePickerMultipleSource source
 * `String? encodeQueryParameters(Map<String, String> params)` 编码 URL 查询参数
 * `Future<bool> launch( String url, { String? title, LaunchMode? mode, Function()? error, })` 内部使用 [url_launcher](https://pub.dev/packages/url_launcher)
 
-#### ZipUtil
+#### 压缩解压缩 ZipUtil
 
 内部使用了 [archive](https://pub.dev/packages/archive)
 
@@ -836,6 +1057,7 @@ Widget select<T>({
   String? helperText,
   bool isRequired = false,
 });
+// input will auto set keyboardType
 Widget input({
   TextEditingController? controller,
   String? labelText,
@@ -923,34 +1145,22 @@ Widget leftStringRightWidget(
 });
 ```
 
-### 路径 FilepathUtil
+#### 绘画 DrawUtil
 
-内部引入了 [path](https://pub.dev/packages/path)
-
-* `String normalize(String userPath)` 标准化用户输入的文件或目录路径，并统一使用 '/' 作为分隔符。
-* `bool isWindowsPath(String path)`
-* `String separator()`, `String dirSeparator()`
-* `List<String> split(String path)` => `p.split(path)`
-* `String posixJoinAll(Iterable<String> parts)` => `p.posix.joinAll(parts)`
-* `String joinAll(Iterable<String> parts)` => `p.joinAll(parts)`
-* `String posixJoin(String part1, String part2 ...)` => `p.posix.join(part1, part2 ...)`
-* `String join(String part1, String part2 ...)` => `normalize(p.join(part1, part2 ...))`
-* `FileSystemEntityType getFileType(String path)` 获取路径类型
-* `String relative(String path, {required String from})`
-* `String dirname(String filePath)` 文件或目录所在的目录
-* `String basename(String filePath)` 文件名+扩展名
-* `String basenameWithoutExtension(String filePath)` 文件名
-* `String extension(String filePath)` 扩展名
-* `String withoutExtension(String filePath)`
-* `bool isAbsolute(String path)`
-* `String absolute(String part1, String part2 ...)`
-* `String resolvePath(String filepath, {String? dir})`
-* `String fromUri(Object? uri)`
-* `String scriptDir()` 当前脚本所在目录
-* `List<String> getFileNames(List<File> files)` 文件名列表
-* `String? getMimeTypeFromPath(String filePath)` 
-* `ResourceLocation determineLocation(String address)` 判断给定的地址是网络地址还是本地文件路径
-* `bool exists(String path)` 检查文件或者目录是否存在
+```dart
+Future<ui.Image> renderImage(String path);
+Future<ui.Image> renderSvgWithUrl(String url);
+Future<ui.Image> renderSvg(String svgContent, { Size size = const Size(512, 512),});
+Future<ui.Image> renderText(
+  String text, {
+  required Size size,
+  double? fontSize,
+  Color? color,
+  String? fontFamily,
+  FontWeight? fontWeight,
+  double pixelRatio = 3.0,
+});
+```
 
 ## 翻译系统 (Translation)
 
@@ -969,6 +1179,10 @@ class TranslationService extends Translations {
 
   // 添加翻译
   void addKeys(Map<String, String> newKeys, {String locale = 'zh_CN'});
+
+  /// 加载翻译文件 [jsonPth] `lib/extensions/app_beian/i18n/zh_CN.json`
+  /// only run in kDebugMode
+  Future<void> addJsonFile(String jsonPth, {String locale = 'zh_CN'});
 }
 ```
 
@@ -987,18 +1201,7 @@ getTranslationService().addKeys({
 }, locale: 'zh_CN');
 ```
 
-## 混入类 (Mixins)
-
-### `MixinTao996Service`
-
-Service 混入类。
-
-```dart
-mixin MixinTao996Service {
-  final IMessageService messageService = getIMessageService();
-  final IDebugService debugService = getIDebugService();
-}
-```
+## 辅助函数
 
 **导航辅助函数：**
 
@@ -1007,50 +1210,9 @@ void goBackWithResult(dynamic result);
 void goBack();
 ```
 
-## 核心数据类型
-
-
-### `ResourceLocation`
-
-资源位置枚举。
-
-```dart
-enum ResourceLocation { local, network, assets, unknown }
-```
-
-### `ImagePickerSource`
-
-图片选择源。
-
-```dart
-enum ImagePickerSource {
-  camera,        // 拍照
-  gallery,       // 相册
-  galleryVideo,  // 从相册选择视频
-  cameraVideo,   // 拍摄视频
-  media,         // 选择图片和视频
-}
-```
-
-### `DateTimeFormat`
-
-日期时间格式。
-
-```dart
-enum DateTimeFormat {
-  ym,          // 2025-01
-  ymd,         // 2025-01-21
-  ymdHm,       // 2025-01-21 10:30
-  ymdHms,      // 2025-01-21 10:30:45
-  ymdFile,     // 20250121
-  ymdHmFile,   // 20250121-1030
-  ymdHmsFile,  // 20250121-103045
-}
-```
-
 ### `KV<T>`
 
-键值对类。
+键值对类，通常用在 `tu.form` 表单中
 
 ```dart
 class KV<T> {
@@ -1058,5 +1220,139 @@ class KV<T> {
   final T value;
 
   KV({required this.label, required this.value});
+}
+
+/// 用于创建 KV 列表
+List<KV<T>> kvCreateList<T extends Enum>(Map<T, String> maps);
+
+extension KVList<T extends Enum> on List<KV<T>> {
+  T? getValue(String? name);
+  List<String> labels();
+  List<T> values();
+}
+```
+
+## UI 和控制器
+
+### CustomTabBar
+
+通常用于多个分组时，需要单独显示分组的内容，对 `TabBarView` 的优化；
+
+```dart
+/// `horizontal` 水平滚动 + 激活时：显示下划线；
+/// `flow` 自动换行 + 激活时：显示下划线；
+/// `bookMark` 水平滚动 + 激活时：显示圆角背景；
+/// `flowChip` 自动换行 + 激活时：显示圆角边框；
+enum MyCustomTabBarStyle { bookMark, horizontal, flow, flowChip }
+
+class MyCustomTabBarItem {
+  final String key;
+  final String title;
+}
+
+class MyCustomTabBar extends StatefulWidget {
+  /// 高度
+  final double height;
+
+  /// 子项：注意，你不能把 RxList 直接传进来，否则会引起 Unhandled Exception: Stack Overflow；
+  /// 应该传 RxList.value
+  final List<MyCustomTabBarItem> children;
+
+  /// 当前选中的标签索引
+  final RxInt activeIndex;
+  final void Function(int index) onChange;
+  final void Function(int index)? onDoubleTap;
+
+  /// 默认为水平排列
+  final MyCustomTabBarStyle style;
+
+  /// 选中的 TabBar 背景色，默认为 theme.scaffoldBackgroundColor
+  final Color? notebookBgColor;
+
+  /// 最后一个标签添加按钮
+  final void Function()? onInsert;
+
+  const MyCustomTabBar({
+    super.key,
+    this.height = 50,
+    this.style = MyCustomTabBarStyle.horizontal,
+    required this.activeIndex,
+    required this.onChange,
+    this.onDoubleTap,
+    required this.children,
+    this.notebookBgColor,
+    this.onInsert,
+  });
+}
+```
+
+### QRCodeView
+
+二维码扫描页面
+
+```dart
+Get.back(result: scanData.code);
+```
+
+### MySmartRefresher
+
+一个自动管理下拉刷新，上拉加载的列表组件，使用示例
+
+#### MySmartRefresherController
+
+控制器，管理数据的加载
+
+```dart
+abstract class MySmartRefresherController<T> extends IMySmartRefresherBodyController {
+  AbstractListDelegate<T> delegate;
+  int pageIndex = 1;
+  int pageSize = 15;
+  final RxBool hasMore = true.obs;
+  RxList<T> get items => delegate.rxItems;
+  RxBool isRequesting = false.obs;
+}
+```
+
+```dart
+class Student {
+  final String name;
+}
+
+/// 定义控制器
+class MyDemoSmartRefresherController extends MySmartRefresherController<Student> {
+  /// 返回每次刷新或加载时需要返回的数据
+  @override
+  Future<List<Student>?> loadData() async {
+      return await _helper.getPaginationData(where: _getWhere(), pageSize: pageSize,pageIndex: pageIndex,);
+  }
+  /// 返回查询的条件
+  String _getWhere() {}
+}
+
+
+class MyDemoSmartRefresherPage extends StatelessWidget {
+  late final MyDemoSmartRefresherController c;
+
+  MyDemoSmartRefresherPage({super.key}) {
+    c = Get.put(MyDemoSmartRefresherController());
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: Text('DEMO SmartRefresher')),
+      body: SafeArea(
+        child: Obx( () => MySmartRefresher.obxListView( c,
+          canLoadMore: c.hasMore,
+            empty:  MyEmptyStateWidget(
+              title: 'student'.tr, onAction: c.bindInsertRecord,
+            ),
+            itemCount: c.items.value.length,
+            itemBuilder: (context, index) {
+              return Obx( () => ?, );
+            },
+         ))),
+      );
+  }
 }
 ```
