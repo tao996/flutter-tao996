@@ -1,17 +1,6 @@
 import 'package:get/get.dart';
 
 class AppRoutes {
+  /// 路由，通常在这里初始化 '/' 入口
   static List<GetPage> routes = [];
 }
-/*
-import 'package:get/get.dart';
-import 'package:tao996/tao996.dart';
-
-class RouteHelper implements IRouteService {
-  @override
-  String initRoute = '/';
-
-  @override
-  List<GetPage> routes = [GetPage(name: '/', page: () => HomePage())];
-}
- */

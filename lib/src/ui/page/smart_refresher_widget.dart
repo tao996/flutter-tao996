@@ -47,13 +47,14 @@ class MySmartRefresher {
     IMySmartRefresherBodyController controller, {
     Widget? child,
     required RxBool canLoadMore,
+    bool showFooterText = true,
   }) {
     // 注意：在 PC 端需要 app.dart 中添加配置 https://github.com/peng8350/flutter_pulltorefresh/issues/544
     return SmartRefresher(
       enablePullDown: true,
       enablePullUp: true,
       header: const WaterDropHeader(),
-      footer: footer(controller),
+      footer: footer(controller, show: showFooterText),
       controller: controller.refreshController,
       onRefresh: controller.onRefresh,
       onLoading: () {

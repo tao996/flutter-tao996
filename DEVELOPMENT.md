@@ -325,13 +325,19 @@ Map<String, dynamic> toMap() => toJson();
 YourModel fromMap(Map<String, dynamic> map) => YourModel.fromMap(map);
 factory YourModel.fromJson(Map<String, dynamic> json) => _$YourModelFromJson(json);
 factory YourModel.fromMap(Map<String, dynamic> map) => YourModel.fromJson(map);
-// 当其它模型引用到当前模型时
-// @JsonKey( fromJson: YourModel.instanceFromJson, toJson: YourModel.instanceToJson, )
-static YourModel instanceFromJson(Object? json) {
-  if (json is String) return YourModel.fromJson(jsonDecode(json));
-  return YourModel.fromJson(json as Map<String, dynamic>);
+
+class YourModelConverter implements JsonConverter<YourModel, String> {
+  const YourModelConverter();
+
+  @override
+  YourModel fromJson(Object json) {
+    if (json is String) return YourModel.fromJson(jsonDecode(json));
+    return YourModel.fromJson(json as Map<String, dynamic>);
+  }
+
+  @override
+  String toJson(YourModel instance) => jsonEncode(instance.toJson());
 }
-static String instanceToJson(YourModel instance) => jsonEncode(instance.toJson());
 ```
 
 以下类都实现了 `JsonConverter` 用于指定类型转换
@@ -425,7 +431,7 @@ class YourModel extends IModel<YourModel> {
 ```dart
 abstract class ModelHelper<T extends IModel<T>> {
   final String _tableName;
-  final bool smallTable;         // 是否是小表，如果是小表，则一次性加载所有数据
+  final bool smallTable;         // if true, load all records in `getAll()`
   final bool enableSoftDelete;   // 是否启用软删除
   final bool enableCreatedAt;    // 是否有 createdAt 字段
   final bool enableUpdatedAt;    // 是否有 updatedAt 字段
@@ -497,7 +503,7 @@ abstract class ModelHelper<T extends IModel<T>> {
 
 ```dart
 class UserService extends ModelHelper<User> {
-  UserService() : super('users', enableCache: true, enableSoftDelete: true);
+  UserService() : super('users', enableSoftDelete: true);
 
   @override
   User fromMap(Map<String, dynamic> map) => User.fromMap(map);
@@ -688,7 +694,7 @@ class _TUtils {
 const tu = _TUtils();
 ```
 
-* 枚举辅助，用于 tu 中
+* 枚举辅助 `tu_header.dart`，用于 tu 中
 
 ```dart
 typedef PickerFileType = FileType;
@@ -698,6 +704,38 @@ enum ResourceLocation { local, network, assets, unknown }
 enum ImagePickerSource { camera, gallery, galleryVideo, cameraVideo, media }
 enum ImagePickerMultipleSource { image, medio, video }
 enum DateTimeFormat { ym, ymd, ymdHm, ymdHms, ymdFile, ymdHmFile, ymdHmsFile }
+```
+
+#### get
+
+服务 `get_it`, 控制器 `get` 的注册
+
+```dart
+class GetUtil {
+  const GetUtil();
+  T getService<T extends Object>() { return GetIt.instance<T>();}
+  /// 注册服务
+  void putService<T extends Object>(T dependency) {
+    GetIt.instance.registerSingleton<T>(dependency);
+  }
+  void lazyPutService<T extends Object>(T Function() factoryFunc) {
+    GetIt.instance.registerLazySingleton<T>(factoryFunc);
+  }
+  bool isServiceRegistered<T extends Object>() {
+    return GetIt.instance.isRegistered<T>();
+  }
+  /// 获取控制器
+  T getController<T extends Object>() {
+    return Get.find<T>();
+  }
+  bool isControllerRegistered<T extends Object>() { return Get.isRegistered<T>();}
+  
+  S putController<S>(S dependency) { return Get.put(dependency); }
+
+  void lazyPutController<T extends Object>(T Function() factoryFunc) { Get.lazyPut(factoryFunc);}
+
+  dynamic arguments() {return Get.arguments;}
+}
 ```
 
 

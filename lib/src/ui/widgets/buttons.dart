@@ -140,14 +140,25 @@ class MyEditButton extends StatelessWidget {
 /// 删除按钮
 class MyDeleteButton extends StatelessWidget {
   final void Function()? onPressed;
-  final RxBool? isLoading;
+
   final MyButtonType? type;
   final bool showIcon;
+
+  /// 是否需要确认对话框
+  final bool confirm;
+
+  /// 提示的信息，默认为 “确定要删除当前记录吗？”
+  final String? content;
+
+  /// 提示信息是否需要添加 “此操作无法撤销”
+  final bool cancel;
 
   const MyDeleteButton({
     super.key,
     this.onPressed,
-    this.isLoading,
+    this.confirm = true,
+    this.cancel = false,
+    this.content,
     this.type,
     this.showIcon = true,
   });
@@ -156,7 +167,17 @@ class MyDeleteButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return MyButton(
       'delete'.tr,
-      onPressed: onPressed,
+      onPressed: confirm
+          ? () async {
+              final text =
+                  (content ??
+                      'deleteConfirmContent'.trParams({'title': 'record'.tr})) +
+                  (cancel ? '' : 'youCannotUndoThis'.tr);
+              await getIMessageService().deleteConfirm(text, () {
+                onPressed!();
+              }, textIsContent: true);
+            }
+          : onPressed,
       icon: showIcon ? const Icon(Icons.delete) : null,
       status: MyButtonStatus.danger,
       type: type,

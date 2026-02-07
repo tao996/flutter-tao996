@@ -19,6 +19,7 @@ import 'package:tao996/src/utils/tu/permission_util.dart';
 import 'package:tao996/src/utils/tu/text_util.dart';
 import 'package:tao996/src/utils/tu/zip.dart';
 import 'package:tao996/src/utils/tu/url_util.dart';
+import 'package:tao996/src/utils/tu/nav_util.dart';
 
 class _TUtils {
   const _TUtils();
@@ -43,6 +44,7 @@ class _TUtils {
   final font = const FontUtil();
 
   final api = const ApiUtil();
+  final nav = const NavUtil();
 
   // 使用 Get.theme 替代 Theme.of(context)
   // Get.theme 会自动指向当前最新的主题，注意：无法随主题变换

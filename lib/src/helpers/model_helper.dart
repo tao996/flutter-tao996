@@ -320,13 +320,20 @@ abstract class ModelHelper<T extends IModel<T>> {
         whereArgs: whereArgs ?? whereArgs1,
         orderBy: orderBy ?? 'id DESC',
         limit: pageSize,
-        offset: offset ?? (max(1, pageIndex) - 1) * pageSize,
+        offset: offset ?? getOffset(pageIndex: pageIndex, pageSize: pageSize),
       );
       return result.map((map) => fromMap(map)).toList();
     } catch (e, st) {
       debugService.exception(e, st, log: true);
       throw 'Failed to get paged data for $tableName; because: $e';
     }
+  }
+
+  int? getOffset({int? pageIndex, int? pageSize}) {
+    if (pageIndex == null || pageSize == null) {
+      return null;
+    }
+    return (max(1, pageIndex) - 1) * pageSize;
   }
 
   /// 从数据库中获取第1条符合条件的记录的字段 [key]值
@@ -359,8 +366,8 @@ abstract class ModelHelper<T extends IModel<T>> {
     String? groupBy,
     String? having,
     String? orderBy,
-    int? limit,
-    int? offset,
+    int? pageSize,
+    int? pageIndex,
   }) async {
     final result = await getManyMapWith(
       fieldName: fieldName,
@@ -371,8 +378,8 @@ abstract class ModelHelper<T extends IModel<T>> {
       groupBy: groupBy,
       having: having,
       orderBy: orderBy,
-      limit: limit,
-      offset: offset,
+      pageIndex: pageIndex,
+      pageSize: pageSize,
     );
     return result.map((map) => fromMap(map)).toList();
   }
@@ -390,8 +397,8 @@ abstract class ModelHelper<T extends IModel<T>> {
     String? groupBy,
     String? having,
     String? orderBy,
-    int? limit,
-    int? offset,
+    int? pageSize,
+    int? pageIndex,
   }) async {
     try {
       var (newWhere, newWhereArgs) = createWhere(
@@ -419,8 +426,8 @@ abstract class ModelHelper<T extends IModel<T>> {
         groupBy: groupBy,
         having: having,
         orderBy: orderBy,
-        limit: limit,
-        offset: offset,
+        limit: pageSize,
+        offset: getOffset(pageIndex: pageIndex, pageSize: pageSize),
       );
     } catch (e, st) {
       debugService.exception(e, st, log: true);
@@ -438,6 +445,8 @@ abstract class ModelHelper<T extends IModel<T>> {
     String? groupBy,
     String? having,
     String? orderBy,
+    int? pageSize,
+    int? pageIndex,
   }) async {
     return await getListIntColumnWith(
       'id',
@@ -449,6 +458,8 @@ abstract class ModelHelper<T extends IModel<T>> {
       groupBy: groupBy,
       having: having,
       orderBy: orderBy,
+      pageIndex: pageIndex,
+      pageSize: pageSize,
     );
   }
 
@@ -462,6 +473,8 @@ abstract class ModelHelper<T extends IModel<T>> {
     String? groupBy,
     String? having,
     String? orderBy,
+    int? pageSize,
+    int? pageIndex,
   }) async {
     try {
       final records = await getManyMapWith(
@@ -474,6 +487,8 @@ abstract class ModelHelper<T extends IModel<T>> {
         groupBy: groupBy,
         having: having,
         orderBy: orderBy,
+        pageIndex: pageIndex,
+        pageSize: pageSize,
       );
       return records.map((record) => record[column] as int).toList();
     } catch (e, st) {

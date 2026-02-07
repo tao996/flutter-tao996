@@ -40,6 +40,15 @@ class MyModelDelegate<T extends IModel<T>> extends AbstractListDelegate<T> {
       _helper != null ||
       (_parentDelegate as MyModelDelegate<T>?)?.hasHelper == true;
 
+  int getIndexById(int id) {
+    return rxItems.value.indexWhere((element) => element.id == id);
+  }
+
+  T? getItemById(int id) {
+    final index = getIndexById(id);
+    return index == -1 ? null : rxItems.value[index];
+  }
+
   @override
   void bind({
     ModelHelper<T>? helper,
@@ -83,6 +92,17 @@ class MyModelDelegate<T extends IModel<T>> extends AbstractListDelegate<T> {
     );
   }
 
+  Future<void> insertItem(T entity) async {
+    await save(
+      entity: entity,
+      index: -1,
+      syncDb: false,
+      showMessage: false,
+      navBack: false,
+      unshift: true,
+    );
+  }
+
   /// 追加1条记录到最后面
   Future<void> push(
     T entity, {
@@ -100,6 +120,17 @@ class MyModelDelegate<T extends IModel<T>> extends AbstractListDelegate<T> {
     );
   }
 
+  Future<void> pushItem(T entity) async {
+    await save(
+      entity: entity,
+      index: -1,
+      syncDb: false,
+      showMessage: false,
+      navBack: false,
+      unshift: false,
+    );
+  }
+
   Future<void> update(
     T entity,
     int index, {
@@ -113,6 +144,16 @@ class MyModelDelegate<T extends IModel<T>> extends AbstractListDelegate<T> {
       syncDb: syncDb,
       showMessage: showMessage,
       navBack: navBack,
+    );
+  }
+
+  Future<void> updateItem(T entity, int index) async {
+    await save(
+      entity: entity,
+      index: index,
+      syncDb: false,
+      showMessage: false,
+      navBack: false,
     );
   }
 
@@ -155,6 +196,17 @@ class MyModelDelegate<T extends IModel<T>> extends AbstractListDelegate<T> {
     );
   }
 
+  Future<void> saveItem(T entity, int index) async {
+    await save(
+      entity: entity,
+      index: index,
+      syncDb: false,
+      showMessage: false,
+      navBack: false,
+      unshift: false,
+    );
+  }
+
   // 抽离公共的收尾逻辑（返回和消息）
   void _onFinalize(String? msg, bool showMessage, bool navBack) {
     if (navBack) goBack();
@@ -184,6 +236,21 @@ class MyModelDelegate<T extends IModel<T>> extends AbstractListDelegate<T> {
       deleteConfirm: deleteConfirm,
       showMessage: showMessage,
       navBack: navBack,
+    );
+  }
+
+  Future<int> remoteItem({int? index, int? id, String? title}) async {
+    if (index == null && id == null) {
+      throw Exception('index or id must be provided');
+    }
+    return await removeWithId(
+      id: id ?? rxItems[index!].id,
+      index: index,
+      title: title,
+      syncDb: false,
+      deleteConfirm: false,
+      showMessage: false,
+      navBack: false,
     );
   }
 

@@ -58,7 +58,7 @@ class MessageService implements IMessageService {
   }) async {
     return Get.dialog(
       AlertDialog(
-        icon: title == null ? null : const Icon(Icons.info),
+        icon: const Icon(Icons.info),
         title: title == null ? null : Text(title),
         content: content == null ? null : Text(content),
         actions: [
@@ -110,7 +110,9 @@ class MessageService implements IMessageService {
       AlertDialog(
         title: Text('deleteConfirmTitle'.tr),
         content: Text(
-          textIsContent ? text : 'deleteConfirmContent'.trParams({'title': text}),
+          textIsContent
+              ? text
+              : 'deleteConfirmContent'.trParams({'title': text}),
         ),
         actions: [
           TextButton(

@@ -62,6 +62,7 @@ export 'src/ui/widgets/listtile.dart';
 export 'src/ui/widgets/loading.dart';
 export 'src/ui/widgets/message_bar.dart';
 export 'src/ui/widgets/padding.dart';
+export 'src/ui/widgets/reorder.dart';
 export 'src/ui/widgets/scaffold.dart';
 export 'src/ui/widgets/sliver.dart';
 export 'src/ui/widgets/separator_line.dart';
@@ -74,7 +75,6 @@ export 'src/utils/function.dart';
 export 'src/utils/typecast_util.dart';
 export 'src/utils/json_util.dart';
 export 'src/utils/stack_util.dart';
-export 'src/utils/nav_util.dart';
 
 // ps
 export 'src/utils/ps/ps.dart';

@@ -14,6 +14,10 @@ class GetUtil {
     GetIt.instance.registerSingleton<T>(dependency);
   }
 
+  void lazyPutService<T extends Object>(T Function() factoryFunc) {
+    GetIt.instance.registerLazySingleton<T>(factoryFunc);
+  }
+
   /// 服务是否存在
   bool isServiceRegistered<T extends Object>() {
     return GetIt.instance.isRegistered<T>();
@@ -32,6 +36,10 @@ class GetUtil {
   /// `tu.get.putController(SimpleReportController(Get.arguments));`
   S putController<S>(S dependency) {
     return Get.put(dependency);
+  }
+
+  void lazyPutController<T extends Object>(T Function() factoryFunc) {
+    Get.lazyPut(factoryFunc);
   }
 
   dynamic arguments() {
