@@ -73,6 +73,10 @@ class ColorUtil {
     }
     return Colors.transparent;
   }
+
+  int withOpacity(double? opacity) {
+    return ((opacity ?? 1.0) * 255).toInt();
+  }
 }
 
 class CheckerboardPainter extends CustomPainter {

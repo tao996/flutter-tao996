@@ -10,6 +10,8 @@ import 'package:image_picker/image_picker.dart';
 import 'package:tao996/tao996.dart';
 import 'package:crypto/crypto.dart';
 
+final imageSaver = ImageGallerySaver();
+
 class FileUtil implements IFilePickerService {
   const FileUtil();
 
@@ -68,7 +70,7 @@ class FileUtil implements IFilePickerService {
         await _saveFileToUserSelectedPath(suggestedName, sourceFile: file);
         return;
       }
-      await FlutterImageGallerySaver.saveImage(await file.readAsBytes());
+      await imageSaver.saveImage(await file.readAsBytes());
     } else if (imageBytes != null) {
       if (DeviceService.isPc()) {
         await _saveFileToUserSelectedPath(
@@ -81,7 +83,7 @@ class FileUtil implements IFilePickerService {
         );
         return;
       }
-      await FlutterImageGallerySaver.saveImage(imageBytes);
+      await imageSaver.saveImage(imageBytes);
     }
   }
 
@@ -97,7 +99,7 @@ class FileUtil implements IFilePickerService {
       await _saveFileToUserSelectedPath(fileName, sourceFile: file);
       return;
     }
-    await FlutterImageGallerySaver.saveFile(filePath);
+    await imageSaver.saveFile(filePath);
   }
 
   /// 文件是否

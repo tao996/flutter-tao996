@@ -169,7 +169,7 @@ class MyPainter extends CustomPainter {
           linePaint.shader = style.foregroundGradient!.createShader(rect);
         } else {
           linePaint.color = (style.borderColor ?? style.color ?? Colors.black)
-              .withOpacity(style.opacity ?? 1.0);
+              .withAlpha(tu.color.withOpacity(style.opacity));
         }
         canvas.drawLine(rect.topLeft, rect.bottomRight, linePaint);
         break;
@@ -217,7 +217,9 @@ class MyPainter extends CustomPainter {
           } else {
             final Paint textPaint = Paint()
               ..colorFilter = ColorFilter.mode(
-                (style.color ?? Colors.black).withOpacity(style.opacity ?? 1.0),
+                (style.color ?? Colors.black).withAlpha(
+                  tu.color.withOpacity(style.opacity),
+                ),
                 BlendMode.srcIn,
               );
             canvas.drawImageRect(
@@ -238,7 +240,10 @@ class MyPainter extends CustomPainter {
             img,
             Rect.fromLTWH(0, 0, img.width.toDouble(), img.height.toDouble()),
             rect,
-            Paint()..color = Colors.white.withOpacity(style.opacity ?? 1.0),
+            Paint()
+              ..color = Colors.white.withAlpha(
+                tu.color.withOpacity(style.opacity),
+              ),
           );
         }
         break;
@@ -260,8 +265,8 @@ class MyPainter extends CustomPainter {
       if (style.foregroundGradient != null) {
         borderPaint.shader = style.foregroundGradient!.createShader(rect);
       } else {
-        borderPaint.color = (style.borderColor ?? Colors.black).withOpacity(
-          style.opacity ?? 1.0,
+        borderPaint.color = (style.borderColor ?? Colors.black).withAlpha(
+          tu.color.withOpacity(style.opacity),
         );
       }
       // 因为边框是画在形状“边缘”上的线，而不是填满内部

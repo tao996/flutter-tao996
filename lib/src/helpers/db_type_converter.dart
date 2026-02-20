@@ -344,6 +344,7 @@ class JsonFontWeightConverter implements JsonConverter<FontWeight, int> {
   @override
   FontWeight fromJson(int json) => FontWeight.values[json];
   @override
+  // ignore: deprecated_member_use
   int toJson(FontWeight object) => object.index;
 }
 

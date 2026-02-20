@@ -68,7 +68,9 @@ class LogService implements ILogService {
 
       if (files.isNotEmpty) {
         // 🎯 调起系统分享面板（微信、邮件、隔空投送等）
-        await Share.shareXFiles(files, text: '应用运行日志反馈');
+        final params = ShareParams(files: files, text: '应用运行日志反馈');
+
+        await SharePlus.instance.share(params);
       }
     }
   }

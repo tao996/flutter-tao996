@@ -269,7 +269,7 @@ class MyText {
         ),
 
         // Trailing (右侧图标/Widget)
-        if (trailing != null) trailing,
+        ?trailing,
       ],
     );
   }

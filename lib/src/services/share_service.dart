@@ -10,6 +10,7 @@ abstract class IShareService {
     String? text,
     String? subject,
   });
+
   /// 分享文本
   Future<IShareStatus> share(String text, {String? subject});
 }
@@ -35,11 +36,12 @@ class ShareService implements IShareService {
     String? text,
     String? subject,
   }) async {
-    final result = await Share.shareXFiles(
-      [XFile(file.path)],
+    final params = ShareParams(
       text: text,
+      files: [XFile(file.path)],
       subject: subject,
     );
+    final result = await SharePlus.instance.share(params);
     return IShareStatus.values[result.status.index];
   }
 
@@ -49,17 +51,20 @@ class ShareService implements IShareService {
     String? text,
     String? subject,
   }) async {
-    final result = await Share.shareXFiles(
-      [XFile(filepath)],
+    final params = ShareParams(
       text: text,
+      files: [XFile(filepath)],
       subject: subject,
     );
+    final result = await SharePlus.instance.share(params);
     return IShareStatus.values[result.status.index];
   }
 
   @override
   Future<IShareStatus> share(String text, {String? subject}) async {
-    final result = await Share.share(text, subject: subject);
+    final result = await SharePlus.instance.share(
+      ShareParams(text: text, subject: subject),
+    );
     return IShareStatus.values[result.status.index];
   }
 }

@@ -14,7 +14,9 @@ void main() async {
     await _initAppServices();
     runApp(MyTao996App(fallbackLocale: const Locale('zh', 'CN')));
   } catch (e, st) {
-    getIDebugService().exception(e, st);
+    // getIDebugService().exception(e, st);
+    debugPrint(e.toString());
+    debugPrintStack(stackTrace: st);
 
     // 在桌面端，你可以选择显示一个包含错误信息的界面，或者直接退出
     runApp(
@@ -56,7 +58,7 @@ Future<void> _initAppServices() async {
   final locator = GetIt.instance;
 
   // 注册依赖项，也可以使用下面注释的代码替换
-  registerTao996Dependencies(locator);
+  await registerTao996Dependencies(locator);
 
   // locator.registerLazySingleton<IMessageService>(() => MessageService());
   // final ILogService logService = LogService();

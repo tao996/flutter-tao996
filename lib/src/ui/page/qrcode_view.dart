@@ -37,6 +37,7 @@ class _QRCodeViewState extends State<QRCodeView> {
   // *** 2. 关键修改：在 dispose 中取消流监听器（尽管这不是直接原因，但仍是好习惯）***
   @override
   void dispose() {
+    // ignore: deprecated_member_use
     controller?.dispose();
     super.dispose();
   }
@@ -62,7 +63,9 @@ class _QRCodeViewState extends State<QRCodeView> {
                     child: FutureBuilder(
                       future: controller?.getFlashStatus(),
                       builder: (context, snapshot) {
-                        return Text(snapshot.data == true ? 'flashOff'.tr : 'flashOn'.tr);
+                        return Text(
+                          snapshot.data == true ? 'flashOff'.tr : 'flashOn'.tr,
+                        );
                       },
                     ),
                   ),

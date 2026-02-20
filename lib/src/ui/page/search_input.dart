@@ -152,7 +152,7 @@ class MyEmptySearchResultWidget extends StatelessWidget {
               textAlign: TextAlign.center,
             ),
 
-            if (child != null) child!,
+            ?child,
           ],
         ),
       ),

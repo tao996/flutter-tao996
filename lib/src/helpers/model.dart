@@ -1,3 +1,5 @@
+// ignore_for_file: overridden_fields
+
 import 'package:json_annotation/json_annotation.dart';
 /*
 await db.execute('''CREATE TABLE $_tableName(
