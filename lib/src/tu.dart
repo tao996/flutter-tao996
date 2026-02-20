@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:tao996/src/utils/tu/api_util.dart';
+import 'package:tao996/src/utils/tu/assert_util.dart';
 import 'package:tao996/src/utils/tu/color_message_util.dart';
 import 'package:tao996/src/utils/tu/color_util.dart';
 import 'package:tao996/src/utils/tu/context_util.dart';
@@ -21,8 +22,11 @@ import 'package:tao996/src/utils/tu/zip.dart';
 import 'package:tao996/src/utils/tu/url_util.dart';
 import 'package:tao996/src/utils/tu/nav_util.dart';
 
+import 'package:uuid/uuid.dart';
+
 class _TUtils {
   const _TUtils();
+  final uuid = const Uuid();
 
   final path = const FilepathUtil();
   final file = const FileUtil();
@@ -42,6 +46,7 @@ class _TUtils {
   final form = const FormHelperUtil();
   final draw = const DrawUtil();
   final font = const FontUtil();
+  final assert1 = const AssertUtil();
 
   final api = const ApiUtil();
   final nav = const NavUtil();

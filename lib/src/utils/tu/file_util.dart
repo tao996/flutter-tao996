@@ -282,15 +282,43 @@ class FileUtil implements IFilePickerService {
     }
   }
 
-  /// 从相册中选择多份文件
-  Future<List<XFile>?> pickXFilesFromGallery({
+  /// 从相册中选择1份文件
+  Future<XFile?> pickXFileFromGallery({
     ImagePickerMultipleSource source = ImagePickerMultipleSource.image,
   }) async {
     final picker = ImagePicker();
     switch (source) {
       case ImagePickerMultipleSource.image:
+        return await picker.pickImage(source: ImageSource.gallery);
+
+      case ImagePickerMultipleSource.media:
+        return await picker.pickMedia();
+      case ImagePickerMultipleSource.video:
+        return await picker.pickVideo(source: ImageSource.gallery);
+    }
+  }
+
+  /// 选择1份资源（默认图片），并返回路径
+  Future<String?> pickXFilePathFromGallery({
+    ImagePickerMultipleSource source = ImagePickerMultipleSource.image,
+  }) async {
+    final file = await pickXFileFromGallery(source: source);
+    if (file == null || file.path.isEmpty) {
+      return null;
+    }
+    return file.path;
+  }
+
+  /// 从相册中选择多份文件
+  Future<List<XFile>?> pickXFilesFromGallery({
+    ImagePickerMultipleSource source = ImagePickerMultipleSource.image,
+  }) async {
+    final picker = ImagePicker();
+
+    switch (source) {
+      case ImagePickerMultipleSource.image:
         return await picker.pickMultiImage();
-      case ImagePickerMultipleSource.medio:
+      case ImagePickerMultipleSource.media:
         return await picker.pickMultipleMedia();
       case ImagePickerMultipleSource.video:
         return await picker.pickMultiVideo();
@@ -298,7 +326,7 @@ class FileUtil implements IFilePickerService {
   }
 
   /// 选择多份资源（默认图片），并返回路径
-  Future<List<String>> pickXFilePathFromGallery({
+  Future<List<String>> pickXFilesPathFromGallery({
     ImagePickerMultipleSource source = ImagePickerMultipleSource.image,
   }) async {
     final files = await pickXFilesFromGallery(source: source);

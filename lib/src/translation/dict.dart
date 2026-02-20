@@ -61,6 +61,9 @@ final Map<String, Map<String, String>> words = {
     'noRecord': '暂无@title',
     'clickToCreateYourFirstRecord': '点击下方按钮，开始创建您的第一个@title',
     'createNewRecord': '添加新@title',
+
+    'mustInteger': '@title 必须为整数',
+    'mustRequired': '@title 不能为空',
   },
 
   // ----------------------------------------------------

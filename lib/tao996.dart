@@ -75,6 +75,7 @@ export 'src/utils/function.dart';
 export 'src/utils/typecast_util.dart';
 export 'src/utils/json_util.dart';
 export 'src/utils/stack_util.dart';
+export 'src/utils/tr.dart';
 
 // ps
 export 'src/utils/ps/ps.dart';

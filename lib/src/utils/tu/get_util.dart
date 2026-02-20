@@ -24,22 +24,25 @@ class GetUtil {
   }
 
   /// 获取控制器
-  T getController<T extends Object>() {
-    return Get.find<T>();
+  T getController<T extends Object>({String? tag}) {
+    return Get.find<T>(tag: tag);
   }
 
-  bool isControllerRegistered<T extends Object>() {
-    return Get.isRegistered<T>();
+  bool isControllerRegistered<T extends Object>({String? tag}) {
+    return Get.isRegistered<T>(tag: tag);
   }
 
   /// 注册一个控制
   /// `tu.get.putController(SimpleReportController(Get.arguments));`
-  S putController<S>(S dependency) {
-    return Get.put(dependency);
+  S putController<S>(S dependency, {String? tag}) {
+    return Get.put(dependency, tag: tag);
   }
 
-  void lazyPutController<T extends Object>(T Function() factoryFunc) {
-    Get.lazyPut(factoryFunc);
+  void lazyPutController<T extends Object>(
+    T Function() factoryFunc, {
+    String? tag,
+  }) {
+    Get.lazyPut(factoryFunc, tag: tag);
   }
 
   dynamic arguments() {

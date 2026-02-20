@@ -84,6 +84,13 @@ class DataUtil {
     return defaultValue;
   }
 
+  double? tryGetDouble(dynamic v) {
+    if (v == null || v == '') {
+      return null;
+    }
+    return getDouble(v);
+  }
+
   double getDouble(dynamic v, {double defaultValue = 0.0}) {
     if (v == null || v == '') {
       return defaultValue;

@@ -79,7 +79,8 @@ class NumberUtil {
     return tu.data.getDouble(value);
   }
 
-  /// 只有数字/数字字符串才会被处理
+  /// 将多种类型的数字格式化为带逗号分隔的字符串；
+  /// 注意：只有数字/数字字符串才会被处理
   String formatNumber(dynamic data) {
     if (startWithNumber(data)) {
       return formatNumberWithComma(data);
@@ -277,5 +278,10 @@ class NumberUtil {
     final random = Random();
     // nextInt 生成一个从 0 到 list.length - 1 的随机整数
     return list[random.nextInt(list.length)];
+  }
+
+  int getRandomInt(int min, int max) {
+    final random = Random();
+    return random.nextInt(max - min) + min;
   }
 }

@@ -23,7 +23,7 @@ extension ResourceLocationExtension on ResourceLocation {
 /// 选择类型 [camera] 拍照；[gallery] 相册；[galleryVideo] 从相册选择一个视频；[cameraVideo] 拍摄一个视频；[media] 选择一个图片和视频
 enum ImagePickerSource { camera, gallery, galleryVideo, cameraVideo, media }
 
-enum ImagePickerMultipleSource { image, medio, video }
+enum ImagePickerMultipleSource { image, media, video }
 
 enum DateTimeFormat {
   ym,

@@ -21,6 +21,9 @@ abstract class ModelHelper<T extends IModel<T>> {
   /// 表中是否有 updatedAt 字段
   final bool enableUpdatedAt;
 
+  /// 是否启用 uuid
+  final bool enableUuid;
+
   /// 缓存全部的记录，通常用于小表使用
   /// 使用 `RxList` (如果使用 GetX) 或其他响应式列表，方便 UI 自动刷新
   /// 如果不使用响应式框架，普通 List 即可
@@ -46,6 +49,7 @@ abstract class ModelHelper<T extends IModel<T>> {
     this.enableSoftDelete = false,
     this.enableCreatedAt = true,
     this.enableUpdatedAt = true,
+    this.enableUuid = false,
   });
 
   Future<void> init(String language) async {
@@ -224,19 +228,44 @@ abstract class ModelHelper<T extends IModel<T>> {
     return await getManyBy(where: where);
   }
 
+  Future<T?> getByUuid(
+    String uuid, {
+    bool tryCache = true,
+    ModelTransaction? mtn,
+  }) async {
+    if (uuid.isEmpty) {
+      return null;
+    }
+    return await getFirstBy(
+      fieldName: 'uuid',
+      value: uuid,
+      tryCache: tryCache,
+      mtn: mtn,
+    );
+  }
+
   /// 检查记录在数据库中是否存在
   Future<bool> exists(
     dynamic value, {
     required String fieldName,
     int? excludeId,
+    String? excludeUuid,
   }) async {
     try {
-      final hasId = excludeId != null && excludeId > 0;
-      final where = hasId ? '$fieldName = ? AND id != ?' : '$fieldName = ?';
+      List<String> where = ['$fieldName = ?'];
+      List<Object> whereArgs = [value];
+      if (excludeUuid != null && excludeUuid.isNotEmpty) {
+        where.add('uuid != ?');
+        whereArgs.add(excludeUuid);
+      }
+      if (excludeId != null && excludeId > 0) {
+        where.add('id != ?');
+        whereArgs.add(excludeId);
+      }
       return await dbService.exists(
         tableName,
-        where: appendWhere(where),
-        whereArgs: hasId ? [value, excludeId] : [value],
+        where: appendWhere(where.join(' AND ')),
+        whereArgs: whereArgs,
       );
     } catch (e, st) {
       debugService.exception(e, st, log: true);
@@ -245,20 +274,30 @@ abstract class ModelHelper<T extends IModel<T>> {
   }
 
   /// 检查记录在数据库中是否存在
-  Future<bool> existsWith(String where, {int? excludeId}) async {
-    final hasId = excludeId != null && excludeId > 0;
-    if (hasId) {
-      where += ' AND id != ?';
-    }
+  Future<bool> existsWith(
+    String condition, {
+    int? excludeId,
+    String? excludeUuid,
+  }) async {
     try {
+      List<String> where = [condition];
+      List<Object> whereArgs = [];
+      if (excludeUuid != null && excludeUuid.isNotEmpty) {
+        where.add('uuid != ?');
+        whereArgs.add(excludeUuid);
+      }
+      if (excludeId != null && excludeId > 0) {
+        where.add('id != ?');
+        whereArgs.add(excludeId);
+      }
       return await dbService.exists(
         tableName,
-        where: appendWhere(where),
-        whereArgs: hasId ? [excludeId] : null,
+        where: appendWhere(where.join(' AND ')),
+        whereArgs: whereArgs,
       );
     } catch (e, st) {
       debugService.exception(e, st, log: true);
-      throw 'Failed to check existence of record in $tableName for $where; because: $e';
+      throw 'Failed to check exists of record in $tableName; because: $e';
     }
   }
 
@@ -670,6 +709,9 @@ abstract class ModelHelper<T extends IModel<T>> {
       }
     }
     fieldValues.remove('id'); // 移除 id，避免更新主键
+    if (enableUuid) {
+      fieldValues.remove('uuid');
+    }
     return updateWith(
       fieldValues.cast<String, Object?>(), // 强制类型转换（确保安全，因 fieldValues 来自实体）
       where: "id=?",
@@ -757,6 +799,11 @@ abstract class ModelHelper<T extends IModel<T>> {
     return await deleteBy(fieldName: 'id', value: id, mtn: mtn);
   }
 
+  /// 根据 uuid 删除记录。
+  Future<int> deleteByUuid(String uuid, {ModelTransaction? mtn}) async {
+    return await deleteBy(fieldName: 'uuid', value: uuid, mtn: mtn);
+  }
+
   /// 添加记录并返回新记录，已经自动从 [values] 中移除 id 列；
   /// 如果使用缓存，则自动添加到缓存中
   Future<T> insertWith(
@@ -783,10 +830,15 @@ abstract class ModelHelper<T extends IModel<T>> {
       if (!await beforeSave(entity, true)) {
         throw 'Insert interrupted by beforeSave hook for $tableName';
       }
-
+      final data = entity.toJson()..remove('id');
+      if (enableUuid) {
+        if (tu.assert1.isEmpty(data['uuid'])) {
+          throw 'uuid is empty';
+        }
+      }
       final newId = mtn == null
-          ? await dbService.insert(tableName, entity.toJson()..remove('id'))
-          : await mtn.txn.insert(tableName, entity.toJson()..remove('id'));
+          ? await dbService.insert(tableName, data)
+          : await mtn.txn.insert(tableName, data);
       if (newId <= 0) throw 'Failed to insert record into $tableName';
       entity.id = newId;
       // 获取新插入的记录
@@ -841,7 +893,11 @@ abstract class ModelHelper<T extends IModel<T>> {
       }
       if (enableCreatedAt) entity.createdAt = DateTime.now();
       if (enableUpdatedAt) entity.updatedAt = DateTime.now();
-      final id = await mtn.txn.insert(tableName, entity.toJson()..remove('id'));
+      final data = entity.toJson()..remove('id');
+      if (enableUuid && tu.assert1.isEmpty(data['uuid'])) {
+        throw 'uuid is empty';
+      }
+      final id = await mtn.txn.insert(tableName, data);
 
       ids.add(id);
       entity.id = id; // 回填 ID
@@ -942,5 +998,17 @@ abstract class ModelHelper<T extends IModel<T>> {
   }) async {
     final sql = 'UPDATE $tableName SET $field=$field-$value WHERE id=$id';
     await execute(sql, mtn: mtn);
+  }
+
+  // 当收到另一台设备发来的数据时，你不知道它是“新产生的”还是“被修改的”
+  Future<void> upsert(T entity, String uuid) async {
+    // 1. 根据 UUID 检查本地是否存在
+    final existing = await getByUuid(uuid);
+    if (existing == null) {
+      await insert(entity);
+    } else {
+      entity.id = existing.id; // 保持本地 ID 不变
+      await update(entity);
+    }
   }
 }
