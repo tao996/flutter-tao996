@@ -269,4 +269,14 @@ class DataUtil {
       }),
     );
   }
+
+  String jsonString(dynamic data) => jsonEncode(
+    data,
+    toEncodable: (item) {
+      if (item is DateTime) {
+        return item.toIso8601String(); // 转为 "2026-02-21T11:14:08..."
+      }
+      return item;
+    },
+  );
 }

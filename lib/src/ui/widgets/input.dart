@@ -43,8 +43,8 @@ class MyInput extends StatefulWidget {
   final void Function(String)? onFieldSubmitted;
 
   final String? Function(String?)? validator;
-
-  final Widget? suffix;
+  final Widget? prefixIcon;
+  final Widget? suffixIcon;
   final TextAlign textAlign;
 
   const MyInput({
@@ -64,7 +64,8 @@ class MyInput extends StatefulWidget {
     this.remStep = -1,
     this.addStep = 1,
     this.isMoney = false,
-    this.suffix,
+    this.suffixIcon,
+    this.prefixIcon,
     this.textAlign = TextAlign.start,
     // 回调
     this.onChanged,
@@ -272,12 +273,13 @@ class _MyInputState extends State<MyInput> {
         hintStyle: TextStyle(color: MyColor.text(0.4)),
         // helper: _helperWidget(),
         helperText: widget.helperText,
-        border: const OutlineInputBorder(),
+        border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+        prefixIcon: widget.prefixIcon,
         // 只有当文本不为空且输入不是密码时才显示后缀图标（密码图标已包含在 _suffix 中）
         suffixIcon:
             (widget.isPassword ||
                 controller.text.isNotEmpty ||
-                widget.suffix != null)
+                widget.suffixIcon != null)
             ? _suffix()
             : null,
         isDense: true,
@@ -332,7 +334,7 @@ class _MyInputState extends State<MyInput> {
           ),
 
         // 追加其它后缀组件
-        if (widget.suffix != null) widget.suffix!,
+        if (widget.suffixIcon != null) widget.suffixIcon!,
       ],
     );
   }

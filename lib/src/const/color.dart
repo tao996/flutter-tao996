@@ -31,7 +31,7 @@ class MyColor {
 
   /// 代表成功的颜色，通常用于表示成功、完成、通过等操作
   static Color success() {
-    return tu.colorScheme.secondary;
+    return tu.colorScheme.tertiary;
   }
 
   /// 代表失败的颜色，通常用于表示失败、错误、拒绝等操作
@@ -41,6 +41,12 @@ class MyColor {
 
   static Color danger() {
     return tu.colorScheme.error;
+  }
+
+  /// 警告顏色（通常為橙色/黃色）
+  static Color warning() {
+    // 注意：ColorScheme 默認沒有 warning，建議自定義或用 outline
+    return const Color(0xFFFFA000); // Amber 700
   }
 
   /// 背景、表面式，常用于 AlertDialog

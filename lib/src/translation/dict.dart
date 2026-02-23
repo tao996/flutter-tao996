@@ -14,6 +14,9 @@ final Map<String, Map<String, String>> words = {
     'success': '成功',
     'error': '错误',
     'detail': '详情',
+    'warning': '警告',
+    'loading': '加载中',
+    'notice': '提示',
     'userGuide': '用户指南',
 
     'pullDownRefresh': '下拉刷新',
@@ -83,6 +86,9 @@ final Map<String, Map<String, String>> words = {
     'success': '成功',
     'error': '錯誤',
     'detail': '詳情',
+    'notice': '提示',
+    'warning': '警告',
+    'loading': '載入中',
     'userGuide': '用戶指南',
 
     'pullUpLoadMore': '上拉載入更多',
@@ -149,6 +155,9 @@ final Map<String, Map<String, String>> words = {
     'success': 'Success',
     'error': 'Error',
     'detail': 'Details',
+    'notice': 'Notice',
+    'warning': 'Warning',
+    'loading': 'Loading...',
     'userGuide': 'User Guide',
 
     'pullUpLoadMore': 'Pull up to load more',
@@ -213,6 +222,9 @@ final Map<String, Map<String, String>> words = {
     'success': '成功',
     'error': 'エラー',
     'detail': '詳細',
+    'notice': 'お知らせ',
+    'warning': '警告',
+    'loading': '読み込み中',
     'userGuide': 'ユーザーガイド',
 
     'pullUpLoadMore': '上へ引っ張ってさらに読み込む',
@@ -276,6 +288,9 @@ final Map<String, Map<String, String>> words = {
     'success': 'Erfolg',
     'error': 'Fehler',
     'detail': 'Details',
+    'notice': 'Hinweis',
+    'warning': 'Warnung',
+    'loading': 'Wird geladen...',
     'userGuide': 'Benutzerhandbuch',
 
     'pullUpLoadMore': 'Hochziehen zum Laden weiterer Daten',
@@ -340,6 +355,9 @@ final Map<String, Map<String, String>> words = {
     'success': 'Succès',
     'error': 'Erreur',
     'detail': 'Détails',
+    'notice': 'Notification',
+    'warning': 'Avertissement',
+    'loading': 'Chargement...',
     'userGuide': 'Guide utilisateur',
 
     'pullUpLoadMore': 'Tirer pour charger plus',
@@ -404,6 +422,9 @@ final Map<String, Map<String, String>> words = {
     'success': 'Éxito',
     'error': 'Error',
     'detail': 'Detalles',
+    'notice': 'Aviso',
+    'warning': 'Advertencia',
+    'loading': 'Cargando...',
     'userGuide': 'Guía de usuario',
 
     'pullUpLoadMore': 'Tirar para cargar más',

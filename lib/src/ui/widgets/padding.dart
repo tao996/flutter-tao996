@@ -4,12 +4,14 @@ import 'package:flutter/material.dart';
 
 class MyPadding extends StatelessWidget {
   final Widget child;
-
-  /// EdgeInsets.? 设置距离
   final EdgeInsetsGeometry? padding;
   final double? vertical;
   final double? horizontal;
-  final double valueAll;
+  final double? top;
+  final double? bottom;
+  final double? left;
+  final double? right;
+  final double? all; // 将 valueAll 改为可选，更符合命名习惯
 
   const MyPadding({
     super.key,
@@ -17,25 +19,30 @@ class MyPadding extends StatelessWidget {
     this.padding,
     this.vertical,
     this.horizontal,
-    this.valueAll = 8,
+    this.top,
+    this.bottom,
+    this.left,
+    this.right,
+    this.all,
   });
 
   @override
   Widget build(BuildContext context) {
-    if (padding == null && vertical == null && horizontal == null) {
-      return Padding(padding: EdgeInsets.all(valueAll), child: child);
-    }
+    // 优先级 1: 如果直接传了 padding，直接使用
     if (padding != null) {
       return Padding(padding: padding!, child: child);
-    } else {
-      return Padding(
-        padding: EdgeInsets.symmetric(
-          vertical: vertical ?? 0,
-          horizontal: horizontal ?? 0,
-        ),
-        child: child,
-      );
     }
+
+    // 优先级 2: 合成 padding
+    // 逻辑：各自方向的特定值 > 对称值 > 全局默认值
+    final finalPadding = EdgeInsets.only(
+      left: left ?? horizontal ?? all ?? 0,
+      right: right ?? horizontal ?? all ?? 0,
+      top: top ?? vertical ?? all ?? 0,
+      bottom: bottom ?? vertical ?? all ?? 0,
+    );
+
+    return Padding(padding: finalPadding, child: child);
   }
 }
 
@@ -56,7 +63,12 @@ class MyBodyPadding extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: EdgeInsets.only(left: horizontal,right: horizontal,top: max(vertical, top),bottom: vertical),
+      padding: EdgeInsets.only(
+        left: horizontal,
+        right: horizontal,
+        top: max(vertical, top),
+        bottom: vertical,
+      ),
       child: child,
     );
   }
@@ -86,7 +98,11 @@ bool _isZeroSizedPlaceholder(Widget widget) {
 // 扩展方法
 extension WidgetListSpacing on List<Widget> {
   /// 在水平列表的非空元素之间插入一个间距
-  List<Widget> withRowWidth({bool first = true, double width = 16.0, bool last = true}) {
+  List<Widget> withRowWidth({
+    bool first = true,
+    double width = 16.0,
+    bool last = true,
+  }) {
     // 过滤掉所有零尺寸占位符，得到一个“有效”列表
     final effectiveList = where((w) => !_isZeroSizedPlaceholder(w)).toList();
 
@@ -121,7 +137,11 @@ extension WidgetListSpacing on List<Widget> {
   }
 
   /// 在垂直列表的非空元素之间插入一个间距
-  List<Widget> withColumnHeight({bool first = true, double height = 16.0, bool last = true}) {
+  List<Widget> withColumnHeight({
+    bool first = true,
+    double height = 16.0,
+    bool last = true,
+  }) {
     // 过滤掉所有零尺寸占位符，得到一个“有效”列表
     final effectiveList = where((w) => !_isZeroSizedPlaceholder(w)).toList();
 

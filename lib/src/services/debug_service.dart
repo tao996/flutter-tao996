@@ -37,8 +37,9 @@ abstract class IDebugService {
 
 abstract class IDebugMessageService {
   dynamic success(String message);
-
   dynamic error(String message);
+  dynamic notice(String message);
+  dynamic warning(String message);
 }
 
 class DebugService implements IDebugService {

@@ -284,4 +284,13 @@ class NumberUtil {
     final random = Random();
     return random.nextInt(max - min) + min;
   }
+
+  List<int> getInts(String value) {
+    return value
+        .split(',')
+        .where((e) => e.trim().isNotEmpty)
+        .map((e) => tu.data.getInt(e))
+        .where((e) => e > 0)
+        .toList();
+  }
 }
