@@ -463,8 +463,8 @@ abstract class ModelHelper<T extends IModel<T>> {
   Future<T?> getFirstWith(String where, {List<Object?>? whereArgs, List<String>? columns, String? orderBy, ModelTransaction? mtn});
   Future<T?> getById(int id, {bool tryCache = true, ModelTransaction? mtn});
   Future<List<T>> getByIds(List<int> ids, {bool tryCache = true, ModelTransaction? mtn});
-  Future<bool> exists(dynamic value, {required String fieldName, int? excludeId});
-  Future<bool> existsWith(String where, {int? excludeId});
+  Future<bool> exists(dynamic value, {required String fieldName,int? excludeId, String? excludeUuid,});
+  Future<bool> Future<bool> existsWith({ String? where,List<Object>? whereArgs, int? excludeId,String? excludeUuid, });
   Future<int> count({String? where, List<Object?>? arguments, bool forceRefresh = false});
   Future<List<T>> getPaginationData({...});
   Future<List<T>> getManyBy({...});

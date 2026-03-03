@@ -24,6 +24,10 @@ class DatetimeUtil {
     return DateFormat(pattern).format(DateTime.now());
   }
 
+  String formatDate(DateTime datetime) {
+    return format(dateTime: datetime, format: DateTimeFormat.ymd);
+  }
+
   String format({
     int timestamp = 0,
     DateTime? dateTime,

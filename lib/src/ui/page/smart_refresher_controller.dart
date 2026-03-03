@@ -99,23 +99,25 @@ abstract class MySmartRefresherController<T>
   /// }
   ///
   /// @override
-  /// Future<void> onSubmitted(String text, {data}) async {}
+  /// Future<void> onSubmitted(String text, {data}) async {
+  ///    await onChanged(text);
+  /// }
   ///
   /// 视图
   /// body: Column(
   ///    children: [
-  ///       FormHelper.search( c,
+  ///       FormHelper.search( controller,
   ///          hintText: 'search'.tr,
-  ///          value: c.searchConditions.keyword,
+  ///          value: controller.searchCondition.keyword,
   ///       ),
-  ///       Expanded(child: MyEvents.unfocusOnTap(body())),
+  ///       Expanded(child: MyEvents.unfocusOnTap(_body(context))),
   ///     ],
   /// )
-  /// Widget body(BuildContext context) {
-  ///     return Obx( () => MySmartRefresher.obxListView( c,
-  ///         canLoadMore: c.hasMore,
+  /// Widget _body(BuildContext context) {
+  ///     return Obx( () => MySmartRefresher.obxListView( controller,
+  ///         canLoadMore: controller.hasMore,
   ///         empty:  MyEmptyStateWidget(title: 'record'.tr, onAction: c.bindInsertRecord,),
-  ///         itemCount: c.items.value.length,
+  ///         itemCount: controller.items.value.length,
   ///         itemBuilder: (context, index) {
   ///           return Obx( () => ?, );
   ///         },

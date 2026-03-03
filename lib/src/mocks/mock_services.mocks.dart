@@ -199,13 +199,13 @@ class MockIDatabaseService extends _i1.Mock implements _i4.IDatabaseService {
   _i3.Future<int> count(
     String? tableName, {
     String? where,
-    List<Object?>? arguments,
+    List<Object?>? whereArgs,
   }) =>
       (super.noSuchMethod(
             Invocation.method(
               #count,
               [tableName],
-              {#where: where, #arguments: arguments},
+              {#where: where, #arguments: whereArgs},
             ),
             returnValue: _i3.Future<int>.value(0),
             returnValueForMissingStub: _i3.Future<int>.value(0),

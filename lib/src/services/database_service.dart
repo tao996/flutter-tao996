@@ -55,7 +55,7 @@ abstract class IDatabaseService {
   Future<int> count(
     String tableName, {
     String? where,
-    List<Object?>? arguments,
+    List<Object?>? whereArgs,
   });
 
   Future<bool> exists(
@@ -164,19 +164,19 @@ class SqfliteDatabaseService implements IDatabaseService {
   Future<int> count(
     String tableName, {
     String? where,
-    List<Object?>? arguments,
+    List<Object?>? whereArgs,
   }) async {
     final sql =
         'SELECT COUNT(*) AS C FROM $tableName${where != null ? ' WHERE $where' : ''}';
     if (printSQL) {
       _debugService.d(
         sql,
-        args: arguments == null ? null : {'args': arguments},
+        args: whereArgs == null ? null : {'args': whereArgs},
       );
     }
     final List<Map<String, dynamic>> result = await _database!.rawQuery(
       sql,
-      arguments,
+      whereArgs,
     );
     return result.first['C'] as int? ?? 0;
   }

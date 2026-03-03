@@ -252,20 +252,11 @@ abstract class ModelHelper<T extends IModel<T>> {
     String? excludeUuid,
   }) async {
     try {
-      List<String> where = ['$fieldName = ?'];
-      List<Object> whereArgs = [value];
-      if (excludeUuid != null && excludeUuid.isNotEmpty) {
-        where.add('uuid != ?');
-        whereArgs.add(excludeUuid);
-      }
-      if (excludeId != null && excludeId > 0) {
-        where.add('id != ?');
-        whereArgs.add(excludeId);
-      }
-      return await dbService.exists(
-        tableName,
-        where: appendWhere(where.join(' AND ')),
-        whereArgs: whereArgs,
+      return await existsWith(
+        where: '$fieldName = ?',
+        whereArgs: [value],
+        excludeId: excludeId,
+        excludeUuid: excludeUuid,
       );
     } catch (e, st) {
       debugService.exception(e, st, log: true);
@@ -274,26 +265,33 @@ abstract class ModelHelper<T extends IModel<T>> {
   }
 
   /// 检查记录在数据库中是否存在
-  Future<bool> existsWith(
-    String condition, {
+  Future<bool> existsWith({
+    String? where,
+    List<Object>? whereArgs,
     int? excludeId,
     String? excludeUuid,
   }) async {
     try {
-      List<String> where = [condition];
-      List<Object> whereArgs = [];
+      List<String> where1 = [];
+      if (where != null && where.isNotEmpty) {
+        where1.add(where);
+      }
+      List<Object> whereArgs1 = [];
+      if (whereArgs != null && whereArgs.isNotEmpty) {
+        whereArgs1.addAll(whereArgs);
+      }
       if (excludeUuid != null && excludeUuid.isNotEmpty) {
-        where.add('uuid != ?');
-        whereArgs.add(excludeUuid);
+        where1.add('uuid != ?');
+        whereArgs1.add(excludeUuid);
       }
       if (excludeId != null && excludeId > 0) {
-        where.add('id != ?');
-        whereArgs.add(excludeId);
+        where1.add('id != ?');
+        whereArgs1.add(excludeId);
       }
       return await dbService.exists(
         tableName,
-        where: appendWhere(where.join(' AND ')),
-        whereArgs: whereArgs,
+        where: appendWhere(where1.join(' AND ')),
+        whereArgs: whereArgs1,
       );
     } catch (e, st) {
       debugService.exception(e, st, log: true);
@@ -304,12 +302,12 @@ abstract class ModelHelper<T extends IModel<T>> {
   /// 获取记录总数。
   Future<int> count({
     String? where,
-    List<Object?>? arguments,
+    List<Object?>? whereArgs,
     bool forceRefresh = false,
   }) async {
     if (smallTable && !forceRefresh) {
       // 若有查询条件，缓存无法覆盖，需查数据库
-      if (where == null && arguments == null) {
+      if (where == null && whereArgs == null) {
         return _cache.length;
       }
     }
@@ -317,7 +315,7 @@ abstract class ModelHelper<T extends IModel<T>> {
       return await dbService.count(
         tableName,
         where: appendWhere(where),
-        arguments: arguments,
+        whereArgs: whereArgs,
       );
     } catch (e, st) {
       debugService.exception(e, st, log: true);
@@ -797,6 +795,17 @@ abstract class ModelHelper<T extends IModel<T>> {
   /// 根据主键 ID 删除记录。
   Future<int> deleteById(int id, {ModelTransaction? mtn}) async {
     return await deleteBy(fieldName: 'id', value: id, mtn: mtn);
+  }
+
+  Future<int> deleteByIds(List<int> ids, {ModelTransaction? mtn}) async {
+    if (ids.isEmpty) {
+      return 0;
+    }
+    return await delete(
+      where: 'id in (?)',
+      whereArgs: [ids.join(',')],
+      mtn: mtn,
+    );
   }
 
   /// 根据 uuid 删除记录。

@@ -122,11 +122,11 @@ class MyModelDelegate<T extends IModel<T>> extends AbstractListDelegate<T> {
     );
   }
 
-  Future<void> pushItem(T entity) async {
+  Future<void> pushItem(T entity, {bool syncDb = false}) async {
     await save(
       entity: entity,
       index: -1,
-      syncDb: false,
+      syncDb: syncDb,
       showMessage: false,
       navBack: false,
       unshift: false,
@@ -149,11 +149,11 @@ class MyModelDelegate<T extends IModel<T>> extends AbstractListDelegate<T> {
     );
   }
 
-  Future<void> updateItem(T entity, int index) async {
+  Future<void> updateItem(T entity, int index, {bool syncDb = false}) async {
     await save(
       entity: entity,
       index: index,
-      syncDb: false,
+      syncDb: syncDb,
       showMessage: false,
       navBack: false,
     );
@@ -198,11 +198,11 @@ class MyModelDelegate<T extends IModel<T>> extends AbstractListDelegate<T> {
     );
   }
 
-  Future<void> saveItem(T entity, int index) async {
+  Future<void> saveItem(T entity, int index, {bool syncDb = false}) async {
     await save(
       entity: entity,
       index: index,
-      syncDb: false,
+      syncDb: syncDb,
       showMessage: false,
       navBack: false,
       unshift: false,
@@ -241,7 +241,12 @@ class MyModelDelegate<T extends IModel<T>> extends AbstractListDelegate<T> {
     );
   }
 
-  Future<int> remoteItem({int? index, int? id, String? title}) async {
+  Future<int> remoteItem({
+    int? index,
+    int? id,
+    String? title,
+    bool syncDb = false,
+  }) async {
     if (index == null && id == null) {
       throw Exception('index or id must be provided');
     }
@@ -249,7 +254,7 @@ class MyModelDelegate<T extends IModel<T>> extends AbstractListDelegate<T> {
       id: id ?? rxItems[index!].id,
       index: index,
       title: title,
-      syncDb: false,
+      syncDb: syncDb,
       deleteConfirm: false,
       showMessage: false,
       navBack: false,

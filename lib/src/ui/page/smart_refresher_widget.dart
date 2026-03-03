@@ -126,7 +126,7 @@ class MySmartRefresher {
         } else if (mode == LoadStatus.canLoading) {
           body = Text('pullUpLoadMore'.tr);
         } else {
-          body = Text('noMoreData'.tr);
+          body = Text('noMoreData'.tr, style: TextStyle(color: Colors.grey));
         }
         return SizedBox(height: 55.0, child: Center(child: body));
       },
