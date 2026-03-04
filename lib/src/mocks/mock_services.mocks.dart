@@ -23,6 +23,7 @@ import 'package:tao996/tao996.dart' as _i4;
 // ignore_for_file: unnecessary_parenthesis
 // ignore_for_file: camel_case_types
 // ignore_for_file: subtype_of_sealed_class
+// ignore_for_file: invalid_use_of_internal_member
 
 class _FakeDatabase_0 extends _i1.SmartFake implements _i2.Database {
   _FakeDatabase_0(Object parent, Invocation parentInvocation)
@@ -74,9 +75,17 @@ class MockIDatabaseService extends _i1.Mock implements _i4.IDatabaseService {
           as _i3.Future<void>);
 
   @override
-  _i3.Future<void> execute(String? sql, [List<Object?>? arguments]) =>
+  _i3.Future<void> execute(
+    String? sql, {
+    List<Object?>? arguments,
+    _i2.Transaction? txn,
+  }) =>
       (super.noSuchMethod(
-            Invocation.method(#execute, [sql, arguments]),
+            Invocation.method(
+              #execute,
+              [sql],
+              {#arguments: arguments, #txn: txn},
+            ),
             returnValue: _i3.Future<void>.value(),
             returnValueForMissingStub: _i3.Future<void>.value(),
           )
@@ -84,11 +93,16 @@ class MockIDatabaseService extends _i1.Mock implements _i4.IDatabaseService {
 
   @override
   _i3.Future<List<Map<String, dynamic>>> rawQuery(
-    String? sql, [
+    String? sql, {
     List<Object?>? arguments,
-  ]) =>
+    _i2.Transaction? txn,
+  }) =>
       (super.noSuchMethod(
-            Invocation.method(#rawQuery, [sql, arguments]),
+            Invocation.method(
+              #rawQuery,
+              [sql],
+              {#arguments: arguments, #txn: txn},
+            ),
             returnValue: _i3.Future<List<Map<String, dynamic>>>.value(
               <Map<String, dynamic>>[],
             ),
@@ -111,6 +125,7 @@ class MockIDatabaseService extends _i1.Mock implements _i4.IDatabaseService {
     String? orderBy,
     int? limit,
     int? offset,
+    _i2.Transaction? txn,
   }) =>
       (super.noSuchMethod(
             Invocation.method(
@@ -126,6 +141,7 @@ class MockIDatabaseService extends _i1.Mock implements _i4.IDatabaseService {
                 #orderBy: orderBy,
                 #limit: limit,
                 #offset: offset,
+                #txn: txn,
               },
             ),
             returnValue: _i3.Future<List<Map<String, dynamic>>>.value(
@@ -143,12 +159,13 @@ class MockIDatabaseService extends _i1.Mock implements _i4.IDatabaseService {
     String? table,
     Map<String, Object?>? values, {
     _i2.ConflictAlgorithm? conflictAlgorithm,
+    _i2.Transaction? txn,
   }) =>
       (super.noSuchMethod(
             Invocation.method(
               #insert,
               [table, values],
-              {#conflictAlgorithm: conflictAlgorithm},
+              {#conflictAlgorithm: conflictAlgorithm, #txn: txn},
             ),
             returnValue: _i3.Future<int>.value(0),
             returnValueForMissingStub: _i3.Future<int>.value(0),
@@ -162,6 +179,7 @@ class MockIDatabaseService extends _i1.Mock implements _i4.IDatabaseService {
     String? where,
     List<Object?>? whereArgs,
     _i2.ConflictAlgorithm? conflictAlgorithm,
+    _i2.Transaction? txn,
   }) =>
       (super.noSuchMethod(
             Invocation.method(
@@ -171,6 +189,7 @@ class MockIDatabaseService extends _i1.Mock implements _i4.IDatabaseService {
                 #where: where,
                 #whereArgs: whereArgs,
                 #conflictAlgorithm: conflictAlgorithm,
+                #txn: txn,
               },
             ),
             returnValue: _i3.Future<int>.value(0),
@@ -183,12 +202,13 @@ class MockIDatabaseService extends _i1.Mock implements _i4.IDatabaseService {
     String? table, {
     String? where,
     List<Object?>? whereArgs,
+    _i2.Transaction? txn,
   }) =>
       (super.noSuchMethod(
             Invocation.method(
               #delete,
               [table],
-              {#where: where, #whereArgs: whereArgs},
+              {#where: where, #whereArgs: whereArgs, #txn: txn},
             ),
             returnValue: _i3.Future<int>.value(0),
             returnValueForMissingStub: _i3.Future<int>.value(0),
@@ -200,12 +220,13 @@ class MockIDatabaseService extends _i1.Mock implements _i4.IDatabaseService {
     String? tableName, {
     String? where,
     List<Object?>? whereArgs,
+    _i2.Transaction? txn,
   }) =>
       (super.noSuchMethod(
             Invocation.method(
               #count,
               [tableName],
-              {#where: where, #arguments: whereArgs},
+              {#where: where, #whereArgs: whereArgs, #txn: txn},
             ),
             returnValue: _i3.Future<int>.value(0),
             returnValueForMissingStub: _i3.Future<int>.value(0),
@@ -217,12 +238,13 @@ class MockIDatabaseService extends _i1.Mock implements _i4.IDatabaseService {
     String? tableName, {
     String? where,
     List<Object?>? whereArgs,
+    _i2.Transaction? txn,
   }) =>
       (super.noSuchMethod(
             Invocation.method(
               #exists,
               [tableName],
-              {#where: where, #whereArgs: whereArgs},
+              {#where: where, #whereArgs: whereArgs, #txn: txn},
             ),
             returnValue: _i3.Future<bool>.value(false),
             returnValueForMissingStub: _i3.Future<bool>.value(false),
@@ -235,12 +257,13 @@ class MockIDatabaseService extends _i1.Mock implements _i4.IDatabaseService {
     String? where,
     List<dynamic>? whereArgs,
     String? key = 'id',
+    _i2.Transaction? txn,
   }) =>
       (super.noSuchMethod(
             Invocation.method(
               #firstRecordId,
               [tableName],
-              {#where: where, #whereArgs: whereArgs, #key: key},
+              {#where: where, #whereArgs: whereArgs, #key: key, #txn: txn},
             ),
             returnValue: _i3.Future<int>.value(0),
             returnValueForMissingStub: _i3.Future<int>.value(0),

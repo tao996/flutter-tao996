@@ -170,8 +170,8 @@ Map<String, dynamic> _$PsNodeToJson(PsNode instance) => <String, dynamic>{
   'tag': instance.tag,
   'classes': const JsonListStringConverter().toJson(instance.classes),
   'type': _$PsNodeTypeEnumMap[instance.type]!,
-  'data': instance.data,
   'style': instance.style,
+  'data': instance.data,
 };
 
 const _$PsNodeTypeEnumMap = {

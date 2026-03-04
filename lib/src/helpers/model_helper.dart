@@ -25,8 +25,6 @@ abstract class ModelHelper<T extends IModel<T>> {
   final bool enableUuid;
 
   /// 缓存全部的记录，通常用于小表使用
-  /// 使用 `RxList` (如果使用 GetX) 或其他响应式列表，方便 UI 自动刷新
-  /// 如果不使用响应式框架，普通 List 即可
   List<T> _cache = [];
 
   /// 提供对缓存的只读访问
@@ -65,39 +63,60 @@ abstract class ModelHelper<T extends IModel<T>> {
 
   /// 插入前调用：返回 false 中断插入，返回 true 继续
   /// [entity]：待插入的实体（关联具体数据，替代原 Map 参数）
-  Future<bool> beforeInsert(T entity) async => true;
+  /// [mtn]：事务对象，如果为 null 表示不在事务中
+  Future<bool> beforeInsert(T entity, {ModelTransaction? mtn}) async => true;
 
   /// 插入后调用：返回值可用于传递额外数据（如关联ID）
   /// [entity]：插入成功后的实体（含数据库生成的 id）
-  Future<dynamic> afterInsert(T entity) async => null;
+  /// [mtn]：事务对象，如果为 null 表示不在事务中
+  Future<dynamic> afterInsert(T entity, {ModelTransaction? mtn}) async => null;
 
   /// 更新前调用：返回 false 中断更新
   /// [entity]：待更新的实体；[updateFields]：本次要更新的字段名（避免全量判断）
-  Future<bool> beforeUpdate(T entity) async => true;
+  /// [mtn]：事务对象，如果为 null 表示不在事务中
+  Future<bool> beforeUpdate(T entity, {ModelTransaction? mtn}) async => true;
 
   /// 更新后调用：返回值可用于传递额外数据
   /// [entity]：更新后的实体（非 null，更新操作必关联实体）
-  Future<dynamic> afterUpdate(T entity) async => null;
+  /// [mtn]：事务对象，如果为 null 表示不在事务中
+  Future<dynamic> afterUpdate(T entity, {ModelTransaction? mtn}) async => null;
 
   /// 保存前调用（插入/更新通用）：返回 false 中断保存
   /// [entity]：待保存的实体；[isInsert]：标识是插入还是更新
-  Future<bool> beforeSave(T entity, bool isInsert) async => true;
+  /// [mtn]：事务对象，如果为 null 表示不在事务中
+  Future<bool> beforeSave(
+    T entity,
+    bool isInsert, {
+    ModelTransaction? mtn,
+  }) async => true;
 
   /// 保存后调用（插入/更新通用）：返回值可用于传递额外数据
   /// [entity]：保存后的实体；[isInsert]：标识是插入还是更新
-  Future<dynamic> afterSave(T entity, bool isInsert) async => null;
+  /// [mtn]：事务对象，如果为 null 表示不在事务中
+  Future<dynamic> afterSave(
+    T entity,
+    bool isInsert, {
+    ModelTransaction? mtn,
+  }) async => null;
 
   /// 删除前调用：返回 false 中断删除
   /// [entity]：待删除的实体（非 null 时为按实体删除）；[where]：删除条件（按条件删除时生效）
+  /// [mtn]：事务对象，如果为 null 表示不在事务中
   Future<bool> beforeDelete({
     T? entity,
     String? where,
     List<Object?>? whereArgs,
+    ModelTransaction? mtn,
   }) async => true;
 
   /// 删除后调用：返回值可用于传递额外数据（如删除的关联数量）
   /// [deletedCount]：实际删除/软删除的行数；[entity]：被删除的实体（非 null 时为按实体删除）
-  Future<dynamic> afterDelete(int deletedCount, {T? entity}) async => null;
+  /// [mtn]：事务对象，如果为 null 表示不在事务中
+  Future<dynamic> afterDelete(
+    int deletedCount, {
+    T? entity,
+    ModelTransaction? mtn,
+  }) async => null;
 
   /// 获取全部的记录（可能使用缓存）
   Future<List<T>> getAll({bool force = false}) async {
@@ -117,12 +136,12 @@ abstract class ModelHelper<T extends IModel<T>> {
   }
 
   /// 从数据库中查询全部的记录并更新缓存。
-  Future<List<T>> _getAllFromDb() async {
+  Future<List<T>> _getAllFromDb({ModelTransaction? mtn}) async {
     try {
-      final List<Map<String, dynamic>> maps = await dbService.query(
-        tableName,
+      final List<Map<String, dynamic>> maps = await query(
         where: appendWhere(null),
         orderBy: 'id DESC',
+        mtn: mtn,
       );
       final rows = maps.map((map) => fromMap(map)).toList();
       if (smallTable) {
@@ -147,19 +166,12 @@ abstract class ModelHelper<T extends IModel<T>> {
       return _cache.firstWhereOrNull((element) => getter(element) == value);
     } else {
       try {
-        final maps = mtn == null
-            ? await dbService.query(
-                tableName,
-                where: appendWhere('$fieldName = ?'),
-                whereArgs: [value],
-                limit: 1, // 只查询一条
-              )
-            : await mtn.txn.query(
-                tableName,
-                where: appendWhere('$fieldName = ?'),
-                whereArgs: [value],
-                limit: 1,
-              );
+        final maps = await query(
+          where: appendWhere('$fieldName = ?'),
+          whereArgs: [value],
+          limit: 1, // 只查询一条
+          mtn: mtn,
+        );
         return maps.isNotEmpty ? fromMap(maps.first) : null;
       } catch (e, st) {
         debugService.exception(e, st, log: true);
@@ -176,23 +188,14 @@ abstract class ModelHelper<T extends IModel<T>> {
     ModelTransaction? mtn,
   }) async {
     try {
-      final maps = mtn == null
-          ? await dbService.query(
-              tableName,
-              where: appendWhere(where),
-              whereArgs: whereArgs,
-              orderBy: orderBy,
-              columns: columns,
-              limit: 1, // 只查询一条
-            )
-          : await mtn.txn.query(
-              tableName,
-              where: appendWhere(where),
-              whereArgs: whereArgs,
-              orderBy: orderBy,
-              columns: columns,
-              limit: 1,
-            );
+      final maps = await query(
+        where: appendWhere(where),
+        whereArgs: whereArgs,
+        orderBy: orderBy,
+        columns: columns,
+        limit: 1, // 只查询一条
+        mtn: mtn,
+      );
       return maps.isNotEmpty ? fromMap(maps.first) : null;
     } catch (e, st) {
       debugService.exception(e, st, log: true);
@@ -225,7 +228,7 @@ abstract class ModelHelper<T extends IModel<T>> {
       return [];
     }
     final where = 'id IN (${ids.join(',')})';
-    return await getManyBy(where: where);
+    return await getManyBy(where: where, mtn: mtn);
   }
 
   Future<T?> getByUuid(
@@ -250,6 +253,7 @@ abstract class ModelHelper<T extends IModel<T>> {
     required String fieldName,
     int? excludeId,
     String? excludeUuid,
+    ModelTransaction? mtn,
   }) async {
     try {
       return await existsWith(
@@ -257,6 +261,7 @@ abstract class ModelHelper<T extends IModel<T>> {
         whereArgs: [value],
         excludeId: excludeId,
         excludeUuid: excludeUuid,
+        mtn: mtn,
       );
     } catch (e, st) {
       debugService.exception(e, st, log: true);
@@ -270,6 +275,7 @@ abstract class ModelHelper<T extends IModel<T>> {
     List<Object>? whereArgs,
     int? excludeId,
     String? excludeUuid,
+    ModelTransaction? mtn,
   }) async {
     try {
       List<String> where1 = [];
@@ -292,6 +298,7 @@ abstract class ModelHelper<T extends IModel<T>> {
         tableName,
         where: appendWhere(where1.join(' AND ')),
         whereArgs: whereArgs1,
+        txn: mtn?.txn,
       );
     } catch (e, st) {
       debugService.exception(e, st, log: true);
@@ -304,6 +311,7 @@ abstract class ModelHelper<T extends IModel<T>> {
     String? where,
     List<Object?>? whereArgs,
     bool forceRefresh = false,
+    ModelTransaction? mtn,
   }) async {
     if (smallTable && !forceRefresh) {
       // 若有查询条件，缓存无法覆盖，需查数据库
@@ -316,6 +324,7 @@ abstract class ModelHelper<T extends IModel<T>> {
         tableName,
         where: appendWhere(where),
         whereArgs: whereArgs,
+        txn: mtn?.txn,
       );
     } catch (e, st) {
       debugService.exception(e, st, log: true);
@@ -341,6 +350,7 @@ abstract class ModelHelper<T extends IModel<T>> {
     String? orderBy,
     int? offset,
     int pageIndex = 1,
+    ModelTransaction? mtn,
   }) async {
     try {
       final List<String> conditions = [];
@@ -358,6 +368,7 @@ abstract class ModelHelper<T extends IModel<T>> {
         orderBy: orderBy ?? 'id DESC',
         limit: pageSize,
         offset: offset ?? getOffset(pageIndex: pageIndex, pageSize: pageSize),
+        txn: mtn?.txn,
       );
       return result.map((map) => fromMap(map)).toList();
     } catch (e, st) {
@@ -378,6 +389,7 @@ abstract class ModelHelper<T extends IModel<T>> {
     required String where,
     required List<dynamic> whereArgs,
     String key = 'id',
+    ModelTransaction? mtn,
   }) async {
     try {
       return await dbService.firstRecordId(
@@ -385,6 +397,7 @@ abstract class ModelHelper<T extends IModel<T>> {
         where: appendWhere(where),
         whereArgs: whereArgs,
         key: key,
+        txn: mtn?.txn,
       );
     } catch (e, st) {
       debugService.exception(e, st, log: true);
@@ -405,6 +418,7 @@ abstract class ModelHelper<T extends IModel<T>> {
     String? orderBy,
     int? pageSize,
     int? pageIndex,
+    ModelTransaction? mtn,
   }) async {
     final result = await getManyMapWith(
       fieldName: fieldName,
@@ -417,6 +431,7 @@ abstract class ModelHelper<T extends IModel<T>> {
       orderBy: orderBy,
       pageIndex: pageIndex,
       pageSize: pageSize,
+      mtn: mtn,
     );
     return result.map((map) => fromMap(map)).toList();
   }
@@ -436,6 +451,7 @@ abstract class ModelHelper<T extends IModel<T>> {
     String? orderBy,
     int? pageSize,
     int? pageIndex,
+    ModelTransaction? mtn,
   }) async {
     try {
       var (newWhere, newWhereArgs) = createWhere(
@@ -455,8 +471,7 @@ abstract class ModelHelper<T extends IModel<T>> {
           newWhereArgs.add(value);
         }
       }
-      return await dbService.query(
-        tableName,
+      return await query(
         columns: columns,
         where: newWhere,
         whereArgs: newWhereArgs,
@@ -465,6 +480,7 @@ abstract class ModelHelper<T extends IModel<T>> {
         orderBy: orderBy,
         limit: pageSize,
         offset: getOffset(pageIndex: pageIndex, pageSize: pageSize),
+        mtn: mtn,
       );
     } catch (e, st) {
       debugService.exception(e, st, log: true);
@@ -484,6 +500,7 @@ abstract class ModelHelper<T extends IModel<T>> {
     String? orderBy,
     int? pageSize,
     int? pageIndex,
+    ModelTransaction? mtn,
   }) async {
     return await getListIntColumnWith(
       'id',
@@ -497,6 +514,7 @@ abstract class ModelHelper<T extends IModel<T>> {
       orderBy: orderBy,
       pageIndex: pageIndex,
       pageSize: pageSize,
+      mtn: mtn,
     );
   }
 
@@ -512,6 +530,7 @@ abstract class ModelHelper<T extends IModel<T>> {
     String? orderBy,
     int? pageSize,
     int? pageIndex,
+    ModelTransaction? mtn,
   }) async {
     try {
       final records = await getManyMapWith(
@@ -526,6 +545,7 @@ abstract class ModelHelper<T extends IModel<T>> {
         orderBy: orderBy,
         pageIndex: pageIndex,
         pageSize: pageSize,
+        mtn: mtn,
       );
       return records.map((record) => record[column] as int).toList();
     } catch (e, st) {
@@ -565,11 +585,7 @@ abstract class ModelHelper<T extends IModel<T>> {
   }) async {
     try {
       dprint('execute SQL $sql');
-      if (mtn != null) {
-        await mtn.txn.execute(sql, arguments);
-      } else {
-        await dbService.execute(sql, arguments);
-      }
+      await dbService.execute(sql, arguments: arguments, txn: mtn?.txn);
     } catch (e, st) {
       debugService.exception(
         e,
@@ -585,9 +601,10 @@ abstract class ModelHelper<T extends IModel<T>> {
   Future<List<Map<String, dynamic>>> rawQuery(
     String sql, {
     List<Object?>? arguments,
+    ModelTransaction? mtn,
   }) async {
     try {
-      return await dbService.rawQuery(sql, arguments);
+      return await dbService.rawQuery(sql, arguments: arguments, txn: mtn?.txn);
     } catch (e, st) {
       debugService.exception(e, st, args: {'sql': sql, 'arguments': arguments});
       throw 'Failed to execute raw query for $tableName; because: $e';
@@ -605,6 +622,7 @@ abstract class ModelHelper<T extends IModel<T>> {
     String? orderBy,
     int? limit,
     int? offset,
+    ModelTransaction? mtn,
   }) async {
     try {
       return await dbService.query(
@@ -618,6 +636,7 @@ abstract class ModelHelper<T extends IModel<T>> {
         orderBy: orderBy,
         limit: limit,
         offset: offset,
+        txn: mtn?.txn,
       );
     } catch (e, st) {
       debugService.exception(e, st, log: true);
@@ -642,33 +661,27 @@ abstract class ModelHelper<T extends IModel<T>> {
         if (enableUpdatedAt) {
           entity.updatedAt = DateTime.now();
         }
-        if (!await beforeUpdate(entity)) {
+        if (!await beforeUpdate(entity, mtn: mtn)) {
           throw 'Update interrupted by beforeUpdate hook for $tableName';
         }
-        if (!await beforeSave(entity, false)) {
+        if (!await beforeSave(entity, false, mtn: mtn)) {
           // isInsert = false（更新场景）
           throw 'Update interrupted by beforeSave hook for $tableName';
         }
       }
 
-      final updatedRows = mtn == null
-          ? await dbService.update(
-              tableName,
-              values,
-              where: appendWhere(where),
-              whereArgs: whereArgs,
-            )
-          : await mtn.txn.update(
-              tableName,
-              values,
-              where: appendWhere(where),
-              whereArgs: whereArgs,
-            );
-      if (mtn == null && smallTable) await _getAllFromDb();
+      final updatedRows = await dbService.update(
+        tableName,
+        values,
+        where: appendWhere(where),
+        whereArgs: whereArgs,
+        txn: mtn?.txn,
+      );
+      if (mtn == null && smallTable) await _getAllFromDb(mtn: mtn);
 
       if (entity != null) {
-        await afterUpdate(entity);
-        await afterSave(entity, false); // isInsert = false
+        await afterUpdate(entity, mtn: mtn);
+        await afterSave(entity, false, mtn: mtn); // isInsert = false
       }
 
       debugService.d('Updated $updatedRows records in $tableName');
@@ -703,7 +716,7 @@ abstract class ModelHelper<T extends IModel<T>> {
         fieldValues.remove('createdAt');
       }
       if (enableUpdatedAt) {
-        fieldValues['createdAt'] = DateTime.now().toIso8601String();
+        fieldValues['updatedAt'] = DateTime.now().toIso8601String();
       }
     }
     fieldValues.remove('id'); // 移除 id，避免更新主键
@@ -735,6 +748,7 @@ abstract class ModelHelper<T extends IModel<T>> {
           entity: entity,
           where: where,
           whereArgs: whereArgs,
+          mtn: mtn,
         )) {
           throw 'Delete interrupted by beforeDelete hook for $tableName';
         }
@@ -749,21 +763,18 @@ abstract class ModelHelper<T extends IModel<T>> {
               entity: entity,
               mtn: mtn,
             )
-          : (mtn == null
-                ? await dbService.delete(
-                    tableName,
-                    where: where,
-                    whereArgs: whereArgs,
-                  )
-                : await mtn.txn.delete(
-                    tableName,
-                    where: where,
-                    whereArgs: whereArgs,
-                  ));
+          : await dbService.delete(
+              tableName,
+              where: where,
+              whereArgs: whereArgs,
+              txn: mtn?.txn,
+            );
       // 更新缓存 + 后置钩子
-      if (mtn == null && smallTable && deletedCount > 0) await _getAllFromDb();
+      if (mtn == null && smallTable && deletedCount > 0) {
+        await _getAllFromDb(mtn: mtn);
+      }
       if (entity != null) {
-        await afterDelete(deletedCount, entity: entity);
+        await afterDelete(deletedCount, entity: entity, mtn: mtn);
       }
       debugService.d(
         'Deleted $deletedCount records in $tableName',
@@ -833,10 +844,10 @@ abstract class ModelHelper<T extends IModel<T>> {
         entity.updatedAt = DateTime.now();
       }
 
-      if (!await beforeInsert(entity)) {
+      if (!await beforeInsert(entity, mtn: mtn)) {
         throw 'Insert interrupted by beforeInsert hook for $tableName';
       }
-      if (!await beforeSave(entity, true)) {
+      if (!await beforeSave(entity, true, mtn: mtn)) {
         throw 'Insert interrupted by beforeSave hook for $tableName';
       }
       final data = entity.toJson()..remove('id');
@@ -845,9 +856,7 @@ abstract class ModelHelper<T extends IModel<T>> {
           throw 'uuid is empty';
         }
       }
-      final newId = mtn == null
-          ? await dbService.insert(tableName, data)
-          : await mtn.txn.insert(tableName, data);
+      final newId = await dbService.insert(tableName, data, txn: mtn?.txn);
       if (newId <= 0) throw 'Failed to insert record into $tableName';
       entity.id = newId;
       // 获取新插入的记录
@@ -859,11 +868,11 @@ abstract class ModelHelper<T extends IModel<T>> {
 
       /// 更新缓存
       if (mtn == null && smallTable) {
-        await _getAllFromDb();
+        await _getAllFromDb(mtn: mtn);
       }
       // 更新后置钩子
-      await afterInsert(record);
-      await afterSave(record, true);
+      await afterInsert(record, mtn: mtn);
+      await afterSave(record, true, mtn: mtn);
       dprint('insert success: ${record.id}');
       return record;
     } catch (e, st) {
@@ -897,7 +906,8 @@ abstract class ModelHelper<T extends IModel<T>> {
     final ids = <int>[];
     for (final entity in entities) {
       // 复用 beforeInsert/beforeSave 逻辑
-      if (!await beforeInsert(entity) || !await beforeSave(entity, true)) {
+      if (!await beforeInsert(entity, mtn: mtn) ||
+          !await beforeSave(entity, true, mtn: mtn)) {
         throw 'Batch insert interrupted for entity: ${entity.id}';
       }
       if (enableCreatedAt) entity.createdAt = DateTime.now();
@@ -911,8 +921,8 @@ abstract class ModelHelper<T extends IModel<T>> {
       ids.add(id);
       entity.id = id; // 回填 ID
       if (callback) {
-        await afterInsert(entity);
-        await afterSave(entity, true);
+        await afterInsert(entity, mtn: mtn);
+        await afterSave(entity, true, mtn: mtn);
       }
     }
     return ids;
@@ -952,11 +962,8 @@ abstract class ModelHelper<T extends IModel<T>> {
     if (!enableSoftDelete) {
       throw 'Soft delete is not enabled for $tableName';
     }
-    if (!enableSoftDelete) {
-      throw 'Soft delete is not enabled for $tableName';
-    }
     // 调用前置钩子（复用 beforeSave，isInsert = false）
-    if (entity != null && !await beforeSave(entity, false)) {
+    if (entity != null && !await beforeSave(entity, false, mtn: mtn)) {
       throw 'Restore interrupted by beforeSave hook for $tableName';
     }
     final updatedRows = await updateWith(
@@ -968,13 +975,17 @@ abstract class ModelHelper<T extends IModel<T>> {
     );
     // 调用后置钩子
     if (entity != null) {
-      await afterSave(entity, false);
+      await afterSave(entity, false, mtn: mtn);
     }
     return updatedRows;
   }
 
   /// 查询已删除的记录（与正常查询区分）
-  Future<List<T>> getDeleted({String? where, List<Object?>? whereArgs}) async {
+  Future<List<T>> getDeleted({
+    String? where,
+    List<Object?>? whereArgs,
+    ModelTransaction? mtn,
+  }) async {
     if (!enableSoftDelete) return [];
     final actualWhere = where == null
         ? 'deletedAt IS NOT NULL'
@@ -983,6 +994,7 @@ abstract class ModelHelper<T extends IModel<T>> {
       tableName,
       where: actualWhere,
       whereArgs: whereArgs,
+      txn: mtn?.txn,
     );
     return maps.map((m) => fromMap(m)).toList();
   }
@@ -1010,14 +1022,14 @@ abstract class ModelHelper<T extends IModel<T>> {
   }
 
   // 当收到另一台设备发来的数据时，你不知道它是“新产生的”还是“被修改的”
-  Future<void> upsert(T entity, String uuid) async {
+  Future<void> upsert(T entity, String uuid, {ModelTransaction? mtn}) async {
     // 1. 根据 UUID 检查本地是否存在
-    final existing = await getByUuid(uuid);
+    final existing = await getByUuid(uuid, mtn: mtn);
     if (existing == null) {
-      await insert(entity);
+      await insert(entity, mtn: mtn);
     } else {
       entity.id = existing.id; // 保持本地 ID 不变
-      await update(entity);
+      await update(entity, mtn: mtn);
     }
   }
 }

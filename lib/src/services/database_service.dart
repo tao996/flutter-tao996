@@ -1,7 +1,6 @@
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart' as path;
-
-import '../../tao996.dart';
+import 'package:tao996/tao996.dart';
 
 /// 自定义查询条件，将你的条件添加到 [conditions]中，将对应的值添加到 [whereArgs] 中
 typedef WhereClauseBuilder =
@@ -16,12 +15,17 @@ abstract class IDatabaseService {
 
   Future<void> close();
 
-  Future<void> execute(String sql, [List<Object?>? arguments]);
+  Future<void> execute(
+    String sql, {
+    List<Object?>? arguments,
+    Transaction? txn,
+  });
 
   Future<List<Map<String, dynamic>>> rawQuery(
-    String sql, [
+    String sql, {
     List<Object?>? arguments,
-  ]);
+    Transaction? txn,
+  });
 
   Future<List<Map<String, dynamic>>> query(
     String table, {
@@ -34,12 +38,14 @@ abstract class IDatabaseService {
     String? orderBy,
     int? limit,
     int? offset,
+    Transaction? txn,
   });
 
   Future<int> insert(
     String table,
     Map<String, Object?> values, {
     ConflictAlgorithm? conflictAlgorithm,
+    Transaction? txn,
   });
 
   Future<int> update(
@@ -48,27 +54,36 @@ abstract class IDatabaseService {
     String? where,
     List<Object?>? whereArgs,
     ConflictAlgorithm? conflictAlgorithm,
+    Transaction? txn,
   });
 
-  Future<int> delete(String table, {String? where, List<Object?>? whereArgs});
+  Future<int> delete(
+    String table, {
+    String? where,
+    List<Object?>? whereArgs,
+    Transaction? txn,
+  });
 
   Future<int> count(
     String tableName, {
     String? where,
     List<Object?>? whereArgs,
+    Transaction? txn,
   });
 
   Future<bool> exists(
     String tableName, {
     String? where,
     List<Object?>? whereArgs,
+    Transaction? txn,
   });
 
   Future<int> firstRecordId(
     String tableName, {
     String? where,
-    List<dynamic> whereArgs,
+    List<dynamic>? whereArgs,
     String key = 'id',
+    Transaction? txn,
   });
 
   /// 执行一个事务，注意事务内部全部都需要传递 mt.txn 来执行，否则会导致锁
@@ -165,6 +180,7 @@ class SqfliteDatabaseService implements IDatabaseService {
     String tableName, {
     String? where,
     List<Object?>? whereArgs,
+    Transaction? txn,
   }) async {
     final sql =
         'SELECT COUNT(*) AS C FROM $tableName${where != null ? ' WHERE $where' : ''}';
@@ -174,9 +190,10 @@ class SqfliteDatabaseService implements IDatabaseService {
         args: whereArgs == null ? null : {'args': whereArgs},
       );
     }
-    final List<Map<String, dynamic>> result = await _database!.rawQuery(
+    final List<Map<String, dynamic>> result = await rawQuery(
       sql,
-      whereArgs,
+      arguments: whereArgs,
+      txn: txn,
     );
     return result.first['C'] as int? ?? 0;
   }
@@ -186,13 +203,22 @@ class SqfliteDatabaseService implements IDatabaseService {
     String table, {
     String? where,
     List<Object?>? whereArgs,
+    Transaction? txn,
   }) async {
-    return await _database!.delete(table, where: where, whereArgs: whereArgs);
+    return txn == null
+        ? await _database!.delete(table, where: where, whereArgs: whereArgs)
+        : await txn.delete(table, where: where, whereArgs: whereArgs);
   }
 
   @override
-  Future<void> execute(String sql, [List<Object?>? arguments]) async {
-    await _database!.execute(sql, arguments);
+  Future<void> execute(
+    String sql, {
+    List<Object?>? arguments,
+    Transaction? txn,
+  }) async {
+    txn == null
+        ? await _database!.execute(sql, arguments)
+        : await txn.execute(sql, arguments);
   }
 
   @override
@@ -200,12 +226,14 @@ class SqfliteDatabaseService implements IDatabaseService {
     String tableName, {
     String? where,
     List<Object?>? whereArgs,
+    Transaction? txn,
   }) async {
-    final List<Map<String, dynamic>> result = await _database!.query(
+    final List<Map<String, dynamic>> result = await query(
       tableName,
       limit: 1,
       where: where,
       whereArgs: whereArgs,
+      txn: txn,
     );
     return result.isNotEmpty;
   }
@@ -216,13 +244,15 @@ class SqfliteDatabaseService implements IDatabaseService {
     String? where,
     List<dynamic>? whereArgs,
     String key = 'id',
+    Transaction? txn,
   }) async {
-    final List<Map<String, dynamic>> result = await _database!.query(
+    final List<Map<String, dynamic>> result = await query(
       tableName,
       columns: [key],
       where: where,
       whereArgs: whereArgs,
       limit: 1,
+      txn: txn,
     );
     return result.first[key] as int? ?? 0;
   }
@@ -232,12 +262,15 @@ class SqfliteDatabaseService implements IDatabaseService {
     String table,
     Map<String, Object?> values, {
     ConflictAlgorithm? conflictAlgorithm,
+    Transaction? txn,
   }) async {
-    return await _database!.insert(
-      table,
-      values,
-      conflictAlgorithm: conflictAlgorithm,
-    );
+    return txn == null
+        ? await _database!.insert(
+            table,
+            values,
+            conflictAlgorithm: conflictAlgorithm,
+          )
+        : await txn.insert(table, values, conflictAlgorithm: conflictAlgorithm);
   }
 
   @override
@@ -252,6 +285,7 @@ class SqfliteDatabaseService implements IDatabaseService {
     String? orderBy,
     int? limit,
     int? offset,
+    Transaction? txn,
   }) async {
     if (printSQL) {
       final whereSql = where != null ? 'WHERE $where' : '';
@@ -266,26 +300,42 @@ class SqfliteDatabaseService implements IDatabaseService {
         args: whereArgs == null ? null : {'args': whereArgs},
       );
     }
-    return await _database!.query(
-      table,
-      distinct: distinct,
-      columns: columns,
-      where: where,
-      whereArgs: whereArgs,
-      groupBy: groupBy,
-      having: having,
-      orderBy: orderBy,
-      limit: limit,
-      offset: offset,
-    );
+    return txn == null
+        ? await _database!.query(
+            table,
+            distinct: distinct,
+            columns: columns,
+            where: where,
+            whereArgs: whereArgs,
+            groupBy: groupBy,
+            having: having,
+            orderBy: orderBy,
+            limit: limit,
+            offset: offset,
+          )
+        : await txn.query(
+            table,
+            distinct: distinct,
+            columns: columns,
+            where: where,
+            whereArgs: whereArgs,
+            groupBy: groupBy,
+            having: having,
+            orderBy: orderBy,
+            limit: limit,
+            offset: offset,
+          );
   }
 
   @override
   Future<List<Map<String, dynamic>>> rawQuery(
-    String sql, [
+    String sql, {
     List<Object?>? arguments,
-  ]) async {
-    return await _database!.rawQuery(sql, arguments);
+    Transaction? txn,
+  }) async {
+    return txn == null
+        ? await _database!.rawQuery(sql, arguments)
+        : await txn.rawQuery(sql, arguments);
   }
 
   @override
@@ -295,14 +345,23 @@ class SqfliteDatabaseService implements IDatabaseService {
     String? where,
     List<Object?>? whereArgs,
     ConflictAlgorithm? conflictAlgorithm,
+    Transaction? txn,
   }) async {
-    return await _database!.update(
-      table,
-      values,
-      where: where,
-      whereArgs: whereArgs,
-      conflictAlgorithm: conflictAlgorithm,
-    );
+    return txn == null
+        ? await _database!.update(
+            table,
+            values,
+            where: where,
+            whereArgs: whereArgs,
+            conflictAlgorithm: conflictAlgorithm,
+          )
+        : await txn.update(
+            table,
+            values,
+            where: where,
+            whereArgs: whereArgs,
+            conflictAlgorithm: conflictAlgorithm,
+          );
   }
 
   /// 执行一个事务
