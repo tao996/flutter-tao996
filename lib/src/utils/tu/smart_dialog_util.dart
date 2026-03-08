@@ -1,0 +1,80 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
+import 'package:get/get.dart';
+
+/// https://pub.dev/packages/flutter_smart_dialog
+class SmartDialogUtil {
+  const SmartDialogUtil();
+
+  void showLoading() {
+    SmartDialog.showLoading();
+  }
+
+  void dismiss() {
+    SmartDialog.dismiss();
+  }
+
+  // 通知类
+  void success({String? message, void Function()? onDismiss}) {
+    SmartDialog.showNotify(
+      msg: message ?? 'success'.tr,
+      notifyType: NotifyType.success,
+      onDismiss: onDismiss,
+    );
+  }
+
+  void failure({String? message, void Function()? onDismiss}) {
+    SmartDialog.showNotify(
+      msg: message ?? 'failure'.tr,
+      notifyType: NotifyType.failure,
+      onDismiss: onDismiss,
+    );
+  }
+
+  void warning({String? message, void Function()? onDismiss}) {
+    SmartDialog.showNotify(
+      msg: message ?? 'warning'.tr,
+      notifyType: NotifyType.warning,
+      onDismiss: onDismiss,
+    );
+  }
+
+  void error(
+    String message, {
+    void Function()? onDismiss,
+    bool clickMaskDismiss = false,
+  }) {
+    SmartDialog.showNotify(
+      msg: message,
+      notifyType: NotifyType.error,
+      onDismiss: onDismiss,
+      clickMaskDismiss: clickMaskDismiss,
+    );
+  }
+
+  void toast(String msg) {
+    SmartDialog.showNotify(msg: msg, notifyType: NotifyType.alert);
+  }
+
+  void notice(String message, {void Function()? onDismiss}) {
+    SmartDialog.showToast(message, onDismiss: onDismiss);
+  }
+
+  Future<void> alert(String title, {String? content, Widget? icon}) {
+    return Get.dialog(
+      AlertDialog(
+        icon: icon,
+        title: Text(title),
+        content: content == null ? null : Text(content),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Get.back();
+            },
+            child: Text('confirm'.tr),
+          ),
+        ],
+      ),
+    );
+  }
+}

@@ -126,7 +126,7 @@ class MyFont {
       onTap: () async {
         await controller.loadFonts();
         if (!context.mounted) {
-          getIMessageService().error('error'.tr);
+          tu.sd.error('error'.tr);
           return;
         }
         showFontPickerDialog(context, onChange: onChange);

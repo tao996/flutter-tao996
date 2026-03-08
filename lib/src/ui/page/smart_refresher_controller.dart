@@ -204,7 +204,7 @@ abstract class MySmartRefresherController<T>
       items.refresh();
     } catch (error, stackTrace) {
       getIDebugService().exception(error, stackTrace);
-      getIMessageService().toast(error.toString());
+      tu.sd.toast(error.toString());
     } finally {
       isRequesting.value = false;
     }
@@ -221,7 +221,7 @@ abstract class MySmartRefresherController<T>
       await afterOnRefresh();
     } catch (error, stackTrace) {
       getIDebugService().exception(error, stackTrace);
-      getIMessageService().toast(error.toString());
+      tu.sd.toast(error.toString());
     } finally {
       isRequesting.value = false;
       refreshController.refreshCompleted();
@@ -242,7 +242,7 @@ abstract class MySmartRefresherController<T>
       await afterOnLoadMore();
     } catch (error, stackTrace) {
       getIDebugService().exception(error, stackTrace);
-      getIMessageService().toast(error.toString());
+      tu.sd.toast(error.toString());
     } finally {
       isRequesting.value = false;
       // refreshController.loadComplete();

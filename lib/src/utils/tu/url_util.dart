@@ -50,9 +50,7 @@ class UrlUtil {
       if (error != null) {
         error();
       } else {
-        getIMessageService().error(
-          'urlIsEmpty'.trParams({'title': title ?? 'url'}),
-        );
+        tu.sd.error('urlIsEmpty'.trParams({'title': title ?? 'url'}));
       }
       return false;
     }
@@ -63,9 +61,7 @@ class UrlUtil {
       if (error != null) {
         error();
       } else {
-        getIMessageService().error(
-          'openUrlFailed'.trParams({'title': title ?? 'url'}),
-        );
+        tu.sd.error('openUrlFailed'.trParams({'title': title ?? 'url'}));
       }
       return false;
     }

@@ -137,21 +137,15 @@ abstract class ModelHelper<T extends IModel<T>> {
 
   /// 从数据库中查询全部的记录并更新缓存。
   Future<List<T>> _getAllFromDb({ModelTransaction? mtn}) async {
-    try {
-      final List<Map<String, dynamic>> maps = await query(
-        where: appendWhere(null),
-        orderBy: 'id DESC',
-        mtn: mtn,
-      );
-      final rows = maps.map((map) => fromMap(map)).toList();
-      if (smallTable) {
-        _cache = rows; // 直接赋值以更新缓存
-      }
-      return rows;
-    } catch (e, st) {
-      debugService.exception(e, st);
-      throw '加载表 $tableName 失败！原因: ${e.toString()}';
+    final List<Map<String, dynamic>> maps = await query(
+      orderBy: 'id DESC',
+      mtn: mtn,
+    );
+    final rows = maps.map((map) => fromMap(map)).toList();
+    if (smallTable) {
+      _cache = rows; // 直接赋值以更新缓存
     }
+    return rows;
   }
 
   /// 获取指定字段和值的第一个记录
@@ -165,18 +159,13 @@ abstract class ModelHelper<T extends IModel<T>> {
       final getter = cacheFieldGetters[fieldName]!;
       return _cache.firstWhereOrNull((element) => getter(element) == value);
     } else {
-      try {
-        final maps = await query(
-          where: appendWhere('$fieldName = ?'),
-          whereArgs: [value],
-          limit: 1, // 只查询一条
-          mtn: mtn,
-        );
-        return maps.isNotEmpty ? fromMap(maps.first) : null;
-      } catch (e, st) {
-        debugService.exception(e, st, log: true);
-        throw 'Failed to get record by $fieldName=$value from $tableName; because: $e';
-      }
+      final maps = await query(
+        where: '$fieldName = ?',
+        whereArgs: [value],
+        limit: 1, // 只查询一条
+        mtn: mtn,
+      );
+      return maps.isNotEmpty ? fromMap(maps.first) : null;
     }
   }
 
@@ -187,24 +176,20 @@ abstract class ModelHelper<T extends IModel<T>> {
     String? orderBy,
     ModelTransaction? mtn,
   }) async {
-    try {
-      final maps = await query(
-        where: appendWhere(where),
-        whereArgs: whereArgs,
-        orderBy: orderBy,
-        columns: columns,
-        limit: 1, // 只查询一条
-        mtn: mtn,
-      );
-      return maps.isNotEmpty ? fromMap(maps.first) : null;
-    } catch (e, st) {
-      debugService.exception(e, st, log: true);
-      throw 'Failed to get record from $tableName; because: $e';
-    }
+    final maps = await query(
+      where: where,
+      whereArgs: whereArgs,
+      orderBy: orderBy,
+      columns: columns,
+      limit: 1, // 只查询一条
+      mtn: mtn,
+    );
+    return maps.isNotEmpty ? fromMap(maps.first) : null;
   }
 
   Future<T?> getById(
     int id, {
+    String fieldName = 'id',
     bool tryCache = true,
     ModelTransaction? mtn,
   }) async {
@@ -212,7 +197,7 @@ abstract class ModelHelper<T extends IModel<T>> {
       return null;
     }
     return await getFirstBy(
-      fieldName: 'id',
+      fieldName: fieldName,
       value: id,
       tryCache: tryCache,
       mtn: mtn,
@@ -221,14 +206,24 @@ abstract class ModelHelper<T extends IModel<T>> {
 
   Future<List<T>> getByIds(
     List<int> ids, {
+    String fieldName = 'id',
     bool tryCache = true,
     ModelTransaction? mtn,
   }) async {
     if (ids.isEmpty) {
       return [];
     }
-    final where = 'id IN (${ids.join(',')})';
+    final where = '$fieldName IN (${ids.join(',')})';
     return await getManyBy(where: where, mtn: mtn);
+  }
+
+  /// 根据 ids 的个数生成占位符
+  String inPlaceholder(List<Object> ids) {
+    if (ids.isEmpty) {
+      return '';
+    }
+    // 假设 memberIds = [1, 2, 3]
+    return List.generate(ids.length, (i) => '?').join(',');
   }
 
   Future<T?> getByUuid(
@@ -255,18 +250,13 @@ abstract class ModelHelper<T extends IModel<T>> {
     String? excludeUuid,
     ModelTransaction? mtn,
   }) async {
-    try {
-      return await existsWith(
-        where: '$fieldName = ?',
-        whereArgs: [value],
-        excludeId: excludeId,
-        excludeUuid: excludeUuid,
-        mtn: mtn,
-      );
-    } catch (e, st) {
-      debugService.exception(e, st, log: true);
-      throw 'Failed to check existence of record in $tableName for $fieldName=$value; because: $e';
-    }
+    return await existsWith(
+      where: '$fieldName = ?',
+      whereArgs: [value],
+      excludeId: excludeId,
+      excludeUuid: excludeUuid,
+      mtn: mtn,
+    );
   }
 
   /// 检查记录在数据库中是否存在
@@ -277,33 +267,28 @@ abstract class ModelHelper<T extends IModel<T>> {
     String? excludeUuid,
     ModelTransaction? mtn,
   }) async {
-    try {
-      List<String> where1 = [];
-      if (where != null && where.isNotEmpty) {
-        where1.add(where);
-      }
-      List<Object> whereArgs1 = [];
-      if (whereArgs != null && whereArgs.isNotEmpty) {
-        whereArgs1.addAll(whereArgs);
-      }
-      if (excludeUuid != null && excludeUuid.isNotEmpty) {
-        where1.add('uuid != ?');
-        whereArgs1.add(excludeUuid);
-      }
-      if (excludeId != null && excludeId > 0) {
-        where1.add('id != ?');
-        whereArgs1.add(excludeId);
-      }
-      return await dbService.exists(
-        tableName,
-        where: appendWhere(where1.join(' AND ')),
-        whereArgs: whereArgs1,
-        txn: mtn?.txn,
-      );
-    } catch (e, st) {
-      debugService.exception(e, st, log: true);
-      throw 'Failed to check exists of record in $tableName; because: $e';
+    List<String> where1 = [];
+    if (where != null && where.isNotEmpty) {
+      where1.add(where);
     }
+    List<Object> whereArgs1 = [];
+    if (whereArgs != null && whereArgs.isNotEmpty) {
+      whereArgs1.addAll(whereArgs);
+    }
+    if (excludeUuid != null && excludeUuid.isNotEmpty) {
+      where1.add('uuid != ?');
+      whereArgs1.add(excludeUuid);
+    }
+    if (excludeId != null && excludeId > 0) {
+      where1.add('id != ?');
+      whereArgs1.add(excludeId);
+    }
+    return await dbService.exists(
+      tableName,
+      where: appendWhere(where1.join(' AND ')),
+      whereArgs: whereArgs1,
+      txn: mtn?.txn,
+    );
   }
 
   /// 获取记录总数。
@@ -319,17 +304,13 @@ abstract class ModelHelper<T extends IModel<T>> {
         return _cache.length;
       }
     }
-    try {
-      return await dbService.count(
-        tableName,
-        where: appendWhere(where),
-        whereArgs: whereArgs,
-        txn: mtn?.txn,
-      );
-    } catch (e, st) {
-      debugService.exception(e, st, log: true);
-      throw 'Failed to get count for $tableName; because: $e';
-    }
+
+    return await dbService.count(
+      tableName,
+      where: appendWhere(where),
+      whereArgs: whereArgs,
+      txn: mtn?.txn,
+    );
   }
 
   /// 通用的分页查询方法，基于自增主键ID
@@ -352,29 +333,24 @@ abstract class ModelHelper<T extends IModel<T>> {
     int pageIndex = 1,
     ModelTransaction? mtn,
   }) async {
-    try {
-      final List<String> conditions = [];
-      final List<Object> whereArgs1 = [];
-      if (clauseBuilder != null) {
-        clauseBuilder(conditions, whereArgs1);
-      }
-      final baseWhere =
-          where ?? (conditions.isNotEmpty ? conditions.join(' AND ') : null);
-      final result = await dbService.query(
-        tableName,
-        columns: columns,
-        where: appendWhere(baseWhere),
-        whereArgs: whereArgs ?? whereArgs1,
-        orderBy: orderBy ?? 'id DESC',
-        limit: pageSize,
-        offset: offset ?? getOffset(pageIndex: pageIndex, pageSize: pageSize),
-        txn: mtn?.txn,
-      );
-      return result.map((map) => fromMap(map)).toList();
-    } catch (e, st) {
-      debugService.exception(e, st, log: true);
-      throw 'Failed to get paged data for $tableName; because: $e';
+    final List<String> conditions = [];
+    final List<Object> whereArgs1 = [];
+    if (clauseBuilder != null) {
+      clauseBuilder(conditions, whereArgs1);
     }
+    final baseWhere =
+        where ?? (conditions.isNotEmpty ? conditions.join(' AND ') : null);
+    final result = await dbService.query(
+      tableName,
+      columns: columns,
+      where: appendWhere(baseWhere),
+      whereArgs: whereArgs ?? whereArgs1,
+      orderBy: orderBy ?? 'id DESC',
+      limit: pageSize,
+      offset: offset ?? getOffset(pageIndex: pageIndex, pageSize: pageSize),
+      txn: mtn?.txn,
+    );
+    return result.map((map) => fromMap(map)).toList();
   }
 
   int? getOffset({int? pageIndex, int? pageSize}) {
@@ -391,18 +367,13 @@ abstract class ModelHelper<T extends IModel<T>> {
     String key = 'id',
     ModelTransaction? mtn,
   }) async {
-    try {
-      return await dbService.firstRecordId(
-        tableName,
-        where: appendWhere(where),
-        whereArgs: whereArgs,
-        key: key,
-        txn: mtn?.txn,
-      );
-    } catch (e, st) {
-      debugService.exception(e, st, log: true);
-      throw 'Failed to get first record ID for $tableName; because: $e';
-    }
+    return await dbService.firstRecordId(
+      tableName,
+      where: appendWhere(where),
+      whereArgs: whereArgs,
+      key: key,
+      txn: mtn?.txn,
+    );
   }
 
   /// 获取指定字段和值的所有记录。如果提供了 [where] 则优先使用 [where] 和 [whereArgs]；
@@ -411,7 +382,7 @@ abstract class ModelHelper<T extends IModel<T>> {
     String? fieldName,
     dynamic value,
     String? where,
-    List<Object?>? whereArgs,
+    List<Object>? whereArgs,
     WhereClauseBuilder? clauseBuilder,
     String? groupBy,
     String? having,
@@ -443,7 +414,7 @@ abstract class ModelHelper<T extends IModel<T>> {
     String? fieldName,
     dynamic value,
     String? where,
-    List<Object?>? whereArgs,
+    List<Object>? whereArgs,
     WhereClauseBuilder? clauseBuilder,
     List<String>? columns,
     String? groupBy,
@@ -453,39 +424,28 @@ abstract class ModelHelper<T extends IModel<T>> {
     int? pageIndex,
     ModelTransaction? mtn,
   }) async {
-    try {
-      var (newWhere, newWhereArgs) = createWhere(
-        where,
-        whereArgs,
-        clauseBuilder,
-      );
-      if (fieldName != null && fieldName.isNotEmpty) {
-        if (newWhere == null) {
-          newWhere = appendWhere('$fieldName = ?');
-        } else {
-          newWhere += ' AND $fieldName = ?';
-        }
-        if (newWhereArgs == null) {
-          newWhereArgs = [value];
-        } else {
-          newWhereArgs.add(value);
-        }
+    var (newWhere, newWhereArgs) = createWhere(where, whereArgs, clauseBuilder);
+    if (fieldName != null && fieldName.isNotEmpty) {
+      if (newWhere != null) {
+        newWhere += ' AND $fieldName = ?';
       }
-      return await query(
-        columns: columns,
-        where: newWhere,
-        whereArgs: newWhereArgs,
-        groupBy: groupBy,
-        having: having,
-        orderBy: orderBy,
-        limit: pageSize,
-        offset: getOffset(pageIndex: pageIndex, pageSize: pageSize),
-        mtn: mtn,
-      );
-    } catch (e, st) {
-      debugService.exception(e, st, log: true);
-      throw 'Failed to getManyMapWith data for $tableName; because: $e';
+      if (newWhereArgs == null) {
+        newWhereArgs = [value];
+      } else {
+        newWhereArgs.add(value);
+      }
     }
+    return await query(
+      columns: columns,
+      where: newWhere,
+      whereArgs: newWhereArgs,
+      groupBy: groupBy,
+      having: having,
+      orderBy: orderBy,
+      limit: pageSize,
+      offset: getOffset(pageIndex: pageIndex, pageSize: pageSize),
+      mtn: mtn,
+    );
   }
 
   /// 获取符合条件的记录ID
@@ -493,7 +453,7 @@ abstract class ModelHelper<T extends IModel<T>> {
     String? fieldName,
     dynamic value,
     String? where,
-    List<Object?>? whereArgs,
+    List<Object>? whereArgs,
     WhereClauseBuilder? clauseBuilder,
     String? groupBy,
     String? having,
@@ -523,7 +483,7 @@ abstract class ModelHelper<T extends IModel<T>> {
     String? fieldName,
     dynamic value,
     String? where,
-    List<Object?>? whereArgs,
+    List<Object>? whereArgs,
     WhereClauseBuilder? clauseBuilder,
     String? groupBy,
     String? having,
@@ -532,49 +492,42 @@ abstract class ModelHelper<T extends IModel<T>> {
     int? pageIndex,
     ModelTransaction? mtn,
   }) async {
-    try {
-      final records = await getManyMapWith(
-        columns: [column],
-        fieldName: fieldName,
-        value: value,
-        where: where,
-        whereArgs: whereArgs,
-        clauseBuilder: clauseBuilder,
-        groupBy: groupBy,
-        having: having,
-        orderBy: orderBy,
-        pageIndex: pageIndex,
-        pageSize: pageSize,
-        mtn: mtn,
-      );
-      return records.map((record) => record[column] as int).toList();
-    } catch (e, st) {
-      debugService.exception(e, st, log: true);
-      throw 'Failed to int column ($column) data for $tableName; because: $e';
-    }
+    final records = await getManyMapWith(
+      columns: [column],
+      fieldName: fieldName,
+      value: value,
+      where: where,
+      whereArgs: whereArgs,
+      clauseBuilder: clauseBuilder,
+      groupBy: groupBy,
+      having: having,
+      orderBy: orderBy,
+      pageIndex: pageIndex,
+      pageSize: pageSize,
+      mtn: mtn,
+    );
+    return records.map((record) => record[column] as int).toList();
   }
 
+  /// 优先使用 [where]，然后才是 [clauseBuilder] 中的条件
   (String?, List<Object?>?) createWhere(
     String? where,
-    List<Object?>? whereArgs,
+    List<Object>? whereArgs,
     WhereClauseBuilder? clauseBuilder,
   ) {
-    final List<String> conditions = [];
-    final List<Object> appendArgs = [];
+    final List<String> newWhere = [];
+    if (where != null) {
+      newWhere.add(where);
+    }
+    final List<Object> newWhereArgs = [];
+    if (whereArgs != null && whereArgs.isNotEmpty) {
+      newWhereArgs.addAll(whereArgs);
+    }
     if (clauseBuilder != null) {
-      clauseBuilder(conditions, appendArgs);
+      clauseBuilder(newWhere, newWhereArgs);
     }
-    final newWhere = appendWhere(
-      where ?? (conditions.isNotEmpty ? conditions.join(' AND ') : null),
-    );
-    if (appendArgs.isNotEmpty) {
-      if (whereArgs != null) {
-        whereArgs.addAll(appendArgs);
-      } else {
-        return (newWhere, appendArgs);
-      }
-    }
-    return (newWhere, whereArgs);
+
+    return (newWhere.join('AND'), newWhereArgs);
   }
 
   /// 执行原生 SQL 语句
@@ -583,18 +536,7 @@ abstract class ModelHelper<T extends IModel<T>> {
     List<Object?>? arguments,
     ModelTransaction? mtn,
   }) async {
-    try {
-      dprint('execute SQL $sql');
-      await dbService.execute(sql, arguments: arguments, txn: mtn?.txn);
-    } catch (e, st) {
-      debugService.exception(
-        e,
-        st,
-        args: {'sql': sql, 'arguments': arguments},
-        log: true,
-      );
-      throw 'Failed to execute SQL for $tableName; because: $e';
-    }
+    await dbService.execute(sql, arguments: arguments, txn: mtn?.txn);
   }
 
   /// 执行原生 SQL 查询
@@ -603,15 +545,10 @@ abstract class ModelHelper<T extends IModel<T>> {
     List<Object?>? arguments,
     ModelTransaction? mtn,
   }) async {
-    try {
-      return await dbService.rawQuery(sql, arguments: arguments, txn: mtn?.txn);
-    } catch (e, st) {
-      debugService.exception(e, st, args: {'sql': sql, 'arguments': arguments});
-      throw 'Failed to execute raw query for $tableName; because: $e';
-    }
+    return await dbService.rawQuery(sql, arguments: arguments, txn: mtn?.txn);
   }
 
-  /// 查询记录
+  /// 查询记录( 在这里调用 appendWhere)
   Future<List<Map<String, dynamic>>> query({
     bool? distinct,
     List<String>? columns,
@@ -624,24 +561,19 @@ abstract class ModelHelper<T extends IModel<T>> {
     int? offset,
     ModelTransaction? mtn,
   }) async {
-    try {
-      return await dbService.query(
-        tableName,
-        distinct: distinct,
-        columns: columns,
-        where: appendWhere(where),
-        whereArgs: whereArgs,
-        groupBy: groupBy,
-        having: having,
-        orderBy: orderBy,
-        limit: limit,
-        offset: offset,
-        txn: mtn?.txn,
-      );
-    } catch (e, st) {
-      debugService.exception(e, st, log: true);
-      throw 'Failed to query for $tableName; because: $e';
-    }
+    return await dbService.query(
+      tableName,
+      distinct: distinct,
+      columns: columns,
+      where: appendWhere(where),
+      whereArgs: whereArgs,
+      groupBy: groupBy,
+      having: having,
+      orderBy: orderBy,
+      limit: limit,
+      offset: offset,
+      txn: mtn?.txn,
+    );
   }
 
   /// 更新符合条件的记录，并返回影响行数；如果提供 [entity] 则会更新修改时间及记录缓存;
@@ -653,43 +585,38 @@ abstract class ModelHelper<T extends IModel<T>> {
     T? entity,
     ModelTransaction? mtn,
   }) async {
-    try {
-      if (entity != null) {
-        if (!entity.hasRecord()) {
-          throw 'Entity has no valid id for $tableName update';
-        }
-        if (enableUpdatedAt) {
-          entity.updatedAt = DateTime.now();
-        }
-        if (!await beforeUpdate(entity, mtn: mtn)) {
-          throw 'Update interrupted by beforeUpdate hook for $tableName';
-        }
-        if (!await beforeSave(entity, false, mtn: mtn)) {
-          // isInsert = false（更新场景）
-          throw 'Update interrupted by beforeSave hook for $tableName';
-        }
+    if (entity != null) {
+      if (!entity.hasRecord()) {
+        throw 'Entity has no valid id for $tableName update';
       }
-
-      final updatedRows = await dbService.update(
-        tableName,
-        values,
-        where: appendWhere(where),
-        whereArgs: whereArgs,
-        txn: mtn?.txn,
-      );
-      if (mtn == null && smallTable) await _getAllFromDb(mtn: mtn);
-
-      if (entity != null) {
-        await afterUpdate(entity, mtn: mtn);
-        await afterSave(entity, false, mtn: mtn); // isInsert = false
+      if (enableUpdatedAt) {
+        entity.updatedAt = DateTime.now();
       }
-
-      debugService.d('Updated $updatedRows records in $tableName');
-      return updatedRows;
-    } catch (e, st) {
-      debugService.exception(e, st, log: true);
-      throw 'Failed to update record in $tableName; because: $e';
+      if (!await beforeUpdate(entity, mtn: mtn)) {
+        throw 'Update interrupted by beforeUpdate hook for $tableName';
+      }
+      if (!await beforeSave(entity, false, mtn: mtn)) {
+        // isInsert = false（更新场景）
+        throw 'Update interrupted by beforeSave hook for $tableName';
+      }
     }
+
+    final updatedRows = await dbService.update(
+      tableName,
+      values,
+      where: appendWhere(where),
+      whereArgs: whereArgs,
+      txn: mtn?.txn,
+    );
+    if (mtn == null && smallTable) await _getAllFromDb(mtn: mtn);
+
+    if (entity != null) {
+      await afterUpdate(entity, mtn: mtn);
+      await afterSave(entity, false, mtn: mtn); // isInsert = false
+    }
+
+    debugService.d('Updated $updatedRows records in $tableName');
+    return updatedRows;
   }
 
   /// 更新指定 ID 记录的数据
@@ -739,53 +666,48 @@ abstract class ModelHelper<T extends IModel<T>> {
     T? entity,
     ModelTransaction? mtn,
   }) async {
-    try {
-      if (entity != null) {
-        if (!entity.hasRecord()) {
-          throw 'The entity must have a record ID when deleting';
-        }
-        if (!await beforeDelete(
-          entity: entity,
-          where: where,
-          whereArgs: whereArgs,
-          mtn: mtn,
-        )) {
-          throw 'Delete interrupted by beforeDelete hook for $tableName';
-        }
-        entity.deletedAt = DateTime.now();
+    if (entity != null) {
+      if (!entity.hasRecord()) {
+        throw 'The entity must have a record ID when deleting';
       }
-      // 2. 执行删除/软删除（不变）
-      final deletedCount = enableSoftDelete
-          ? await updateWith(
-              {'deletedAt': DateTime.now().toIso8601String()},
-              where: where ?? '',
-              whereArgs: whereArgs ?? [],
-              entity: entity,
-              mtn: mtn,
-            )
-          : await dbService.delete(
-              tableName,
-              where: where,
-              whereArgs: whereArgs,
-              txn: mtn?.txn,
-            );
-      // 更新缓存 + 后置钩子
-      if (mtn == null && smallTable && deletedCount > 0) {
-        await _getAllFromDb(mtn: mtn);
+      if (!await beforeDelete(
+        entity: entity,
+        where: where,
+        whereArgs: whereArgs,
+        mtn: mtn,
+      )) {
+        throw 'Delete interrupted by beforeDelete hook for $tableName';
       }
-      if (entity != null) {
-        await afterDelete(deletedCount, entity: entity, mtn: mtn);
-      }
-      debugService.d(
-        'Deleted $deletedCount records in $tableName',
-        args: '=x=x=x=x=x=x=x=x=x==x=x=x=x=x=x=x=x=x==x=x',
-        log: true,
-      );
-      return deletedCount;
-    } catch (e, st) {
-      debugService.exception(e, st, log: true);
-      throw 'Failed to delete record from $tableName; because: $e';
+      entity.deletedAt = DateTime.now();
     }
+    // 2. 执行删除/软删除（不变）
+    final deletedCount = enableSoftDelete
+        ? await updateWith(
+            {'deletedAt': DateTime.now().toIso8601String()},
+            where: where ?? '',
+            whereArgs: whereArgs ?? [],
+            entity: entity,
+            mtn: mtn,
+          )
+        : await dbService.delete(
+            tableName,
+            where: where,
+            whereArgs: whereArgs,
+            txn: mtn?.txn,
+          );
+    // 更新缓存 + 后置钩子
+    if (mtn == null && smallTable && deletedCount > 0) {
+      await _getAllFromDb(mtn: mtn);
+    }
+    if (entity != null) {
+      await afterDelete(deletedCount, entity: entity, mtn: mtn);
+    }
+    debugService.d(
+      'Deleted $deletedCount records in $tableName',
+      args: '=x=x=x=x=x=x=x=x=x==x=x=x=x=x=x=x=x=x==x=x',
+      log: true,
+    );
+    return deletedCount;
   }
 
   /// 根据指定字段和值删除记录。返回删除操作是否成功。
@@ -836,49 +758,44 @@ abstract class ModelHelper<T extends IModel<T>> {
 
   /// 添加记录并返回新记录，已经自动从 [entity] 中移除 id 列；
   Future<T> insert(T entity, {ModelTransaction? mtn}) async {
-    try {
-      if (enableCreatedAt) {
-        entity.createdAt = DateTime.now();
-      }
-      if (enableUpdatedAt) {
-        entity.updatedAt = DateTime.now();
-      }
-
-      if (!await beforeInsert(entity, mtn: mtn)) {
-        throw 'Insert interrupted by beforeInsert hook for $tableName';
-      }
-      if (!await beforeSave(entity, true, mtn: mtn)) {
-        throw 'Insert interrupted by beforeSave hook for $tableName';
-      }
-      final data = entity.toJson()..remove('id');
-      if (enableUuid) {
-        if (tu.assert1.isEmpty(data['uuid'])) {
-          throw 'uuid is empty';
-        }
-      }
-      final newId = await dbService.insert(tableName, data, txn: mtn?.txn);
-      if (newId <= 0) throw 'Failed to insert record into $tableName';
-      entity.id = newId;
-      // 获取新插入的记录
-      final record = await getById(newId, tryCache: false, mtn: mtn);
-      if (record == null) {
-        throw 'Failed to get record by id=$newId from $tableName';
-      }
-      debugService.d('Inserted new record into $tableName with new ID: $newId');
-
-      /// 更新缓存
-      if (mtn == null && smallTable) {
-        await _getAllFromDb(mtn: mtn);
-      }
-      // 更新后置钩子
-      await afterInsert(record, mtn: mtn);
-      await afterSave(record, true, mtn: mtn);
-      dprint('insert success: ${record.id}');
-      return record;
-    } catch (e, st) {
-      debugService.exception(e, st, args: entity.toJson(), log: true);
-      throw 'Failed to insert record into $tableName; because: $e';
+    if (enableCreatedAt) {
+      entity.createdAt = DateTime.now();
     }
+    if (enableUpdatedAt) {
+      entity.updatedAt = DateTime.now();
+    }
+
+    if (!await beforeInsert(entity, mtn: mtn)) {
+      throw 'Insert interrupted by beforeInsert hook for $tableName';
+    }
+    if (!await beforeSave(entity, true, mtn: mtn)) {
+      throw 'Insert interrupted by beforeSave hook for $tableName';
+    }
+    final data = entity.toJson()..remove('id');
+    if (enableUuid) {
+      if (tu.assert1.isEmpty(data['uuid'])) {
+        throw 'uuid is empty';
+      }
+    }
+    final newId = await dbService.insert(tableName, data, txn: mtn?.txn);
+    if (newId <= 0) throw 'Failed to insert record into $tableName';
+    entity.id = newId;
+    // 获取新插入的记录
+    final record = await getById(newId, tryCache: false, mtn: mtn);
+    if (record == null) {
+      throw 'Failed to get record by id=$newId from $tableName';
+    }
+    debugService.d('Inserted new record into $tableName with new ID: $newId');
+
+    /// 更新缓存
+    if (mtn == null && smallTable) {
+      await _getAllFromDb(mtn: mtn);
+    }
+    // 更新后置钩子
+    await afterInsert(record, mtn: mtn);
+    await afterSave(record, true, mtn: mtn);
+    dprint('insert success: ${record.id}');
+    return record;
   }
 
   /// 批量插入（使用事务），需要手动更新缓存
@@ -933,16 +850,10 @@ abstract class ModelHelper<T extends IModel<T>> {
     Future<M> Function(ModelTransaction) action, {
     bool? exclusive,
   }) async {
-    try {
-      final db = dbService.getDatabase();
-      return await db.transaction<M>((txn) async {
-        return action(ModelTransaction(txn));
-      }, exclusive: exclusive);
-    } catch (e, st) {
-      dprint('事务执行失败');
-      debugService.exception(e, st);
-      rethrow;
-    }
+    final db = dbService.getDatabase();
+    return await db.transaction<M>((txn) async {
+      return action(ModelTransaction(txn));
+    }, exclusive: exclusive);
   }
 
   // Future<ModelTransaction> transactionTXN({bool? exclusive}) async {

@@ -94,14 +94,18 @@ class MyModelDelegate<T extends IModel<T>> extends AbstractListDelegate<T> {
     );
   }
 
-  Future<void> insertItem(T entity) async {
+  Future<void> insertItem(
+    T entity, {
+    bool syncDb = false,
+    bool unshift = false,
+  }) async {
     await save(
       entity: entity,
       index: -1,
-      syncDb: false,
+      syncDb: syncDb,
       showMessage: false,
       navBack: false,
-      unshift: true,
+      unshift: unshift,
     );
   }
 

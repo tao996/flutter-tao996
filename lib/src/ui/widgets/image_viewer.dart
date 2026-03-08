@@ -281,10 +281,7 @@ Future<void> _downloadImage({
     if (Platform.isAndroid) {
       var status = await Permission.storage.request();
       if (!status.isGranted) {
-        getIDebugService().d(
-          '存储权限未授予',
-          errorMessage: 'permissionStorageDeny'.tr,
-        );
+        await tu.sd.alert('permissionStorageDeny'.tr);
         return;
       }
     }
@@ -306,13 +303,13 @@ Future<void> _downloadImage({
         },
       );
       if (file == null) {
-        getIMessageService().error('imageDownloadError'.tr);
+        tu.sd.error('imageDownloadError'.tr);
         return;
       } else {
         await tu.file.saveImageToGallery(file: file);
       }
     }
-    getIDebugService().d('图片保存成功', successMessage: 'downloadAndSaveSuccess'.tr);
+    tu.sd.success(message: 'downloadAndSaveSuccess'.tr);
   } catch (error, stackTrace) {
     getIDebugService().exception(
       error,
@@ -328,7 +325,7 @@ Future<void> _shareImage({
   required ResourceLocation location,
   Directory? director,
 }) async {
-  getIMessageService().toast('imageSharing'.tr);
+  tu.sd.toast('imageSharing'.tr);
   try {
     final file = await _getImage(
       imageUrl: imageUrl,
@@ -336,7 +333,8 @@ Future<void> _shareImage({
       director: director,
     );
     if (file == null) {
-      getIMessageService().error('imageNotExists'.tr);
+      tu.sd.error('imageNotExists'.tr);
+      return;
     } else {
       await getIShareService().shareFilepath(file.path);
     }
@@ -346,9 +344,7 @@ Future<void> _shareImage({
     // File(filePath).deleteSync(); // 如果需要立即删除
     // _debugService.d('临时文件已删除');
   } catch (e) {
-    getIDebugService().d(
-      '分享图片错误: $e',
-      errorMessage: 'shareFailed'.trParams({'reason': e.toString()}),
-    );
+    getIDebugService().d('分享图片错误');
+    tu.sd.error('shareFailed'.trParams({'reason': e.toString()}));
   }
 }

@@ -205,6 +205,12 @@ class SqfliteDatabaseService implements IDatabaseService {
     List<Object?>? whereArgs,
     Transaction? txn,
   }) async {
+    if (printSQL) {
+      _debugService.d(
+        'delete from $table',
+        args: {'where': table, 'whereArgs': whereArgs},
+      );
+    }
     return txn == null
         ? await _database!.delete(table, where: where, whereArgs: whereArgs)
         : await txn.delete(table, where: where, whereArgs: whereArgs);
@@ -216,6 +222,9 @@ class SqfliteDatabaseService implements IDatabaseService {
     List<Object?>? arguments,
     Transaction? txn,
   }) async {
+    if (printSQL) {
+      _debugService.d('execute: $sql', args: arguments);
+    }
     txn == null
         ? await _database!.execute(sql, arguments)
         : await txn.execute(sql, arguments);
@@ -264,6 +273,9 @@ class SqfliteDatabaseService implements IDatabaseService {
     ConflictAlgorithm? conflictAlgorithm,
     Transaction? txn,
   }) async {
+    if (printSQL) {
+      _debugService.d('insert $table', args: values);
+    }
     return txn == null
         ? await _database!.insert(
             table,
@@ -291,14 +303,17 @@ class SqfliteDatabaseService implements IDatabaseService {
       final whereSql = where != null ? 'WHERE $where' : '';
       var sql = columns != null
           ? 'SELECT ${columns.join(', ')} FROM $table $whereSql  ORDER BY $orderBy LIMIT $limit'
-          : 'SELECT * FROM $table $whereSql ORDER BY $orderBy LIMIT $limit';
+          : 'SELECT * FROM $table $whereSql';
+      if (orderBy != null) {
+        sql = '$sql ORDER BY $orderBy';
+      }
+      if (limit != null) {
+        sql = '$sql LIMIT $limit';
+      }
       if (offset != null) {
         sql = '$sql OFFSET $offset';
       }
-      _debugService.d(
-        sql,
-        args: whereArgs == null ? null : {'args': whereArgs},
-      );
+      _debugService.d(sql, args: {'args': whereArgs});
     }
     return txn == null
         ? await _database!.query(
@@ -333,6 +348,9 @@ class SqfliteDatabaseService implements IDatabaseService {
     List<Object?>? arguments,
     Transaction? txn,
   }) async {
+    if (printSQL) {
+      dprint('rawQuery: $sql');
+    }
     return txn == null
         ? await _database!.rawQuery(sql, arguments)
         : await txn.rawQuery(sql, arguments);
@@ -347,6 +365,12 @@ class SqfliteDatabaseService implements IDatabaseService {
     ConflictAlgorithm? conflictAlgorithm,
     Transaction? txn,
   }) async {
+    if (printSQL) {
+      _debugService.d(
+        'update $table',
+        args: {'where': where, 'whereArgs': whereArgs, 'values': values},
+      );
+    }
     return txn == null
         ? await _database!.update(
             table,
@@ -370,15 +394,10 @@ class SqfliteDatabaseService implements IDatabaseService {
     Future<M> Function(ModelTransaction mt) action, {
     bool? exclusive,
   }) async {
-    try {
-      final db = getDatabase();
-      return await db.transaction<M>((txn) async {
-        return action(ModelTransaction(txn));
-      }, exclusive: exclusive);
-    } catch (e, st) {
-      getIDebugService().exception(e, st);
-      rethrow;
-    }
+    final db = getDatabase();
+    return await db.transaction<M>((txn) async {
+      return action(ModelTransaction(txn));
+    }, exclusive: exclusive);
   }
 }
 

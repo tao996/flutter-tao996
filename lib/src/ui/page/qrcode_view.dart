@@ -100,7 +100,7 @@ class _QRCodeViewState extends State<QRCodeView> {
             Get.back(result: scanData.code);
             // Navigator.pop(context, scanData.code);
           } else {
-            getIMessageService().toast('scan failed'.tr);
+            tu.sd.error('scan failed'.tr);
           }
         });
       },

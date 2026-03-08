@@ -17,6 +17,7 @@ import 'package:tao996/src/utils/tu/fn_util.dart';
 import 'package:tao996/src/utils/tu/get_util.dart';
 import 'package:tao996/src/utils/tu/number_util.dart';
 import 'package:tao996/src/utils/tu/permission_util.dart';
+import 'package:tao996/src/utils/tu/smart_dialog_util.dart';
 import 'package:tao996/src/utils/tu/text_util.dart';
 import 'package:tao996/src/utils/tu/zip.dart';
 import 'package:tao996/src/utils/tu/url_util.dart';
@@ -47,6 +48,7 @@ class _TUtils {
   final draw = const DrawUtil();
   final font = const FontUtil();
   final assert1 = const AssertUtil();
+  final sd = const SmartDialogUtil();
 
   final api = const ApiUtil();
   final nav = const NavUtil();

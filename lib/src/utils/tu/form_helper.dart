@@ -39,7 +39,7 @@ class FormHelperUtil {
   }
 
   /// 水平布局的 按钮组，可用于多单或单选（oneFilterChip），被选中的选项会打上一个勾（改变了尺寸）
-  /// 跟 [gridCheckbox] 的区别是会自动换行，你可以需要将这个组件包裹在 Expanded 中
+  /// 跟 [gridCheckbox] 的区别是会自动换行，你可能需要将这个组件包裹在 Expanded 中
   Widget filterChipCheckbox<T>({
     required List<KV<T>> items,
     required void Function(bool selected, T item) onSelectionChanged,
