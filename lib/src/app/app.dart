@@ -13,26 +13,32 @@ import '../../tao996.dart';
 class MyTao996App extends StatelessWidget {
   final Iterable<LocalizationsDelegate<dynamic>>? localizationsDelegates;
 
-  /// 在 app 构建之前执行
-  final Function? beforeBuild;
+  /// 语言，默认为 const Locale('zh', 'CN')
   final Locale? fallbackLocale;
 
   const MyTao996App({
     super.key,
-    this.beforeBuild,
     this.fallbackLocale,
     this.localizationsDelegates,
   });
 
   @override
   Widget build(BuildContext context) {
+    if (AppRoutes.routes.isEmpty) {
+      throw Exception('AppRoutes.routes is empty');
+    } else {
+      final index = AppRoutes.routes.indexWhere(
+        (element) => element.name == '/',
+      );
+      if (index < 0) {
+        throw Exception('AppRoutes.routes does not contain a route named "/"');
+      }
+    }
     final IThemeService themeService = getIThemeService();
     final ISettingsService settingService = getISettingsService();
 
     DeviceService.calScreenSize(context);
-    if (beforeBuild != null) {
-      beforeBuild!();
-    }
+
     // final dx = settingsService.navDragPosX;
     // if (-1 < dx && dx < 1) {
     //   settingsService.navDragPosX = DeviceService.screenWidth * 1 / 2 - 50;
@@ -56,7 +62,7 @@ class MyTao996App extends StatelessWidget {
           translations: getTranslationService(),
           locale: getILocaleService().locale,
           // 系统默认
-          fallbackLocale: fallbackLocale ?? const Locale('en', 'US'),
+          fallbackLocale: fallbackLocale ?? const Locale('zh', 'CN'),
           navigatorObservers: [FlutterSmartDialog.observer],
           theme: themeService.buildLightTheme(lightDynamic),
           darkTheme: themeService.buildDarkTheme(darkDynamic),
@@ -67,6 +73,12 @@ class MyTao996App extends StatelessWidget {
           ][settingService.themeMode],
           initialRoute: '/',
           getPages: AppRoutes.routes,
+          // 🎯 当跳转到一个不存在的路由时，跳转到这个页面而不是崩溃
+          unknownRoute: GetPage(
+            name: '/not-found',
+            page: () =>
+                const Scaffold(body: Center(child: Text('Page not found'))),
+          ),
           defaultTransition: {
             'cupertino': Transition.cupertino,
             'fade': Transition.fade,
@@ -78,6 +90,9 @@ class MyTao996App extends StatelessWidget {
               //   Theme.of(context).appBarTheme.backgroundColor!,
               //   Theme.of(context).brightness,
               // );
+              if (child == null) {
+                dprint('~~~~~~~~~ error child is null');
+              }
               return MediaQuery(
                 data: MediaQuery.of(context).copyWith(
                   textScaler: TextScaler.linear(settingService.textScaleFactor),

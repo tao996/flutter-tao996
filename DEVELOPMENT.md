@@ -435,6 +435,7 @@ abstract class ModelHelper<T extends IModel<T>> {
   final bool enableSoftDelete;   // 是否启用软删除
   final bool enableCreatedAt;    // 是否有 createdAt 字段
   final bool enableUpdatedAt;    // 是否有 updatedAt 字段
+  final bool enableUuid;         // 是否启用 uuid 字段
 
   ModelHelper(
     this._tableName, {
@@ -442,7 +443,13 @@ abstract class ModelHelper<T extends IModel<T>> {
     this.enableSoftDelete = false,
     this.enableCreatedAt = true,
     this.enableUpdatedAt = true,
+    this.enableUuid = false,
   });
+
+  /// 缓存字段映射（子类可重写，指定需要缓存的字段）
+  Map<String, dynamic Function(T)> get cacheFieldGetters => {
+    'id': (entity) => entity.id,
+  };
 
   // 必须实现的转换方法
   T fromMap(Map<String, dynamic> map);
@@ -689,6 +696,7 @@ class _TUtils {
   final draw = const DrawUtil();
   final font = const FontUtil();
   final api = const ApiUtil();
+  final sd = const SmartDialogUtil();
 }
 
 const tu = _TUtils();
@@ -699,11 +707,34 @@ const tu = _TUtils();
 ```dart
 typedef PickerFileType = FileType;
 typedef PickerPlatformFile = PlatformFile;
+
+/// 资源位置类型
 enum ResourceLocation { local, network, assets, unknown }
-/// 选择类型 [camera] 拍照；[gallery] 相册；[galleryVideo] 从相册选择一个视频；[cameraVideo] 拍摄一个视频；[media] 选择一个图片和视频
+
+/// 图片/视频选择类型
+/// [camera] 拍照
+/// [gallery] 从相册选择图片
+/// [galleryVideo] 从相册选择视频
+/// [cameraVideo] 拍摄视频
+/// [media] 选择图片或视频
 enum ImagePickerSource { camera, gallery, galleryVideo, cameraVideo, media }
+
+/// 多选资源类型
+/// [image] 仅图片
+/// [medio] 媒体文件（图片+视频）
+/// [video] 仅视频
 enum ImagePickerMultipleSource { image, medio, video }
-enum DateTimeFormat { ym, ymd, ymdHm, ymdHms, ymdFile, ymdHmFile, ymdHmsFile }
+
+/// 日期时间格式化类型
+/// [ym] 年月 (yyyy-MM)
+/// [ymd] 年月日 (yyyy-MM-dd)
+/// [ymdHm] 年月日时分 (yyyy-MM-dd HH:mm)
+/// [ymdHms] 年月日时分秒 (yyyy-MM-dd HH:mm:ss)
+/// [ymdFile] 年月日文件格式 (yyyyMMdd)
+/// [ymdHmFile] 年月日时分文件格式 (yyyyMMdd-HHmm)
+/// [ymdHmsFile] 年月日时分秒文件格式 (yyyyMMdd-HHmmss)
+/// [hm] 时分 (HH:mm)
+enum DateTimeFormat { ym, ymd, ymdHm, ymdHms, ymdFile, ymdHmFile, ymdHmsFile, hm }
 ```
 
 #### get
@@ -821,14 +852,29 @@ Future<String?> getPickFileContent({
 });
 
 /// 保存图片到用户相册
+/// [file] 图片文件
+/// [imageBytes] 图片字节数据
+/// [image] ui.Image 对象，会自动转换为 Uint8List
+/// [suggestedFileName] 建议文件名（PC 端使用）
 Future<void> saveImageToGallery({
   File? file,
   Uint8List? imageBytes,
+  ui.Image? image,
   String? suggestedFileName,
 });
 
 /// 保存文件到用户相册
 Future<void> saveFileToGallery(String filePath);
+
+/// 判断文件是否存在
+bool exists(String filePath);
+
+/// 异步计算给定文件的 MD5 哈希值
+/// 返回一个 32 字符的十六进制字符串
+Future<String> fileMd5(String filePath);
+
+/// 读取文件内容为字符串
+Future<String> getContent(String filePath);
 
 /// 判断文件是否存在
 bool exists(String filePath);
@@ -916,12 +962,47 @@ class ApiUtil {
 }
 ```
 
+#### SmartDialog 工具 (SmartDialogUtil)
+
+基于 [flutter_smart_dialog](https://pub.dev/packages/flutter_smart_dialog) 的弹窗工具。
+
+```dart
+class SmartDialogUtil {
+  // 显示加载中
+  void showLoading(String message);
+  void loading(); // 无文字加载
+  void dismiss(); // 关闭弹窗
+  void hideLoading(); // 关闭加载
+
+  // 通知提示 (自动消失)
+  void success({String? message, void Function()? onDismiss});
+  void failure({String? message, void Function()? onDismiss});
+  void warning({String? message, void Function()? onDismiss});
+  void error(String message, {void Function()? onDismiss, bool clickMaskDismiss = false});
+  void toast(String msg);
+  void showToast(String msg);
+  void notice(String message, {void Function()? onDismiss}); // Toast 通知
+
+  // 弹窗
+  Future<void> alert(String title, {String? content, Widget? icon});
+}
+```
+
 #### 日期时间工具 (`DatetimeUtil`)
 
 ```dart
 class DatetimeUtil {
+  // 检查字符串是否匹配 ISO8601 格式 (YYYY-MM-DDTHH:MM:SS.mmmmmm)
+  bool isIso8601FormatRegex(dynamic input);
+
   // 获取当前时间
   String getNowTime({String pattern = 'yyyy-MM-dd HH:mm:ss'});
+
+  // 按 ymd 格式化 (快捷方法)
+  String formatDate(DateTime datetime);
+
+  // 按 ymdHms 格式化 (快捷方法)
+  String formatDatetime(DateTime datetime);
 
   // 格式化日期
   String format({
@@ -932,23 +1013,33 @@ class DatetimeUtil {
   });
 
   // 快捷格式化
-  String formatYM({...});
-  String formatYMD({...});
-  String formatYMDHM({...});
-  String formatYMDHMS({...});
+  String formatYM({int timestamp = 0, DateTime? dateTime, String? iso8601});
+  String formatYMD({int timestamp = 0, DateTime? dateTime, String? iso8601});
+  String formatYMDHM({int timestamp = 0, DateTime? dateTime, String? iso8601});
+  String formatYMDHMS({int timestamp = 0, DateTime? dateTime, String? iso8601});
+
+  // 自定义格式格式化
   String formatWith(String format, DateTime datetime);
 
-  // 解析日期
+  // 解析日期，支持多种格式自动识别
   DateTime? parse(dynamic dateStr, {bool nowIfEmpty = false, String? formatPattern});
 
-  // 比较
+  // 比较两个日期
   int compareTo(dynamic a, dynamic b);
 
-  // 时间戳
+  // 获取时间戳
+  // [l10] 10位秒级时间戳 (PHP 常用)
+  // [l13] 13位毫秒级时间戳
+  // 默认 16位微秒级时间戳
   int timestamp(DateTime dt, {bool l10 = false, bool l13 = false});
 
-  // 格式化分钟数
+  // 格式化分钟数为易读格式 (如: 90分钟 -> "1h 30m")
   String formatMinutes(int totalMinutes);
+}
+
+// DateTime 扩展
+extension DateTimeExt on DateTime {
+  String formatYMD(); // 格式化为 YYYY-MM-DD
 }
 ```
 
@@ -989,6 +1080,30 @@ class DatetimeUtil {
 #### 字符串处理 TextUtil
 
 * `String merge( String separator, String text0, [ String? text1, ...]`
+
+#### 栈追踪工具 StackUtil
+
+用于调试时打印栈信息，帮助定位问题。
+
+```dart
+class StackUtil {
+  /// 允许打印的包名列表
+  static final List<String> debugPackages = ['package:tao996'];
+
+  /// 添加包名到调试列表
+  static void logPackages(List<String> packages, {bool append = true});
+
+  /// 打印栈信息
+  static void output({
+    required String color,        // 输出颜色
+    List<String>? filterNames,    // 过滤掉的类名
+    bool first = false,           // 只打印第一条
+  });
+
+  /// 获取栈追踪字符串列表
+  static List<String> getStackTraceString({StackTrace? stackTrace});
+}
+```
 
 #### UrlUtil
 
@@ -1206,6 +1321,18 @@ Future<ui.Image> renderText(
 
 支持多语言翻译，基于 GetX Translations。
 
+**支持的语言：**
+
+| 语言 | 代码 | Locale |
+|------|------|--------|
+| 简体中文 | zh_CN | Locale('zh', 'CN') |
+| 繁体中文 | zh_TW | Locale('zh', 'TW') |
+| English | en_US | Locale('en', 'US') |
+| 日本語 | ja_JP | Locale('ja', 'JP') |
+| Deutsch | de_DE | Locale('de', 'DE') |
+| Français | fr_FR | Locale('fr', 'FR') |
+| Español | es_ES | Locale('es', 'ES') |
+
 **核心方法：**
 
 ```dart
@@ -1271,6 +1398,54 @@ extension KVList<T extends Enum> on List<KV<T>> {
 ```
 
 ## UI 和控制器
+
+### MyScaffold
+
+集成 SafeArea 的 Scaffold 组件，简化页面布局。
+
+```dart
+class MyScaffold extends StatelessWidget {
+  final AppBar? appBar;
+  final Widget? drawer;
+  final Widget body;
+  final Widget? floatingActionButton;
+
+  /// [singleChildScrollView] 在滚动方向（垂直）上，不给其子 Widget 任何约束
+  /// 默认为 false，表示你可以在 Column 中使用 Expanded
+  final bool singleChildScrollView;
+
+  final bool useSafeArea;
+  final Widget? bottomNavigationBar;
+  final Widget? bottomSheet;
+  final Color? backgroundColor;
+
+  /// [drawerEdgeDragWidthPercent] 定义一个宽度区域，在这个区域内水平拖动可以触发打开 drawer
+  final double? drawerEdgeDragWidthPercent;
+  final FloatingActionButtonLocation? floatingActionButtonLocation;
+}
+
+/// 适用于子内容不包含 `Expanded` 的页面
+class MyMiniScaffold extends StatelessWidget {
+  final AppBar appBar;
+  final List<Widget> children;
+  final Widget? floatingActionButton;
+}
+
+/// AppBar 菜单按钮组
+class MyAppBarMenuButtons extends StatelessWidget {
+  final void Function(String) onSelected;
+  final List<List<MyAppBarMenuItem>> items;
+}
+
+/// 空状态 Widget（当页面没有记录时显示）
+class MyEmptyStateWidget extends StatelessWidget {
+  final String? buttonText;    // 按钮文字
+  final VoidCallback? onAction; // 点击回调
+  final String? title;         // 内容类型描述
+  final Widget? child;         // 追加的自定义组件
+  final bool showDesc;         // 是否显示描述
+}
+```
 
 ### CustomTabBar
 
@@ -1387,7 +1562,8 @@ class MyDemoSmartRefresherPage extends StatelessWidget {
             ),
             itemCount: c.items.value.length,
             itemBuilder: (context, index) {
-              return Obx( () => ?, );
+              final student = c.items[index];
+              return ListTile(title: Text(student.name));
             },
          ))),
       );

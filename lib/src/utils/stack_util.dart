@@ -22,6 +22,9 @@ class StackUtil {
 
   /// 添加包名
   static void logPackages(List<String> packages, {bool append = true}) {
+    if (packages.isEmpty) {
+      return;
+    }
     if (append) {
       for (var package in packages) {
         package = package.startsWith('package:') ? package : 'package:$package';

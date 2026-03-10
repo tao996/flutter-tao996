@@ -73,14 +73,14 @@ class FileUtil implements IFilePickerService {
       await imageSaver.saveImage(await file.readAsBytes());
     } else if (imageBytes != null) {
       if (DeviceService.isPc()) {
-        await _saveFileToUserSelectedPath(
-          suggestedFileName ??
-              tu.date.format(
-                dateTime: DateTime.now(),
-                format: DateTimeFormat.ymdHmFile,
-              ),
-          data: imageBytes,
-        );
+        final saveName =
+            suggestedFileName ??
+            tu.date.format(
+              dateTime: DateTime.now(),
+              format: DateTimeFormat.ymdHmFile,
+            );
+        await _saveFileToUserSelectedPath(saveName, data: imageBytes);
+        dprint('PC 保存路径: $saveName');
         return;
       }
       await imageSaver.saveImage(imageBytes);

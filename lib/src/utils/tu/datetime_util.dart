@@ -24,8 +24,14 @@ class DatetimeUtil {
     return DateFormat(pattern).format(DateTime.now());
   }
 
+  /// 按 ymd 格式化
   String formatDate(DateTime datetime) {
     return format(dateTime: datetime, format: DateTimeFormat.ymd);
+  }
+
+  /// 按 ymdHms 格式化
+  String formatDatetime(DateTime datetime) {
+    return format(dateTime: datetime, format: DateTimeFormat.ymdHms);
   }
 
   String format({

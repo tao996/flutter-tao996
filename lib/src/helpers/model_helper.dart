@@ -378,6 +378,7 @@ abstract class ModelHelper<T extends IModel<T>> {
 
   /// 获取指定字段和值的所有记录。如果提供了 [where] 则优先使用 [where] 和 [whereArgs]；
   /// 再使用 [fieldName] 和 [value] 组合
+  /// 使用注意：禁止 where: 'id IN (?)', whereArgs: [familyIds.join(',')], 语法错误
   Future<List<T>> getManyBy({
     String? fieldName,
     dynamic value,
@@ -527,7 +528,7 @@ abstract class ModelHelper<T extends IModel<T>> {
       clauseBuilder(newWhere, newWhereArgs);
     }
 
-    return (newWhere.join('AND'), newWhereArgs);
+    return (newWhere.join(' AND '), newWhereArgs);
   }
 
   /// 执行原生 SQL 语句
@@ -754,6 +755,19 @@ abstract class ModelHelper<T extends IModel<T>> {
   }) async {
     final entity = fromMap(values);
     return insert(entity, mtn: mtn);
+  }
+
+  Future<T> save(T entity, {ModelTransaction? mtn}) async {
+    if (entity.hasRecord()) {
+      await update(entity, mtn: mtn);
+      return entity;
+    }
+    return await insert(entity, mtn: mtn);
+  }
+
+  /// [insert] 方法的别名
+  Future<T> create(T entity, {ModelTransaction? mtn}) async {
+    return await insert(entity, mtn: mtn);
   }
 
   /// 添加记录并返回新记录，已经自动从 [entity] 中移除 id 列；

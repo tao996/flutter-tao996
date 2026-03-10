@@ -46,7 +46,21 @@ final List<Locale> systemSupportedLocales = [
 // 请写出它们的繁体中文 zh_TW，英文 en_US，日本语 ja_JP，德语 de_DE，法语 fr_FR，西班牙语 es_ES 的翻译，输出格式为 Map<String, Map<String, String>>，key 只使用单引号
 // http://www.lingoes.net/zh/translator/langcode.htm
 // 使用注意：只有在 GetMaterialApp build 之后，才能使用到 .tr 否则无交
+/*
+class AppTranslation {
+    static final Map<String, Map<String, String>> keys = {
+      'zh_CN': { /* 简体中文翻译 */ },
+      'zh_TW': { /* 繁體中文翻译 */ },
+      'en_US': { /* English翻译 */ },
+      'ja_JP': { /* 日本語翻译 */ },
+      'de_DE': { /* Deutsch翻译 */ },
+      'fr_FR': { /* Français翻译 */ },
+      'es_ES': { /* Español翻译 */ },
+    };
+}
+*/
 class TranslationService extends Translations {
+  // {'zh_CN':{'name':'名称'},'zh_TW':{'name':"名稱"},'en_US':{'name':'Name'},'de_DE':{},'fr_FR':{},'es_ES':{}}
   final Map<String, Map<String, String>> _keys = words;
 
   @override

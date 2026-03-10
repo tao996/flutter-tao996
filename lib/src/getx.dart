@@ -1,4 +1,7 @@
+import 'dart:io';
+
 import 'package:get_it/get_it.dart';
+import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 import 'package:tao996/tao996.dart';
 import '../tao996_platform_interface.dart';
 
@@ -9,16 +12,32 @@ class Tao996 {
 }
 
 /// 注册无依赖的服务
-Future<void> registerTao996Dependencies(GetIt locator) async {
+/// [packages] 需要打印日志的包名
+Future<GetIt> registerTao996Dependencies(List<String> packages) async {
+  final locator = GetIt.instance;
+  // 在桌面平台上初始化数据库工厂
+  // 这行代码必须在调用 openDatabase() 或 getDatabasesPath() 之前执行
+  if (Platform.isWindows || Platform.isLinux || Platform.isMacOS) {
+    sqfliteFfiInit();
+    databaseFactory = databaseFactoryFfi;
+  }
+  StackUtil.logPackages(packages);
+
   await initSharedPreferences();
   locator.registerLazySingleton<IMessageService>(() => MessageService());
   final ILogService logService = LogService();
   locator.registerSingleton<ILogService>(logService);
   locator.registerLazySingleton<IDebugService>(() => DebugService());
   locator.registerLazySingleton<TranslationService>(() => TranslationService());
+  locator.registerLazySingleton<IPathService>(() => PathService());
+  locator.registerLazySingleton<INetworkService>(() => NetworkService());
+  locator.registerLazySingleton<IShareService>(() => ShareService());
+  locator.registerLazySingleton<IFilePickerService>(() => tu.file);
+  return locator;
 }
 
-/// 注册有依赖的服务
+/// 在使用 registerTao996Services 之前你需要手动注册以下服务
+/// ISettingsService, IThemeService,
 void registerTao996Services(GetIt locator) {
   // final locator = GetIt.instance;
   // 用户需要自己注册
@@ -31,10 +50,6 @@ void registerTao996Services(GetIt locator) {
   // locator.registerLazySingleton<IHttpService>(() => DioHttpClient());
   final localService = LocaleService();
   locator.registerLazySingleton<ILocaleService>(() => localService);
-  locator.registerLazySingleton<INetworkService>(() => NetworkService());
-  locator.registerLazySingleton<IPathService>(() => PathService());
-  locator.registerLazySingleton<IShareService>(() => ShareService());
-  locator.registerLazySingleton<IFilePickerService>(() => tu.file);
   locator.registerLazySingleton<IWebviewService>(() => WebviewService());
 
   // 设置全局异常捕获

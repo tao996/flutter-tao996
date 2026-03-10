@@ -6,11 +6,19 @@ import 'package:get/get.dart';
 class SmartDialogUtil {
   const SmartDialogUtil();
 
-  void showLoading() {
+  void showLoading(String message) {
+    SmartDialog.showLoading(msg: message);
+  }
+
+  void loading() {
     SmartDialog.showLoading();
   }
 
   void dismiss() {
+    SmartDialog.dismiss();
+  }
+
+  void hideLoading() {
     SmartDialog.dismiss();
   }
 
@@ -54,6 +62,10 @@ class SmartDialogUtil {
 
   void toast(String msg) {
     SmartDialog.showNotify(msg: msg, notifyType: NotifyType.alert);
+  }
+
+  void showToast(String msg) {
+    return toast(msg);
   }
 
   void notice(String message, {void Function()? onDismiss}) {

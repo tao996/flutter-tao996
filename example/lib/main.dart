@@ -58,7 +58,7 @@ Future<void> _initAppServices() async {
   final locator = GetIt.instance;
 
   // 注册依赖项，也可以使用下面注释的代码替换
-  await registerTao996Dependencies(locator);
+  await registerTao996Dependencies([]);
 
   // locator.registerLazySingleton<IMessageService>(() => MessageService());
   // final ILogService logService = LogService();
