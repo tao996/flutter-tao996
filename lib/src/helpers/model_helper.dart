@@ -425,17 +425,13 @@ abstract class ModelHelper<T extends IModel<T>> {
     int? pageIndex,
     ModelTransaction? mtn,
   }) async {
-    var (newWhere, newWhereArgs) = createWhere(where, whereArgs, clauseBuilder);
-    if (fieldName != null && fieldName.isNotEmpty) {
-      if (newWhere != null) {
-        newWhere += ' AND $fieldName = ?';
-      }
-      if (newWhereArgs == null) {
-        newWhereArgs = [value];
-      } else {
-        newWhereArgs.add(value);
-      }
-    }
+    var (newWhere, newWhereArgs) = createWhere(
+      where: where,
+      whereArgs: whereArgs,
+      clauseBuilder: clauseBuilder,
+      fieldName: fieldName,
+      value: value,
+    );
     return await query(
       columns: columns,
       where: newWhere,
@@ -511,18 +507,32 @@ abstract class ModelHelper<T extends IModel<T>> {
   }
 
   /// 优先使用 [where]，然后才是 [clauseBuilder] 中的条件
-  (String?, List<Object?>?) createWhere(
+  (String?, List<Object?>?) createWhere({
     String? where,
     List<Object>? whereArgs,
     WhereClauseBuilder? clauseBuilder,
-  ) {
+    String? fieldName,
+    dynamic value,
+  }) {
     final List<String> newWhere = [];
     if (where != null) {
       newWhere.add(where);
     }
+    if (fieldName != null && fieldName.isNotEmpty) {
+      newWhere.add('$fieldName = ?');
+      if (value == null) {
+        throw ArgumentError(
+          'value should not be null when fieldName is not empty',
+        );
+      }
+    }
+
     final List<Object> newWhereArgs = [];
     if (whereArgs != null && whereArgs.isNotEmpty) {
       newWhereArgs.addAll(whereArgs);
+    }
+    if (value != null) {
+      newWhereArgs.add(value);
     }
     if (clauseBuilder != null) {
       clauseBuilder(newWhere, newWhereArgs);

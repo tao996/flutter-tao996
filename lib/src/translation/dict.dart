@@ -67,6 +67,24 @@ final Map<String, Map<String, String>> words = {
 
     'mustInteger': '@title 必须为整数',
     'mustRequired': '@title 不能为空',
+    'isRepeat': '重复的 @title',
+    'toAdd': '添加@title',
+    'toEdit': '编辑@title',
+    'toDelete': '删除@title',
+    'toSuccess': '@title成功',
+    'toFailed': '@title失败',
+    'addSuccess': '@title添加成功',
+    'addFailed': '@title添加失败',
+    'saveSuccess': '@title保存成功',
+    'saveFailed': '@title保存失败',
+    'editSuccess': '@title修改成功',
+    'editFailed': '@title修改失败',
+    'deleteSuccess': '@title删除成功',
+    'deleteFailed': '@title删除失败',
+    'updateSuccess': '@title更新成功',
+    'updateFailed': '@title更新失敗',
+    'noRecordFound': '找不到符合条件的@title',
+    'mustSelected': '请先选择@title',
   },
 
   // ----------------------------------------------------
@@ -138,6 +156,27 @@ final Map<String, Map<String, String>> words = {
     'clickToCreateYourFirstRecord': '點擊下方按鈕，開始建立您的第一個@title',
     // '建立' 更常用
     'createNewRecord': '新增@title',
+
+    'mustInteger': '@title 必須為整數',
+    'mustRequired': '@title 不能為空',
+    'isRepeat': '重複的 @title',
+    'toAdd': '新增@title',
+    'toEdit': '編輯@title',
+    'toDelete': '刪除@title',
+    'toSuccess': '@title成功',
+    'toFailed': '@title失敗',
+    'addSuccess': '@title新增成功',
+    'addFailed': '@title新增失敗',
+    'saveSuccess': '@title儲存成功',
+    'saveFailed': '@title儲存失敗',
+    'editSuccess': '@title修改成功',
+    'editFailed': '@title修改失敗',
+    'deleteSuccess': '@title刪除成功',
+    'deleteFailed': '@title刪除失敗',
+    'updateSuccess': '@title更新成功',
+    'updateFailed': '@title更新失敗',
+    'noRecordFound': '找不到符合條件的@title',
+    'mustSelected': '請先選擇@title',
   },
 
   // ----------------------------------------------------
@@ -205,6 +244,27 @@ final Map<String, Map<String, String>> words = {
     'clickToCreateYourFirstRecord':
         'Click the button below to create your first @title',
     'createNewRecord': 'Create new @title',
+
+    'mustInteger': '@title must be an integer',
+    'mustRequired': '@title is required',
+    'isRepeat': 'Duplicate @title',
+    'toAdd': 'Add @title',
+    'toEdit': 'Edit @title',
+    'toDelete': 'Delete @title',
+    'toSuccess': '@title successful',
+    'toFailed': '@title failed',
+    'addSuccess': '@title added successfully',
+    'addFailed': 'Failed to add @title',
+    'saveSuccess': '@title saved successfully',
+    'saveFailed': 'Failed to save @title',
+    'editSuccess': '@title updated successfully',
+    'editFailed': 'Failed to update @title',
+    'deleteSuccess': '@title deleted successfully',
+    'deleteFailed': 'Failed to delete @title',
+    'updateSuccess': '@title updated successfully',
+    'updateFailed': 'Failed to update @title',
+    'noRecordFound': 'No matching @title found',
+    'mustSelected': 'Please select @title',
   },
 
   // ----------------------------------------------------
@@ -271,206 +331,26 @@ final Map<String, Map<String, String>> words = {
     'noRecord': 'まだ@titleがありません',
     'clickToCreateYourFirstRecord': '下のボタンをクリックして、最初の@titleを作成してください',
     'createNewRecord': '新しい@titleを作成',
-  },
 
-  // ----------------------------------------------------
-  // 德语 (de_DE)
-  // ----------------------------------------------------
-  'de_DE': {
-    'confirm': 'Bestätigen',
-    'cancel': 'Abbrechen',
-    'save': 'Speichern',
-    'add': 'Hinzufügen',
-    'edit': 'Bearbeiten',
-    'delete': 'Löschen',
-    'back': 'Zurück',
-    'search': 'Suchen',
-    'success': 'Erfolg',
-    'error': 'Fehler',
-    'detail': 'Details',
-    'notice': 'Hinweis',
-    'warning': 'Warnung',
-    'loading': 'Wird geladen...',
-    'userGuide': 'Benutzerhandbuch',
-
-    'pullUpLoadMore': 'Hochziehen zum Laden weiterer Daten',
-    'loadFailedRetry': 'Laden fehlgeschlagen, bitte erneut versuchen',
-    'noMoreData': 'Keine weiteren Daten',
-
-    'failedToReadFontFiles': 'Fehler beim Lesen der Schriftartdateien',
-    'failedToReadThemeFont': 'Fehler beim Lesen der Themenschriftart',
-    'failedToDeleteFont': 'Fehler beim Löschen der Schriftart',
-    'failedToImportFonts': 'Fehler beim Importieren der Schriftarten',
-    'errorLanguageData': 'Fehlerhaftes Sprachdatenformat',
-
-    'deleteConfirmTitle': 'Warnung',
-    'deleteConfirmContent': 'Sind Sie sicher, dass Sie @title löschen möchten?',
-    'youCannotUndoThis': 'Diese Aktion kann nicht rückgängig gemacht werden.',
-    'noRecordDelete': 'Keine Datensätze gelöscht',
-
-    'noInternetConnection': 'Keine Internetverbindung',
-
-    'clickToLoadImage': 'Zum Laden des Bildes klicken',
-    'imageLoading': 'Wird geladen...',
-    'imageLoadError': 'Fehler beim Laden des Bildes',
-
-    'imageDownloadError': 'Fehler beim Herunterladen des Bildes',
-    'downloadAndSaveSuccess': 'Erfolgreich heruntergeladen und gespeichert',
-    'imageSharing': 'Bild zum Teilen vorbereiten',
-    'imageNotExists': 'Bild existiert nicht',
-    'fileNotExists': 'Datei existiert nicht',
-    'shareFailed': 'Teilen fehlgeschlagen: @reason',
-    'share': 'Teilen',
-    'flashOn': 'Blitz an',
-    'flashOff': 'Blitz aus',
-
-    'permissionStorageDeny': 'Speicherberechtigung verweigert',
-
-    'openUrlFailed': 'Fehler beim Öffnen des @title-Links',
-    'urlIsEmpty': '@title-Link ist leer',
-
-    'selectADate': 'Datum auswählen',
-    'selectATime': 'Uhrzeit auswählen',
-    'selectDateAndTime': 'Datum und Uhrzeit auswählen',
-
-    'record': 'Eintrag',
-    'noRecord': 'Noch kein @title vorhanden',
-    'clickToCreateYourFirstRecord':
-        'Klicken Sie unten, um Ihren ersten @title zu erstellen',
-    'createNewRecord': 'Neuen @title erstellen',
-  },
-
-  // ----------------------------------------------------
-  // 法语 (fr_FR)
-  // ----------------------------------------------------
-  'fr_FR': {
-    'confirm': 'Confirmer',
-    'cancel': 'Annuler',
-    'save': 'Enregistrer',
-    'add': 'Ajouter',
-    'edit': 'Modifier',
-    'delete': 'Supprimer',
-    'back': 'Retour',
-    'search': 'Rechercher',
-    'success': 'Succès',
-    'error': 'Erreur',
-    'detail': 'Détails',
-    'notice': 'Notification',
-    'warning': 'Avertissement',
-    'loading': 'Chargement...',
-    'userGuide': 'Guide utilisateur',
-
-    'pullUpLoadMore': 'Tirer pour charger plus',
-    'loadFailedRetry': 'Échec du chargement, veuillez réessayer',
-    'noMoreData': 'Plus de données',
-
-    'failedToReadFontFiles': 'Échec de la lecture des fichiers de police',
-    'failedToReadThemeFont': 'Échec de la lecture de la police du thème',
-    'failedToDeleteFont': 'Échec de la suppression de la police',
-    'failedToImportFonts': 'Échec de l\'importation des polices',
-    'errorLanguageData': 'Erreur de format des données de langue',
-
-    'deleteConfirmTitle': 'Avertissement',
-    'deleteConfirmContent': 'Êtes-vous sûr de vouloir supprimer @title ?',
-    'youCannotUndoThis': 'Cette action est irréversible.',
-    'noRecordDelete': 'Aucun enregistrement supprimé',
-
-    'noInternetConnection': 'Aucune connexion Internet',
-
-    'clickToLoadImage': 'Cliquer pour charger l\'image',
-    'imageLoading': 'Chargement...',
-    'imageLoadError': 'Erreur de chargement d\'image',
-
-    'imageDownloadError': 'Erreur de téléchargement d\'image',
-    'downloadAndSaveSuccess': 'Téléchargé et enregistré avec succès',
-    'imageSharing': 'Préparation du partage d\'image',
-    'imageNotExists': 'L\'image n\'existe pas',
-    'fileNotExists': 'Le fichier n\'existe pas',
-    'shareFailed': 'Échec du partage : @reason',
-    'share': 'Partager',
-    'flashOn': 'Flash activé',
-    'flashOff': 'Flash désactivé',
-
-    'permissionStorageDeny': 'Permission de stockage refusée',
-
-    'openUrlFailed': 'Échec de l\'ouverture du lien @title',
-    'urlIsEmpty': 'Le lien @title est vide',
-
-    'selectADate': 'Sélectionner une date',
-    'selectATime': 'Sélectionner une heure',
-    'selectDateAndTime': 'Sélectionner date et heure',
-
-    'record': 'Enregistrement',
-    'noRecord': 'Aucun @title pour l\'instant',
-    'clickToCreateYourFirstRecord':
-        'Cliquez ci-dessous pour créer votre premier @title',
-    'createNewRecord': 'Créer un nouvel @title',
-  },
-
-  // ----------------------------------------------------
-  // 西班牙语 (es_ES)
-  // ----------------------------------------------------
-  'es_ES': {
-    'confirm': 'Confirmar',
-    'cancel': 'Cancelar',
-    'save': 'Guardar',
-    'add': 'Añadir',
-    'edit': 'Editar',
-    'delete': 'Eliminar',
-    'back': 'Atrás',
-    'search': 'Buscar',
-    'success': 'Éxito',
-    'error': 'Error',
-    'detail': 'Detalles',
-    'notice': 'Aviso',
-    'warning': 'Advertencia',
-    'loading': 'Cargando...',
-    'userGuide': 'Guía de usuario',
-
-    'pullUpLoadMore': 'Tirar para cargar más',
-    'loadFailedRetry': 'Error de carga, inténtelo de nuevo',
-    'noMoreData': 'No hay más datos',
-
-    'failedToReadFontFiles': 'Error al leer archivos de fuente',
-    'failedToReadThemeFont': 'Error al leer la fuente del tema',
-    'failedToDeleteFont': 'Error al eliminar fuente',
-    'failedToImportFonts': 'Error al importar fuentes',
-    'errorLanguageData': 'Error en el formato de datos de idioma',
-
-    'deleteConfirmTitle': 'Advertencia',
-    'deleteConfirmContent': '¿Está seguro de que desea eliminar @title?',
-    'youCannotUndoThis': 'Esta acción no se puede deshacer.',
-    'noRecordDelete': 'No se eliminaron registros',
-
-    'noInternetConnection': 'Sin conexión a internet',
-
-    'clickToLoadImage': 'Haga clic para cargar la imagen',
-    'imageLoading': 'Cargando...',
-    'imageLoadError': 'Error al cargar la imagen',
-
-    'imageDownloadError': 'Error al descargar imagen',
-    'downloadAndSaveSuccess': 'Descargado y guardado correctamente',
-    'imageSharing': 'Preparando para compartir imagen',
-    'imageNotExists': 'La imagen no existe',
-    'fileNotExists': 'El archivo no existe',
-    'shareFailed': 'Error al compartir: @reason',
-    'share': 'Compartir',
-    'flashOn': 'Flash encendido',
-    'flashOff': 'Flash apagado',
-
-    'permissionStorageDeny': 'Permiso de almacenamiento denegado',
-
-    'openUrlFailed': 'Error al abrir el enlace @title',
-    'urlIsEmpty': 'El enlace @title está vacío',
-
-    'selectADate': 'Seleccionar una fecha',
-    'selectATime': 'Seleccionar una hora',
-    'selectDateAndTime': 'Seleccionar fecha y hora',
-
-    'record': 'Registro',
-    'noRecord': 'Aún no hay @title',
-    'clickToCreateYourFirstRecord':
-        'Haga clic abajo para crear su primer @title',
-    'createNewRecord': 'Crear nuevo @title',
+    'mustInteger': '@title は整数で入力してください',
+    'mustRequired': '@title は必須項目です',
+    'isRepeat': '重複する @title',
+    'toAdd': '@titleの追加',
+    'toEdit': '@titleの編集',
+    'toDelete': '@titleの削除',
+    'toSuccess': '@titleに成功しました',
+    'toFailed': '@titleに失敗しました',
+    'addSuccess': '@titleを追加しました',
+    'addFailed': '@titleの追加に失敗しました',
+    'saveSuccess': '@titleを保存しました',
+    'saveFailed': '@titleの保存に失敗しました',
+    'editSuccess': '@titleを更新しました',
+    'editFailed': '@titleの更新に失敗しました',
+    'deleteSuccess': '@titleを削除しました',
+    'deleteFailed': '@titleの削除に失敗しました',
+    'updateSuccess': '@titleを更新しました',
+    'updateFailed': '@titleの更新に失敗しました',
+    'noRecordFound': '条件に一致する@titleが見つかりません',
+    'mustSelected': '@titleを選択してください',
   },
 };

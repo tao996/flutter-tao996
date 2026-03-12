@@ -51,6 +51,13 @@ class MyModelDelegate<T extends IModel<T>> extends AbstractListDelegate<T> {
     return index == -1 ? null : rxItems.value[index];
   }
 
+  T getItemByIndex(int index) {
+    if (index < 0 || index >= rxItems.value.length) {
+      throw Exception('getItemByIndex: index out of range.');
+    }
+    return rxItems.value[index];
+  }
+
   @override
   void bind({
     ModelHelper<T>? helper,
@@ -94,6 +101,7 @@ class MyModelDelegate<T extends IModel<T>> extends AbstractListDelegate<T> {
     );
   }
 
+  /// 追加1条记录，默认不同步数据库
   Future<void> insertItem(
     T entity, {
     bool syncDb = false,
@@ -126,6 +134,7 @@ class MyModelDelegate<T extends IModel<T>> extends AbstractListDelegate<T> {
     );
   }
 
+  /// 追加1条记录到最末尾，默认不同步数据库
   Future<void> pushItem(T entity, {bool syncDb = false}) async {
     await save(
       entity: entity,
@@ -137,9 +146,10 @@ class MyModelDelegate<T extends IModel<T>> extends AbstractListDelegate<T> {
     );
   }
 
+  /// 更新1条记录
   Future<void> update(
-    T entity,
-    int index, {
+    T entity, {
+    int? index,
     bool syncDb = true,
     bool showMessage = true,
     bool navBack = true,
@@ -153,7 +163,7 @@ class MyModelDelegate<T extends IModel<T>> extends AbstractListDelegate<T> {
     );
   }
 
-  Future<void> updateItem(T entity, int index, {bool syncDb = false}) async {
+  Future<void> updateItem(T entity, {int? index, bool syncDb = false}) async {
     await save(
       entity: entity,
       index: index,
@@ -166,12 +176,18 @@ class MyModelDelegate<T extends IModel<T>> extends AbstractListDelegate<T> {
   /// 对 [entity] 进行添加或修改操作
   Future<void> save({
     required T entity,
-    required int index,
+    int? index,
     bool syncDb = true,
     bool showMessage = true,
     bool navBack = true,
     bool unshift = true,
   }) async {
+    if (index == null) {
+      index = getIndexById(entity.id);
+      if (index == -1) {
+        throw Exception('save: entity not found.');
+      }
+    }
     if (!hasHelper || syncDb == false) {
       await sync(index: index, entity: entity, unshift: unshift);
       _onFinalize('save'.tr + 'success'.tr, showMessage, navBack);
@@ -186,7 +202,7 @@ class MyModelDelegate<T extends IModel<T>> extends AbstractListDelegate<T> {
         _,
       ) async {
         message = 'save'.tr + 'success'.tr;
-        await sync(index: index, entity: entity, unshift: unshift);
+        await sync(index: index!, entity: entity, unshift: unshift);
       });
     } else {
       action.addInsert(() => helper.insert(entity)).afterInsertSuccess((
@@ -202,7 +218,7 @@ class MyModelDelegate<T extends IModel<T>> extends AbstractListDelegate<T> {
     );
   }
 
-  Future<void> saveItem(T entity, int index, {bool syncDb = false}) async {
+  Future<void> saveItem(T entity, {int? index, bool syncDb = false}) async {
     await save(
       entity: entity,
       index: index,

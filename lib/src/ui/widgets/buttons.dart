@@ -40,8 +40,9 @@ class MyButtons {
 class MyCancelButton extends StatelessWidget {
   final int? id;
   final MyButtonType? type;
+  final double? size;
 
-  const MyCancelButton({this.id, super.key, this.type});
+  const MyCancelButton({this.id, super.key, this.type, this.size});
 
   @override
   Widget build(BuildContext context) {
@@ -209,7 +210,7 @@ class MyEditIconButton extends StatelessWidget {
   Widget build(BuildContext context) {
     // return MyButton('编辑',onPressed: onPressed,type: ButtonType.info,);
     return IconButton(
-      icon: Icon(Icons.edit_outlined, color: MyColor.info()),
+      icon: Icon(Icons.edit_outlined, color: MyColor.info(), size: 16),
       onPressed: onPressed,
       tooltip: 'edit'.tr,
     );
@@ -225,7 +226,7 @@ class MyDetailIconButton extends StatelessWidget {
   Widget build(BuildContext context) {
     // return MyButton('详情',onPressed: onPressed,type: ButtonType.secondary,);
     return IconButton(
-      icon: const Icon(Icons.info_outline),
+      icon: const Icon(Icons.info_outline, size: 16),
       onPressed: onPressed,
       tooltip: 'detail'.tr,
     );
@@ -281,7 +282,7 @@ class MyDeleteIconButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return IconButton(
-      icon: Icon(Icons.delete_outline, color: MyColor.error()),
+      icon: Icon(Icons.delete_outline, color: MyColor.error(), size: 16),
       onPressed: confirm
           ? () async {
               final text =
@@ -318,6 +319,7 @@ class MyButton extends StatelessWidget {
   final MyButtonType? type;
   final double? radius; // 新增：自定义圆角（默认 8px）
   final EdgeInsetsGeometry? padding; // 新增：自定义内边距
+  final double? size;
 
   /// [isLoading] 是否显示加载动画；注意外部组件不需要使用 Obx 包裹，MyButton 内部已经自动处理 isLoading
   const MyButton(
@@ -330,6 +332,7 @@ class MyButton extends StatelessWidget {
     this.isLoading,
     this.type,
     this.radius = 4.0,
+    this.size,
     this.padding = const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
   });
 
@@ -432,7 +435,7 @@ class MyButton extends StatelessWidget {
     if (icon != null) {
       return icon;
     }
-    return iconData != null ? Icon(iconData) : null;
+    return iconData != null ? Icon(iconData, size: size) : null;
   }
 
   /// 3. 构建 FilledButton（填充样式）

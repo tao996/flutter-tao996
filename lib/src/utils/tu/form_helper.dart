@@ -259,7 +259,14 @@ class FormHelperUtil {
     void Function(String)? onChanged,
     void Function(String)? onSubmit,
     String? Function(String?)? validator,
+    bool readonly = false,
   }) {
+    if (readonly) {
+      return inputDecoration(
+        labelText ?? '',
+        Text(controller?.text ?? defaultValue ?? ''),
+      );
+    }
     return MyInput(
       controller: controller,
       labelText: labelText,

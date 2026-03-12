@@ -246,14 +246,36 @@ class _MyInputState extends State<MyInput> {
     return formatters;
   }
 
+  int? _maxLines() {
+    if (widget.isPassword) {
+      return 1;
+    } else if (widget.maxLines != null) {
+      return widget.maxLines;
+    } else if (widget.isMoney || widget.isInteger || widget.isDouble) {
+      return 1;
+    }
+    return null;
+  }
+
+  int? _minLines() {
+    if (widget.isPassword) {
+      return 1;
+    } else if (widget.minLines != null) {
+      return widget.minLines;
+    } else if (widget.isMoney || widget.isInteger || widget.isDouble) {
+      return 1;
+    }
+    return null;
+  }
+
   @override
   Widget build(BuildContext context) {
     return TextFormField(
       controller: controller,
       // focusNode: _focusNode,
       obscureText: isPassword,
-      maxLines: widget.isPassword ? 1 : widget.maxLines ?? 1,
-      minLines: widget.isPassword ? 1 : widget.minLines ?? 1,
+      maxLines: _maxLines(),
+      minLines: _minLines(),
       // 新增：限制键盘类型
       keyboardType: _keyboardType,
       // 新增：限制输入格式

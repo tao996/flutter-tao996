@@ -29,26 +29,22 @@ class MyDialog {
   static Future<dynamic> fullScreenDialog(
     BuildContext context, {
     required Widget child,
-    double? horizontalPadding = 20.0,
-    double? verticalPadding = 20.0,
     double? width,
     double? height,
-    int num = 1,
     bool? barrierDismissible,
+    double horizontalPadding = 20.0,
+    double verticalPadding = 20.0,
+    int num = 1,
   }) async {
     if (width == null) {
-      if (horizontalPadding != null) {
-        final screenWidth = MediaQuery.of(context).size.width;
-        width = screenWidth - (horizontalPadding * num); // 比父窗口宽度小 20
-        width = width.toInt().toDouble();
-      }
+      final screenWidth = MediaQuery.of(context).size.width;
+      width = screenWidth - (horizontalPadding * num); // 比父窗口宽度小 20
+      width = width.toInt().toDouble();
     }
     if (height == null) {
-      if (verticalPadding != null) {
-        final screenHeight = MediaQuery.of(context).size.height;
-        height = screenHeight - (verticalPadding * num); // 比父窗口高度小 20
-        height = height.toInt().toDouble();
-      }
+      final screenHeight = MediaQuery.of(context).size.height;
+      height = screenHeight - (verticalPadding * num); // 比父窗口高度小 20
+      height = height.toInt().toDouble();
     }
     dprint(
       'MyDialog.fullScreenDialog num:$num; width: $width; height: $height',
@@ -93,7 +89,7 @@ class MyDialog {
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12.0),
           ),
-          content: width != null && height != null
+          content: width != null || height != null
               ? SizedBox(width: width, height: height, child: child)
               : child,
         );
@@ -114,7 +110,6 @@ class MyDialog {
     final length = children.length;
     return await MyDialog.fullScreenDialog(
       context,
-      verticalPadding: null,
       child: MyBodyPadding(
         Column(
           mainAxisSize: MainAxisSize.min,

@@ -16,21 +16,21 @@ List<KV<String>> kvLanguages = [
   KV(label: '日本語', value: 'ja_JP'),
   // 欧洲主要语言
   KV(label: 'English', value: 'en_US'),
-  KV(label: 'Deutsch', value: 'de_DE'),
-  // 德语 (German)
-  KV(label: 'Français', value: 'fr_FR'),
-  // 法语 (French) (可选)
-  KV(label: 'Español', value: 'es_ES'),
-  // 西班牙语 (Spanish) (可选)
+  // KV(label: 'Deutsch', value: 'de_DE'),
+  // // 德语 (German)
+  // KV(label: 'Français', value: 'fr_FR'),
+  // // 法语 (French) (可选)
+  // KV(label: 'Español', value: 'es_ES'),
+  // // 西班牙语 (Spanish) (可选)
 ];
 final List<Locale> systemSupportedLocales = [
   Locale('zh', 'CN'), //
   Locale('zh', 'TW'), //
   Locale('en', 'US'), //
   Locale('ja', 'JP'),
-  Locale('de', 'DE'), // 德语 (German)
-  Locale('fr', 'FR'), // 法语 (French) (可选)
-  Locale('es', 'ES'), // 西班牙语 (Spanish) (可选)
+  // Locale('de', 'DE'), // 德语 (German)
+  // Locale('fr', 'FR'), // 法语 (French) (可选)
+  // Locale('es', 'ES'), // 西班牙语 (Spanish) (可选)
   // 'zh_CN',
   // 'zh_TW',
   // 'en_US',
