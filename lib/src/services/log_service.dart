@@ -52,11 +52,16 @@ class LogService implements ILogService {
     _logger.e(message);
   }
 
-  // 一键分享日志
-  static Future<void> shareLogFiles() async {
+  /// 获取日志保存目录
+  static Future<Directory> getLogDir() async {
     final dir = await getApplicationSupportDirectory();
     final logDirPath = p.join(dir.path, 'logs');
-    final logDir = Directory(logDirPath);
+    return Directory(logDirPath);
+  }
+
+  // 一键分享日志
+  static Future<void> shareLogFiles() async {
+    final logDir = await getLogDir();
 
     if (logDir.existsSync()) {
       // 获取目录下所有的 .txt 日志文件

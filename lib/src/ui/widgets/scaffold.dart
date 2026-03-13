@@ -4,13 +4,26 @@ import 'package:tao996/tao996.dart';
 
 /// 集成 SafeArea
 class MyScaffold extends StatelessWidget {
+  /// 在 Flutter 中，Scaffold 的 appBar 默认已经处理了顶部的 SafeArea。
+  ///
+  /// 问题：如果你既有 appBar 又在 body 里套了 SafeArea，某些机型可能会出现“双倍顶距”的情况，或者顶部的阴影显示异常。
   final AppBar? appBar;
   final Widget? drawer;
   final Widget body;
   final Widget? floatingActionButton;
 
+  /// 是否需要开启自动移除焦点，通常用在表单中
+  ///
+  /// 冲突风险：如果 body 中包含 ListView、Google Maps 或者其他复杂的手势组件，外层的 GestureDetector 可能会干扰内层的滑动判定，导致点击变得不灵敏。
+  ///
+  /// 重复触发：如果你在 body 里的某个按钮上也写了点击事件，外层的 unfocus 会先触发，有时会导致按钮的 onPressed 在某些特定机型上反馈延迟。
+  final bool unfocusOnTap;
+
   /// [singleChildScrollView] 在滚动方向（垂直）上，不给其子 Widget 任何约束，告诉它“你可以无限高”
-  /// （即 child 继承了无限高的属性）默认为 false，表示你可以在 Column 中使用 Expanded；
+  ///
+  /// 布局溢出：如果你传入的 body 内部本身包含了一个 Expanded 或 Flexible，当它被套入 SingleChildScrollView 时，高度会变成“无限大”，直接导致 RenderBox was not laid out 报错。
+  ///
+  /// 滚动条重复：如果 body 内部自带了滚动逻辑（比如 ListView），再套一层 SingleChildScrollView 会导致双层嵌套滚动，造成极其糟糕的卡顿感。
   ///
   /// 设置为 true 时的常用错误: `SingleChildScrollView>Column>Expanded|Flexible|ListView`
   ///
@@ -27,6 +40,16 @@ class MyScaffold extends StatelessWidget {
   ///     ...),)
   /// ```
   final bool singleChildScrollView;
+
+  /// [useSafeArea] 默认为 true，表示在构建 Scaffold 时，会自动添加 SafeArea 组件。
+  ///
+  /// 当你把 SafeArea 放在 Scaffold 的 body 内部时，由于 SafeArea 的原理是添加缩进（Padding），这会导致你的背景色或装饰出现断层。
+  ///
+  /// 问题：如果你的页面有底色（比如浅灰色），Scaffold 的背景色会填满屏幕，但 SafeArea 内部的内容会被限制在刘海屏/底部操作条之外。
+  ///
+  /// 后果：在真机测试时，你可能会发现状态栏和底部虚拟按键区是一片空白（或背景色），而不是你页面内容的延伸，视觉上不够“沉浸”。
+  ///
+  /// 建议：只有在页面背景和状态栏颜色不一致时才这么做。如果需要全屏背景，建议在具体的小组件里局部使用 SafeArea。
   final bool useSafeArea;
   final Widget? bottomNavigationBar;
   final Widget? bottomSheet;
@@ -42,25 +65,19 @@ class MyScaffold extends StatelessWidget {
     this.drawer,
     this.floatingActionButton,
     this.singleChildScrollView = false,
-    this.useSafeArea = true,
     this.bottomNavigationBar,
     this.bottomSheet,
     this.backgroundColor,
     this.drawerEdgeDragWidthPercent,
     this.floatingActionButtonLocation,
+    this.useSafeArea = true,
+    this.unfocusOnTap = false,
     required this.body,
   });
 
   @override
   Widget build(BuildContext context) {
-    Widget child = singleChildScrollView
-        ? SingleChildScrollView(child: body)
-        : body;
-    if (useSafeArea) {
-      child = SafeArea(child: child);
-    }
-
-    return Scaffold(
+    final child = Scaffold(
       appBar: appBar,
       drawer: drawer,
       floatingActionButton: floatingActionButton,
@@ -68,10 +85,26 @@ class MyScaffold extends StatelessWidget {
       bottomNavigationBar: bottomNavigationBar,
       bottomSheet: bottomSheet,
       backgroundColor: backgroundColor,
-      body: child,
+      body: _buildBody(),
       drawerEdgeDragWidth: drawerEdgeDragWidthPercent != null
           ? Get.width * drawerEdgeDragWidthPercent!
           : null,
+    );
+    return unfocusOnTap ? MyEvents.unfocusOnTap(child) : child;
+  }
+
+  Widget _buildBody() {
+    Widget content = body;
+
+    // 3. 只有非滚动页面才考虑自动套 SingleChildScrollView
+    if (singleChildScrollView) {
+      content = SingleChildScrollView(child: content);
+    }
+
+    // 4. 建议增加 maintainBottomViewPadding 属性，防止键盘弹出时布局跳动
+    return SafeArea(
+      top: appBar == null, // 如果有 AppBar，顶部就不需要 SafeArea 了
+      child: content,
     );
   }
 }
@@ -205,7 +238,7 @@ class MyEmptyStateWidget extends StatelessWidget {
 
     final childBox = Center(
       child: Padding(
-        padding: EdgeInsets.only(left: 32.0, right: 32,),
+        padding: EdgeInsets.only(left: 32.0, right: 32),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           crossAxisAlignment: CrossAxisAlignment.center,

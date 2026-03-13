@@ -140,6 +140,7 @@ class FileUtil implements IFilePickerService {
     return await file.readAsString();
   }
 
+  /// 使用注意：如果你指定了 [allowedExtensions] 参数，那么 [type] 参数则不能为 any。
   @override
   Future<List<PlatformFile>?> pickPlatformFile({
     String? dialogTitle,
@@ -154,6 +155,11 @@ class FileUtil implements IFilePickerService {
     bool lockParentWindow = false,
     bool readSequential = false,
   }) async {
+    if (allowedExtensions != null) {
+      if (type == PickerFileType.any) {
+        type = PickerFileType.custom;
+      }
+    }
     final result = await FilePicker.platform.pickFiles(
       dialogTitle: dialogTitle,
       initialDirectory: initialDirectory,
@@ -200,9 +206,14 @@ class FileUtil implements IFilePickerService {
   }
 
   /// 返回第1个选择文件的路径
-  Future<String?> pickFirstPath({List<String>? allowedExtensions}) async {
+  Future<String?> pickFirstPath({
+    List<String>? allowedExtensions,
+    String? initialDirectory,
+  }) async {
     FilePickerResult? result = await FilePicker.platform.pickFiles(
       allowedExtensions: allowedExtensions,
+      initialDirectory: initialDirectory,
+      type: allowedExtensions != null ? FileType.custom : FileType.any,
     );
 
     if (result != null) {
@@ -220,7 +231,7 @@ class FileUtil implements IFilePickerService {
     bool allowMultiple = false,
   }) async {
     final pickers = await FilePicker.platform.pickFiles(
-      type: type,
+      type: allowedExtensions != null ? FileType.custom : FileType.any,
       initialDirectory: initialDirectory,
       allowedExtensions: allowedExtensions,
       allowMultiple: allowMultiple,
@@ -254,7 +265,7 @@ class FileUtil implements IFilePickerService {
     try {
       // 调用文件选择器，只允许选择文件
       FilePickerResult? result = await FilePicker.platform.pickFiles(
-        type: type, // 允许选择任何类型的文件
+        type: allowedExtensions != null ? FileType.custom : FileType.any,
         allowMultiple: false, // 只允许选择单个文件
         initialDirectory: initialDirectory,
         allowedExtensions: allowedExtensions,

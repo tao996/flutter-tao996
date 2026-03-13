@@ -25,6 +25,18 @@ class JsonBoolConverter implements JsonConverter<bool, int> {
   int toJson(bool value) => value ? 1 : 0;
 }
 
+class JsonDatetimeConverter implements JsonConverter<DateTime?, String> {
+  const JsonDatetimeConverter();
+
+  @override
+  DateTime? fromJson(String? value) =>
+      value == null || value.isEmpty ? null : DateTime.tryParse(value);
+
+  @override
+  String toJson(DateTime? value) =>
+      value == null ? '' : value.toIso8601String();
+}
+
 class JsonMapStringStringConverter
     implements JsonConverter<Map<String, String>, String> {
   const JsonMapStringStringConverter();

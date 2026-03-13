@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:flutter/foundation.dart';
 import 'package:get_it/get_it.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 import 'package:tao996/tao996.dart';
@@ -25,8 +26,11 @@ Future<GetIt> registerTao996Dependencies(List<String> packages) async {
 
   await initSharedPreferences();
   locator.registerLazySingleton<IMessageService>(() => MessageService());
-  final ILogService logService = LogService();
+  final LogService logService = LogService();
   locator.registerSingleton<ILogService>(logService);
+  if (kDebugMode) {
+    debugPrint('日志目录：${(await LogService.getLogDir()).path}');
+  }
   locator.registerLazySingleton<IDebugService>(() => DebugService());
   locator.registerLazySingleton<TranslationService>(() => TranslationService());
   locator.registerLazySingleton<IPathService>(() => PathService());

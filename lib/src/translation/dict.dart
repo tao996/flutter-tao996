@@ -84,7 +84,13 @@ final Map<String, Map<String, String>> words = {
     'updateSuccess': '@title更新成功',
     'updateFailed': '@title更新失敗',
     'noRecordFound': '找不到符合条件的@title',
-    'mustSelected': '请先选择@title',
+    'mustSelected': '必须选择一个@title',
+    'inputHint': '请输入@title',
+    'toManage': '@title管理',
+    'toList': '@title列表',
+    'toSearch': '搜索@title',
+    'toSelect': '@title选择',
+    'toImport': '导入@title',
   },
 
   // ----------------------------------------------------

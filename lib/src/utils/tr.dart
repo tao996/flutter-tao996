@@ -19,6 +19,13 @@ extension StringTrExt on String {
   String get toDelete => 'toDelete'.trParams({'title': tr});
   String get toSuccess => 'toSuccess'.trParams({'title': tr});
   String get toFailed => 'toFailed'.trParams({'title': tr});
+  String get toManage => 'toManage'.trParams({'title': tr});
+  String get toList => 'toList'.trParams({'title': tr});
+  String get toSearch => 'toSearch'.trParams({'title': tr});
+  String get toSelect => 'toSelect'.trParams({'title': tr});
+  String get toImport => 'toImport'.trParams({'title': tr});
+  //表单类
+  String get inputHint => 'inputHint'.trParams({'title': tr});
 
   // 结果类：
   String get addSuccess => 'addSuccess'.trParams({'title': tr});
