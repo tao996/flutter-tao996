@@ -1,6 +1,5 @@
 import 'dart:convert';
-
-import 'package:crypto/crypto.dart';
+import 'dart:typed_data';
 
 import '../../../tao996.dart';
 
@@ -232,12 +231,7 @@ class DataUtil {
 
   /// 将字符串转换为 MD5 哈希值
   String generateMd5(String input) {
-    // 1. 将字符串转为 UTF-8 字节流
-    var bytes = utf8.encode(input);
-    // 2. 计算 MD5
-    var digest = md5.convert(bytes);
-    // 3. 以十六进制字符串形式输出
-    return digest.toString();
+    return tu.crypto.md5Text(input);
   }
 
   /// 无法适用于 Map
@@ -279,4 +273,18 @@ class DataUtil {
       return item;
     },
   );
+
+  /// 获取 Uint8List 支持类型：Uint8List, ByteData, String, `List<int>`，其它类型返回 null
+  Uint8List? getUint8List(Object? data) {
+    return switch (data) {
+      Uint8List val => val,
+      ByteData val => val.buffer.asUint8List(
+        val.offsetInBytes,
+        val.lengthInBytes,
+      ),
+      String val => utf8.encode(val),
+      List<int> val => Uint8List.fromList(val),
+      _ => null,
+    };
+  }
 }

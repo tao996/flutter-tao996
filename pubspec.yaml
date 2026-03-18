@@ -2,6 +2,8 @@ name: tao996
 description: "A new Flutter plugin project."
 version: 0.0.1
 #homepage:
+# 指定使用工作区解析
+resolution: workspace
 
 environment:
   sdk: ^3.8.1

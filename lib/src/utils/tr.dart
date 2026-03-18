@@ -31,7 +31,7 @@ extension StringTrExt on String {
   String get addSuccess => 'addSuccess'.trParams({'title': tr});
   String get addFailed => 'addFailed'.trParams({'title': tr});
   String get saveSuccess => 'saveSuccess'.trParams({'title': tr});
-  String get saveFailed => 'saveSuccess'.trParams({'title': tr});
+  String get saveFailed => 'saveFailed'.trParams({'title': tr});
   String get editSuccess => 'editSuccess'.trParams({'title': tr});
   String get editFailed => 'editFailed'.trParams({'title': tr});
   String get updateSuccess => 'updateSuccess'.trParams({'title': tr});

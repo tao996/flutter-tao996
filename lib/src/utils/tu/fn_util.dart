@@ -3,7 +3,6 @@ import 'dart:math';
 
 import 'package:flutter/foundation.dart';
 
-
 class FnUtil {
   const FnUtil();
 
@@ -14,12 +13,32 @@ class FnUtil {
   }
 
   /// 防抖：在指定 [milliseconds] 时间内，如果再次调用该方法，则取消上一次调用。
+  /// 在覆盖上一个函数（不支持在运行过程中手动取消）
   void debounce(VoidCallback callback, {int milliseconds = 500}) {
     _debounceCancel();
     _debounce = Timer(Duration(milliseconds: milliseconds), () {
       callback();
       _debounceCancel();
     });
+  }
+
+  /// 非阻塞的延时（支持手动取消），返回一个取消函数
+  /// ```dart
+  /// // 使用方式：
+  /// final cancel = startTimeout(Duration(seconds: 5), () => print("Boom!"));
+  /// // ... 在 5 秒内如果想后悔：
+  /// cancel();
+  /// ```
+  void Function() startTimeout(Duration duration, void Function() onTimeout) {
+    final timer = Timer(duration, onTimeout);
+
+    // 返回一个闭包，用于外部手动取消
+    return () {
+      if (timer.isActive) {
+        timer.cancel();
+        print("计时已手动拦截");
+      }
+    };
   }
 
   /// 随机延时 [minMilliseconds] 毫秒 到 [maxMilliseconds] 毫秒的函数。
@@ -40,13 +59,12 @@ class FnUtil {
     await Future.delayed(Duration(milliseconds: delayMilliseconds));
   }
 
-  /// 延时指定时间，支持秒或毫秒（优先使用毫秒）
-  /// [seconds]：秒数（1秒=1000毫秒）
-  /// [milliseconds]：毫秒数（若不为null，会覆盖seconds）
+  /// (阻塞）延时指定时间（默认为1秒）
+  /// [seconds]：秒数（1秒=1000毫秒）， [milliseconds]：毫秒数
   Future<void> delayed({int? seconds, int? milliseconds}) async {
-    // 计算延时毫秒数：若指定了milliseconds则用它，否则用seconds转换（默认1秒）
-    final int delayMs = milliseconds ?? (seconds ?? 1) * 1000;
-    // 使用正确的毫秒参数
-    await Future.delayed(Duration(milliseconds: delayMs));
+    // 建议：将两者相加，或者明确优先级
+    final totalMs = (milliseconds ?? 0) + (seconds ?? 0) * 1000;
+    // 如果都没传，给一个默认值（比如 1000ms）
+    await Future.delayed(Duration(milliseconds: totalMs > 0 ? totalMs : 1000));
   }
 }

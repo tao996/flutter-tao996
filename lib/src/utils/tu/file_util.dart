@@ -8,7 +8,6 @@ import 'package:flutter_image_gallery_saver/flutter_image_gallery_saver.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:tao996/tao996.dart';
-import 'package:crypto/crypto.dart';
 
 final imageSaver = ImageGallerySaver();
 
@@ -119,15 +118,7 @@ class FileUtil implements IFilePickerService {
     try {
       // 1. 打开文件流
       final inputStream = file.openRead();
-
-      // 2. 创建 MD5 哈希器
-      final Hash md5Hash = md5;
-
-      // 3. 将文件流通过 md5.bind(inputStream) 注入，计算哈希值
-      final digest = await md5Hash.bind(inputStream).first;
-
-      // 4. 将 Digest 对象转换为十六进制字符串
-      return digest.toString();
+      return tu.crypto.generateMd5(inputStream: inputStream);
     } catch (e) {
       dprint("Error calculating MD5 for $filePath: $e");
       // 生产环境中，如果计算失败，可以抛出异常或返回一个基于时间的唯一ID

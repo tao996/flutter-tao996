@@ -92,7 +92,7 @@ class MyModelDelegate<T extends IModel<T>> extends AbstractListDelegate<T> {
     bool navBack = true,
   }) async {
     await save(
-      entity: entity,
+      entity,
       index: -1,
       syncDb: syncDb,
       showMessage: showMessage,
@@ -108,7 +108,7 @@ class MyModelDelegate<T extends IModel<T>> extends AbstractListDelegate<T> {
     bool unshift = false,
   }) async {
     await save(
-      entity: entity,
+      entity,
       index: -1,
       syncDb: syncDb,
       showMessage: false,
@@ -125,7 +125,7 @@ class MyModelDelegate<T extends IModel<T>> extends AbstractListDelegate<T> {
     bool navBack = true,
   }) async {
     await save(
-      entity: entity,
+      entity,
       index: -1,
       syncDb: syncDb,
       showMessage: showMessage,
@@ -137,7 +137,7 @@ class MyModelDelegate<T extends IModel<T>> extends AbstractListDelegate<T> {
   /// 追加1条记录到最末尾，默认不同步数据库
   Future<void> pushItem(T entity, {bool syncDb = false}) async {
     await save(
-      entity: entity,
+      entity,
       index: -1,
       syncDb: syncDb,
       showMessage: false,
@@ -155,7 +155,7 @@ class MyModelDelegate<T extends IModel<T>> extends AbstractListDelegate<T> {
     bool navBack = true,
   }) async {
     await save(
-      entity: entity,
+      entity,
       index: index,
       syncDb: syncDb,
       showMessage: showMessage,
@@ -165,7 +165,7 @@ class MyModelDelegate<T extends IModel<T>> extends AbstractListDelegate<T> {
 
   Future<void> updateItem(T entity, {int? index, bool syncDb = false}) async {
     await save(
-      entity: entity,
+      entity,
       index: index,
       syncDb: syncDb,
       showMessage: false,
@@ -174,22 +174,24 @@ class MyModelDelegate<T extends IModel<T>> extends AbstractListDelegate<T> {
   }
 
   /// 对 [entity] 进行添加或修改操作
-  Future<void> save({
-    required T entity,
+  Future<void> save(
+    T entity, {
     int? index,
     bool syncDb = true,
     bool showMessage = true,
     bool navBack = true,
     bool unshift = true,
   }) async {
-    if (index == null) {
-      index = getIndexById(entity.id);
-      if (index == -1) {
-        throw Exception('save: entity not found.');
+    if (entity.id > 0) {
+      if (index == null) {
+        index = getIndexById(entity.id);
+        if (index < 0) {
+          throw Exception('save: entity not found.');
+        }
       }
     }
-    if (!hasHelper || syncDb == false) {
-      await sync(index: index, entity: entity, unshift: unshift);
+    if (syncDb == false) {
+      await sync(index: index ?? -1, entity: entity, unshift: unshift);
       _onFinalize('save'.tr + 'success'.tr, showMessage, navBack);
       return;
     }
@@ -197,7 +199,7 @@ class MyModelDelegate<T extends IModel<T>> extends AbstractListDelegate<T> {
     final action = ModelAction();
     String? message;
 
-    if (index >= 0) {
+    if (entity.id > 0) {
       action.addUpdate(() => helper.update(entity)).afterUpdateSuccess((
         _,
       ) async {
@@ -220,7 +222,7 @@ class MyModelDelegate<T extends IModel<T>> extends AbstractListDelegate<T> {
 
   Future<void> saveItem(T entity, {int? index, bool syncDb = false}) async {
     await save(
-      entity: entity,
+      entity,
       index: index,
       syncDb: syncDb,
       showMessage: false,
@@ -261,19 +263,13 @@ class MyModelDelegate<T extends IModel<T>> extends AbstractListDelegate<T> {
     );
   }
 
-  Future<int> remoteItem({
-    int? index,
-    int? id,
-    String? title,
-    bool syncDb = false,
-  }) async {
+  Future<int> remoteItem({int? index, int? id, bool syncDb = false}) async {
     if (index == null && id == null) {
       throw Exception('index or id must be provided');
     }
     return await removeWithId(
       id: id ?? rxItems[index!].id,
       index: index,
-      title: title,
       syncDb: syncDb,
       deleteConfirm: false,
       showMessage: false,
@@ -353,7 +349,7 @@ class MyModelDelegate<T extends IModel<T>> extends AbstractListDelegate<T> {
       );
     } else {
       await save(
-        entity: entity,
+        entity,
         index: index,
         syncDb: syncDb,
         showMessage: showMessage,

@@ -5,6 +5,7 @@ import 'package:tao996/src/utils/tu/assert_util.dart';
 import 'package:tao996/src/utils/tu/color_message_util.dart';
 import 'package:tao996/src/utils/tu/color_util.dart';
 import 'package:tao996/src/utils/tu/context_util.dart';
+import 'package:tao996/src/utils/tu/crypto_util.dart';
 import 'package:tao996/src/utils/tu/data_util.dart';
 import 'package:tao996/src/utils/tu/datetime_util.dart';
 import 'package:tao996/src/utils/tu/device_util.dart';
@@ -28,6 +29,7 @@ import 'package:uuid/uuid.dart';
 class _TUtils {
   const _TUtils();
   final uuid = const Uuid();
+  final crypto = const CryptoUtil();
 
   final path = const FilepathUtil();
   final file = const FileUtil();

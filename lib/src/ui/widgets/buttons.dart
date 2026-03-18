@@ -41,17 +41,26 @@ class MyCancelButton extends StatelessWidget {
   final int? id;
   final MyButtonType? type;
   final double? size;
+  final Function()? onPressed;
 
-  const MyCancelButton({this.id, super.key, this.type, this.size});
+  const MyCancelButton({
+    this.id,
+    super.key,
+    this.type,
+    this.size,
+    this.onPressed,
+  });
 
   @override
   Widget build(BuildContext context) {
     return MyButton(
       id == null ? 'cancel'.tr : 'back'.tr,
       iconData: id == null ? Icons.cancel_outlined : Icons.navigate_before,
-      onPressed: () {
-        Get.back();
-      },
+      onPressed:
+          onPressed ??
+          () {
+            Get.back();
+          },
       status: MyButtonStatus.secondary,
       type: type,
     );
@@ -83,6 +92,22 @@ class MySaveButton extends StatelessWidget {
       iconData: showIcon ? Icons.save_outlined : null,
       isLoading: isLoading,
       type: type,
+    );
+  }
+}
+
+/// 保存图标无文字按钮
+class MySaveIconButton extends StatelessWidget {
+  final void Function()? onPressed;
+
+  const MySaveIconButton({super.key, this.onPressed});
+
+  @override
+  Widget build(BuildContext context) {
+    return IconButton(
+      icon: const Icon(Icons.save_outlined, size: 16),
+      onPressed: onPressed,
+      tooltip: 'save'.tr,
     );
   }
 }
@@ -196,6 +221,21 @@ class MyHelperIconButton extends StatelessWidget {
     return Tooltip(
       message: 'userGuide'.tr,
       child: IconButton(onPressed: onPressed, icon: Icon(Icons.help_outline)),
+    );
+  }
+}
+
+class MyInsertIconButton extends StatelessWidget {
+  final void Function()? onPressed;
+
+  const MyInsertIconButton({super.key, this.onPressed});
+
+  @override
+  Widget build(BuildContext context) {
+    return IconButton(
+      icon: Icon(Icons.add, size: 16),
+      onPressed: onPressed,
+      tooltip: 'insert'.tr,
     );
   }
 }

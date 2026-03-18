@@ -344,6 +344,7 @@ class YourModelConverter implements JsonConverter<YourModel, String> {
 
 * `@JsonColorConverter()` for `Color`
 * `@JsonBoolConverter` for `bool`
+* `@JsonDatetimeConverter` for `Datetime`
 * `@JsonMapStringStringConverter()` for `Map<String, String>`
 * `@JsonNestedMapStringConverter()` for `Map<String, Map<String, String>>`
 * `@JsonMapStringBoolConverter() ` form `Map<String, bool>`
@@ -470,6 +471,7 @@ abstract class ModelHelper<T extends IModel<T>> {
   Future<T?> getFirstWith(String where, {List<Object?>? whereArgs, List<String>? columns, String? orderBy, ModelTransaction? mtn});
   Future<T?> getById(int id, {bool tryCache = true, ModelTransaction? mtn});
   Future<List<T>> getByIds(List<int> ids, {bool tryCache = true, ModelTransaction? mtn});
+  Future<T?> getByUuid(String uuid, {bool tryCache = true,ModelTransaction? mtn,});
   Future<bool> exists(dynamic value, {required String fieldName,int? excludeId, String? excludeUuid,});
   Future<bool> Future<bool> existsWith({ String? where,List<Object>? whereArgs, int? excludeId,String? excludeUuid, });
   Future<int> count({String? where, List<Object?>? arguments, bool forceRefresh = false});
@@ -609,8 +611,7 @@ class MyModelDelegate<T extends IModel<T>> extends AbstractListDelegate<T> {
   Future<void> update(T entity, int index, {bool syncDb = true, bool showMessage = true, bool navBack = true});
   
   // index > 0 call update; index < 0 call push 
-  Future<void> save({required T entity, required int index, bool syncDb = true, bool showMessage = true, bool navBack = true, bool unshift = true,
-  });
+  Future<void> save(T entity, {required int index, bool syncDb = true, bool showMessage = true, bool navBack = true, bool unshift = true});
 
   // 删除记录
   Future<int> remoteAt({required int index, String? title, bool syncDb = true, bool deleteConfirm = true, bool showMessage = true, bool navBack = true});
@@ -1323,15 +1324,15 @@ Future<ui.Image> renderText(
 
 **支持的语言：**
 
-| 语言 | 代码 | Locale |
-|------|------|--------|
+| 语言     | 代码  | Locale             |
+| -------- | ----- | ------------------ |
 | 简体中文 | zh_CN | Locale('zh', 'CN') |
 | 繁体中文 | zh_TW | Locale('zh', 'TW') |
-| English | en_US | Locale('en', 'US') |
-| 日本語 | ja_JP | Locale('ja', 'JP') |
-| Deutsch | de_DE | Locale('de', 'DE') |
+| English  | en_US | Locale('en', 'US') |
+| 日本語   | ja_JP | Locale('ja', 'JP') |
+| Deutsch  | de_DE | Locale('de', 'DE') |
 | Français | fr_FR | Locale('fr', 'FR') |
-| Español | es_ES | Locale('es', 'ES') |
+| Español  | es_ES | Locale('es', 'ES') |
 
 **核心方法：**
 
@@ -1348,6 +1349,50 @@ class TranslationService extends Translations {
   /// 加载翻译文件 [jsonPth] `lib/extensions/app_beian/i18n/zh_CN.json`
   /// only run in kDebugMode
   Future<void> addJsonFile(String jsonPth, {String locale = 'zh_CN'});
+}
+```
+
+**内置翻译：**
+
+为了避免重复，内置了部分翻译，如：
+
+```dart
+// 假设 'title'=>'记录'
+extension StringTrExt on String {
+  // 校验类：结构化处理
+  String get mustRequired => 'mustRequired'.trParams({'title': tr}); // 必填项
+  String get mustInteger => 'mustInteger'.trParams({'title': tr}); // 必须是整数
+  String get isRepeat => 'isRepeat'.trParams({'title': tr}); // 重复记录
+  String get noRecordFound =>
+      'noRecordFound'.trParams({'title': tr}); // 没有找到符合条件的记录
+  String get noRecord => 'noRecord'.trParams({'title': tr}); // 暂无记录
+  String get mustSelected => 'mustSelected'.trParams({'title': tr}); // 没有记录被选中
+
+  // 操作类：通过占位符解决词序问题
+  String get toAdd => 'toAdd'.trParams({'title': tr}); // 添加记录
+  String get toEdit => 'toEdit'.trParams({'title': tr}); // 修改记录
+  String get toDelete => 'toDelete'.trParams({'title': tr}); // 删除记录
+  String get toSuccess => 'toSuccess'.trParams({'title': tr}); // 记录成功
+  String get toFailed => 'toFailed'.trParams({'title': tr}); // 记录失败
+  String get toManage => 'toManage'.trParams({'title': tr}); // 管理记录
+  String get toList => 'toList'.trParams({'title': tr}); // 列表记录
+  String get toSearch => 'toSearch'.trParams({'title': tr}); // 搜索记录
+  String get toSelect => 'toSelect'.trParams({'title': tr}); // 选择记录
+  String get toImport => 'toImport'.trParams({'title': tr}); // 导入记录
+  //表单类
+  String get inputHint => 'inputHint'.trParams({'title': tr}); // 请填写记录
+
+  // 结果类：
+  String get addSuccess => 'addSuccess'.trParams({'title': tr}); // 添加记录成功
+  String get addFailed => 'addFailed'.trParams({'title': tr}); // 添加记录失败
+  String get saveSuccess => 'saveSuccess'.trParams({'title': tr}); // 保存记录成功
+  String get saveFailed => 'saveFailed'.trParams({'title': tr}); // 保存记录失败
+  String get editSuccess => 'editSuccess'.trParams({'title': tr}); // 修改记录成功
+  String get editFailed => 'editFailed'.trParams({'title': tr}); // 修改记录失败
+  String get updateSuccess => 'updateSuccess'.trParams({'title': tr}); // 更新记录成功
+  String get updateFailed => 'updateFailed'.trParams({'title': tr}); // 更新记录失败
+  String get deleteSuccess => 'deleteSuccess'.trParams({'title': tr}); // 删除记录成功
+  String get deleteFailed => 'deleteFailed'.trParams({'title': tr}); // 删除记录失败
 }
 ```
 
@@ -1375,9 +1420,9 @@ void goBackWithResult(dynamic result);
 void goBack();
 ```
 
-### `KV<T>`
+### enum 枚举辅助 `KV<T>`
 
-键值对类，通常用在 `tu.form` 表单中
+键值对类，通常用于 `enum` `tu.form.oneFilterChip` 单选表单中
 
 ```dart
 class KV<T> {
@@ -1395,6 +1440,35 @@ extension KVList<T extends Enum> on List<KV<T>> {
   List<String> labels();
   List<T> values();
 }
+// 获取值
+T? kvTryGetValue<T extends Enum>(final List<KV<T>> kvs, String? name);
+// 获取标签
+String kvGetLabel<T extends Enum>(List<KV<T>> kvs, T value, {String defaultLabel = ''});
+```
+
+使用示例
+
+```dart
+enum EnvScope { user, system, both }
+
+final kvEnvScope = kvCreateList({
+  EnvScope.user: 'env_scope_user'.tr,
+  EnvScope.system: 'env_scope_system'.tr,
+  EnvScope.both: 'env_scope_both'.tr,
+});
+
+final Rx<EnvScope> scope;
+Obx(() => tu.form.inputDecoration( 'env_scope'.tr,
+    tu.form.oneFilterChip(
+      items: kvEnvScope,
+      value: scope.value,
+      onSelectionChanged: (value) {
+        if (value == null) return;
+        scope.value = value;
+      },
+    ),
+  ),
+)
 ```
 
 ## UI 和控制器

@@ -1,8 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:tao996/tao996.dart';
 
 class FormHelperUtil {
   const FormHelperUtil();
+
+  /// 生成一个表单 key，使用 if (formKey.currentState!.validate()){ 验证通过 }
+  GlobalKey<FormState> formKey() {
+    return GlobalKey<FormState>();
+  }
 
   /// 网络布局的 checkbox 按钮组
   /// [crossAxisCount] 列数，会根据列数自动计算自身的尺寸
@@ -186,6 +192,7 @@ class FormHelperUtil {
     String? hintText,
     String? helperText,
     bool isRequired = false,
+    String? Function(T?)? validator,
   }) {
     if (value != null) {
       final values = items.map((kv) => kv.value).toList();
@@ -224,6 +231,7 @@ class FormHelperUtil {
         }
       },
       hint: hintText != null ? Text(hintText, softWrap: true) : null,
+      validator: validator,
     );
   }
 
@@ -420,13 +428,45 @@ class FormHelperUtil {
     );
   }
 
+  Widget searchInput(
+    TextEditingController controller, {
+    void Function(String)? onChanged,
+    void Function(String)? onSubmitted,
+    double fontSize = 16,
+    String? hintText,
+  }) {
+    return TextField(
+      controller: controller,
+      onChanged: onChanged,
+      onSubmitted: onSubmitted,
+      style: TextStyle(fontSize: fontSize),
+      maxLines: 1,
+      // 设置垂直居中
+      decoration: InputDecoration(
+        alignLabelWithHint: true,
+        contentPadding: const EdgeInsets.symmetric(vertical: 0),
+        hintText: hintText ?? 'search'.tr,
+        hintStyle: TextStyle(color: Colors.grey, fontSize: fontSize),
+        prefixIcon: Icon(Icons.search, size: fontSize),
+        suffixIcon: IconButton(
+          icon: Icon(Icons.clear, size: fontSize),
+          onPressed: () {
+            controller.text = '';
+            onChanged?.call('');
+          },
+        ),
+      ),
+    );
+  }
+
   /// 用来模拟一个输入框，如果只是单纯需要显示文字，使用 MyText.label
-  InputDecorator inputDecoration(
+  Widget inputDecoration(
     String label,
     Widget child, {
     InputDecoration? decoration,
     bool isRequired = false,
     String? helperText,
+    bool isFocused = false,
   }) {
     final textWidget = MyInputLabel(label: label, isRequired: isRequired);
 
@@ -445,6 +485,7 @@ class FormHelperUtil {
             .copyWith(label: textWidget);
 
     return InputDecorator(
+      isFocused: isFocused,
       decoration: usedDecoration,
       // child 内部的 padding 用于调整芯片内容与装饰器内边距的契合度
       child: child,

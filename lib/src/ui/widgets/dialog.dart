@@ -17,7 +17,7 @@ class MyDialog {
             onPressed: () {
               Get.back();
             },
-            icon: Icon(Icons.close),
+            icon: const Icon(Icons.close, size: 16),
           ),
         ],
       ),

@@ -2,6 +2,8 @@ name: tao996_example
 description: "Demonstrates how to use the tao996 plugin."
 publish_to: 'none'
 
+resolution: workspace
+
 environment:
   sdk: ^3.8.1
 dependencies:

@@ -271,6 +271,7 @@ class _MyInputState extends State<MyInput> {
   @override
   Widget build(BuildContext context) {
     return TextFormField(
+      // focusNode: FocusNode(debugLabel: 'input:${widget.labelText}'),
       controller: controller,
       // focusNode: _focusNode,
       obscureText: isPassword,
@@ -328,6 +329,7 @@ class _MyInputState extends State<MyInput> {
       children: [
         if (widget.isPassword)
           IconButton(
+            // focusNode: FocusNode(canRequestFocus: false, debugLabel: '密码图标'),
             onPressed: () {
               setState(() {
                 isPassword = !isPassword;
@@ -348,6 +350,7 @@ class _MyInputState extends State<MyInput> {
         // 只有当文本不为空时才显示清除按钮
         if (controller.text.isNotEmpty)
           IconButton(
+            // focusNode: FocusNode(canRequestFocus: false, debugLabel: '清除图标'),
             icon: const Icon(Icons.clear),
             onPressed: () {
               controller.clear();
@@ -466,6 +469,10 @@ class StepperSuffixIcon extends StatelessWidget {
       height: 24, // 限制按钮高度为 Column 高度的一半
       width: 32,
       child: IconButton(
+        // focusNode: FocusNode(
+        //   canRequestFocus: false,
+        //   debugLabel: 'StepperSuffixIcon',
+        // ),
         padding: EdgeInsets.zero,
         // 移除内边距
         iconSize: 18,
