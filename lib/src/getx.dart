@@ -13,7 +13,8 @@ class Tao996 {
 }
 
 /// 注册无依赖的服务
-/// [packages] 需要打印日志的包名
+/// [packages] 需要打印日志的包名；
+/// 稍后你还需要调用 registerTao996Services
 Future<GetIt> registerTao996Dependencies(List<String> packages) async {
   final locator = GetIt.instance;
   // 在桌面平台上初始化数据库工厂
@@ -25,18 +26,18 @@ Future<GetIt> registerTao996Dependencies(List<String> packages) async {
   StackUtil.logPackages(packages);
 
   await initSharedPreferences();
-  locator.registerLazySingleton<IMessageService>(() => MessageService());
+  tu.get.lazyPutService<IMessageService>(() => MessageService());
   final LogService logService = LogService();
-  locator.registerSingleton<ILogService>(logService);
+  tu.get.putService<ILogService>(logService);
   if (kDebugMode) {
     debugPrint('日志目录：${(await LogService.getLogDir()).path}');
   }
-  locator.registerLazySingleton<IDebugService>(() => DebugService());
-  locator.registerLazySingleton<TranslationService>(() => TranslationService());
-  locator.registerLazySingleton<IPathService>(() => PathService());
-  locator.registerLazySingleton<INetworkService>(() => NetworkService());
-  locator.registerLazySingleton<IShareService>(() => ShareService());
-  locator.registerLazySingleton<IFilePickerService>(() => tu.file);
+  tu.get.putService<IDebugService>(DebugService());
+  tu.get.lazyPutService<TranslationService>(() => TranslationService());
+  tu.get.lazyPutService<IPathService>(() => PathService());
+  tu.get.putService<INetworkService>(NetworkService());
+  tu.get.lazyPutService<IShareService>(() => ShareService());
+  tu.get.lazyPutService<IFilePickerService>(() => tu.file);
   return locator;
 }
 

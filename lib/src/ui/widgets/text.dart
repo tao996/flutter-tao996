@@ -111,6 +111,20 @@ class MyText {
     );
   }
 
+  static Widget helperText(String text, {BuildContext? context}) {
+    final theme = tu.theme;
+    // 获取主题样式，如果为空则手动模拟
+    final TextStyle helperStyle =
+        theme.inputDecorationTheme.helperStyle ??
+        theme.textTheme.bodySmall!.copyWith(color: theme.hintColor);
+
+    return Padding(
+      // 关键：手动添加顶部间距，模拟 TextFormField 的感官
+      padding: const EdgeInsets.only(top: 4, left: 18.0),
+      child: Text(text, style: helperStyle),
+    );
+  }
+
   /// 价格或数字显示（通常需要等宽字体或特殊颜色）
   static Widget price(
     double value, {

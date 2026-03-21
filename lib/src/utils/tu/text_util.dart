@@ -102,4 +102,19 @@ class TextUtil {
     }
     return l;
   }
+
+  /// 去除右边的 trim
+  String trimRight(String text, String trim) {
+    if (text.endsWith(trim)) {
+      return text.substring(0, text.length - trim.length);
+    }
+    return text;
+  }
+
+  String trimLeft(String text, String trim) {
+    if (text.startsWith(trim)) {
+      return text.substring(trim.length);
+    }
+    return text;
+  }
 }

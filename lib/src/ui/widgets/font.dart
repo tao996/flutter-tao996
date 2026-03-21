@@ -67,7 +67,7 @@ class MyFont {
               // 列表
               Expanded(
                 child: fontController.allFonts.isEmpty
-                    ? MyEmptyStateWidget(title: 'font'.tr)
+                    ? MyEmptyStateLayout(titleText: 'font'.tr)
                     : Obx(() {
                         return ListView.builder(
                           itemCount: fontController.filteredFonts.length,

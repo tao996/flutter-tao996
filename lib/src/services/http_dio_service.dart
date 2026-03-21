@@ -4,6 +4,7 @@ import 'package:dio/dio.dart';
 import 'package:dio/io.dart';
 import 'package:get/get_utils/get_utils.dart';
 import 'package:get_it/get_it.dart';
+import 'package:tao996/src/getx.dart';
 
 import 'debug_service.dart';
 import 'network_service.dart';
@@ -17,7 +18,7 @@ class HttpResponse {
   HttpResponse({required this.data, this.statusCode});
 }
 
-abstract class IDioHttpService{
+abstract class IDioHttpService {
   Future<HttpResponse> get(
     String url, {
     Dio? dio,
@@ -58,11 +59,14 @@ abstract class IDioHttpService{
   });
 }
 
+/// https://github.com/cfug/dio/blob/main/dio/README-ZH.md
 class DioHttpService implements IDioHttpService {
   static late Dio _dio;
-  final ILogService _logger = GetIt.instance.get<ILogService>();
-  final ISettingsService _settingSer = GetIt.instance.get<ISettingsService>();
-  final IDebugService _debugSer = GetIt.instance.get<IDebugService>();
+  final ILogService _logger = getILogService();
+
+  /// 是否开启代理
+  final ISettingsService _settingSer = getISettingsService();
+  final IDebugService _debugSer = getIDebugService();
 
   DioHttpService({BaseOptions? options}) {
     _dio = createDio(options: options);
@@ -291,7 +295,7 @@ class NetworkInterceptor extends Interceptor {
   @override
   void onRequest(RequestOptions options, RequestInterceptorHandler handler) {
     // 在请求发送前检查网络状态
-    if (_networkService.currentNetworkState.isNoNetwork) {
+    if (_networkService.isNoNetwork) {
       // 如果没有网络，直接拒绝请求并抛出自定义异常
       _debugService.d('拦截器：没有网络连接，请求被取消');
       // throw NoNetworkException();

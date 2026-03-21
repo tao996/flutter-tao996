@@ -37,7 +37,7 @@ class MyTao996App extends StatelessWidget {
     final IThemeService themeService = getIThemeService();
     final ISettingsService settingService = getISettingsService();
 
-    DeviceService.calScreenSize(context);
+    MyDeviceService.calScreenSize(context);
 
     // final dx = settingsService.navDragPosX;
     // if (-1 < dx && dx < 1) {

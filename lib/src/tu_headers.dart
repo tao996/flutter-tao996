@@ -97,36 +97,36 @@ class MyApiResponse {
   }
 }
 
-class MyPaginatedResponse<T> {
-  /// 总记录数。
-  final int totalCount;
+// class MyPaginatedResponse<T> {
+//   /// 总记录数。
+//   final int totalCount;
 
-  /// 当前页的记录列表。
-  final List<T>? items;
+//   /// 当前页的记录列表。
+//   final List<T>? items;
 
-  static String mapTotalCountName = 'totalCount';
-  static String mapItemsName = 'list';
+//   static String mapTotalCountName = 'totalCount';
+//   static String mapItemsName = 'list';
 
-  MyPaginatedResponse({required this.totalCount, this.items});
+//   MyPaginatedResponse({required this.totalCount, this.items});
 
-  /// 从 JSON Map 创建 PaginatedResponse 实例。
-  /// [itemBuilder] 是一个函数，用于将 `List<Map<String, dynamic>>` 转换为 `List<T>`。
-  factory MyPaginatedResponse.fromJson(
-    Map<String, dynamic> json,
-    List<T> Function(List<Map<String, dynamic>>)? itemBuilder,
-  ) {
-    return MyPaginatedResponse(
-      totalCount: (json[mapTotalCountName] as num? ?? 0).toInt(),
-      // 更安全的类型转换和默认值
-      items:
-          (json[mapItemsName] == null || itemBuilder == null) // 字段名改为 'list'
-          ? null
-          : itemBuilder(
-              (json[mapItemsName] as List).cast<Map<String, dynamic>>(),
-            ),
-    );
-  }
-}
+//   /// 从 JSON Map 创建 PaginatedResponse 实例。
+//   /// [itemBuilder] 是一个函数，用于将 `List<Map<String, dynamic>>` 转换为 `List<T>`。
+//   factory MyPaginatedResponse.fromJson(
+//     Map<String, dynamic> json,
+//     List<T> Function(List<Map<String, dynamic>>)? itemBuilder,
+//   ) {
+//     return MyPaginatedResponse(
+//       totalCount: (json[mapTotalCountName] as num? ?? 0).toInt(),
+//       // 更安全的类型转换和默认值
+//       items:
+//           (json[mapItemsName] == null || itemBuilder == null) // 字段名改为 'list'
+//           ? null
+//           : itemBuilder(
+//               (json[mapItemsName] as List).cast<Map<String, dynamic>>(),
+//             ),
+//     );
+//   }
+// }
 
 /// 自定义异常类，用于表示 API 请求或响应中的错误。
 class MyApiException implements Exception {

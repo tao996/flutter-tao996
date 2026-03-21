@@ -1,4 +1,3 @@
-
 import 'dart:io';
 
 import 'package:flutter/foundation.dart';
@@ -8,7 +7,7 @@ import 'package:flutter/material.dart';
 /// 注意区分 发行版/OS 标识符
 enum OS { unknown, windows, linux, unix, macos, android, ios, fuchsia }
 
-class DeviceService {
+class MyDeviceService {
   static double screenWidth = 0;
   static double screenHeight = 0;
   static double statusBarHeight = 0;
@@ -66,6 +65,4 @@ GetPlatform.isWeb
       return OS.unknown;
     }
   }
-
-
 }

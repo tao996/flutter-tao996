@@ -91,6 +91,9 @@ final Map<String, Map<String, String>> words = {
     'toSearch': '搜索@title',
     'toSelect': '@title选择',
     'toImport': '导入@title',
+    'toComplete': '@title完成',
+    'isNotExist': '@title不存在',
+    'isExist': '@title已存在',
   },
 
   // ----------------------------------------------------

@@ -197,44 +197,25 @@ class MyAppBarMenuButtons extends StatelessWidget {
   }
 }
 
-/// 当页面没有记录时显示的空状态 Widget。
-/// 它遵循应用的极简扁平化主题，并引导用户进行初次操作。
-///
-/// [showDesc] 是否显示描述：点击下方按钮，创建你的第一个 [title]
-///
-/// [onAction] 回调函数，如果不为 null，则会显示一个用于创建记录的按钮；你可以通过 [buttonText] 来自定义按钮的文字
-///
-/// [child] 追加的自定义组件
-class MyEmptyStateWidget extends StatelessWidget {
-  /// 提示用户可以执行的操作（例如：“添加新活动”）。
+class MyEmptyStateLayout extends StatelessWidget {
+  final String titleText;
+  final String? descText;
   final String? buttonText;
+  final void Function()? onPressed;
 
-  /// 当用户点击按钮时执行的回调函数。
-  final VoidCallback? onAction;
-
-  /// 描述当前页面的内容类型（例如：“活动”、“资源”）。
-  final String? title;
-
-  final Widget? child;
-
-  final bool showDesc;
-
-  const MyEmptyStateWidget({
+  /// [titleText] 模型的名称；[descText] ；[buttonText] 按钮的文本；[onPressed] 按钮的点击事件
+  const MyEmptyStateLayout({
     super.key,
-    this.title,
+    required this.titleText,
+    this.descText,
     this.buttonText,
-    this.onAction,
-    this.child,
-    this.showDesc = true,
+    this.onPressed,
   });
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
-
-    // final double upwardShift = DeviceService.screenHeight / 5;
-    final titleText = title ?? 'record'.tr;
 
     final childBox = Center(
       child: Padding(
@@ -255,20 +236,21 @@ class MyEmptyStateWidget extends StatelessWidget {
             const SizedBox(height: 24),
 
             // 2. 提示文本
-            Text(
-              'noRecord'.trParams({'title': titleText}),
-              style: theme.textTheme.headlineSmall!.copyWith(
-                fontWeight: FontWeight.bold,
-                color: colorScheme.onSurface.withAlpha(200),
+            if (titleText != null && titleText!.isNotEmpty)
+              Text(
+                titleText!,
+                style: theme.textTheme.headlineSmall!.copyWith(
+                  fontWeight: FontWeight.bold,
+                  color: colorScheme.onSurface.withAlpha(200),
+                ),
+                textAlign: TextAlign.center,
               ),
-              textAlign: TextAlign.center,
-            ),
 
             // 3. 详细说明
-            if (showDesc && onAction != null) ...[
+            if (descText != null && descText!.isNotEmpty) ...[
               const SizedBox(height: 8),
               Text(
-                'clickToCreateYourFirstRecord'.trParams({'title': titleText}),
+                descText!,
                 style: theme.textTheme.bodyMedium!.copyWith(
                   color: colorScheme.onSurface.withAlpha(150),
                 ),
@@ -277,16 +259,16 @@ class MyEmptyStateWidget extends StatelessWidget {
             ],
 
             // 4. 主要操作按钮 (使用主题 Primary Color)
-            if (onAction != null) ...[
+            if (onPressed != null) ...[
               const SizedBox(height: 30),
               SizedBox(
                 width: 250, // 限定按钮宽度
                 child: ElevatedButton.icon(
-                  onPressed: onAction,
+                  onPressed: onPressed,
                   icon: const Icon(Icons.add),
                   label: Text(
                     buttonText ??
-                        'createNewRecord'.trParams({'title': titleText}),
+                        'createNewRecord'.trParams({'title': 'record'.tr}),
                   ),
                   style: ElevatedButton.styleFrom(
                     // 🚨 遵循扁平化主题：移除阴影
@@ -302,14 +284,46 @@ class MyEmptyStateWidget extends StatelessWidget {
                 ),
               ),
             ],
-            ?child,
           ],
         ),
       ),
     );
-    final height = DeviceService.screenHeight / 2;
+    final height = MyDeviceService.screenHeight / 2;
     return height > 400
-        ? SizedBox(height: DeviceService.screenHeight / 2, child: childBox)
+        ? SizedBox(height: MyDeviceService.screenHeight / 2, child: childBox)
         : childBox;
+  }
+}
+
+/// 当页面没有记录时显示的空状态 Widget。
+/// 它遵循应用的极简扁平化主题，并引导用户进行初次操作。
+///
+/// [showDesc] 是否显示描述：点击下方按钮，创建你的第一个 [title]
+///
+/// [onAction] 回调函数，如果不为 null，则会显示一个用于创建记录的按钮；你可以通过 [buttonText] 来自定义按钮的文字
+///
+/// [child] 追加的自定义组件
+class MyEmptyStateWidget extends StatelessWidget {
+  /// 提示用户可以执行的操作（例如：“添加新活动”）。
+
+  /// 当用户点击按钮时执行的回调函数。
+  final VoidCallback? onPressed;
+
+  /// 描述当前页面的内容类型（例如：“活动”、“资源”）。
+  final String? titleText;
+
+  const MyEmptyStateWidget({super.key, this.titleText, this.onPressed});
+
+  @override
+  Widget build(BuildContext context) {
+    final t = 'noRecord'.trParams({'title': titleText ?? 'record'.tr});
+    final dt = 'clickToCreateYourFirstRecord'.trParams({
+      'title': titleText ?? 'record'.tr,
+    });
+    return MyEmptyStateLayout(
+      titleText: t,
+      descText: onPressed == null ? null : dt,
+      onPressed: onPressed,
+    );
   }
 }

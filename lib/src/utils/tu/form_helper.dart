@@ -341,6 +341,18 @@ class FormHelperUtil {
     );
   }
 
+  /// 开关
+  Widget switch1(RxBool value) {
+    return Obx(
+      () => Switch(
+        value: value.value,
+        onChanged: (bool newValue) {
+          value.value = newValue;
+        },
+      ),
+    );
+  }
+
   Widget checkboxListTile(
     String title, {
     required void Function(bool) onChanged,
@@ -429,12 +441,13 @@ class FormHelperUtil {
   }
 
   Widget searchInput(
-    TextEditingController controller, {
-    void Function(String)? onChanged,
+    void Function(String) onChanged, {
     void Function(String)? onSubmitted,
     double fontSize = 16,
     String? hintText,
+    String? value,
   }) {
+    final controller = TextEditingController(text: value);
     return TextField(
       controller: controller,
       onChanged: onChanged,
@@ -452,7 +465,7 @@ class FormHelperUtil {
           icon: Icon(Icons.clear, size: fontSize),
           onPressed: () {
             controller.text = '';
-            onChanged?.call('');
+            onChanged.call('');
           },
         ),
       ),

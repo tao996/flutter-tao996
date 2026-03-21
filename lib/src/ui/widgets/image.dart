@@ -54,7 +54,7 @@ class _MyImageCacheState extends State<MyImageCache> {
 
   _MyImageCacheState()
     : useLowDataMode = getISettingsService().useLowDataMode,
-      isWifi = getINetworkService().currentNetworkState.isWifi {
+      isWifi = getINetworkService().isSpeedNetwork {
     _shouldLoadManually = useLowDataMode && !isWifi;
     _debugService.d(
       '[_MyImageCacheState] 图片加载模式',

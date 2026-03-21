@@ -63,7 +63,7 @@ class FileUtil implements IFilePickerService {
       throw 'file, imageBytes or image is null';
     }
     if (file != null) {
-      if (DeviceService.isPc()) {
+      if (MyDeviceService.isPc()) {
         // 桌面端：调用通用保存逻辑
         final suggestedName = tu.path.basename(file.path);
         await _saveFileToUserSelectedPath(suggestedName, sourceFile: file);
@@ -71,7 +71,7 @@ class FileUtil implements IFilePickerService {
       }
       await imageSaver.saveImage(await file.readAsBytes());
     } else if (imageBytes != null) {
-      if (DeviceService.isPc()) {
+      if (MyDeviceService.isPc()) {
         final saveName =
             suggestedFileName ??
             tu.date.format(
@@ -92,7 +92,7 @@ class FileUtil implements IFilePickerService {
     if (!file.existsSync()) {
       throw 'fileNotExists'.tr;
     }
-    if (DeviceService.isPc()) {
+    if (MyDeviceService.isPc()) {
       // 提取文件名作为建议名称
       final fileName = tu.path.basename(filePath);
       await _saveFileToUserSelectedPath(fileName, sourceFile: file);

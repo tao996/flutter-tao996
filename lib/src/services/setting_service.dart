@@ -72,7 +72,9 @@ SharedPreferences get prefs => _prefs!;
 
 Future<void> initSharedPreferences() async {
   _prefs = await SharedPreferences.getInstance();
-  // 保存路径 C:\Users\<你的用户名>\AppData\Roaming\<你的公司名>\<你的应用名>\shared_preferences.json
+  // 测试的时候，可以在控制台看到目录
+  // C:\Users\<你的用户名>\AppData\Roaming\<公司名>\<你的应用名>\logs
+  // 同一个目录，保存文件名为 shared_preferences.json
 }
 
 abstract class SettingService implements ISettingsService {

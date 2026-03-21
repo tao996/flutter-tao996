@@ -7,19 +7,19 @@ import 'package:tao996/tao996.dart';
 class DeviceUtil {
   const DeviceUtil();
 
-  double get screenWidth => DeviceService.screenWidth;
+  double get screenWidth => MyDeviceService.screenWidth;
 
-  double get screenHeight => DeviceService.screenHeight;
+  double get screenHeight => MyDeviceService.screenHeight;
 
-  double get statusBarHeight => DeviceService.statusBarHeight;
+  double get statusBarHeight => MyDeviceService.statusBarHeight;
 
-  String get platform => DeviceService.platform();
+  String get platform => MyDeviceService.platform();
 
-  bool get isPc => DeviceService.isPc();
+  bool get isPc => MyDeviceService.isPc();
 
-  bool get isMobile => DeviceService.isMobile();
+  bool get isMobile => MyDeviceService.isMobile();
 
-  OS get runtimeOS => DeviceService.runtimeOS();
+  OS get runtimeOS => MyDeviceService.runtimeOS();
 
   /// has_command 检查的是外部可执行程序（.exe, .bat, .ps1），不是 shell 内置命令（比如 dir, ls, echo 等都不是可执行文件）
   /// 只有 curl, ping, notepad, powershell 才是可执行文件

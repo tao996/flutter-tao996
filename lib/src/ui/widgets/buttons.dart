@@ -105,7 +105,7 @@ class MySaveIconButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return IconButton(
-      icon: const Icon(Icons.save_outlined, size: 16),
+      icon: Icon(Icons.save_outlined, size: 16, color: tu.colorScheme.primary),
       onPressed: onPressed,
       tooltip: 'save'.tr,
     );

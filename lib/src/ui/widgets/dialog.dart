@@ -4,21 +4,30 @@ import 'package:tao996/tao996.dart';
 
 class MyDialog {
   /// 可用于关闭对话框
-  static Widget title(String title, {List<Widget>? actions}) {
+  static Widget title(
+    String title, {
+    Widget? titleWidget,
+    List<Widget>? actions,
+    bool replace = false,
+    double? vertical = 10,
+  }) {
     return MyPadding(
-      vertical: 10,
+      vertical: vertical,
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          Expanded(child: Text(title, style: tu.textTheme.titleLarge)),
-          if (actions != null) ...actions,
-          IconButton(
-            onPressed: () {
-              Get.back();
-            },
-            icon: const Icon(Icons.close, size: 16),
+          Expanded(
+            child: titleWidget ?? Text(title, style: tu.textTheme.titleLarge),
           ),
+          if (actions != null) ...actions,
+          if (!replace)
+            IconButton(
+              onPressed: () {
+                Get.back();
+              },
+              icon: const Icon(Icons.close, size: 16),
+            ),
         ],
       ),
     );
@@ -51,7 +60,7 @@ class MyDialog {
     );
     return showDialog(
       context: context,
-      barrierDismissible: barrierDismissible ?? DeviceService.isMobile(),
+      barrierDismissible: barrierDismissible ?? MyDeviceService.isMobile(),
       builder: (BuildContext context) {
         return AlertDialog(
           // backgroundColor: const Color(0xFF1F2937),

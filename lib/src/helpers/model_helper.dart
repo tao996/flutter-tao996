@@ -119,11 +119,14 @@ abstract class ModelHelper<T extends IModel<T>> {
   }) async => null;
 
   /// 获取全部的记录（可能使用缓存）
-  Future<List<T>> getAll({bool force = false}) async {
-    if (_cache.isEmpty || force) {
-      _cache.assignAll(await _getAllFromDb());
+  Future<List<T>> getAll({bool force = false, ModelTransaction? mtn}) async {
+    if (smallTable) {
+      if (_cache.isEmpty || force) {
+        _cache.assignAll(await _getAllFromDb(mtn: mtn));
+      }
+      return _cache;
     }
-    return _cache;
+    return await _getAllFromDb(mtn: mtn);
   }
 
   /// 如果启用了软删除，则在 where 条件中自动添加 `deletedAt IS NULL AND`
@@ -141,11 +144,7 @@ abstract class ModelHelper<T extends IModel<T>> {
       orderBy: 'id DESC',
       mtn: mtn,
     );
-    final rows = maps.map((map) => fromMap(map)).toList();
-    if (smallTable) {
-      _cache = rows; // 直接赋值以更新缓存
-    }
-    return rows;
+    return maps.map((map) => fromMap(map)).toList();
   }
 
   /// 获取指定字段和值的第一个记录
@@ -619,7 +618,7 @@ abstract class ModelHelper<T extends IModel<T>> {
       whereArgs: whereArgs,
       txn: mtn?.txn,
     );
-    if (mtn == null && smallTable) await _getAllFromDb(mtn: mtn);
+    if (smallTable) await getAll(mtn: mtn, force: true);
 
     if (entity != null) {
       await afterUpdate(entity, mtn: mtn);
@@ -707,9 +706,7 @@ abstract class ModelHelper<T extends IModel<T>> {
             txn: mtn?.txn,
           );
     // 更新缓存 + 后置钩子
-    if (mtn == null && smallTable && deletedCount > 0) {
-      await _getAllFromDb(mtn: mtn);
-    }
+    if (smallTable) await getAll(mtn: mtn, force: true);
     if (entity != null) {
       await afterDelete(deletedCount, entity: entity, mtn: mtn);
     }
@@ -812,9 +809,7 @@ abstract class ModelHelper<T extends IModel<T>> {
     debugService.d('Inserted new record into $tableName with new ID: $newId');
 
     /// 更新缓存
-    if (mtn == null && smallTable) {
-      await _getAllFromDb(mtn: mtn);
-    }
+    if (smallTable) await getAll(mtn: mtn, force: true);
     // 更新后置钩子
     await afterInsert(record, mtn: mtn);
     await afterSave(record, true, mtn: mtn);

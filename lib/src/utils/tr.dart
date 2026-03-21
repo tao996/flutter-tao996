@@ -8,6 +8,8 @@ extension StringTrExt on String {
   String get mustRequired => 'mustRequired'.trParams({'title': tr});
   String get mustInteger => 'mustInteger'.trParams({'title': tr});
   String get isRepeat => 'isRepeat'.trParams({'title': tr});
+  String get isExist => 'isExist'.trParams({'title': tr});
+  String get isNotExist => 'isNotExist'.trParams({'title': tr});
   String get noRecordFound =>
       'noRecordFound'.trParams({'title': tr}); // 没有找到符合条件的记录
   String get noRecord => 'noRecord'.trParams({'title': tr}); // 暂无记录
@@ -24,6 +26,7 @@ extension StringTrExt on String {
   String get toSearch => 'toSearch'.trParams({'title': tr});
   String get toSelect => 'toSelect'.trParams({'title': tr});
   String get toImport => 'toImport'.trParams({'title': tr});
+  String get toComplete => 'toComplete'.trParams({'title': tr});
   //表单类
   String get inputHint => 'inputHint'.trParams({'title': tr});
 
