@@ -132,71 +132,6 @@ class MyMiniScaffold extends StatelessWidget {
   }
 }
 
-class MyAppBarMenuItem {
-  final String value;
-  final String text;
-  final IconData? iconData;
-  final Color? color;
-  final bool bold;
-
-  const MyAppBarMenuItem({
-    required this.value,
-    required this.text,
-    this.iconData,
-    this.color,
-    this.bold = false,
-  });
-}
-
-class MyAppBarMenuButtons extends StatelessWidget {
-  final void Function(String) onSelected;
-  final List<List<MyAppBarMenuItem>> items;
-
-  const MyAppBarMenuButtons({
-    super.key,
-    required this.onSelected,
-    required this.items,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final List<PopupMenuEntry<String>> children = [];
-    for (var i = 0; i < items.length; i++) {
-      if (i > 0) {
-        children.add(const PopupMenuDivider(height: 1));
-      }
-      children.addAll(
-        items[i].map((item) {
-          final textChild = Text(
-            item.text,
-            style: TextStyle(
-              color: item.color,
-              fontWeight: item.bold ? FontWeight.bold : null,
-            ),
-          );
-          return PopupMenuItem(
-            value: item.value,
-            child: item.iconData == null
-                ? textChild
-                : Row(
-                    children: [
-                      Icon(item.iconData!, size: 20, color: item.color),
-                      const SizedBox(width: 12),
-                      textChild,
-                    ],
-                  ),
-          );
-        }),
-      );
-    }
-    return PopupMenuButton<String>(
-      icon: const Icon(Icons.more_vert),
-      onSelected: onSelected,
-      itemBuilder: (context) => children,
-    );
-  }
-}
-
 class MyEmptyStateLayout extends StatelessWidget {
   final String titleText;
   final String? descText;
@@ -236,9 +171,9 @@ class MyEmptyStateLayout extends StatelessWidget {
             const SizedBox(height: 24),
 
             // 2. 提示文本
-            if (titleText != null && titleText!.isNotEmpty)
+            if (titleText.isNotEmpty)
               Text(
-                titleText!,
+                titleText,
                 style: theme.textTheme.headlineSmall!.copyWith(
                   fontWeight: FontWeight.bold,
                   color: colorScheme.onSurface.withAlpha(200),

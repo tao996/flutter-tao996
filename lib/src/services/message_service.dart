@@ -1,8 +1,6 @@
 import 'dart:async';
-import 'dart:io';
 
 import 'package:flutter/material.dart';
-import 'package:fluttertoast/fluttertoast.dart';
 import 'package:get/get.dart';
 import 'package:tao996/tao996.dart';
 
@@ -27,29 +25,19 @@ abstract class IMessageService extends IDebugMessageService {
     bool textIsContent = false,
   });
 
-  void toast(String message);
-
-  SnackbarController snackbar(
-    String title,
-    String message, {
-    SnackPosition snackPosition = SnackPosition.BOTTOM,
-    Icon? icon,
-    int seconds = 3,
-  });
-
   /// 成功提示，提前调用 Get.back() 后再调用 [success]
   @override
-  void success(String message, {bool snackBar = false});
+  void success(String message);
 
   /// 错误提示
   @override
-  void error(String message, {bool snackBar = false});
+  void error(String message);
 
   @override
-  void notice(String message, {bool snackBar = false});
+  void notice(String message);
 
   @override
-  void warning(String message, {bool snackBar = false});
+  void warning(String message);
 }
 
 class MessageService implements IMessageService {
@@ -88,22 +76,8 @@ class MessageService implements IMessageService {
   }
 
   @override
-  Future<void> alert(String title, {String? content, Widget? icon}) {
-    return Get.dialog(
-      AlertDialog(
-        icon: icon,
-        title: Text(title),
-        content: content == null ? null : Text(content),
-        actions: [
-          TextButton(
-            onPressed: () {
-              Get.back();
-            },
-            child: Text('confirm'.tr),
-          ),
-        ],
-      ),
-    );
+  Future<void> alert(String title, {String? content, Widget? icon}) async {
+    return await tu.sd.alert(title, content: content, icon: icon);
   }
 
   @override
@@ -144,112 +118,22 @@ class MessageService implements IMessageService {
   }
 
   @override
-  void toast(String message, {Color? textColor, String? title, Icon? icon}) {
-    // 优化：更健壮的错误截取逻辑
-    String displayMessage = message;
-    if (message.contains('DioException')) {
-      final parts = message.split(':');
-      displayMessage = parts.last.trim();
-    }
-
-    if (Platform.isWindows || Platform.isLinux || Platform.isMacOS) {
-      // 桌面端建议：根据 textColor 自动匹配一个浅色背景
-      snackbar(
-        title ?? 'notice'.tr,
-        displayMessage,
-        icon: icon,
-        colorText: textColor,
-        // 桌面端 Snackbar 停留时间可以长一点
-        seconds: 4,
-      );
-      return;
-    }
-
-    Fluttertoast.cancel();
-    Fluttertoast.showToast(
-      msg: displayMessage,
-      // 注意：这里是 Toast 的文字颜色，建议保持高对比度
-      textColor: Colors.white,
-      backgroundColor: textColor?.withAlpha(200) ?? Colors.black87,
-      gravity: ToastGravity.BOTTOM,
-    );
+  void success(String message) {
+    tu.sd.success(message);
   }
 
   @override
-  SnackbarController snackbar(
-    String title,
-    String message, {
-    SnackPosition snackPosition = SnackPosition.BOTTOM,
-    Icon? icon,
-    Color? colorText,
-    int seconds = 3,
-  }) {
-    return Get.snackbar(
-      title,
-      colorText: colorText,
-      message,
-      snackPosition: snackPosition,
-      margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-      duration: seconds == 0 ? null : Duration(seconds: seconds),
-      icon: icon,
-      onTap: (snack) {
-        Get.back();
-      },
-    );
+  void error(String message) {
+    tu.sd.error(message);
   }
 
   @override
-  void success(String message, {bool snackBar = false}) {
-    final icon = const Icon(Icons.check_circle_outline, color: Colors.green);
-    if (snackBar) {
-      snackbar('success'.tr, message, icon: icon);
-      return;
-    }
-    toast(
-      message,
-      textColor: MyColor.success(),
-      title: 'success'.tr,
-      icon: icon,
-    );
+  void notice(String message) {
+    tu.sd.notice(message);
   }
 
   @override
-  void error(
-    String message, {
-    Duration? duration = const Duration(seconds: 4),
-    double offsetY = -0.2, // 统一向上偏移，保持样式一致
-    bool snackBar = false,
-  }) {
-    final icon = const Icon(Icons.error_outline, color: Colors.red);
-    if (snackBar) {
-      snackbar('error'.tr, message, icon: icon);
-      return;
-    }
-    toast(message, textColor: MyColor.error(), title: 'error'.tr, icon: icon);
-  }
-
-  @override
-  void notice(String message, {bool snackBar = false}) {
-    final icon = const Icon(Icons.info_outline);
-    if (snackBar) {
-      snackbar('notice'.tr, message, icon: icon);
-      return;
-    }
-    toast(message, textColor: MyColor.info(), title: 'notice'.tr, icon: icon);
-  }
-
-  @override
-  void warning(String message, {bool snackBar = false}) {
-    final icon = const Icon(Icons.warning_amber_rounded, color: Colors.orange);
-    if (snackBar) {
-      snackbar('warning'.tr, message, icon: icon);
-      return;
-    }
-    toast(
-      message,
-      textColor: MyColor.warning(),
-      title: 'warning'.tr,
-      icon: icon,
-    );
+  void warning(String message) {
+    tu.sd.warning(message);
   }
 }

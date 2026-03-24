@@ -287,4 +287,18 @@ class MyText {
       ],
     );
   }
+
+  static Widget inkTitle(String title, void Function() onTap) {
+    return MyEvents.inkWell(
+      child: Text(
+        title,
+        softWrap: true,
+        style: const TextStyle(
+          decoration: TextDecoration.underline,
+          fontWeight: FontWeight.w600,
+        ),
+      ),
+      onTap: onTap,
+    );
+  }
 }

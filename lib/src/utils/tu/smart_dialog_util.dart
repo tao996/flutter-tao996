@@ -23,25 +23,28 @@ class SmartDialogUtil {
   }
 
   // 通知类
-  void success({String? message, void Function()? onDismiss}) {
+  void success(String message, {void Function()? onDismiss}) {
+    SmartDialog.dismiss();
     SmartDialog.showNotify(
-      msg: message ?? 'success'.tr,
+      msg: message,
       notifyType: NotifyType.success,
       onDismiss: onDismiss,
     );
   }
 
-  void failure({String? message, void Function()? onDismiss}) {
+  void failure(String message, {void Function()? onDismiss}) {
+    SmartDialog.dismiss();
     SmartDialog.showNotify(
-      msg: message ?? 'failure'.tr,
+      msg: message,
       notifyType: NotifyType.failure,
       onDismiss: onDismiss,
     );
   }
 
-  void warning({String? message, void Function()? onDismiss}) {
+  void warning(String message, {void Function()? onDismiss}) {
+    SmartDialog.dismiss();
     SmartDialog.showNotify(
-      msg: message ?? 'warning'.tr,
+      msg: message,
       notifyType: NotifyType.warning,
       onDismiss: onDismiss,
     );
@@ -52,6 +55,7 @@ class SmartDialogUtil {
     void Function()? onDismiss,
     bool clickMaskDismiss = false,
   }) {
+    SmartDialog.dismiss();
     SmartDialog.showNotify(
       msg: message,
       notifyType: NotifyType.error,
@@ -61,15 +65,22 @@ class SmartDialogUtil {
   }
 
   void toast(String msg) {
-    SmartDialog.showNotify(msg: msg, notifyType: NotifyType.alert);
+    SmartDialog.dismiss();
+    SmartDialog.showToast(msg);
   }
 
   void showToast(String msg) {
-    return toast(msg);
+    SmartDialog.dismiss();
+    SmartDialog.showToast(msg);
   }
 
   void notice(String message, {void Function()? onDismiss}) {
-    SmartDialog.showToast(message, onDismiss: onDismiss);
+    SmartDialog.dismiss();
+    SmartDialog.showNotify(
+      msg: message,
+      notifyType: NotifyType.alert,
+      onDismiss: onDismiss,
+    );
   }
 
   Future<void> alert(String title, {String? content, Widget? icon}) {

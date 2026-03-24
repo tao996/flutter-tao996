@@ -6,7 +6,6 @@ import 'package:tao996/tao996.dart';
 enum DelegateAction { insert, update, delete }
 
 /// 使用示例
-///
 /// ```
 /// final MyModelDelegate<User> delegate // 类型需要指定为 User
 ///   = MyModelDelegate<User>(getUserService());
@@ -19,7 +18,7 @@ class MyModelDelegate<T extends IModel<T>> extends AbstractListDelegate<T> {
     ModelHelper<T>? helper,
     IMessageService? messageService, // 允许测试时注入 Mock
     MyModelDelegate<T>? delegate,
-    super.rxItems,
+    super.rxItems, // 要注意 smallTable 的赋值
     super.rxTotal,
     super.autoInit = true,
   }) : _helper = helper,
@@ -211,6 +210,12 @@ class MyModelDelegate<T extends IModel<T>> extends AbstractListDelegate<T> {
         newRecord,
       ) async {
         message = 'add'.tr + 'success'.tr;
+        if (helper.smallTable) {
+          if (rxItems.indexWhere((item) => item.id == entity.id) != -1) {
+            dprint('小表，记录已经被更新到 rxItems 中，跳过 sync');
+            return;
+          }
+        }
         await sync(index: -1, entity: newRecord as T, unshift: unshift);
       });
     }
@@ -307,10 +312,19 @@ class MyModelDelegate<T extends IModel<T>> extends AbstractListDelegate<T> {
       return 0;
     }
 
-    if (index == -1) return await helper.deleteById(id);
+    if (index == -1) {
+      return await helper.deleteById(id);
+    }
 
     final effect = await helper.deleteById(id);
     if (effect > 0) {
+      if (helper.smallTable) {
+        if (-1 == rxItems.indexWhere((item) => item.id == id)) {
+          dprint('小表，记录[$id]可能已经被移除了，跳过 sync');
+          _onFinalize('delete'.tr + 'success'.tr, showMessage, navBack);
+          return effect;
+        }
+      }
       await sync(index: index);
       _onFinalize('delete'.tr + 'success'.tr, showMessage, navBack);
     } else if (showMessage) {
@@ -455,7 +469,6 @@ abstract class AbstractListDelegate<T> {
   }) async {
     final rootItems = rxItems;
     final rootTotal = __rxTotal;
-
     if (entity == null) {
       if (index >= 0 && index < rootItems.length) {
         final removed = rootItems.removeAt(index);

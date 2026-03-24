@@ -99,16 +99,41 @@ class MySaveButton extends StatelessWidget {
 /// 保存图标无文字按钮
 class MySaveIconButton extends StatelessWidget {
   final void Function()? onPressed;
+  final RxBool? isLoading;
+  final double? size;
 
-  const MySaveIconButton({super.key, this.onPressed});
+  const MySaveIconButton({
+    super.key,
+    this.onPressed,
+    this.size,
+    this.isLoading,
+  });
 
   @override
   Widget build(BuildContext context) {
-    return IconButton(
-      icon: Icon(Icons.save_outlined, size: 16, color: tu.colorScheme.primary),
-      onPressed: onPressed,
-      tooltip: 'save'.tr,
-    );
+    if (isLoading == null) {
+      return IconButton(
+        icon: Icon(
+          Icons.save_outlined,
+          size: size,
+          // color: tu.colorScheme.primary,
+        ),
+        onPressed: onPressed,
+        tooltip: 'save'.tr,
+      );
+    } else {
+      return Obx(() {
+        return IconButton(
+          icon: Icon(
+            Icons.save_outlined,
+            size: size,
+            // color: tu.colorScheme.primary,
+          ),
+          onPressed: isLoading!.value ? onPressed : null,
+          tooltip: 'save'.tr,
+        );
+      });
+    }
   }
 }
 
@@ -138,6 +163,22 @@ class MyInsertButton extends StatelessWidget {
   }
 }
 
+class MyInsertIconButton extends StatelessWidget {
+  final void Function()? onPressed;
+  final double? size;
+
+  const MyInsertIconButton({super.key, this.onPressed, this.size});
+
+  @override
+  Widget build(BuildContext context) {
+    return IconButton(
+      icon: Icon(Icons.add, size: size),
+      onPressed: onPressed,
+      tooltip: 'add'.tr,
+    );
+  }
+}
+
 class MyEditButton extends StatelessWidget {
   final String? label;
   final void Function()? onPressed;
@@ -159,6 +200,24 @@ class MyEditButton extends StatelessWidget {
       onPressed: onPressed,
       icon: showIcon ? const Icon(Icons.edit) : null,
       type: type,
+    );
+  }
+}
+
+/// 编辑图标无文字按钮
+class MyEditIconButton extends StatelessWidget {
+  final void Function()? onPressed;
+  final double? size;
+
+  const MyEditIconButton({super.key, this.onPressed, this.size});
+
+  @override
+  Widget build(BuildContext context) {
+    // return MyButton('编辑',onPressed: onPressed,type: ButtonType.info,);
+    return IconButton(
+      icon: Icon(Icons.edit_outlined, color: MyColor.info(), size: size),
+      onPressed: onPressed,
+      tooltip: 'edit'.tr,
     );
   }
 }
@@ -211,62 +270,78 @@ class MyDeleteButton extends StatelessWidget {
   }
 }
 
+/// 删除图标无文字按钮
+class MyDeleteIconButton extends StatelessWidget {
+  final void Function()? onPressed;
+  final double? size;
+
+  /// 是否需要确认对话框
+  final bool confirm;
+
+  /// 提示的信息，默认为 “确定要删除当前记录吗？”
+  final String? content;
+
+  /// 提示信息是否需要添加 “此操作无法撤销”
+  final bool cancel;
+
+  const MyDeleteIconButton({
+    super.key,
+    this.onPressed,
+    this.confirm = true,
+    this.cancel = false,
+    this.size,
+    this.content,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return IconButton(
+      icon: Icon(Icons.delete_outline, color: MyColor.error(), size: size),
+      onPressed: confirm
+          ? () async {
+              final text =
+                  (content ??
+                      'deleteConfirmContent'.trParams({'title': 'record'.tr})) +
+                  (cancel ? '' : 'youCannotUndoThis'.tr);
+              await getIMessageService().deleteConfirm(text, () {
+                onPressed!();
+              }, textIsContent: true);
+            }
+          : onPressed,
+      tooltip: 'delete'.tr,
+    );
+  }
+}
+
 class MyHelperIconButton extends StatelessWidget {
   final void Function()? onPressed;
+  final double? size;
 
-  const MyHelperIconButton({super.key, this.onPressed});
+  const MyHelperIconButton({super.key, this.onPressed, this.size});
 
   @override
   Widget build(BuildContext context) {
     return Tooltip(
       message: 'userGuide'.tr,
-      child: IconButton(onPressed: onPressed, icon: Icon(Icons.help_outline)),
-    );
-  }
-}
-
-class MyInsertIconButton extends StatelessWidget {
-  final void Function()? onPressed;
-
-  const MyInsertIconButton({super.key, this.onPressed});
-
-  @override
-  Widget build(BuildContext context) {
-    return IconButton(
-      icon: Icon(Icons.add, size: 16),
-      onPressed: onPressed,
-      tooltip: 'insert'.tr,
-    );
-  }
-}
-
-/// 编辑图标无文字按钮
-class MyEditIconButton extends StatelessWidget {
-  final void Function()? onPressed;
-
-  const MyEditIconButton({super.key, this.onPressed});
-
-  @override
-  Widget build(BuildContext context) {
-    // return MyButton('编辑',onPressed: onPressed,type: ButtonType.info,);
-    return IconButton(
-      icon: Icon(Icons.edit_outlined, color: MyColor.info(), size: 16),
-      onPressed: onPressed,
-      tooltip: 'edit'.tr,
+      child: IconButton(
+        onPressed: onPressed,
+        icon: Icon(Icons.help_outline, size: size),
+      ),
     );
   }
 }
 
 class MyDetailIconButton extends StatelessWidget {
   final void Function()? onPressed;
+  final double? size;
 
-  const MyDetailIconButton({super.key, this.onPressed});
+  const MyDetailIconButton({super.key, this.onPressed, this.size});
 
   @override
   Widget build(BuildContext context) {
     // return MyButton('详情',onPressed: onPressed,type: ButtonType.secondary,);
     return IconButton(
-      icon: const Icon(Icons.info_outline, size: 16),
+      icon: Icon(Icons.info_outline, size: size),
       onPressed: onPressed,
       tooltip: 'detail'.tr,
     );
@@ -298,47 +373,6 @@ class MyQrcodeIconButton extends StatelessWidget {
   }
 }
 
-/// 删除图标无文字按钮
-class MyDeleteIconButton extends StatelessWidget {
-  final void Function()? onPressed;
-
-  /// 是否需要确认对话框
-  final bool confirm;
-
-  /// 提示的信息，默认为 “确定要删除当前记录吗？”
-  final String? content;
-
-  /// 提示信息是否需要添加 “此操作无法撤销”
-  final bool cancel;
-
-  const MyDeleteIconButton({
-    super.key,
-    this.onPressed,
-    this.confirm = true,
-    this.cancel = false,
-    this.content,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return IconButton(
-      icon: Icon(Icons.delete_outline, color: MyColor.error(), size: 16),
-      onPressed: confirm
-          ? () async {
-              final text =
-                  (content ??
-                      'deleteConfirmContent'.trParams({'title': 'record'.tr})) +
-                  (cancel ? '' : 'youCannotUndoThis'.tr);
-              await getIMessageService().deleteConfirm(text, () {
-                onPressed!();
-              }, textIsContent: true);
-            }
-          : onPressed,
-      tooltip: 'delete'.tr,
-    );
-  }
-}
-
 enum MyButtonStatus { primary, secondary, danger, warning, success, info }
 
 /// [MyButtonType.filled] 填充无阴影； 核心操作，当前流程中必须完成的关键操作，引导用户优先点击，如（保存、提交、确认）
@@ -360,6 +394,7 @@ class MyButton extends StatelessWidget {
   final double? radius; // 新增：自定义圆角（默认 8px）
   final EdgeInsetsGeometry? padding; // 新增：自定义内边距
   final double? size;
+  final String? tooltip;
 
   /// [isLoading] 是否显示加载动画；注意外部组件不需要使用 Obx 包裹，MyButton 内部已经自动处理 isLoading
   const MyButton(
@@ -374,6 +409,7 @@ class MyButton extends StatelessWidget {
     this.radius = 4.0,
     this.size,
     this.padding = const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+    this.tooltip,
   });
 
   @override
@@ -387,30 +423,32 @@ class MyButton extends StatelessWidget {
     final bool isDisabled = (isLoading?.value ?? false) || onPressed == null;
 
     final buttonType = type ?? MyButton.defaultType;
-    // 4. 根据 ButtonType 生成对应样式的按钮
-    final Widget buttonWidget = _buildButton(
-      buttonType,
-      baseColor,
-      onBaseColor,
-      currentIcon,
-      isDisabled,
-    );
-    if (isLoading == null) {
-      return buttonWidget;
+
+    // 定义一个统一的渲染函数，避免逻辑散落在 if/else 中
+    Widget buildFinalButton(bool loading) {
+      final bool disabled = isDisabled || loading;
+
+      Widget btn = _buildButton(
+        buttonType,
+        baseColor,
+        onBaseColor,
+        loading ? const MyAnimatedIcon(isLoading: true) : currentIcon,
+        disabled,
+      );
+
+      if (tooltip != null && !loading) {
+        btn = Tooltip(message: tooltip, child: btn);
+      }
+      return btn;
     }
 
-    // 5. 加载状态通过 Obx 响应式更新（仅当 isLoading 不为 null 时）
-    return Obx(
-      () => isLoading!.value
-          ? _buildButton(
-              buttonType,
-              baseColor,
-              onBaseColor,
-              const MyAnimatedIcon(isLoading: true),
-              true,
-            )
-          : buttonWidget,
-    );
+    // 如果没有加载状态，直接返回普通按钮
+    if (isLoading == null) {
+      return buildFinalButton(false);
+    }
+
+    // 响应式更新
+    return Obx(() => buildFinalButton(isLoading!.value));
   }
 
   Widget _buildButton(
@@ -587,6 +625,72 @@ class MyButton extends StatelessWidget {
       ),
       icon: icon,
       label: Text(label),
+    );
+  }
+}
+
+class MyMenuButtonItem {
+  final String text;
+  final IconData? iconData;
+  final Color? color;
+  final bool bold;
+  final void Function() onPressed;
+
+  const MyMenuButtonItem({
+    required this.text,
+    required this.onPressed,
+    this.iconData,
+    this.color,
+    this.bold = false,
+  });
+}
+
+class MyMenuButtons extends StatelessWidget {
+  final List<List<MyMenuButtonItem>> items;
+
+  const MyMenuButtons({super.key, required this.items});
+
+  @override
+  Widget build(BuildContext context) {
+    final List<PopupMenuEntry<String>> children = [];
+    for (var i = 0; i < items.length; i++) {
+      if (i > 0) {
+        children.add(const PopupMenuDivider(height: 1));
+      }
+      children.addAll(
+        items[i].map((item) {
+          final textChild = Text(
+            item.text,
+            style: TextStyle(
+              color: item.color,
+              fontWeight: item.bold ? FontWeight.bold : null,
+            ),
+          );
+          return PopupMenuItem(
+            value: item.text,
+            child: item.iconData == null
+                ? textChild
+                : Row(
+                    children: [
+                      Icon(item.iconData!, size: 20, color: item.color),
+                      const SizedBox(width: 8),
+                      textChild,
+                    ],
+                  ),
+          );
+        }),
+      );
+    }
+    return PopupMenuButton<String>(
+      icon: const Icon(Icons.more_vert),
+      onSelected: (value) {
+        final callback = items
+            .firstWhere((element) => element.first.text == value)
+            .first
+            .onPressed;
+        callback();
+      },
+      itemBuilder: (context) => children,
     );
   }
 }

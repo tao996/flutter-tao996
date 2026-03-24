@@ -55,6 +55,7 @@ export 'src/ui/widgets/icon.dart';
 export 'src/ui/widgets/image.dart';
 export 'src/ui/widgets/image_viewer.dart';
 export 'src/ui/widgets/input.dart';
+export 'src/ui/widgets/keep_alive.dart';
 export 'src/ui/widgets/input_date.dart';
 export 'src/ui/widgets/input_datetime.dart';
 export 'src/ui/widgets/layout.dart';

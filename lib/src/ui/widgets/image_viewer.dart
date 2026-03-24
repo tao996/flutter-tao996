@@ -309,7 +309,7 @@ Future<void> _downloadImage({
         await tu.file.saveImageToGallery(file: file);
       }
     }
-    tu.sd.success(message: 'downloadAndSaveSuccess'.tr);
+    tu.sd.success('downloadAndSaveSuccess'.tr);
   } catch (error, stackTrace) {
     getIDebugService().exception(
       error,

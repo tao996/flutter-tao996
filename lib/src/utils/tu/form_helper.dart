@@ -505,6 +505,46 @@ class FormHelperUtil {
     );
   }
 
+  Widget inputReadonly(String label, String text) {
+    return InputDecorator(
+      // 关键：将 isFocused 设为 false，并根据需要设置其启用状态
+      decoration: InputDecoration(
+        labelText: label, // 传入标签
+        // filled: true,
+        // 模拟只读背景：通常比普通输入框更灰一点，或者降低蓝色饱和度
+        // fillColor: Colors.grey[200],
+        border: const OutlineInputBorder(),
+        // // 这里的边框需要同时设置 disabledBorder，否则即便设为 readonly 也会有默认边框
+        // border: OutlineInputBorder(
+        //   borderRadius: BorderRadius.circular(8),
+        //   borderSide: BorderSide.none,
+        // ),
+        // enabledBorder: OutlineInputBorder(
+        //   borderRadius: BorderRadius.circular(8),
+        //   borderSide: BorderSide.none,
+        // ),
+        // disabledBorder: OutlineInputBorder(
+        //   borderRadius: BorderRadius.circular(8),
+        //   borderSide: BorderSide.none,
+        // ),
+
+        // 内容填充，让只读文本位置与普通输入框对齐
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 12,
+          vertical: 12,
+        ),
+      ),
+      child: Text(
+        text,
+        style: TextStyle(
+          fontSize: 16,
+          // 使用更浅的颜色模拟只读状态
+          color: Colors.black54,
+        ),
+      ),
+    );
+  }
+
   static const double myFormLeftWidth = 120;
 
   /// 左侧控件 + 右侧控件

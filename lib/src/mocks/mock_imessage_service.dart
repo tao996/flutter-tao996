@@ -1,6 +1,3 @@
-import 'package:flutter/material.dart';
-import 'package:get/get_navigation/src/snackbar/snackbar.dart';
-import 'package:get/get_navigation/src/snackbar/snackbar_controller.dart';
 import 'package:tao996/tao996.dart';
 
 class MockIMessageService implements IMessageService {
@@ -50,28 +47,12 @@ class MockIMessageService implements IMessageService {
   }) async => true;
 
   @override
-  void toast(String message) {
-    dprint('toast: $message');
-  }
-
-  @override
-  void notice(String message, {bool snackBar = false}) {
+  void notice(String message) {
     dprint('notice: $message');
   }
 
   @override
-  SnackbarController snackbar(
-    String title,
-    String message, {
-    SnackPosition snackPosition = SnackPosition.BOTTOM,
-    Icon? icon,
-    int seconds = 3,
-  }) {
-    throw UnimplementedError();
-  }
-
-  @override
-  void warning(String message, {bool snackBar = false}) {
+  void warning(String message) {
     dprint('warning: $message');
   }
 }

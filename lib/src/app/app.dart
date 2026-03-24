@@ -47,7 +47,7 @@ class MyTao996App extends StatelessWidget {
     return DynamicColorBuilder(
       builder: (ColorScheme? lightDynamic, ColorScheme? darkDynamic) {
         return GetMaterialApp(
-          debugShowCheckedModeBanner: true,
+          debugShowCheckedModeBanner: false,
           title: 'appTitle'.tr,
           // 🎯 Flutter Material 的配置 (控制内置组件)
           localizationsDelegates: [
