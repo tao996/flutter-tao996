@@ -22,11 +22,13 @@ class MyDialog {
           ),
           if (actions != null) ...actions,
           if (!replace)
-            IconButton(
+            MyButton(
+              'cancel'.tr,
+              iconData: Icons.clear,
+              autoSize: true,
               onPressed: () {
                 Get.back();
               },
-              icon: const Icon(Icons.close, size: 16),
             ),
         ],
       ),

@@ -41,6 +41,7 @@ class MyCancelButton extends StatelessWidget {
   final int? id;
   final MyButtonType? type;
   final double? size;
+  final bool autoSize;
   final Function()? onPressed;
 
   const MyCancelButton({
@@ -49,13 +50,14 @@ class MyCancelButton extends StatelessWidget {
     this.type,
     this.size,
     this.onPressed,
+    this.autoSize = true,
   });
 
   @override
   Widget build(BuildContext context) {
     return MyButton(
       id == null ? 'cancel'.tr : 'back'.tr,
-      iconData: id == null ? Icons.cancel_outlined : Icons.navigate_before,
+      iconData: id == null ? Icons.clear : Icons.navigate_before,
       onPressed:
           onPressed ??
           () {
@@ -63,6 +65,7 @@ class MyCancelButton extends StatelessWidget {
           },
       status: MyButtonStatus.secondary,
       type: type,
+      autoSize: true,
     );
   }
 }
@@ -72,16 +75,16 @@ class MySaveButton extends StatelessWidget {
   final void Function()? onPressed;
   final RxBool? isLoading;
   final MyButtonType? type;
-  final bool showIcon;
   final String? label;
+  final bool autoSize;
 
   const MySaveButton({
     super.key,
     this.onPressed,
     this.isLoading,
     this.type,
-    this.showIcon = true,
     this.label,
+    this.autoSize = true,
   });
 
   @override
@@ -89,51 +92,11 @@ class MySaveButton extends StatelessWidget {
     return MyButton(
       label ?? 'save'.tr,
       onPressed: onPressed,
-      iconData: showIcon ? Icons.save_outlined : null,
+      icon: const Icon(Icons.save_outlined),
       isLoading: isLoading,
       type: type,
+      autoSize: autoSize,
     );
-  }
-}
-
-/// 保存图标无文字按钮
-class MySaveIconButton extends StatelessWidget {
-  final void Function()? onPressed;
-  final RxBool? isLoading;
-  final double? size;
-
-  const MySaveIconButton({
-    super.key,
-    this.onPressed,
-    this.size,
-    this.isLoading,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    if (isLoading == null) {
-      return IconButton(
-        icon: Icon(
-          Icons.save_outlined,
-          size: size,
-          // color: tu.colorScheme.primary,
-        ),
-        onPressed: onPressed,
-        tooltip: 'save'.tr,
-      );
-    } else {
-      return Obx(() {
-        return IconButton(
-          icon: Icon(
-            Icons.save_outlined,
-            size: size,
-            // color: tu.colorScheme.primary,
-          ),
-          onPressed: isLoading!.value ? onPressed : null,
-          tooltip: 'save'.tr,
-        );
-      });
-    }
   }
 }
 
@@ -142,14 +105,14 @@ class MyInsertButton extends StatelessWidget {
   final String? label;
   final void Function()? onPressed;
   final MyButtonType? type;
-  final bool showIcon;
+  final bool autoSize;
 
   const MyInsertButton({
     super.key,
     this.label,
     this.onPressed,
     this.type,
-    this.showIcon = true,
+    this.autoSize = true,
   });
 
   @override
@@ -157,8 +120,9 @@ class MyInsertButton extends StatelessWidget {
     return MyButton(
       label ?? 'add'.tr,
       onPressed: onPressed,
-      icon: showIcon ? const Icon(Icons.add) : null,
+      icon: const Icon(Icons.add),
       type: type,
+      autoSize: autoSize,
     );
   }
 }
@@ -183,14 +147,14 @@ class MyEditButton extends StatelessWidget {
   final String? label;
   final void Function()? onPressed;
   final MyButtonType? type;
-  final bool showIcon;
+  final bool autoSize;
 
   const MyEditButton({
     super.key,
     this.label,
     this.onPressed,
     this.type,
-    this.showIcon = true,
+    this.autoSize = true,
   });
 
   @override
@@ -198,8 +162,9 @@ class MyEditButton extends StatelessWidget {
     return MyButton(
       label ?? 'edit'.tr,
       onPressed: onPressed,
-      icon: showIcon ? const Icon(Icons.edit) : null,
+      icon: const Icon(Icons.edit),
       type: type,
+      autoSize: autoSize,
     );
   }
 }
@@ -227,7 +192,6 @@ class MyDeleteButton extends StatelessWidget {
   final void Function()? onPressed;
 
   final MyButtonType? type;
-  final bool showIcon;
 
   /// 是否需要确认对话框
   final bool confirm;
@@ -237,6 +201,7 @@ class MyDeleteButton extends StatelessWidget {
 
   /// 提示信息是否需要添加 “此操作无法撤销”
   final bool cancel;
+  final bool autoSize;
 
   const MyDeleteButton({
     super.key,
@@ -245,7 +210,7 @@ class MyDeleteButton extends StatelessWidget {
     this.cancel = false,
     this.content,
     this.type,
-    this.showIcon = true,
+    this.autoSize = true,
   });
 
   @override
@@ -263,9 +228,10 @@ class MyDeleteButton extends StatelessWidget {
               }, textIsContent: true);
             }
           : onPressed,
-      icon: showIcon ? const Icon(Icons.delete) : null,
+      icon: const Icon(Icons.delete),
       status: MyButtonStatus.danger,
       type: type,
+      autoSize: autoSize,
     );
   }
 }
@@ -396,6 +362,9 @@ class MyButton extends StatelessWidget {
   final double? size;
   final String? tooltip;
 
+  /// 根据尺寸自动隐藏文件
+  final bool autoSize;
+
   /// [isLoading] 是否显示加载动画；注意外部组件不需要使用 Obx 包裹，MyButton 内部已经自动处理 isLoading
   const MyButton(
     this.label, {
@@ -410,6 +379,7 @@ class MyButton extends StatelessWidget {
     this.size,
     this.padding = const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
     this.tooltip,
+    this.autoSize = true,
   });
 
   @override
@@ -523,6 +493,12 @@ class MyButton extends StatelessWidget {
     Widget? icon,
     bool isDisabled,
   ) {
+    if (autoSize && tu.device.isMobile) {
+      return IconButton.filled(
+        onPressed: isDisabled ? null : onPressed,
+        icon: icon ?? Text(label),
+      );
+    }
     return FilledButton.icon(
       onPressed: isDisabled ? null : onPressed,
       style: FilledButton.styleFrom(
@@ -544,6 +520,12 @@ class MyButton extends StatelessWidget {
     Widget? icon,
     bool isDisabled,
   ) {
+    if (autoSize && tu.device.isMobile) {
+      return IconButton.filledTonal(
+        onPressed: isDisabled ? null : onPressed,
+        icon: icon ?? Text(label),
+      );
+    }
     return FilledButton.tonalIcon(
       onPressed: isDisabled ? null : onPressed,
       style: FilledButton.styleFrom(
@@ -566,6 +548,12 @@ class MyButton extends StatelessWidget {
     Widget? icon,
     bool isDisabled,
   ) {
+    if (autoSize && tu.device.isMobile) {
+      return IconButton(
+        onPressed: isDisabled ? null : onPressed,
+        icon: icon ?? Text(label),
+      );
+    }
     return ElevatedButton.icon(
       onPressed: isDisabled ? null : onPressed,
       style: ElevatedButton.styleFrom(
@@ -590,6 +578,12 @@ class MyButton extends StatelessWidget {
     Widget? icon,
     bool isDisabled,
   ) {
+    if (autoSize && tu.device.isMobile) {
+      return IconButton.outlined(
+        onPressed: isDisabled ? null : onPressed,
+        icon: icon ?? Text(label),
+      );
+    }
     return OutlinedButton.icon(
       onPressed: isDisabled ? null : onPressed,
       style: OutlinedButton.styleFrom(
@@ -614,6 +608,12 @@ class MyButton extends StatelessWidget {
     Widget? icon,
     bool isDisabled,
   ) {
+    if (autoSize && tu.device.isMobile) {
+      return IconButton.outlined(
+        onPressed: isDisabled ? null : onPressed,
+        icon: icon ?? Text(label),
+      );
+    }
     return TextButton.icon(
       onPressed: isDisabled ? null : onPressed,
       style: TextButton.styleFrom(
