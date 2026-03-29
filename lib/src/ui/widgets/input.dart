@@ -485,3 +485,39 @@ class StepperSuffixIcon extends StatelessWidget {
     );
   }
 }
+
+class MyTextArea extends StatelessWidget {
+  final TextEditingController controller;
+  final String labelText;
+  final String? hintText;
+  final String? helperText;
+  final int maxLines;
+
+  const MyTextArea({
+    super.key,
+    required this.controller,
+    required this.labelText,
+    this.hintText,
+    this.helperText,
+    this.maxLines = 3, // 默认提供 5 行高度
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return TextFormField(
+      controller: controller,
+      maxLines: maxLines,
+      // 允许无限换行或固定高度
+      keyboardType: TextInputType.multiline,
+      decoration: InputDecoration(
+        labelText: labelText,
+        hintText: hintText,
+        helperText: helperText,
+        // 建议使用 OutlineInputBorder 更有“输入框”的边界感
+        border: const OutlineInputBorder(),
+        alignLabelWithHint: true, // 关键：让 Label 文字对齐到左上角，而不是居中
+        contentPadding: const EdgeInsets.all(12),
+      ),
+    );
+  }
+}

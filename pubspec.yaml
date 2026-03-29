@@ -54,6 +54,10 @@ dependencies:
 #  collection: ^1.19.1
   flutter_smart_dialog: ^5.0.0
 
+  # 字符集
+  fast_gbk: ^1.0.0
+  charset: ^2.0.1
+
   mockito: any
 dev_dependencies:
   flutter_test:

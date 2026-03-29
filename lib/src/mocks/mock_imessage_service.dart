@@ -25,8 +25,8 @@ class MockIMessageService implements IMessageService {
 
   @override
   Future<bool?> deleteConfirm(
-    String text,
-    void Function() yes, {
+    String text, {
+    void Function()? yes,
     bool textIsContent = false,
   }) async {
     return deleteConfirmResponse;

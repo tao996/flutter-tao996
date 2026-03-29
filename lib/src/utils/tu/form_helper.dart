@@ -610,4 +610,20 @@ class FormHelperUtil {
       right: child,
     );
   }
+
+  Widget textarea({
+    required TextEditingController controller,
+    required String labelText,
+    String? hintText,
+    String? helperText,
+    int maxLines = 3,
+  }) {
+    return MyTextArea(
+      controller: controller,
+      labelText: labelText,
+      hintText: hintText,
+      helperText: helperText,
+      maxLines: maxLines,
+    );
+  }
 }

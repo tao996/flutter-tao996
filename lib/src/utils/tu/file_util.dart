@@ -101,7 +101,7 @@ class FileUtil implements IFilePickerService {
     await imageSaver.saveFile(filePath);
   }
 
-  /// 文件是否
+  /// 文件是否存在（如果需要检查目录和文件，请使用 tu.path.exists）
   bool exists(String filePath) {
     return File(filePath).existsSync();
   }

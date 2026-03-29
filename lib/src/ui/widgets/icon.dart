@@ -110,7 +110,8 @@ class MyIconSvg extends StatelessWidget {
         BlendMode.srcIn,
       );
 
-      if ((data as String).startsWith('assets/')) {
+      if ((data as String).startsWith('assets/') ||
+          (data as String).startsWith('packages/')) {
         return SvgPicture.asset(
           data,
           fit: BoxFit.contain,

@@ -20,8 +20,8 @@ abstract class IMessageService extends IDebugMessageService {
   /// 删除确认
   /// [textIsContent] 为 true 时，[text] 为内容，否则为标题
   Future<bool?> deleteConfirm(
-    String text,
-    void Function() yes, {
+    String text, {
+    void Function()? yes,
     bool textIsContent = false,
   });
 
@@ -82,8 +82,8 @@ class MessageService implements IMessageService {
 
   @override
   Future<bool?> deleteConfirm(
-    String text,
-    void Function() yes, {
+    String text, {
+    void Function()? yes,
     bool textIsContent = false,
   }) async {
     return Get.dialog(
@@ -108,7 +108,7 @@ class MessageService implements IMessageService {
             ),
             onPressed: () async {
               Get.back(result: true); // 必须提前关闭
-              yes.call();
+              yes?.call();
             },
             child: Text('confirm'.tr),
           ),

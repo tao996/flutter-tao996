@@ -66,6 +66,7 @@ class GetUtil {
     T Function() factoryFunc, {
     String? tag,
     bool overwrite = false,
+    bool fenix = true,
   }) {
     if (isControllerRegistered<T>(tag: tag)) {
       dprint('lazyPutController: ${T.toString()} is already registered');
@@ -73,10 +74,27 @@ class GetUtil {
         return;
       }
     }
-    Get.lazyPut(factoryFunc, tag: tag);
+    Get.lazyPut(factoryFunc, tag: tag, fenix: fenix);
   }
 
+  void removeController<T extends Object>({String? tag}) {
+    if (isControllerRegistered<T>(tag: tag)) {
+      Get.delete<T>(tag: tag);
+    }
+  }
+
+  /// 强制清理 GetX 管理的所有依赖，通常用于用户退出登录或重置 App 状态
+  void reset() {
+    Get.reset();
+  }
+
+  // 注意：总是指向父层的路由，因此不能用于嵌套路由中
   dynamic arguments() {
     return Get.arguments;
+  }
+
+  /// 用于嵌套路由
+  T getArguments<T>() {
+    return Get.find<T>();
   }
 }

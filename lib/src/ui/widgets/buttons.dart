@@ -223,9 +223,13 @@ class MyDeleteButton extends StatelessWidget {
                   (content ??
                       'deleteConfirmContent'.trParams({'title': 'record'.tr})) +
                   (cancel ? '' : 'youCannotUndoThis'.tr);
-              await getIMessageService().deleteConfirm(text, () {
-                onPressed!();
-              }, textIsContent: true);
+              await getIMessageService().deleteConfirm(
+                text,
+                yes: () {
+                  onPressed!();
+                },
+                textIsContent: true,
+              );
             }
           : onPressed,
       icon: const Icon(Icons.delete),
@@ -269,9 +273,13 @@ class MyDeleteIconButton extends StatelessWidget {
                   (content ??
                       'deleteConfirmContent'.trParams({'title': 'record'.tr})) +
                   (cancel ? '' : 'youCannotUndoThis'.tr);
-              await getIMessageService().deleteConfirm(text, () {
-                onPressed!();
-              }, textIsContent: true);
+              await getIMessageService().deleteConfirm(
+                text,
+                yes: () {
+                  onPressed!();
+                },
+                textIsContent: true,
+              );
             }
           : onPressed,
       tooltip: 'delete'.tr,
@@ -634,7 +642,7 @@ class MyMenuButtonItem {
   final IconData? iconData;
   final Color? color;
   final bool bold;
-  final void Function() onPressed;
+  final Future<void> Function() onPressed;
 
   const MyMenuButtonItem({
     required this.text,
@@ -652,45 +660,61 @@ class MyMenuButtons extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final List<PopupMenuEntry<String>> children = [];
-    for (var i = 0; i < items.length; i++) {
-      if (i > 0) {
-        children.add(const PopupMenuDivider(height: 1));
-      }
-      children.addAll(
-        items[i].map((item) {
-          final textChild = Text(
-            item.text,
-            style: TextStyle(
-              color: item.color,
-              fontWeight: item.bold ? FontWeight.bold : null,
-            ),
-          );
-          return PopupMenuItem(
-            value: item.text,
-            child: item.iconData == null
-                ? textChild
-                : Row(
-                    children: [
-                      Icon(item.iconData!, size: 20, color: item.color),
-                      const SizedBox(width: 8),
-                      textChild,
-                    ],
-                  ),
-          );
-        }),
-      );
-    }
-    return PopupMenuButton<String>(
+    return PopupMenuButton<MyMenuButtonItem>(
       icon: const Icon(Icons.more_vert),
-      onSelected: (value) {
-        final callback = items
-            .firstWhere((element) => element.first.text == value)
-            .first
-            .onPressed;
-        callback();
-      },
-      itemBuilder: (context) => children,
+      // 直接返回 item 本身，不用文字当 value，最安全
+      onSelected: (item) async => await item.onPressed(),
+      itemBuilder: (context) => _buildMenuItems(),
+    );
+  }
+
+  // 优化：把菜单构建抽离，代码更清晰
+  List<PopupMenuEntry<MyMenuButtonItem>> _buildMenuItems() {
+    final List<PopupMenuEntry<MyMenuButtonItem>> entries = [];
+
+    for (int i = 0; i < items.length; i++) {
+      final group = items[i];
+
+      // 分组之间加分隔线
+      if (i > 0) {
+        entries.add(const PopupMenuDivider(height: 1));
+      }
+
+      // 遍历当前组的所有按钮
+      for (final item in group) {
+        entries.add(
+          PopupMenuItem(
+            // 直接传递整个 item 对象，最安全
+            value: item,
+            child: _buildItemChild(item),
+          ),
+        );
+      }
+    }
+
+    return entries;
+  }
+
+  // 优化：单独构建菜单项UI
+  Widget _buildItemChild(MyMenuButtonItem item) {
+    final text = Text(
+      item.text,
+      style: TextStyle(
+        color: item.color,
+        fontWeight: item.bold ? FontWeight.bold : null,
+      ),
+    );
+
+    if (item.iconData == null) {
+      return text;
+    }
+
+    return Row(
+      children: [
+        Icon(item.iconData!, size: 20, color: item.color),
+        const SizedBox(width: 8),
+        text,
+      ],
     );
   }
 }

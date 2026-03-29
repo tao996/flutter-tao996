@@ -176,6 +176,16 @@ extension WidgetListSpacing on List<Widget> {
   }
 }
 
+extension WidgetMethods on Widget {
+  Widget withBodyPadding() {
+    return MyBodyPadding(this);
+  }
+
+  Widget withForm(GlobalKey<FormState> formKey) {
+    return Form(key: formKey, child: this);
+  }
+}
+
 /// 将一个子元素（如按钮）放在一个块级容器中，让其占满父容器的宽度
 class MyBlockWidget extends StatelessWidget {
   final Widget child;

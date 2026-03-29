@@ -140,9 +140,12 @@ class MyDialog {
                     if (deleteHint != null && deleteHint.isNotEmpty)
                       MyDeleteButton(
                         onPressed: () {
-                          getIMessageService().deleteConfirm(deleteHint, () {
-                            goBackWithResult('delete');
-                          });
+                          getIMessageService().deleteConfirm(
+                            deleteHint,
+                            yes: () {
+                              goBackWithResult('delete');
+                            },
+                          );
                         },
                       ),
                     // 保存按钮

@@ -1,4 +1,7 @@
+import 'dart:convert';
 import 'dart:math';
+import 'dart:typed_data';
+import 'package:fast_gbk/fast_gbk.dart';
 
 final RegExp halfWidthChars = RegExp("[a-zA-Z0-9\\s.,!?:;\"'\\-]");
 
@@ -117,4 +120,49 @@ class TextUtil {
     }
     return text;
   }
+
+  /// 编写通用适配解码器
+  /// 优先检查 BOM (字节顺序标记)，其次尝试 UTF-8，最后回退到 GBK。
+  String decode(List<int> bytes) {
+    if (bytes.isEmpty) return "";
+
+    // 1. 处理 UTF-16 (Windows 常见的 Little Endian)
+    // 特征：开头是 [0xFF, 0xFE]
+    if (bytes.length >= 2 && bytes[0] == 0xFF && bytes[1] == 0xFE) {
+      return String.fromCharCodes(
+        Uint16List.view(Uint8List.fromList(bytes).buffer, 2),
+      );
+    }
+
+    // 2. 尝试 UTF-8 解码
+    // 逻辑：如果字节流符合 UTF-8 规范，优先按 UTF-8 处理
+    try {
+      // allowMalformed: false 会在遇到非 UTF-8 字符时抛出异常
+      return const Utf8Decoder(allowMalformed: false).convert(bytes);
+    } catch (_) {
+      // 3. 回退到 GBK (Windows 中文环境最可能的编码)
+      try {
+        return gbk.decode(bytes);
+      } catch (e) {
+        // 4. 最后的防线：Latin1 (至少保证能显示，不崩溃)
+        return latin1.decode(bytes);
+      }
+    }
+  }
+
+  /*
+  Future<void> runCommand() async {
+  final proc = await Process.run(
+    'reg', 
+    ['query', r'HKCU\Environment'],
+    stdoutEncoding: null, // 必须为 null，拿到原始字节
+    stderrEncoding: null,
+  );
+
+  if (proc.stdout != null) {
+    // 自动适配多种编码
+    String output = SmartDecoder.decode(proc.stdout as List<int>);
+    print(output);
+  }
+}*/
 }

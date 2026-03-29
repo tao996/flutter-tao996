@@ -294,8 +294,7 @@ class MyModelDelegate<T extends IModel<T>> extends AbstractListDelegate<T> {
   }) async {
     if (deleteConfirm) {
       final ok =
-          await messageService.deleteConfirm(title ?? 'record'.tr, () {}) ??
-          false;
+          await messageService.deleteConfirm(title ?? 'record'.tr) ?? false;
       if (!ok) return 0;
     }
 
