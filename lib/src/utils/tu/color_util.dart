@@ -43,22 +43,26 @@ class ColorUtil {
 
   /// Color c2 = rgbToColor("255, 247, 255", opacity: 0.8);
   Color rgbToColor(String rgbString, {double opacity = 1.0}) {
-    // 1. 切割并转为整数列表
-    List<int> parts = rgbString
-        .split(',')
-        .map((e) => int.parse(e.trim()))
-        .toList();
+    try {
+      // 1. 切割并转为整数列表
+      List<int> parts = rgbString
+          .split(',')
+          .map((e) => int.parse(e.trim()))
+          .toList();
 
-    if (parts.length != 3) return Colors.black; // 兜底处理
+      if (parts.length != 3) return Colors.black; // 兜底处理
 
     // 2. 构造颜色
-    // 现代写法 (3.27+)：Color.from(r: ..., g: ..., b: ..., a: ...)
-    return Color.from(
-      red: parts[0] / 255,
-      green: parts[1] / 255,
-      blue: parts[2] / 255,
-      alpha: opacity,
-    );
+      // 现代写法 (3.27+)：Color.from(r: ..., g: ..., b: ..., a: ...)
+      return Color.from(
+        red: parts[0] / 255,
+        green: parts[1] / 255,
+        blue: parts[2] / 255,
+        alpha: opacity,
+      );
+    } catch (e) {
+      return Colors.black; // 解析失败返回黑色
+    }
   }
 
   Color parseToColor(String input, {double opacity = 1.0}) {

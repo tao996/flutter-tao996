@@ -105,11 +105,13 @@ class NumberUtil {
   /// [number]：支持 null、String、int、double 类型
   /// [decimalDigits]：保留的小数位数（默认 null，自动保留有效小数）
   /// [allowTrailingZeros]：是否保留小数末尾的 0（默认 false）
+  /// [round]：是否四舍五入（默认 true），为 false 时直接截断多余小数位
   /// 返回：格式化字符串，若无法解析则返回 "0"
   String formatNumberWithComma(
     dynamic number, {
     int? decimalDigits,
     bool allowTrailingZeros = false,
+    bool round = true,
   }) {
     // 1. 处理 null 情况
     if (number == null) {
@@ -139,16 +141,33 @@ class NumberUtil {
     // 3. 处理小数部分
     String numberStr;
     if (decimalDigits != null) {
-      // 限制小数位数（四舍五入）
-      final rounded = parsedNumber.toStringAsFixed(decimalDigits);
+      // 限制小数位数
+      final String formatted;
+      if (round) {
+        // 四舍五入
+        formatted = parsedNumber.toStringAsFixed(decimalDigits);
+      } else {
+        // 截断小数（不四舍五入）
+        final num scaled = parsedNumber * pow(10, decimalDigits);
+        final num truncated = scaled < 0 ? scaled.ceil() : scaled.floor();
+        formatted = (truncated / pow(10, decimalDigits)).toStringAsFixed(decimalDigits);
+      }
       if (!allowTrailingZeros) {
         // 移除小数末尾的0和多余的小数点
-        numberStr = rounded.replaceAll(
-          RegExp(r'(\.0*$)|(\.([0-9]*[1-9])0*$)'),
-          r'$2',
+        // 匹配：.000 -> 删除；.5000 -> .5；.50 -> .5
+        numberStr = formatted.replaceAllMapped(
+          RegExp(r'\.(\d*?[1-9])?0+$'),
+          (match) {
+            // 如果有非零数字，保留小数点和非零数字
+            if (match.group(1) != null) {
+              return '.${match.group(1)}';
+            }
+            // 全是0，去掉整个小数部分
+            return '';
+          },
         );
       } else {
-        numberStr = rounded;
+        numberStr = formatted;
       }
     } else {
       // 自动保留有效小数（整数不显示小数点）
