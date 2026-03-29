@@ -23,3 +23,10 @@ A new Flutter plugin project.
 <key>com.apple.security.files.user-selected.read-write</key>
 <true/>
 ```
+
+###  mockito
+
+`build.yaml`
+
+使用 `flutter pub run build_runner build` 来更新 `lib/src/mocks`
+（或 `dart run build_runner build --delete-conflicting-outputs`）

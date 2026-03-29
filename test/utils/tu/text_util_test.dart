@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'dart:typed_data';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:tao996/src/utils/tu/text_util.dart';
@@ -14,13 +13,17 @@ void main() {
 
     group('getTagsList', () {
       test('splits tags by comma', () {
-        expect(textUtil.getTagsList('tag1,tag2,tag3'),
-            equals(['tag1', 'tag2', 'tag3']));
+        expect(
+          textUtil.getTagsList('tag1,tag2,tag3'),
+          equals(['tag1', 'tag2', 'tag3']),
+        );
       });
 
       test('filters empty strings', () {
-        expect(textUtil.getTagsList('tag1,,tag2,,,tag3'),
-            equals(['tag1', 'tag2', 'tag3']));
+        expect(
+          textUtil.getTagsList('tag1,,tag2,,,tag3'),
+          equals(['tag1', 'tag2', 'tag3']),
+        );
       });
 
       test('returns empty list for empty string', () {
@@ -30,23 +33,31 @@ void main() {
 
     group('formatTags', () {
       test('formats list for saving with delimiters', () {
-        expect(textUtil.formatTags(listInput: ['tag1', 'tag2'], isSave: true),
-            equals(',tag1,tag2,'));
+        expect(
+          textUtil.formatTags(listInput: ['tag1', 'tag2'], isSave: true),
+          equals(',tag1,tag2,'),
+        );
       });
 
       test('formats list without save delimiters', () {
-        expect(textUtil.formatTags(listInput: ['tag1', 'tag2'], isSave: false),
-            equals('tag1,tag2'));
+        expect(
+          textUtil.formatTags(listInput: ['tag1', 'tag2'], isSave: false),
+          equals('tag1,tag2'),
+        );
       });
 
       test('formats string input', () {
-        expect(textUtil.formatTags(input: ',tag1,tag2,', isSave: true),
-            equals(',tag1,tag2,'));
+        expect(
+          textUtil.formatTags(input: ',tag1,tag2,', isSave: true),
+          equals(',tag1,tag2,'),
+        );
       });
 
       test('filters empty tags', () {
-        expect(textUtil.formatTags(listInput: ['tag1', '', 'tag2'], isSave: true),
-            equals(',tag1,tag2,'));
+        expect(
+          textUtil.formatTags(listInput: ['tag1', '', 'tag2'], isSave: true),
+          equals(',tag1,tag2,'),
+        );
       });
 
       test('returns empty string for empty input', () {
@@ -64,8 +75,7 @@ void main() {
       });
 
       test('ignores null values', () {
-        expect(textUtil.merge('-', 'a', null, 'b', null, 'c'),
-            equals('a-b-c'));
+        expect(textUtil.merge('-', 'a', null, 'b', null, 'c'), equals('a-b-c'));
       });
 
       test('ignores empty strings', () {
@@ -80,9 +90,28 @@ void main() {
       // Skipping null tests as they would be compile-time errors in null-safe Dart
 
       test('handles up to 16 parameters', () {
-        expect(textUtil.merge(',', 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i',
-            'j', 'k', 'l', 'm', 'n', 'o', 'p'),
-            equals('a,b,c,d,e,f,g,h,i,j,k,l,m,n,o,p'));
+        expect(
+          textUtil.merge(
+            ',',
+            'a',
+            'b',
+            'c',
+            'd',
+            'e',
+            'f',
+            'g',
+            'h',
+            'i',
+            'j',
+            'k',
+            'l',
+            'm',
+            'n',
+            'o',
+            'p',
+          ),
+          equals('a,b,c,d,e,f,g,h,i,j,k,l,m,n,o,p'),
+        );
       });
     });
 
@@ -123,8 +152,10 @@ void main() {
       });
 
       test('handles mixed Chinese and English', () {
-        expect(textUtil.maxLength(['Hi', '你好', 'Hello World']),
-            equals(6)); // "Hello World" = ceil(11/2) = 6
+        expect(
+          textUtil.maxLength(['Hi', '你好', 'Hello World']),
+          equals(6),
+        ); // "Hello World" = ceil(11/2) = 6
       });
     });
 
