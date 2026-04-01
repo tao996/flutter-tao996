@@ -24,6 +24,8 @@ A new Flutter plugin project.
 <true/>
 ```
 
+* https://pub.dev/packages/image_cropper
+
 ###  mockito
 
 `build.yaml`

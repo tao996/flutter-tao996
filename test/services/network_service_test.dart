@@ -1,3 +1,5 @@
+// ignore_for_file: invalid_use_of_protected_member
+
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:get/get.dart';
@@ -27,7 +29,10 @@ void main() {
       });
 
       test('handles multiple states', () {
-        networkService.state.value = [ConnectivityResult.none, ConnectivityResult.wifi];
+        networkService.state.value = [
+          ConnectivityResult.none,
+          ConnectivityResult.wifi,
+        ];
         expect(networkService.isNoNetwork, isTrue);
       });
     });
@@ -44,7 +49,10 @@ void main() {
       });
 
       test('handles multiple states', () {
-        networkService.state.value = [ConnectivityResult.mobile, ConnectivityResult.wifi];
+        networkService.state.value = [
+          ConnectivityResult.mobile,
+          ConnectivityResult.wifi,
+        ];
         expect(networkService.isMobileNetwork, isTrue);
       });
     });
@@ -71,7 +79,10 @@ void main() {
       });
 
       test('handles multiple states', () {
-        networkService.state.value = [ConnectivityResult.mobile, ConnectivityResult.wifi];
+        networkService.state.value = [
+          ConnectivityResult.mobile,
+          ConnectivityResult.wifi,
+        ];
         expect(networkService.isSpeedNetwork, isTrue);
       });
     });
@@ -124,8 +135,7 @@ class TestNetworkService extends INetworkService {
       state.value.contains(ConnectivityResult.ethernet);
 
   @override
-  Stream<List<ConnectivityResult>> get onConnectivityChanged =>
-      Stream.empty();
+  Stream<List<ConnectivityResult>> get onConnectivityChanged => Stream.empty();
 
   @override
   void onInit({Future<void> Function()? callback}) {}

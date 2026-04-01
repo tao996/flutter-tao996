@@ -25,7 +25,10 @@ class DatetimeUtil {
   }
 
   /// 按 ymd 格式化
-  String formatDate(DateTime datetime) {
+  String formatDate(DateTime? datetime) {
+    if (datetime == null) {
+      return '';
+    }
     return format(dateTime: datetime, format: DateTimeFormat.ymd);
   }
 

@@ -32,9 +32,15 @@ class TestModel extends IModel<TestModel> {
       id: map['id'] ?? 0,
       name: map['name'] ?? '',
       age: map['age'] ?? 0,
-      createdAt: map['createdAt'] != null ? DateTime.tryParse(map['createdAt']) : null,
-      updatedAt: map['updatedAt'] != null ? DateTime.tryParse(map['updatedAt']) : null,
-      deletedAt: map['deletedAt'] != null ? DateTime.tryParse(map['deletedAt']) : null,
+      createdAt: map['createdAt'] != null
+          ? DateTime.tryParse(map['createdAt'])
+          : null,
+      updatedAt: map['updatedAt'] != null
+          ? DateTime.tryParse(map['updatedAt'])
+          : null,
+      deletedAt: map['deletedAt'] != null
+          ? DateTime.tryParse(map['deletedAt'])
+          : null,
     );
   }
 
@@ -60,28 +66,20 @@ class TestModel extends IModel<TestModel> {
 class TestNoTimeModel extends INoTimeModel<TestNoTimeModel> {
   String data;
 
-  TestNoTimeModel({
-    super.id = 0,
-    required this.data,
-  });
+  TestNoTimeModel({super.id = 0, required this.data});
 
   @override
   Map<String, dynamic> toMap() {
-    return {
-      'id': id,
-      'data': data,
-    };
+    return {'id': id, 'data': data};
   }
 
   factory TestNoTimeModel.fromMap(Map<String, dynamic> map) {
-    return TestNoTimeModel(
-      id: map['id'] ?? 0,
-      data: map['data'] ?? '',
-    );
+    return TestNoTimeModel(id: map['id'] ?? 0, data: map['data'] ?? '');
   }
 
   @override
-  TestNoTimeModel fromMap(Map<String, dynamic> map) => TestNoTimeModel.fromMap(map);
+  TestNoTimeModel fromMap(Map<String, dynamic> map) =>
+      TestNoTimeModel.fromMap(map);
 
   @override
   Map<String, dynamic> toJson() => toMap();
@@ -143,7 +141,11 @@ void main() {
 
       test('preserves existing createdAt', () {
         final existingTime = DateTime(2025, 1, 1);
-        final model = TestModel(name: 'Alice', age: 30, createdAt: existingTime);
+        final model = TestModel(
+          name: 'Alice',
+          age: 30,
+          createdAt: existingTime,
+        );
         final insertMap = model.toInsertMap(addCreatedAt: true);
         expect(insertMap['createdAt'], equals(existingTime.toIso8601String()));
       });
@@ -252,7 +254,7 @@ void main() {
   group('INoTimeModel', () {
     test('time fields are excluded from JSON serialization', () {
       final model = TestNoTimeModel(data: 'test');
-      final json = model.toJson();
+      model.toJson();
 
       // INoTimeModel 的时间字段被标记为 @JsonKey(includeFromJson: false, includeToJson: false)
       // 但在 toMap 中仍然可能包含这些字段

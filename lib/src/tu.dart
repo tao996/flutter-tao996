@@ -16,6 +16,7 @@ import 'package:tao996/src/utils/tu/form_helper.dart';
 import 'package:tao996/src/utils/tu/fpath_util.dart';
 import 'package:tao996/src/utils/tu/fn_util.dart';
 import 'package:tao996/src/utils/tu/get_util.dart';
+import 'package:tao996/src/utils/tu/image_util.dart';
 import 'package:tao996/src/utils/tu/number_util.dart';
 import 'package:tao996/src/utils/tu/permission_util.dart';
 import 'package:tao996/src/utils/tu/smart_dialog_util.dart';
@@ -51,6 +52,7 @@ class _TUtils {
   final font = const FontUtil();
   final assert1 = const AssertUtil();
   final sd = const SmartDialogUtil();
+  final image = const ImageUtil();
 
   final api = const ApiUtil();
   final nav = const NavUtil();

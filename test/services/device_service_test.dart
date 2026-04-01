@@ -1,4 +1,3 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:tao996/src/services/device_service.dart';
 
@@ -28,7 +27,11 @@ void main() {
           'fuchsia',
         ];
         final hasMatch = expectedPlatforms.any((p) => result.contains(p));
-        expect(hasMatch, isTrue, reason: 'Expected one of $expectedPlatforms but got $result');
+        expect(
+          hasMatch,
+          isTrue,
+          reason: 'Expected one of $expectedPlatforms but got $result',
+        );
       });
     });
 
@@ -41,9 +44,9 @@ void main() {
         // Note: This test behavior depends on the platform running the test
         final isPc = MyDeviceService.isPc();
         final platform = MyDeviceService.platform();
-        
-        if (platform.contains('windows') || 
-            platform.contains('linux') || 
+
+        if (platform.contains('windows') ||
+            platform.contains('linux') ||
             platform.contains('macos')) {
           expect(isPc, isTrue);
         }
@@ -76,7 +79,7 @@ void main() {
         final os = MyDeviceService.runtimeOS();
         final isPc = MyDeviceService.isPc();
         final isMobile = MyDeviceService.isMobile();
-        
+
         if (os == OS.windows || os == OS.linux || os == OS.macos) {
           expect(isPc, isTrue);
           expect(isMobile, isFalse);

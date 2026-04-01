@@ -232,7 +232,7 @@ class MyDeleteButton extends StatelessWidget {
               );
             }
           : onPressed,
-      icon: const Icon(Icons.delete),
+      icon: Icon(Icons.delete_outline, color: MyColor.error()),
       status: MyButtonStatus.danger,
       type: type,
       autoSize: autoSize,
@@ -617,7 +617,7 @@ class MyButton extends StatelessWidget {
     bool isDisabled,
   ) {
     if (autoSize && tu.device.isMobile) {
-      return IconButton.outlined(
+      return IconButton(
         onPressed: isDisabled ? null : onPressed,
         icon: icon ?? Text(label),
       );

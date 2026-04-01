@@ -5,10 +5,13 @@ final Map<String, Map<String, String>> words = {
   'zh_CN': {
     'confirm': '确定',
     'cancel': '取消',
+    'done': '完成',
     'save': '保存',
     'add': '添加',
     'edit': '编辑',
     'delete': '删除',
+    'upload': '上传',
+    'remove': '移除',
     'back': '返回',
     'search': '搜索',
     'success': '成功',
@@ -40,6 +43,7 @@ final Map<String, Map<String, String>> words = {
     'clickToLoadImage': '点击加载图片',
     'imageLoading': '加载中...',
     'imageLoadError': '图片加载失败',
+    'cropImage': '裁剪图片',
 
     'imageDownloadError': '图片下载失败',
     'downloadAndSaveSuccess': '下载并保存成功',
@@ -102,12 +106,15 @@ final Map<String, Map<String, String>> words = {
   'zh_TW': {
     'confirm': '確定',
     'cancel': '取消',
+    'done': '完成',
     'save': '儲存',
     // 繁体更常用 '儲存'
     'add': '新增',
     // 繁体更常用 '新增'
     'edit': '編輯',
     'delete': '刪除',
+    'upload': '上傳',
+    'remove': '移除',
     'back': '返回',
     'search': '搜尋',
     'success': '成功',
@@ -140,6 +147,7 @@ final Map<String, Map<String, String>> words = {
     'clickToLoadImage': '點擊載入圖片',
     'imageLoading': '載入中...',
     'imageLoadError': '圖片載入失敗',
+    'cropImage': '裁剪圖片',
 
     'imageDownloadError': '圖片下載失敗',
     'downloadAndSaveSuccess': '下載並儲存成功',
@@ -194,10 +202,13 @@ final Map<String, Map<String, String>> words = {
   'en_US': {
     'confirm': 'Confirm',
     'cancel': 'Cancel',
+    'done': 'Done',
     'save': 'Save',
     'add': 'Add',
     'edit': 'Edit',
     'delete': 'Delete',
+    'upload': 'Upload',
+    'remove': 'Remove',
     'back': 'Back',
     'search': 'Search',
     'success': 'Success',
@@ -228,6 +239,7 @@ final Map<String, Map<String, String>> words = {
     'clickToLoadImage': 'Click to load image',
     'imageLoading': 'Loading...',
     'imageLoadError': 'Image load error',
+    'cropImage': 'Crop Image',
 
     'imageDownloadError': 'Image download error',
     'downloadAndSaveSuccess': 'Downloaded and saved successfully',
@@ -282,10 +294,13 @@ final Map<String, Map<String, String>> words = {
   'ja_JP': {
     'confirm': '確定',
     'cancel': 'キャンセル',
+    'done': '完了',
     'save': '保存',
     'add': '追加',
     'edit': '編集',
     'delete': '削除',
+    'upload': 'アップロード',
+    'remove': '削除',
     'back': '戻る',
     'search': '検索',
     'success': '成功',
@@ -316,6 +331,7 @@ final Map<String, Map<String, String>> words = {
     'clickToLoadImage': '画像をクリックして読み込む',
     'imageLoading': '読み込み中...',
     'imageLoadError': '画像の読み込みエラー',
+    'cropImage': '画像をトリミング',
 
     'imageDownloadError': '画像のダウンロードエラー',
     'downloadAndSaveSuccess': 'ダウンロードと保存に成功しました',

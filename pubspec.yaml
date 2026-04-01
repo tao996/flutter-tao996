@@ -57,6 +57,10 @@ dependencies:
   # 字符集
   fast_gbk: ^1.0.0
   charset: ^2.0.1
+  
+  # 图片裁剪和扩展功能
+  extended_image: ^10.0.1
+  image: ^4.5.3  # 用于图片处理（裁剪、压缩等）
 
   mockito: any
 dev_dependencies:

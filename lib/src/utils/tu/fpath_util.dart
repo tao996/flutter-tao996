@@ -429,4 +429,13 @@ class FilepathUtil {
   bool exists(String path) {
     return FileSystemEntity.typeSync(path) != FileSystemEntityType.notFound;
   }
+
+  /// 递归创建目录
+  Directory createDir(String path) {
+    final d = Directory(path);
+    if (!d.existsSync()) {
+      d.createSync(recursive: true);
+    }
+    return d;
+  }
 }
