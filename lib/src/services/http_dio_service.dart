@@ -29,6 +29,15 @@ abstract class IDioHttpService {
     void Function(int, int)? onReceiveProgress,
   });
 
+  Future<HttpResponse> getUri(
+    Uri uri, {
+    Dio? dio,
+    Object? data,
+    Options? options,
+    CancelToken? cancelToken,
+    ProgressCallback? onReceiveProgress,
+  });
+
   Future<HttpResponse> post(
     String url, {
     Dio? dio,
@@ -36,6 +45,15 @@ abstract class IDioHttpService {
     CancelToken? cancelToken,
     Map<String, dynamic>? queryParameters,
     Options? options,
+    void Function(int, int)? onSendProgress,
+    void Function(int, int)? onReceiveProgress,
+  });
+  Future<HttpResponse> postUri(
+    Uri uri, {
+    Dio? dio,
+    Object? data,
+    Options? options,
+    CancelToken? cancelToken,
     void Function(int, int)? onSendProgress,
     void Function(int, int)? onReceiveProgress,
   });
@@ -197,6 +215,24 @@ class DioHttpService implements IDioHttpService {
     return HttpResponse(data: response.data, statusCode: response.statusCode);
   }
 
+  Future<HttpResponse> getUri(
+    Uri uri, {
+    Dio? dio,
+    Object? data,
+    Options? options,
+    CancelToken? cancelToken,
+    ProgressCallback? onReceiveProgress,
+  }) async {
+    final response = await _getDio(dio).getUri(
+      uri,
+      cancelToken: cancelToken,
+      data: data,
+      options: options,
+      onReceiveProgress: onReceiveProgress,
+    );
+    return HttpResponse(data: response.data, statusCode: response.statusCode);
+  }
+
   @override
   Future<HttpResponse> post(
     String url, {
@@ -215,6 +251,26 @@ class DioHttpService implements IDioHttpService {
       cancelToken: cancelToken,
       queryParameters: queryParameters,
       options: options,
+      onSendProgress: onSendProgress,
+      onReceiveProgress: onReceiveProgress,
+    );
+    return HttpResponse(data: response.data, statusCode: response.statusCode);
+  }
+
+  Future<HttpResponse> postUri(
+    Uri uri, {
+    Dio? dio,
+    Object? data,
+    Options? options,
+    CancelToken? cancelToken,
+    void Function(int, int)? onSendProgress,
+    void Function(int, int)? onReceiveProgress,
+  }) async {
+    final response = await _getDio(dio).postUri(
+      uri,
+      data: data,
+      options: options,
+      cancelToken: cancelToken,
       onSendProgress: onSendProgress,
       onReceiveProgress: onReceiveProgress,
     );
@@ -295,18 +351,20 @@ class NetworkInterceptor extends Interceptor {
   @override
   void onRequest(RequestOptions options, RequestInterceptorHandler handler) {
     // 在请求发送前检查网络状态
-    if (_networkService.isNoNetwork) {
-      // 如果没有网络，直接拒绝请求并抛出自定义异常
-      _debugService.d('拦截器：没有网络连接，请求被取消');
-      // throw NoNetworkException();
-      // _messageService.showToast(msg: 'noInternetConnection');
-      return handler.reject(
-        DioException(
-          requestOptions: options,
-          error: NoNetworkException('noInternetConnection'.tr),
-          type: DioExceptionType.unknown,
-        ),
-      );
+    if (Platform.isAndroid || Platform.isIOS) {
+      if (_networkService.isNoNetwork) {
+        // 如果没有网络，直接拒绝请求并抛出自定义异常
+        _debugService.d('拦截器：没有网络连接，请求被取消');
+        // throw NoNetworkException();
+        // _messageService.showToast(msg: 'noInternetConnection');
+        return handler.reject(
+          DioException(
+            requestOptions: options,
+            error: NoNetworkException('noInternetConnection'.tr),
+            type: DioExceptionType.unknown,
+          ),
+        );
+      }
     }
     // 如果有网络，继续请求
     super.onRequest(options, handler);

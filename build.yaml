@@ -10,6 +10,7 @@ targets:
       json_serializable:
         generate_for:
           - lib/src/models/*.dart
+          - lib/src/app/models/*.dart
           - lib/src/utils/ps/*.dart
 
       # 3. 彻底禁用不必要的生成器在其他文件夹的扫描
@@ -17,4 +18,5 @@ targets:
         generate_for:
           - lib/src/mocks/*.dart
           - lib/src/models/*.dart
+          - lib/src/app/models/*.dart
           - lib/src/utils/ps/*.dart

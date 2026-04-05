@@ -35,10 +35,12 @@ class MemberModule implements DbMigrateModule {
 */
 /// 模块迁移接口
 abstract class DbMigrateModule {
-  String get id;
+  final String id;
 
   /// 该模块当前代码中的最新版本
-  int get version;
+  final int version;
+
+  DbMigrateModule(this.id, this.version);
 
   /// 处理第一次建表
   void onCreate(Batch batch);
@@ -65,7 +67,11 @@ class MyDbMigrate {
     }
   }
 
-  Future<void> execute(SqfliteDatabaseService db) async {
+  Future<void> execute(
+    SqfliteDatabaseService db, {
+    Future<void> Function(Database, int)? onCreate,
+    Future<void> Function(Database, int, int)? onUpgrade,
+  }) async {
     // 这里的 dbService.migrate 是你自定义的服务封装
     await db.migrate((path) async {
       return await openDatabase(
@@ -85,16 +91,24 @@ class MyDbMigrate {
 
           // 3. 初始化所有当前注册的模块
           for (var module in modules) {
-            module.onCreate(batch);
             // 🎯 关键：在建表时立即记录版本，防止同步逻辑重复触发
             batch.insert('_module_versions', {
               'module_id': module.id,
               'version': module.version,
             });
+
+            module.onCreate(batch);
+          }
+
+          if (onCreate != null) {
+            await onCreate(db, version);
           }
           await batch.commit();
         },
         onUpgrade: (db, oldVersion, newVersion) async {
+          if (onUpgrade != null) {
+            await onUpgrade(db, oldVersion, newVersion);
+          }
           // 系统级升级逻辑（如果将来需要修改 _module_versions 表结构，在此处理）
           // 业务模块的升级将统一交给 _syncModules 处理
         },

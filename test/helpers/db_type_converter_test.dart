@@ -3,7 +3,7 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:tao996/src/helpers/db_type_converter.dart';
+import 'package:tao996/src/db/db_type_converter.dart';
 
 void main() {
   group('JsonColorConverter', () {
@@ -164,7 +164,8 @@ void main() {
     });
 
     test('converts JSON string to nested Map', () {
-      const jsonStr = '{"section1":{"key1":"value1"},"section2":{"key2":"value2"}}';
+      const jsonStr =
+          '{"section1":{"key1":"value1"},"section2":{"key2":"value2"}}';
       final result = converter.fromJson(jsonStr);
       expect(result['section1']?['key1'], equals('value1'));
       expect(result['section2']?['key2'], equals('value2'));
@@ -406,7 +407,10 @@ void main() {
 
     test('converts FontWeight to int index', () {
       // ignore: deprecated_member_use
-      expect(converter.toJson(FontWeight.normal), equals(FontWeight.normal.index));
+      expect(
+        converter.toJson(FontWeight.normal),
+        equals(FontWeight.normal.index),
+      );
       // ignore: deprecated_member_use
       expect(converter.toJson(FontWeight.bold), equals(FontWeight.bold.index));
     });

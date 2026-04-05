@@ -2,14 +2,14 @@ export 'src/const/color.dart';
 export 'src/const/icon.dart';
 export 'src/const/space.dart';
 
-export 'src/helpers/db_migrate.dart';
-export 'src/helpers/db_type_converter.dart';
-export 'src/helpers/kv.dart';
-export 'src/helpers/model.dart';
-export 'src/helpers/model_action.dart';
-export 'src/helpers/model_delegate.dart';
-export 'src/helpers/model_helper.dart';
-export 'src/helpers/query_builder.dart';
+export 'src/db/db_migrate.dart';
+export 'src/db/db_type_converter.dart';
+export 'src/db/kv.dart';
+export 'src/db/model.dart';
+export 'src/db/model_action.dart';
+export 'src/db/model_delegate.dart';
+export 'src/db/model_helper.dart';
+export 'src/db/query_builder.dart';
 
 export 'src/mixin/mixin_service.dart';
 export 'src/mixin/mixin_controller.dart';
@@ -25,7 +25,7 @@ export 'src/services/log_service.dart';
 export 'src/services/message_service.dart';
 export 'src/services/network_service.dart';
 export 'src/services/path_service.dart';
-export 'src/app/app_routes.dart';
+
 export 'src/services/setting_service.dart';
 export 'src/services/share_service.dart';
 export 'src/services/theme_service.dart';
@@ -86,6 +86,3 @@ export 'src/utils/ps/painter.dart';
 export 'src/getx.dart';
 export 'src/tu.dart';
 export 'src/tu_headers.dart';
-
-export 'src/app/app.dart';
-export 'src/app/app_contact_service.dart';

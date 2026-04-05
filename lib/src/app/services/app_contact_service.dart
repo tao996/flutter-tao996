@@ -76,7 +76,7 @@ class AppContactService {
 
   Widget weiboIcon() {
     return SvgPicture.asset(
-      'assets/icons/weibo.svg', // 确保路径正确
+      'packages/tao996/assets/icons/weibo.svg', // 确保路径正确
       width: 30,
       height: 30,
       colorFilter: ColorFilter.mode(Colors.red, BlendMode.srcIn), // 可以设置颜色
@@ -85,7 +85,7 @@ class AppContactService {
 
   Widget twitterIcon() {
     return SvgPicture.asset(
-      'assets/icons/twitter.svg', // 确保路径正确
+      'packages/tao996/assets/icons/twitter.svg', // 确保路径正确
       width: 30,
       height: 30,
     );

@@ -74,6 +74,7 @@ class _AnimatedIconState extends State<MyAnimatedIcon>
 }
 
 /// 显示图像或图标的组件,优先级：IconData > Asset 资源 > 本地文件
+/// 支持第3方包 `packages:【包名】/【资源在 package 里的实际路径】` 如 `packages/localsync_sdk/assets/images/logo.png`
 class MyIconSvg extends StatelessWidget {
   final double size;
   final Color? color;

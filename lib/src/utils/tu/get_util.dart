@@ -22,6 +22,7 @@ class GetUtil {
   }
 
   /// 懒注册一个服务，如果已经注册，则跳过
+  /// 注意：只有 putController 才会调用 onInit 方法
   void lazyPutService<T extends Object>(
     T Function() factoryFunc, {
     bool overwrite = false,

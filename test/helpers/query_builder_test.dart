@@ -1,11 +1,10 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:tao996/src/helpers/query_builder.dart';
+import 'package:tao996/src/db/query_builder.dart';
 
 void main() {
   group('QueryBuilder', () {
     test('can add where condition', () {
-      final builder = QueryBuilder<String>()
-        ..where('name', '=', 'Alice');
+      final builder = QueryBuilder<String>()..where('name', '=', 'Alice');
 
       final (sql, args) = builder.build();
       expect(sql, equals('name = ?'));
@@ -33,8 +32,7 @@ void main() {
     });
 
     test('andWhere without previous condition works like where', () {
-      final builder = QueryBuilder<String>()
-        ..andWhere('name', '=', 'Alice');
+      final builder = QueryBuilder<String>()..andWhere('name', '=', 'Alice');
 
       final (sql, args) = builder.build();
       expect(sql, equals('name = ?'));
@@ -55,8 +53,7 @@ void main() {
     });
 
     test('handles null values', () {
-      final builder = QueryBuilder<String>()
-        ..where('deleted_at', 'IS', null);
+      final builder = QueryBuilder<String>()..where('deleted_at', 'IS', null);
 
       final (sql, args) = builder.build();
       expect(sql, equals('deleted_at IS ?'));
@@ -88,11 +85,7 @@ void main() {
     });
 
     test('can create primary key column', () {
-      final column = DDLColumn(
-        'id',
-        DDLColumnType.integer,
-        isPrimaryKey: true,
-      );
+      final column = DDLColumn('id', DDLColumnType.integer, isPrimaryKey: true);
       expect(column.toString(), equals('id INTEGER PRIMARY KEY'));
     });
 
@@ -117,11 +110,7 @@ void main() {
     });
 
     test('can create unique column', () {
-      final column = DDLColumn(
-        'email',
-        DDLColumnType.text,
-        isUnique: true,
-      );
+      final column = DDLColumn('email', DDLColumnType.text, isUnique: true);
       expect(column.toString(), equals('email TEXT UNIQUE'));
     });
 

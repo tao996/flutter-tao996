@@ -34,6 +34,8 @@ class DataUtil {
   }) {
     if (v == null ||
         v == '' ||
+        v == false ||
+        v == 0 ||
         (textCompare &&
             (v == '0' ||
                 v == 'false' ||
@@ -42,13 +44,15 @@ class DataUtil {
                 v == 'OFF' ||
                 v == 'off'))) {
       return defaultValue;
-    } else if (textCompare &&
-        (v == '1' ||
-            v == 'true' ||
-            v == 't' ||
-            v == 'T' ||
-            v == 'on' ||
-            v == 'ON')) {
+    } else if (v == true ||
+        v == 1 ||
+        (textCompare &&
+            (v == '1' ||
+                v == 'true' ||
+                v == 't' ||
+                v == 'T' ||
+                v == 'on' ||
+                v == 'ON'))) {
       return true;
     } else if (v is num) {
       return v > 0;

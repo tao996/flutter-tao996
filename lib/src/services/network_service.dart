@@ -1,6 +1,7 @@
 // ignore_for_file: invalid_use_of_protected_member
 
 import 'dart:async';
+import 'dart:io';
 
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:get/get.dart';
@@ -40,9 +41,19 @@ class NetworkService extends INetworkService {
 
   NetworkService() {
     // 首次初始化时获取当前网络状态，这是一个异步操作
-    _connectivity.checkConnectivity().then((result) {
-      _updateNetworkState(result);
-    });
+    _initNetwork();
+  }
+
+  void _initNetwork() async {
+    var result = await _connectivity.checkConnectivity();
+
+    // 如果 Windows 启动瞬时返回 none，延迟 1 秒再试一次（Windows 特有补丁）
+    if (Platform.isWindows && result.contains(ConnectivityResult.none)) {
+      await Future.delayed(const Duration(seconds: 1));
+      result = await _connectivity.checkConnectivity();
+    }
+
+    _updateNetworkState(result);
   }
 
   @override
@@ -50,6 +61,7 @@ class NetworkService extends INetworkService {
     _subscription = _connectivity.onConnectivityChanged.listen((
       List<ConnectivityResult> result,
     ) async {
+      dprint('NetworkService.onConnectivityChanged.listen');
       _updateNetworkState(result);
       if (callback != null) {
         await callback();

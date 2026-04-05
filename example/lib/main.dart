@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
+import 'package:tao996/app.dart';
 import 'package:tao996/tao996.dart';
 
 import 'helper/setting_helper.dart';

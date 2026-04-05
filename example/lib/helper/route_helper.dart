@@ -1,5 +1,5 @@
 import 'package:get/get.dart';
-import 'package:tao996/tao996.dart';
+import 'package:tao996/app.dart';
 import 'package:tao996_example/demo/page/canvas.dart';
 import 'package:tao996_example/demo/page/easy_refresh.dart';
 import 'package:tao996_example/demo/page/image.dart';

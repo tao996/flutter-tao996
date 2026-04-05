@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:tao996/src/helpers/model.dart';
+import 'package:tao996/src/db/model.dart';
 
 // 测试用的具体模型实现
 class TestModel extends IModel<TestModel> {
