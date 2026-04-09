@@ -76,18 +76,20 @@ class _AnimatedIconState extends State<MyAnimatedIcon>
 /// 显示图像或图标的组件,优先级：IconData > Asset 资源 > 本地文件
 /// 支持第3方包 `packages:【包名】/【资源在 package 里的实际路径】` 如 `packages/localsync_sdk/assets/images/logo.png`
 class MyIconSvg extends StatelessWidget {
-  final double size;
+  final double? size;
   final Color? color;
   final dynamic data;
   final int textLength;
+  final BoxFit boxFit;
 
-  /// 支持 IconData, 'assets/xxx.svg' > '本地文本 /xxx.svg'
+  /// 支持 IconData, 'assets/xxx.svg' > '本地文件 /xxx.svg'
   const MyIconSvg(
     this.data, {
     super.key,
     this.size = 24,
     this.color,
     this.textLength = 7,
+    this.boxFit = BoxFit.cover,
   });
 
   @override
@@ -110,21 +112,23 @@ class MyIconSvg extends StatelessWidget {
         finalColor,
         BlendMode.srcIn,
       );
-
+      // assets 资源
       if ((data as String).startsWith('assets/') ||
           (data as String).startsWith('packages/')) {
         return SvgPicture.asset(
           data,
-          fit: BoxFit.contain,
+          fit: boxFit,
           colorFilter: colorFilter,
           width: size,
           height: size,
         );
-      } else if ((data as String).startsWith('https://') ||
+      }
+      // 网络资源
+      else if ((data as String).startsWith('https://') ||
           (data as String).startsWith('http://')) {
         return SvgPicture.network(
           data,
-          fit: BoxFit.contain,
+          fit: boxFit,
           colorFilter: colorFilter,
           width: size,
           height: size,
@@ -136,7 +140,7 @@ class MyIconSvg extends StatelessWidget {
         if (data.toLowerCase().endsWith('.svg')) {
           return SvgPicture.file(
             file,
-            fit: BoxFit.contain,
+            fit: boxFit,
             colorFilter: colorFilter,
             width: size,
             height: size,
@@ -146,7 +150,7 @@ class MyIconSvg extends StatelessWidget {
           file,
           width: size,
           height: size,
-          fit: BoxFit.contain,
+          fit: boxFit,
           color: color, // 注意：Image 的 color 会覆盖整个图片，通常仅用于纯色图标
         );
       }

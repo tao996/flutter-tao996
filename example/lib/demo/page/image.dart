@@ -18,7 +18,7 @@ class MyDemoImage extends StatelessWidget {
             const SizedBox(height: 10),
             MyText.h3('图片显示 MyImageCache'),
             const SizedBox(height: 10),
-            MyImageCache(url: 'https://picsum.photos/250?image=9'),
+            MyImageCache(data: 'https://picsum.photos/250?image=9'),
             MyText.h3('点击图片可下载和分享'),
           ],
         ),

@@ -18,7 +18,7 @@ class FontUtil {
           if (fontName.endsWith('.ttf') ||
               fontName.endsWith('.otf') ||
               fontName.endsWith('.ttc')) {
-            fontNameList.add(tu.path.basenameWithoutExtension(fontName));
+            fontNameList.add(tu.path.getBasenameWithoutExtension(fontName));
           }
         }
       }
@@ -78,7 +78,7 @@ class FontUtil {
       return false;
     }
     final fontFileBytes = await fontFile.readAsBytes();
-    fontName ??= tu.path.basenameWithoutExtension(fontFilePath);
+    fontName ??= tu.path.getBasenameWithoutExtension(fontFilePath);
     final fontLoad = FontLoader(fontName);
     fontLoad.addFont(Future.value(ByteData.view(fontFileBytes.buffer)));
     await fontLoad.load();

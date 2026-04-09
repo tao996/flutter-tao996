@@ -61,7 +61,7 @@ abstract class IFilePickerService {
   });
 
   /// 调用原生文件选择器来选择一个目录
-  Future<String?> getDirectory();
+  Future<String?> pickDirectory();
 
   /// 成功读取文件内容后返回 String，否则返回 null。
   Future<String?> getPickFileContent({

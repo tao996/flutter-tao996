@@ -215,6 +215,7 @@ class DioHttpService implements IDioHttpService {
     return HttpResponse(data: response.data, statusCode: response.statusCode);
   }
 
+  @override
   Future<HttpResponse> getUri(
     Uri uri, {
     Dio? dio,
@@ -257,6 +258,7 @@ class DioHttpService implements IDioHttpService {
     return HttpResponse(data: response.data, statusCode: response.statusCode);
   }
 
+  @override
   Future<HttpResponse> postUri(
     Uri uri, {
     Dio? dio,

@@ -214,7 +214,7 @@ class FilepathUtil {
   /// p.dirname('foo');              // -> '.'
   /// p.dirname('');                 // -> '.'
   /// ```
-  String dirname(String filePath) {
+  String getDirname(String filePath) {
     File file = File(filePath);
     return p.dirname(file.path);
   }
@@ -225,7 +225,7 @@ class FilepathUtil {
   /// p.basename('path/to');          // -> 'to'
   /// p.basename('path/to/'); // -> 'to'
   /// ```
-  String basename(String filePath) {
+  String getBasename(String filePath) {
     File file = File(filePath);
     return p.basename(file.path);
   }
@@ -235,7 +235,7 @@ class FilepathUtil {
   /// p.basenameWithoutExtension('path/to/foo.dart'); // -> 'foo'
   /// p.basenameWithoutExtension('path/to/foo.dart/'); // -> 'foo'
   /// ```
-  String basenameWithoutExtension(String filePath) {
+  String getBasenameWithoutExtension(String filePath) {
     File file = File(filePath);
     return p.basenameWithoutExtension(file.path);
   }
@@ -251,7 +251,7 @@ class FilepathUtil {
   /// p.extension('foo.bar.dart.js', 10);  // -> '.bar.dart.js'
   /// p.extension('path/to/foo.bar.dart.js', 2);  // -> '.dart.js
   /// ```
-  String extension(String filePath) {
+  String getExtension(String filePath) {
     File file = File(filePath);
     return p.extension(file.path);
   }
@@ -260,7 +260,7 @@ class FilepathUtil {
   /// ```
   /// p.withoutExtension('path/to/foo.dart'); // -> 'path/to/foo
   /// ```
-  String withoutExtension(String filePath) {
+  String getWithoutExtension(String filePath) {
     File file = File(filePath);
     return p.withoutExtension(file.path);
   }

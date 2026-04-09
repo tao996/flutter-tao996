@@ -65,7 +65,7 @@ class FileUtil implements IFilePickerService {
     if (file != null) {
       if (MyDeviceService.isPc()) {
         // 桌面端：调用通用保存逻辑
-        final suggestedName = tu.path.basename(file.path);
+        final suggestedName = tu.path.getBasename(file.path);
         await _saveFileToUserSelectedPath(suggestedName, sourceFile: file);
         return;
       }
@@ -94,7 +94,7 @@ class FileUtil implements IFilePickerService {
     }
     if (MyDeviceService.isPc()) {
       // 提取文件名作为建议名称
-      final fileName = tu.path.basename(filePath);
+      final fileName = tu.path.getBasename(filePath);
       await _saveFileToUserSelectedPath(fileName, sourceFile: file);
       return;
     }
@@ -108,10 +108,15 @@ class FileUtil implements IFilePickerService {
 
   /// 异步计算给定文件的 MD5 哈希值
   /// 返回一个 32 字符的十六进制字符串
-  Future<String> fileMd5(String filePath) async {
-    final file = File(filePath);
+  Future<String> fileMd5({String? filePath, File? file}) async {
+    if (file == null && (filePath == null || filePath.isEmpty)) {
+      throw 'filePath or file is null';
+    }
+    if (filePath != null && filePath.isNotEmpty) {
+      file = File(filePath);
+    }
 
-    if (!file.existsSync()) {
+    if (!file!.existsSync()) {
       throw FileSystemException('File not found', filePath);
     }
 
@@ -126,6 +131,7 @@ class FileUtil implements IFilePickerService {
     }
   }
 
+  /// 获取指定文件内容
   Future<String> getContent(String filePath) async {
     final file = File(filePath);
     return await file.readAsString();
@@ -234,7 +240,7 @@ class FileUtil implements IFilePickerService {
   }
 
   @override
-  Future<String?> getDirectory({
+  Future<String?> pickDirectory({
     String? dialogTitle,
     bool lockParentWindow = false,
     String? initialDirectory,

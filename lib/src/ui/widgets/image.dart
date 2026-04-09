@@ -1,43 +1,24 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:tao996/tao996.dart';
 import 'package:visibility_detector/visibility_detector.dart';
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 
-import '../../../tao996.dart';
-
-/// 图片占位符
-Widget myImagePlaceholder(String text, {void Function()? onTap}) {
-  return Center(
-    child: GestureDetector(
-      onTap: onTap,
-      child: Container(
-        height: 200,
-        width: double.infinity,
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(8),
-          color: Colors.grey[200],
-        ),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            const Icon(Icons.broken_image_outlined),
-            const SizedBox(height: 8),
-            Text(text),
-          ],
-        ),
-      ),
-    ),
-  );
-}
-
+/// 具有缓存功能的图片组件
+/// [data] 图片地址（网络或者本地）
 class MyImageCache extends StatefulWidget {
-  final String? url;
+  final dynamic data;
+  final void Function()? onTap;
+  final bool enabledTap;
+  final double? size;
 
-  const MyImageCache({super.key, required this.url});
+  const MyImageCache({
+    super.key,
+    required this.data,
+    this.onTap,
+    this.enabledTap = true,
+    this.size,
+  });
 
   @override
   State<MyImageCache> createState() => _MyImageCacheState();
@@ -48,23 +29,17 @@ class MyImageCache extends StatefulWidget {
 class _MyImageCacheState extends State<MyImageCache> {
   final IDebugService _debugService = getIDebugService();
 
-  /// 是否
-  final bool useLowDataMode;
-  final bool isWifi;
+  /// 是否为设备资源
+  bool _isDeviceResource = false;
+  bool _isAssetsResource = false;
+  bool _isIconResource = false;
+  bool _isSvgResource = false;
 
-  _MyImageCacheState()
-    : useLowDataMode = getISettingsService().useLowDataMode,
-      isWifi = getINetworkService().isSpeedNetwork {
-    _shouldLoadManually = useLowDataMode && !isWifi;
-    _debugService.d(
-      '[_MyImageCacheState] 图片加载模式',
-      args: {
-        "useLowDataMode": useLowDataMode,
-        "isWifi": isWifi,
-        "shouldLoadManually": _shouldLoadManually,
-      },
-    );
-  }
+  /// 是否开启流量模式
+  bool _useLowDataMode = true;
+
+  /// 是否为高速网络
+  bool _isSpeedNetwork = false;
 
   /// 条件加载
   bool _shouldLoadManually = false;
@@ -74,16 +49,49 @@ class _MyImageCacheState extends State<MyImageCache> {
 
   String imageUrl = '';
 
+  _MyImageCacheState() {}
+
   @override
   void initState() {
     super.initState();
-    if (widget.url != null) {
-      imageUrl = widget.url!.startsWith('//')
-          ? 'https:${widget.url}'
-          : widget.url!;
+    if (widget.data != null) {
+      if ((widget.data as String).startsWith('assets/') ||
+          (widget.data as String).startsWith('packages/')) {
+        _isAssetsResource = true;
+        _isDeviceResource = true;
+      } else if (widget.data is IconData) {
+        _isIconResource = true;
+        _isDeviceResource = true;
+      } else {
+        _isDeviceResource = tu.path.isAbsolute(widget.data!);
+      }
     }
 
-    _checkImageCache(); // 首次检查缓存
+    if (_isDeviceResource) {
+      dprint('设备图片');
+    } else {
+      _useLowDataMode = getISettingsService().useLowDataMode;
+      _isSpeedNetwork = getINetworkService().isSpeedNetwork;
+
+      /// 是否需要手动加载
+      _shouldLoadManually = _useLowDataMode && !_isSpeedNetwork;
+      _debugService.d(
+        '[_MyImageCacheState] 图片加载模式',
+        args: {
+          "useLowDataMode": _useLowDataMode,
+          "isSpeedNetwork": _isSpeedNetwork,
+          "shouldLoadManually": _shouldLoadManually,
+        },
+      );
+    }
+    if (!_isDeviceResource) {
+      if (widget.data != null) {
+        imageUrl = widget.data!.startsWith('//')
+            ? 'https:${widget.data}'
+            : widget.data!;
+      }
+      _checkImageCache(); // 首次检查缓存
+    }
   }
 
   // 检查图片是否在缓存中
@@ -121,24 +129,42 @@ class _MyImageCacheState extends State<MyImageCache> {
 
   @override
   Widget build(BuildContext context) {
+    if (_isDeviceResource) {
+      if (_isAssetsResource || _isIconResource || _isSvgResource) {
+        return _gestureDetector(
+          context,
+          MyIconSvg(widget.data, size: widget.size),
+          imageUrl: widget.data!,
+        );
+      }
+      return _gestureDetector(
+        context,
+        tu.image.deviceImage(widget.data!),
+        imageUrl: widget.data!,
+      );
+    }
     // 没有 URL 无需加载
     if (imageUrl.isEmpty) {
       return const SizedBox.shrink(); // 没有 URL，不显示任何内容
     }
     // 已缓存，总是立即加载
     if (_isImageCached || _shouldLoadManually) {
-      return _gestureDetector(context, _image(imageUrl), imageUrl: imageUrl);
+      return _gestureDetector(
+        context,
+        tu.image.networkImage(imageUrl),
+        imageUrl: imageUrl,
+      );
     }
     // wifi，图片可见时加载
-    if (isWifi) {
+    if (_isSpeedNetwork) {
       return _visibilityDetector(context, imageUrl);
     }
     // 没有网络
     if (getINetworkService().isNoNetwork) {
-      return myImagePlaceholder('No network'.tr);
+      return tu.image.placeholder('No network'.tr);
     }
 
-    return myImagePlaceholder(
+    return tu.image.placeholder(
       'clickToLoadImage'.tr,
       onTap: () {
         // 点击时，允许立即加载
@@ -163,7 +189,11 @@ class _MyImageCacheState extends State<MyImageCache> {
           );
         }
       },
-      child: _gestureDetector(context, _image(imageUrl), imageUrl: imageUrl),
+      child: _gestureDetector(
+        context,
+        tu.image.networkImage(imageUrl),
+        imageUrl: imageUrl,
+      ),
     );
   }
 
@@ -173,87 +203,22 @@ class _MyImageCacheState extends State<MyImageCache> {
     Widget child, {
     required String imageUrl,
   }) {
+    if (!widget.enabledTap) {
+      return child;
+    }
     return GestureDetector(
       // <--- 添加 GestureDetector
       onTap: () {
         if (imageUrl.isNotEmpty) {
           // 只有在图片应该加载时才允许点击放大
-          openImageViewer(context, imageUrl);
+          if (widget.onTap != null) {
+            widget.onTap!();
+          } else {
+            openImageViewer(context, imageUrl);
+          }
         }
       },
       child: child,
-    );
-  }
-
-  /// 显示指定图片
-  /// [imageUrl] 图片地址
-  Widget _image(String imageUrl) {
-    return CachedNetworkImage(
-      imageUrl: imageUrl,
-      fit: BoxFit.cover,
-      width: double.infinity,
-      // 占位符和错误组件处理它们自己的状态
-      placeholder: (context, url) => myImagePlaceholder('imageLoading'.tr),
-      errorWidget: (context, url, error) =>
-          myImagePlaceholder('imageLoadError'.tr),
-      fadeInDuration: const Duration(milliseconds: 500),
-      fadeOutDuration: const Duration(milliseconds: 500),
-    );
-  }
-}
-
-// 这是一个示例 Widget，您可以在您的 Tile 或其他地方使用它
-class MyFixedSizeLocalImage extends StatelessWidget {
-  final String filePath;
-  final double width;
-  final double height;
-
-  const MyFixedSizeLocalImage({
-    super.key,
-    required this.filePath,
-    this.width = 50,
-    this.height = 50,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    // 确保文件路径不为空且不是一个占位符
-    if (filePath.isEmpty) {
-      return const SizedBox(
-        width: 50,
-        height: 50,
-        child: Icon(Icons.broken_image, size: 30),
-      );
-    }
-
-    return Container(
-      width: width,
-      height: height,
-      clipBehavior: Clip.hardEdge,
-      // 确保图片不会溢出边界
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(4), // 可选：添加圆角
-      ),
-      child: Image.file(
-        File(filePath), // 1. 使用 Image.file 加载本地文件
-
-        width: width, // 2. 限制图片的宽度
-        height: height, // 3. 限制图片的高度
-        // 4. 控制图片的填充方式
-        fit: BoxFit.cover,
-
-        // 5. 推荐：处理图片加载失败的情况 (文件不存在、损坏等)
-        errorBuilder: (context, error, stackTrace) {
-          // 在文件不存在或加载失败时，显示一个占位符
-          return const Center(
-            child: Icon(
-              Icons.image_not_supported,
-              size: 30,
-              color: Colors.grey,
-            ),
-          );
-        },
-      ),
     );
   }
 }

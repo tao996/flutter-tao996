@@ -17,6 +17,7 @@ class ImageUtil {
     openImageViewer(context ?? Get.context!, imageUrl);
   }
 
+  /// 头像 [name] 名称，只会显示首字母；[pathImage] 头像地址；[radius] 头像半径
   Widget avatar(
     BuildContext context, {
     String? name,
@@ -46,6 +47,99 @@ class ImageUtil {
     return CircleAvatar(
       radius: radius,
       backgroundColor: Theme.of(context).colorScheme.primary,
+    );
+  }
+
+  /// 占位图片
+  Widget placeholder(
+    String text, {
+    void Function()? onTap,
+    double height = 200,
+  }) {
+    return Center(
+      child: GestureDetector(
+        onTap: onTap,
+        child: Container(
+          height: height,
+          width: double.infinity,
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(8),
+            color: Colors.grey[200],
+          ),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              const Icon(Icons.broken_image_outlined),
+              const SizedBox(height: 8),
+              Text(text),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  /// 显示指定的网络图片
+  /// [imageUrl] 图片地址
+  Widget networkImage(String imageUrl, {bool cache = true}) {
+    return CachedNetworkImage(
+      imageUrl: imageUrl,
+      fit: BoxFit.cover,
+      width: double.infinity,
+      // 占位符和错误组件处理它们自己的状态
+      placeholder: (context, url) => tu.image.placeholder('imageLoading'.tr),
+      errorWidget: (context, url, error) =>
+          tu.image.placeholder('imageLoadError'.tr),
+      fadeInDuration: const Duration(milliseconds: 500),
+      fadeOutDuration: const Duration(milliseconds: 500),
+    );
+  }
+
+  /// 显示指定的本地图片
+  Widget deviceImage(
+    String filePath, {
+    double? width,
+    double? height,
+    double iconSize = 30,
+  }) {
+    // 确保文件路径不为空且不是一个占位符
+    if (filePath.isEmpty) {
+      return SizedBox(
+        width: width,
+        height: height,
+        child: Icon(Icons.broken_image, size: iconSize),
+      );
+    }
+
+    return Container(
+      width: width,
+      height: height,
+      clipBehavior: Clip.hardEdge,
+      // 确保图片不会溢出边界
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(4), // 可选：添加圆角
+      ),
+      child: Image.file(
+        File(filePath), // 1. 使用 Image.file 加载本地文件
+
+        width: width, // 2. 限制图片的宽度
+        height: height, // 3. 限制图片的高度
+        // 4. 控制图片的填充方式
+        fit: BoxFit.cover,
+
+        // 5. 推荐：处理图片加载失败的情况 (文件不存在、损坏等)
+        errorBuilder: (context, error, stackTrace) {
+          // 在文件不存在或加载失败时，显示一个占位符
+          return Center(
+            child: Icon(
+              Icons.image_not_supported,
+              size: iconSize,
+              color: Colors.grey,
+            ),
+          );
+        },
+      ),
     );
   }
 

@@ -1,5 +1,3 @@
-import 'dart:async';
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:tao996/src/utils/tu/fn_util.dart';
@@ -56,9 +54,12 @@ void main() {
 
       test('can be cancelled', () async {
         var executed = false;
-        final cancel = fnUtil.startTimeout(const Duration(milliseconds: 50), () {
-          executed = true;
-        });
+        final cancel = fnUtil.startTimeout(
+          const Duration(milliseconds: 50),
+          () {
+            executed = true;
+          },
+        );
 
         cancel();
         await Future.delayed(const Duration(milliseconds: 100));
@@ -78,7 +79,10 @@ void main() {
         stopwatch.stop();
 
         expect(stopwatch.elapsedMilliseconds, greaterThanOrEqualTo(50));
-        expect(stopwatch.elapsedMilliseconds, lessThan(150)); // Allow some tolerance
+        expect(
+          stopwatch.elapsedMilliseconds,
+          lessThan(150),
+        ); // Allow some tolerance
       });
 
       test('delays at least minMilliseconds', () async {
@@ -96,7 +100,10 @@ void main() {
           await fnUtil.randomDelay(minMilliseconds: 10, maxMilliseconds: 50);
           stopwatch.stop();
 
-          expect(stopwatch.elapsedMilliseconds, lessThan(100)); // With tolerance
+          expect(
+            stopwatch.elapsedMilliseconds,
+            lessThan(100),
+          ); // With tolerance
         }
       });
 
