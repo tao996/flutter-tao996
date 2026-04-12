@@ -440,18 +440,19 @@ class FormHelperUtil {
     );
   }
 
-  Widget searchInput(
-    void Function(String) onChanged, {
-    void Function(String)? onSubmitted,
+  Widget searchInput({
+    TextEditingController? controller,
+    void Function(String)? onChanged,
+    void Function(String)? onSubmit,
     double fontSize = 16,
     String? hintText,
     String? value,
   }) {
-    final controller = TextEditingController(text: value);
+    controller ??= TextEditingController(text: value);
     return TextField(
       controller: controller,
       onChanged: onChanged,
-      onSubmitted: onSubmitted,
+      onSubmitted: onSubmit,
       style: TextStyle(fontSize: fontSize),
       maxLines: 1,
       // 设置垂直居中
@@ -464,8 +465,8 @@ class FormHelperUtil {
         suffixIcon: IconButton(
           icon: Icon(Icons.clear, size: fontSize),
           onPressed: () {
-            controller.text = '';
-            onChanged.call('');
+            controller!.text = '';
+            onChanged?.call('');
           },
         ),
       ),

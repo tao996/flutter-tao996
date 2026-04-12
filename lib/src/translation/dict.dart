@@ -108,9 +108,7 @@ final Map<String, Map<String, String>> words = {
     'cancel': '取消',
     'done': '完成',
     'save': '儲存',
-    // 繁体更常用 '儲存'
     'add': '新增',
-    // 繁体更常用 '新增'
     'edit': '編輯',
     'delete': '刪除',
     'upload': '上傳',
@@ -125,11 +123,11 @@ final Map<String, Map<String, String>> words = {
     'loading': '載入中',
     'userGuide': '用戶指南',
 
+    'pullDownRefresh': '下拉刷新',
     'pullUpLoadMore': '上拉載入更多',
     'loadFailedRetry': '載入失敗，請重試',
     'noMoreData': '沒有更多資料了',
 
-    // '資料' 更常用
     'failedToReadFontFiles': '無法讀取字體檔案',
     'failedToReadThemeFont': '無法讀取主題字體',
     'failedToDeleteFont': '刪除字體失敗',
@@ -141,7 +139,6 @@ final Map<String, Map<String, String>> words = {
     'youCannotUndoThis': '此操作無法復原',
     'noRecordDelete': '沒有記錄被刪除',
 
-    // '復原' 更常用
     'noInternetConnection': '網路錯誤或連線異常',
 
     'clickToLoadImage': '點擊載入圖片',
@@ -171,7 +168,6 @@ final Map<String, Map<String, String>> words = {
     'record': '記錄',
     'noRecord': '暫無@title',
     'clickToCreateYourFirstRecord': '點擊下方按鈕，開始建立您的第一個@title',
-    // '建立' 更常用
     'createNewRecord': '新增@title',
 
     'mustInteger': '@title 必須為整數',
@@ -194,6 +190,15 @@ final Map<String, Map<String, String>> words = {
     'updateFailed': '@title更新失敗',
     'noRecordFound': '找不到符合條件的@title',
     'mustSelected': '請先選擇@title',
+    'inputHint': '請輸入@title',
+    'toManage': '@title管理',
+    'toList': '@title列表',
+    'toSearch': '搜尋@title',
+    'toSelect': '選擇@title',
+    'toImport': '匯入@title',
+    'toComplete': '@title完成',
+    'isNotExist': '@title不存在',
+    'isExist': '@title已存在',
   },
 
   // ----------------------------------------------------
@@ -219,6 +224,7 @@ final Map<String, Map<String, String>> words = {
     'loading': 'Loading...',
     'userGuide': 'User Guide',
 
+    'pullDownRefresh': 'Pull down to refresh',
     'pullUpLoadMore': 'Pull up to load more',
     'loadFailedRetry': 'Load failed, please retry',
     'noMoreData': 'No more data',
@@ -286,6 +292,15 @@ final Map<String, Map<String, String>> words = {
     'updateFailed': 'Failed to update @title',
     'noRecordFound': 'No matching @title found',
     'mustSelected': 'Please select @title',
+    'inputHint': 'Please enter @title',
+    'toManage': 'Manage @title',
+    'toList': '@title List',
+    'toSearch': 'Search @title',
+    'toSelect': 'Select @title',
+    'toImport': 'Import @title',
+    'toComplete': '@title Completed',
+    'isNotExist': '@title does not exist',
+    'isExist': '@title already exists',
   },
 
   // ----------------------------------------------------
@@ -311,6 +326,7 @@ final Map<String, Map<String, String>> words = {
     'loading': '読み込み中',
     'userGuide': 'ユーザーガイド',
 
+    'pullDownRefresh': '下に引っ張って更新',
     'pullUpLoadMore': '上へ引っ張ってさらに読み込む',
     'loadFailedRetry': '読み込み失敗、再試行してください',
     'noMoreData': 'これ以上データはありません',
@@ -377,5 +393,14 @@ final Map<String, Map<String, String>> words = {
     'updateFailed': '@titleの更新に失敗しました',
     'noRecordFound': '条件に一致する@titleが見つかりません',
     'mustSelected': '@titleを選択してください',
+    'inputHint': '@titleを入力してください',
+    'toManage': '@title管理',
+    'toList': '@title一覧',
+    'toSearch': '@titleを検索',
+    'toSelect': '@titleを選択',
+    'toImport': '@titleをインポート',
+    'toComplete': '@title完了',
+    'isNotExist': '@titleが存在しません',
+    'isExist': '@titleは既に存在します',
   },
 };

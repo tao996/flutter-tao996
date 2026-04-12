@@ -55,6 +55,7 @@ class ImageUtil {
     String text, {
     void Function()? onTap,
     double height = 200,
+    bool showText = true, // 新增：控制是否显示文字
   }) {
     return Center(
       child: GestureDetector(
@@ -68,11 +69,13 @@ class ImageUtil {
           ),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              const Icon(Icons.broken_image_outlined),
-              const SizedBox(height: 8),
-              Text(text),
+              const Icon(Icons.broken_image_outlined, size: 20), // 调小图标
+              if (showText && height > 60) ...[
+                // 只有高度足够才显示文字
+                const SizedBox(height: 4),
+                Text(text, style: const TextStyle(fontSize: 10)),
+              ],
             ],
           ),
         ),
@@ -82,15 +85,28 @@ class ImageUtil {
 
   /// 显示指定的网络图片
   /// [imageUrl] 图片地址
-  Widget networkImage(String imageUrl, {bool cache = true}) {
+  Widget networkImage(
+    String imageUrl, {
+    bool cache = true,
+    double? width,
+    double? height,
+  }) {
     return CachedNetworkImage(
       imageUrl: imageUrl,
       fit: BoxFit.cover,
-      width: double.infinity,
+      width: width,
+      height: height,
       // 占位符和错误组件处理它们自己的状态
-      placeholder: (context, url) => tu.image.placeholder('imageLoading'.tr),
-      errorWidget: (context, url, error) =>
-          tu.image.placeholder('imageLoadError'.tr),
+      placeholder: (context, url) => tu.image.placeholder(
+        'imageLoading',
+        height: height ?? 40,
+        showText: false,
+      ),
+      errorWidget: (context, url, error) => tu.image.placeholder(
+        'imageLoadError',
+        height: height ?? 40,
+        showText: false,
+      ),
       fadeInDuration: const Duration(milliseconds: 500),
       fadeOutDuration: const Duration(milliseconds: 500),
     );

@@ -6,10 +6,11 @@ abstract class MyEasyRefreshController extends GetxController {
   var hasMore = true.obs;
 
   @override
-  void onInit() { // 只有在 Get.put 中才能正确初始化
+  void onInit() {
+    // 只有在 Get.put 中才能正确初始化
     super.onInit();
     scrollController.addListener(() async {
-      if (!hasMore.value){
+      if (!hasMore.value) {
         return;
       }
       if (scrollController.position.pixels ==
@@ -41,7 +42,7 @@ class EasyRefresh {
     Widget Function(BuildContext, int)? separatorBuilder,
     EdgeInsetsGeometry? padding,
   }) {
-   return RefreshIndicator(
+    return RefreshIndicator(
       onRefresh: c.onRefresh,
       child: ListView.separated(
         controller: c.scrollController,

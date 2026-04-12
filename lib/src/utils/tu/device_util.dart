@@ -2,6 +2,7 @@ import 'dart:io';
 import 'dart:convert';
 
 import 'package:flutter/services.dart';
+import 'package:get/get.dart';
 import 'package:tao996/tao996.dart';
 
 class DeviceUtil {
@@ -128,5 +129,10 @@ class DeviceUtil {
   /// 获取用户的家目录
   Future<String> homeDir() async {
     return await getIPathService().homeDir();
+  }
+
+  /// 国家码，CN 等
+  String? countryCode() {
+    return Get.deviceLocale?.countryCode;
   }
 }

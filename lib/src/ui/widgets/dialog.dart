@@ -90,7 +90,16 @@ class MyDialog {
     required Widget child,
     double? width,
     double? height,
+    bool fullScreen = false,
   }) async {
+    if (fullScreen) {
+      return fullScreenDialog(
+        context,
+        child: child,
+        width: width,
+        height: height,
+      );
+    }
     return showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -117,16 +126,18 @@ class MyDialog {
     required List<Widget> children,
     String? deleteHint,
     required void Function() onSubmit,
+    bool fullScreen = false,
   }) async {
     final length = children.length;
-    return await MyDialog.fullScreenDialog(
+    return await MyDialog.open(
       context,
+      fullScreen: fullScreen,
       child: MyBodyPadding(
         Column(
           mainAxisSize: MainAxisSize.min,
           children: List.generate(length + 2, (index) {
             if (index == 0) {
-              return MyDialog.title(title);
+              return MyDialog.title(title, replace: true);
             }
             if (index == length + 1) {
               /// 操作按钮

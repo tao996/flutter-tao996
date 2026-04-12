@@ -68,7 +68,7 @@ class _MyImageCacheState extends State<MyImageCache> {
     }
 
     if (_isDeviceResource) {
-      dprint('设备图片');
+      // dprint('设备图片');
     } else {
       _useLowDataMode = getISettingsService().useLowDataMode;
       _isSpeedNetwork = getINetworkService().isSpeedNetwork;
@@ -139,7 +139,11 @@ class _MyImageCacheState extends State<MyImageCache> {
       }
       return _gestureDetector(
         context,
-        tu.image.deviceImage(widget.data!),
+        tu.image.deviceImage(
+          widget.data!,
+          width: widget.size,
+          height: widget.size,
+        ),
         imageUrl: widget.data!,
       );
     }
@@ -151,7 +155,11 @@ class _MyImageCacheState extends State<MyImageCache> {
     if (_isImageCached || _shouldLoadManually) {
       return _gestureDetector(
         context,
-        tu.image.networkImage(imageUrl),
+        tu.image.networkImage(
+          imageUrl,
+          width: widget.size,
+          height: widget.size,
+        ),
         imageUrl: imageUrl,
       );
     }
@@ -191,7 +199,11 @@ class _MyImageCacheState extends State<MyImageCache> {
       },
       child: _gestureDetector(
         context,
-        tu.image.networkImage(imageUrl),
+        tu.image.networkImage(
+          imageUrl,
+          width: widget.size,
+          height: widget.size,
+        ),
         imageUrl: imageUrl,
       ),
     );

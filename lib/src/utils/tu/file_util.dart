@@ -8,6 +8,7 @@ import 'package:flutter_image_gallery_saver/flutter_image_gallery_saver.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:tao996/tao996.dart';
+import 'package:open_filex/open_filex.dart';
 
 final imageSaver = ImageGallerySaver();
 
@@ -375,5 +376,11 @@ class FileUtil implements IFilePickerService {
       return file.path;
     }
     return null;
+  }
+
+  /// 打开文件或目录
+  /// https://pub.dev/packages/open_filex
+  Future<void> open(String path) async {
+    await OpenFilex.open(path);
   }
 }

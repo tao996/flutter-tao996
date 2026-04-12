@@ -14,7 +14,7 @@ class MyDemoImage extends StatelessWidget {
           children: [
             MyText.h3('占位符 myImagePlaceholder'),
             const SizedBox(height: 10),
-            myImagePlaceholder('图片不存在'),
+            tu.image.placeholder('图片不存在'),
             const SizedBox(height: 10),
             MyText.h3('图片显示 MyImageCache'),
             const SizedBox(height: 10),

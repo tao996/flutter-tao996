@@ -23,6 +23,15 @@ List<KV<String>> kvLanguages = [
   // KV(label: 'Español', value: 'es_ES'),
   // // 西班牙语 (Spanish) (可选)
 ];
+String getSelectedLanguage(String value) {
+  return kvLanguages
+      .firstWhere(
+        (element) => element.value == value,
+        orElse: () => kvLanguages.first,
+      )
+      .label;
+}
+
 final List<Locale> systemSupportedLocales = [
   Locale('zh', 'CN'), //
   Locale('zh', 'TW'), //

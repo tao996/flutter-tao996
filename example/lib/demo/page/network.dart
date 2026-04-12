@@ -21,11 +21,11 @@ class MyDemoNetwork extends StatelessWidget {
           MyNetworkWidget(
             builder: (context, result) {
               if (result.isWifi) {
-                return myImagePlaceholder('wifi 高清图片');
+                return tu.image.placeholder('wifi 高清图片');
               } else if (result.isMobile) {
-                return myImagePlaceholder('mobile 普通图片');
+                return tu.image.placeholder('mobile 普通图片');
               } else {
-                return myImagePlaceholder('No internet connection');
+                return tu.image.placeholder('No internet connection');
               }
             },
           ),
@@ -34,11 +34,11 @@ class MyDemoNetwork extends StatelessWidget {
           const SizedBox(height: 16),
           Obx(() {
             if (c.results.isWifi) {
-              return myImagePlaceholder('wifi 高清图片');
+              return tu.image.placeholder('wifi 高清图片');
             } else if (c.results.isConnected) {
-              return myImagePlaceholder('mobile 普通图片');
+              return tu.image.placeholder('mobile 普通图片');
             }
-            return myImagePlaceholder('No internet connection');
+            return tu.image.placeholder('No internet connection');
           }),
         ],
       ),

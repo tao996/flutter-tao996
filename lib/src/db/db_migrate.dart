@@ -171,13 +171,13 @@ class MyDbMigrate {
       for (var row in records)
         row['module_id'] as String: row['version'] as int,
     };
-
+    dprint('已安装模块版本: $installedMap');
     var batch = db.batch();
     bool hasChanges = false;
 
     for (var module in modules) {
       final int? installedVersion = installedMap[module.id];
-
+      dprint('模块 ${module.id} 当前版本 ${module.version}, 已安装版本 $installedVersion');
       if (installedVersion == null) {
         // --- 场景 A：新安装的扩展模块 ---
         module.onCreate(batch);

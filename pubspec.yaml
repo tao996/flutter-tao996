@@ -53,6 +53,7 @@ dependencies:
   flex_color_picker: ^3.7.2
 #  collection: ^1.19.1
   flutter_smart_dialog: ^5.0.0
+  open_filex: ^4.7.0
 
   # 字符集
   fast_gbk: ^1.0.0

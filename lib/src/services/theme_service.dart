@@ -13,12 +13,12 @@ abstract class IThemeService {
   ThemeData buildLightTheme(ColorScheme? dynamicLight);
 
   /// 设置 System UI 样式的方法
-  void systemUIOverlayStyle(Color backgroundColor, Brightness brightness);
+  void systemUIOverlayStyle(Color? backgroundColor, Brightness brightness);
 }
 
 abstract class ThemeService implements IThemeService {
   @override
-  void systemUIOverlayStyle(Color backgroundColor, Brightness brightness) {
+  void systemUIOverlayStyle(Color? backgroundColor, Brightness brightness) {
     tu.fn.debounce(() {
       final isLight = brightness == Brightness.light;
       SystemChrome.setSystemUIOverlayStyle(
@@ -56,6 +56,7 @@ abstract class ThemeService implements IThemeService {
     }
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
   }
+
   /// 修改主题
   /// Get.changeTheme(Get.isDarkMode? ThemeData.light(): ThemeData.dark());
   void changeTheme(ThemeData theme) {
