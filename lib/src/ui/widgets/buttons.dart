@@ -41,7 +41,6 @@ class MyCancelButton extends StatelessWidget {
   final int? id;
   final MyButtonType? type;
   final double? size;
-  final bool autoSize;
   final Function()? onPressed;
 
   const MyCancelButton({
@@ -50,7 +49,6 @@ class MyCancelButton extends StatelessWidget {
     this.type,
     this.size,
     this.onPressed,
-    this.autoSize = true,
   });
 
   @override
@@ -65,7 +63,6 @@ class MyCancelButton extends StatelessWidget {
           },
       status: MyButtonStatus.secondary,
       type: type,
-      autoSize: true,
     );
   }
 }
@@ -76,7 +73,6 @@ class MySaveButton extends StatelessWidget {
   final RxBool? isLoading;
   final MyButtonType? type;
   final String? label;
-  final bool autoSize;
 
   const MySaveButton({
     super.key,
@@ -84,7 +80,6 @@ class MySaveButton extends StatelessWidget {
     this.isLoading,
     this.type,
     this.label,
-    this.autoSize = true,
   });
 
   @override
@@ -95,7 +90,6 @@ class MySaveButton extends StatelessWidget {
       icon: const Icon(Icons.save_outlined),
       isLoading: isLoading,
       type: type,
-      autoSize: autoSize,
     );
   }
 }
@@ -105,15 +99,8 @@ class MyInsertButton extends StatelessWidget {
   final String? label;
   final void Function()? onPressed;
   final MyButtonType? type;
-  final bool autoSize;
 
-  const MyInsertButton({
-    super.key,
-    this.label,
-    this.onPressed,
-    this.type,
-    this.autoSize = true,
-  });
+  const MyInsertButton({super.key, this.label, this.onPressed, this.type});
 
   @override
   Widget build(BuildContext context) {
@@ -122,7 +109,6 @@ class MyInsertButton extends StatelessWidget {
       onPressed: onPressed,
       icon: const Icon(Icons.add),
       type: type,
-      autoSize: autoSize,
     );
   }
 }
@@ -147,15 +133,8 @@ class MyEditButton extends StatelessWidget {
   final String? label;
   final void Function()? onPressed;
   final MyButtonType? type;
-  final bool autoSize;
 
-  const MyEditButton({
-    super.key,
-    this.label,
-    this.onPressed,
-    this.type,
-    this.autoSize = true,
-  });
+  const MyEditButton({super.key, this.label, this.onPressed, this.type});
 
   @override
   Widget build(BuildContext context) {
@@ -164,7 +143,6 @@ class MyEditButton extends StatelessWidget {
       onPressed: onPressed,
       icon: const Icon(Icons.edit),
       type: type,
-      autoSize: autoSize,
     );
   }
 }
@@ -201,7 +179,6 @@ class MyDeleteButton extends StatelessWidget {
 
   /// 提示信息是否需要添加 “此操作无法撤销”
   final bool cancel;
-  final bool autoSize;
 
   const MyDeleteButton({
     super.key,
@@ -210,7 +187,6 @@ class MyDeleteButton extends StatelessWidget {
     this.cancel = false,
     this.content,
     this.type,
-    this.autoSize = true,
   });
 
   @override
@@ -235,7 +211,6 @@ class MyDeleteButton extends StatelessWidget {
       icon: Icon(Icons.delete_outline, color: MyColor.error()),
       status: MyButtonStatus.danger,
       type: type,
-      autoSize: autoSize,
     );
   }
 }
@@ -370,9 +345,6 @@ class MyButton extends StatelessWidget {
   final double? size;
   final String? tooltip;
 
-  /// 根据尺寸自动隐藏文件
-  final bool autoSize;
-
   /// [isLoading] 是否显示加载动画；注意外部组件不需要使用 Obx 包裹，MyButton 内部已经自动处理 isLoading
   const MyButton(
     this.label, {
@@ -387,11 +359,13 @@ class MyButton extends StatelessWidget {
     this.size,
     this.padding = const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
     this.tooltip,
-    this.autoSize = true,
   });
 
   @override
   Widget build(BuildContext context) {
+    // 显示文本
+    bool showLabel =
+        label.isNotEmpty && (tu.device.countryCode() == 'CN' || tu.device.isPc);
     final ColorScheme colorScheme = Theme.of(context).colorScheme;
     // 1. 根据 ButtonStatus 计算基础颜色（适配主题色）
     final (baseColor, onBaseColor) = _getButtonColors(colorScheme);
@@ -412,6 +386,7 @@ class MyButton extends StatelessWidget {
         onBaseColor,
         loading ? const MyAnimatedIcon(isLoading: true) : currentIcon,
         disabled,
+        showLabel,
       );
 
       if (tooltip != null && !loading) {
@@ -435,6 +410,7 @@ class MyButton extends StatelessWidget {
     Color onBaseColor,
     Widget? currentIcon,
     bool isDisabled,
+    bool showLabel,
   ) {
     return switch (buttonType) {
       MyButtonType.filled => _buildFilledButton(
@@ -442,30 +418,35 @@ class MyButton extends StatelessWidget {
         onBaseColor,
         currentIcon,
         isDisabled,
+        showLabel,
       ),
       MyButtonType.filledTonal => _buildFilledTonalButton(
         baseColor,
         onBaseColor,
         currentIcon,
         isDisabled,
+        showLabel,
       ),
       MyButtonType.elevated => _buildElevatedButton(
         baseColor,
         onBaseColor,
         currentIcon,
         isDisabled,
+        showLabel,
       ),
       MyButtonType.outlined => _buildOutlinedButton(
         baseColor,
         onBaseColor,
         currentIcon,
         isDisabled,
+        showLabel,
       ),
       MyButtonType.text => _buildTextButton(
         baseColor,
         onBaseColor,
         currentIcon,
         isDisabled,
+        showLabel,
       ),
     };
   }
@@ -500,8 +481,9 @@ class MyButton extends StatelessWidget {
     Color onBaseColor,
     Widget? icon,
     bool isDisabled,
+    bool showLabel,
   ) {
-    if (autoSize && tu.device.isMobile) {
+    if (!showLabel) {
       return IconButton.filled(
         onPressed: isDisabled ? null : onPressed,
         icon: icon ?? Text(label),
@@ -527,8 +509,9 @@ class MyButton extends StatelessWidget {
     Color onBaseColor,
     Widget? icon,
     bool isDisabled,
+    bool showLabel,
   ) {
-    if (autoSize && tu.device.isMobile) {
+    if (!showLabel) {
       return IconButton.filledTonal(
         onPressed: isDisabled ? null : onPressed,
         icon: icon ?? Text(label),
@@ -555,8 +538,9 @@ class MyButton extends StatelessWidget {
     Color onBaseColor,
     Widget? icon,
     bool isDisabled,
+    bool showLabel,
   ) {
-    if (autoSize && tu.device.isMobile) {
+    if (!showLabel) {
       return IconButton(
         onPressed: isDisabled ? null : onPressed,
         icon: icon ?? Text(label),
@@ -585,8 +569,9 @@ class MyButton extends StatelessWidget {
     Color onBaseColor,
     Widget? icon,
     bool isDisabled,
+    bool showLabel,
   ) {
-    if (autoSize && tu.device.isMobile) {
+    if (!showLabel) {
       return IconButton.outlined(
         onPressed: isDisabled ? null : onPressed,
         icon: icon ?? Text(label),
@@ -615,8 +600,9 @@ class MyButton extends StatelessWidget {
     Color onBaseColor,
     Widget? icon,
     bool isDisabled,
+    bool showLabel,
   ) {
-    if (autoSize && tu.device.isMobile) {
+    if (!showLabel) {
       return IconButton(
         onPressed: isDisabled ? null : onPressed,
         icon: icon ?? Text(label),

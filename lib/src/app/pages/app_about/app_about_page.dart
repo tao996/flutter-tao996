@@ -57,185 +57,257 @@ class AppAboutPage extends StatelessWidget {
     return MyScaffold(
       singleChildScrollView: true,
       appBar: AppBar(title: Text('aboutUs'.tr)),
-      body: Center(
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.start,
-          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            Container(
-              margin: const EdgeInsets.symmetric(vertical: 24),
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(720),
-                boxShadow: [
-                  BoxShadow(
-                    color: Theme.of(context).colorScheme.primary.withAlpha(10),
-                    spreadRadius: 10,
-                    blurRadius: 10,
-                    offset: const Offset(0, 3), // changes position of shadow
-                  ),
+            // 1. 头部身份区
+            _buildHeader(context),
+            const SizedBox(height: 24),
+
+            // 2. 资源分组
+            _buildGroupTitle('appWebSite'.tr),
+            Card(
+              child: Column(
+                children: [
+                  if (args.homeUrl.isNotEmpty)
+                    _buildListTile(
+                      context,
+                      'appWebSite'.tr,
+                      args.homeUrl,
+                      Icons.language,
+                      onTap: () => c.contactService.open(args.homeUrl),
+                    ),
+                  if (args.cnDocs.isNotEmpty)
+                    _buildListTile(
+                      context,
+                      '中文文档',
+                      args.cnDocs,
+                      Icons.description_outlined,
+                      onTap: () => c.contactService.open(args.cnDocs),
+                    ),
+                  if (args.enDocs.isNotEmpty)
+                    _buildListTile(
+                      context,
+                      'En Docs',
+                      args.enDocs,
+                      Icons.translate,
+                      onTap: () => c.contactService.open(args.enDocs),
+                    ),
                 ],
               ),
-              clipBehavior: Clip.antiAlias,
-              child: Image.asset(
-                args.logoAssets,
-                height: Get.mediaQuery.size.width / 3,
+            ),
+            const SizedBox(height: 16),
+
+            // 3. 法律条款
+            _buildGroupTitle('termsOfService'.tr),
+            Card(
+              child: Column(
+                children: [
+                  if (args.termsOfService.isNotEmpty)
+                    _buildListTile(
+                      context,
+                      'termsOfService'.tr,
+                      null,
+                      Icons.assignment_outlined,
+                      onTap: () => c.contactService.open(args.termsOfService),
+                    ),
+                  if (args.privacyPolicy.isNotEmpty)
+                    _buildListTile(
+                      context,
+                      'privacyPolicy'.tr,
+                      null,
+                      Icons.privacy_tip_outlined,
+                      onTap: () => c.contactService.open(args.privacyPolicy),
+                    ),
+                ],
               ),
             ),
-            Text(args.appTitle, style: const TextStyle(fontSize: 36)),
+            const SizedBox(height: 16),
 
-            if (args.appInfo.isNotEmpty)
-              Padding(
-                padding: const EdgeInsets.fromLTRB(18, 4, 18, 4),
+            // 4. 联系我们
+            _buildGroupTitle('Contact & Social'),
+            Card(
+              child: Column(
+                children: [
+                  if (args.email.isNotEmpty)
+                    _buildContactTile(
+                      context,
+                      'Email',
+                      Icons.email_outlined,
+                      onTap: () => c.contactService.sendEmail(args.email),
+                    ),
+                  if (args.github.isNotEmpty)
+                    _buildContactTile(
+                      context,
+                      'Github',
+                      'packages/tao996/assets/icons/github.svg',
+                      onTap: () => c.contactService.open(
+                        args.github,
+                        platform: ContactPlatform.github,
+                      ),
+                    ),
+                  if (args.wechat.isNotEmpty)
+                    _buildContactTile(
+                      context,
+                      '微信 Wechat',
+                      'packages/tao996/assets/icons/wechat.svg',
+                      isCopy: true,
+                      onTap: () => c.contactService.copy(args.wechat),
+                    ),
+                  if (args.weibo.isNotEmpty)
+                    _buildContactTile(
+                      context,
+                      '微博 Weibo',
+                      'packages/tao996/assets/icons/weibo.svg',
+                      onTap: () => c.contactService.copy(args.weibo),
+                    ),
+                  if (args.facebook.isNotEmpty)
+                    _buildContactTile(
+                      context,
+                      'Facebook',
+                      'packages/tao996/assets/icons/facebook.svg',
+                      onTap: () => c.contactService.open(
+                        args.facebook,
+                        platform: ContactPlatform.facebook,
+                      ),
+                    ),
+                  if (args.twitter.isNotEmpty)
+                    _buildContactTile(
+                      context,
+                      'Twitter',
+                      'packages/tao996/assets/icons/x-twitter.svg',
+                      onTap: () => c.contactService.open(
+                        args.twitter,
+                        platform: ContactPlatform.twitter,
+                      ),
+                    ),
+
+                  if (args.telegram.isNotEmpty)
+                    _buildContactTile(
+                      context,
+                      'Telegram',
+                      'packages/tao996/assets/icons/telegram.svg',
+                      onTap: () => c.contactService.open(
+                        args.telegram,
+                        platform: ContactPlatform.telegram,
+                      ),
+                    ),
+                ],
+              ),
+            ),
+
+            // 5. 页脚版权
+            const SizedBox(height: 48),
+            if (args.copyright.isNotEmpty)
+              Opacity(
+                opacity: 0.5,
                 child: Text(
-                  args.appInfo,
-                  textAlign: TextAlign.center,
-                  style: const TextStyle(fontSize: 20),
+                  args.copyright,
+                  style: const TextStyle(fontSize: 12),
                 ),
               ),
-
-            const SizedBox(height: 20),
-            if (args.version.isNotEmpty)
-              ListTile(
-                title: Text('appVersion'.tr),
-                trailing: Text(args.version + (kDebugMode ? ' (Debug)' : '')),
-              ),
-
-            if (args.copyright.isNotEmpty)
-              ListTile(
-                title: Text('appCopyright'.tr),
-                trailing: Text(args.copyright),
-              ),
-            if (args.homeUrl.isNotEmpty)
-              ListTile(
-                title: Text('appWebSite'.tr),
-                subtitle: Text(args.homeUrl),
-                onTap: () async {
-                  await c.contactService.open(args.homeUrl);
-                },
-                trailing: const Icon(Icons.keyboard_arrow_right_outlined),
-              ),
-            if (args.cnDocs.isNotEmpty)
-              ListTile(
-                title: const Text('中文文档'),
-                subtitle: Text(args.cnDocs),
-                onTap: () async {
-                  await c.contactService.open(args.cnDocs);
-                },
-                trailing: const Icon(Icons.keyboard_arrow_right_outlined),
-              ),
-            if (args.enDocs.isNotEmpty)
-              ListTile(
-                title: const Text('En Docs'),
-                subtitle: Text(args.enDocs),
-                onTap: () async {
-                  await c.contactService.open(args.enDocs);
-                },
-                trailing: const Icon(Icons.keyboard_arrow_right_outlined),
-              ),
-
-            if (args.termsOfService.isNotEmpty)
-              ListTile(
-                title: Text('termsOfService'.tr),
-                subtitle: Text(args.termsOfService),
-                onTap: () async {
-                  await c.contactService.open(args.termsOfService);
-                },
-                trailing: const Icon(Icons.keyboard_arrow_right_outlined),
-              ),
-            if (args.privacyPolicy.isNotEmpty)
-              ListTile(
-                title: Text('privacyPolicy'.tr),
-                subtitle: Text(args.privacyPolicy),
-                onTap: () async {
-                  await c.contactService.open(args.privacyPolicy);
-                },
-                trailing: const Icon(Icons.keyboard_arrow_right_outlined),
-              ),
-
-            const SizedBox(height: 10),
-
-            if (args.email.isNotEmpty)
-              ListTile(
-                title: Text('Email'),
-                subtitle: Text(args.email),
-                trailing: const Icon(Icons.send_outlined),
-                onTap: () async {
-                  await c.contactService.sendEmail(args.email);
-                },
-              ),
-
-            if (args.github.isNotEmpty)
-              ListTile(
-                title: Text('Github'),
-                subtitle: Text(args.github),
-                trailing: const Icon(Icons.keyboard_arrow_right_outlined),
-                onTap: () async {
-                  await c.contactService.open(
-                    args.github,
-                    platform: ContactPlatform.github,
-                  );
-                },
-              ),
-            if (args.wechat.isNotEmpty)
-              ListTile(
-                title: Text('微信 Wechat'),
-                subtitle: Text(args.wechat),
-                trailing: const Icon(Icons.copy_outlined),
-                onTap: () async {
-                  await c.contactService.copy(args.wechat);
-                },
-              ),
-
-            if (args.weibo.isNotEmpty)
-              ListTile(
-                title: Text('微博 Weibo'),
-                subtitle: Text(args.weibo),
-                trailing: const Icon(Icons.copy_outlined),
-                onTap: () async {
-                  await c.contactService.copy(args.weibo);
-                },
-              ),
-
-            if (args.facebook.isNotEmpty)
-              ListTile(
-                title: Text('Facebook'),
-                subtitle: Text(args.facebook),
-                trailing: const Icon(Icons.keyboard_arrow_right_outlined),
-                onTap: () async {
-                  await c.contactService.open(
-                    args.facebook,
-                    platform: ContactPlatform.facebook,
-                  );
-                },
-              ),
-
-            if (args.twitter.isNotEmpty)
-              ListTile(
-                title: Text('Twitter'),
-                subtitle: Text(args.twitter),
-                trailing: const Icon(Icons.keyboard_arrow_right_outlined),
-                onTap: () async {
-                  await c.contactService.open(
-                    args.twitter,
-                    platform: ContactPlatform.twitter,
-                  );
-                },
-              ),
-            if (args.telegram.isNotEmpty)
-              ListTile(
-                title: const Text('Telegram'),
-                subtitle: Text(args.telegram),
-                trailing: const Icon(Icons.keyboard_arrow_right_outlined),
-                onTap: () async {
-                  await c.contactService.open(
-                    args.telegram,
-                    platform: ContactPlatform.telegram,
-                  );
-                },
-              ),
+            const SizedBox(height: 24),
           ],
         ),
       ),
+    );
+  }
+
+  // 构建头部展示
+  Widget _buildHeader(BuildContext context) {
+    return Column(
+      children: [
+        Container(
+          margin: const EdgeInsets.only(top: 24, bottom: 16),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(24), // 稍微方圆一点看起来更现代
+            boxShadow: [
+              BoxShadow(
+                color: Theme.of(context).colorScheme.primary.withOpacity(0.1),
+                spreadRadius: 8,
+                blurRadius: 15,
+              ),
+            ],
+          ),
+          clipBehavior: Clip.antiAlias,
+          child: Image.asset(args.logoAssets, height: 80, width: 80),
+        ),
+        Text(
+          args.appTitle,
+          style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+        ),
+        const SizedBox(height: 4),
+        Text(
+          'Version ${args.version}${kDebugMode ? ' (Debug)' : ''}',
+          style: TextStyle(color: Colors.grey[600], fontSize: 14),
+        ),
+        if (args.appInfo.isNotEmpty)
+          Padding(
+            padding: const EdgeInsets.only(top: 12, left: 24, right: 24),
+            child: Text(
+              args.appInfo,
+              textAlign: TextAlign.center,
+              style: const TextStyle(fontSize: 14),
+            ),
+          ),
+      ],
+    );
+  }
+
+  // 构建分组标题
+  Widget _buildGroupTitle(String title) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.only(left: 4, bottom: 8, top: 8),
+      child: Text(
+        title,
+        style: const TextStyle(
+          fontSize: 13,
+          fontWeight: FontWeight.w600,
+          color: Colors.blueGrey,
+        ),
+      ),
+    );
+  }
+
+  // 通用列表项
+  Widget _buildListTile(
+    BuildContext context,
+    String title,
+    String? subtitle,
+    IconData icon, {
+    required VoidCallback onTap,
+  }) {
+    return ListTile(
+      leading: Icon(icon, size: 22),
+      title: Text(title, style: const TextStyle(fontSize: 15)),
+      subtitle: subtitle != null
+          ? Text(subtitle, maxLines: 1, overflow: TextOverflow.ellipsis)
+          : null,
+      trailing: const Icon(Icons.chevron_right, size: 20),
+      onTap: onTap,
+    );
+  }
+
+  // 联系方式专用列表项
+  Widget _buildContactTile(
+    BuildContext context,
+    String title,
+    dynamic iconOrSvg, {
+    required VoidCallback onTap,
+    bool isCopy = false,
+  }) {
+    return ListTile(
+      leading: iconOrSvg is IconData
+          ? Icon(iconOrSvg, size: 22)
+          : MyIconSvg(iconOrSvg, size: 22),
+      title: Text(title, style: const TextStyle(fontSize: 15)),
+      trailing: Icon(
+        isCopy ? Icons.copy_outlined : Icons.chevron_right,
+        size: 18,
+      ),
+      onTap: onTap,
     );
   }
 }

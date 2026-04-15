@@ -81,7 +81,8 @@ class MessageBar extends StatelessWidget {
         // margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         decoration: _decoration(context),
         child: Row(
-          crossAxisAlignment: CrossAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisAlignment: MainAxisAlignment.start,
           children: [
             if (icon) ..._icon(foregroundColor),
             Expanded(child: _text(foregroundColor)),

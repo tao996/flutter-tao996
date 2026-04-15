@@ -25,7 +25,6 @@ class MyDialog {
             MyButton(
               'cancel'.tr,
               iconData: Icons.clear,
-              autoSize: true,
               onPressed: () {
                 Get.back();
               },

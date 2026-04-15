@@ -40,6 +40,7 @@ abstract class DbMigrateModule {
   /// 该模块当前代码中的最新版本
   final int version;
 
+  /// HomeDbModule() : super('home', 1); 注意使用 extends
   DbMigrateModule(this.id, this.version);
 
   /// 处理第一次建表

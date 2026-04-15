@@ -89,3 +89,6 @@ flutter:
       windows:
         pluginClass: Tao996PluginCApi
 
+  uses-material-design: true
+  assets:
+    - assets/icons/
