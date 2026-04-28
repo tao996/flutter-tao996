@@ -1,3 +1,5 @@
+// ignore_for_file: deprecated_member_use
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:tao996/src/db/kv.dart';
@@ -104,7 +106,7 @@ class DisplaySettingView extends StatelessWidget {
           onTap: () async {
             String selectedFont = c.globalFont.value;
             await c.refreshFontList();
-            Get.dialog(
+            await Get.dialog(
               StatefulBuilder(
                 builder: (context, setState) {
                   return AlertDialog(

@@ -15,7 +15,7 @@ abstract class IMessageService extends IDebugMessageService {
     void Function()? no,
   });
 
-  Future<void> alert(String title, {String? content, Widget? icon});
+  Future<void> alert(String content, {String? title, Widget? icon});
 
   /// 删除确认
   /// [textIsContent] 为 true 时，[text] 为内容，否则为标题
@@ -76,8 +76,8 @@ class MessageService implements IMessageService {
   }
 
   @override
-  Future<void> alert(String title, {String? content, Widget? icon}) async {
-    return await tu.sd.alert(title, content: content, icon: icon);
+  Future<void> alert(String content, {String? title, Widget? icon}) async {
+    return await tu.sd.alert(content, title: title, icon: icon);
   }
 
   @override

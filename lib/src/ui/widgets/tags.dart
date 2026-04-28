@@ -2,13 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 // 标签管理器
-class TagsManager extends StatefulWidget {
+class MyTagsManager extends StatefulWidget {
   final List<String> values;
   final String? label;
   final String? hintText;
   final Function(List<String>)? onChanged; // 添加回调以便父组件感知变化
 
-  const TagsManager({
+  const MyTagsManager({
     super.key,
     required this.values,
     this.onChanged,
@@ -17,10 +17,10 @@ class TagsManager extends StatefulWidget {
   });
 
   @override
-  State<TagsManager> createState() => _TagsManagerState();
+  State<MyTagsManager> createState() => _MyTagsManagerState();
 }
 
-class _TagsManagerState extends State<TagsManager> {
+class _MyTagsManagerState extends State<MyTagsManager> {
   late List<String> items;
 
   @override
@@ -123,3 +123,73 @@ class _TagsManagerState extends State<TagsManager> {
 //     ],
 //   );
 // }
+class MyTag {
+  /// 主色
+  static Widget primary(BuildContext context, String text) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+      decoration: BoxDecoration(
+        // 取主题主色的 10% 透明度作为背景
+        color: Theme.of(context).colorScheme.primary.withAlpha(25),
+        borderRadius: BorderRadius.circular(6),
+      ),
+      child: Text(
+        text,
+        style: TextStyle(
+          color: Theme.of(context).colorScheme.primary, // 文字使用主色，保证可读性
+          fontSize: 12,
+          fontWeight: FontWeight.w600,
+        ),
+      ),
+    );
+  }
+
+  /// 灰度“元数据”标签 , 如果你有很多标签，且不希望它们抢占用户视觉焦点（比如显示时间、创建人），使用灰色背景会更高级。
+  static Widget gray(BuildContext context, String text) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+      decoration: BoxDecoration(
+        color: Theme.of(
+          context,
+        ).colorScheme.surfaceContainerHighest, // 使用 Material 3 推荐的背景灰
+        borderRadius: BorderRadius.circular(16), // 更圆润的边角
+      ),
+      child: Text(
+        text,
+        style: TextStyle(
+          color: Theme.of(context).colorScheme.onSurfaceVariant,
+          fontSize: 12,
+        ),
+      ),
+    );
+  }
+
+  /// 警示/高亮标签, 用于“错误”、“已过期”或“重要”提示。
+  static Widget highlight(BuildContext context, String text) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.errorContainer, // 自动适配深/浅色模式
+        borderRadius: BorderRadius.circular(6),
+      ),
+      child: Text(
+        text,
+        style: TextStyle(
+          color: Theme.of(context).colorScheme.onErrorContainer,
+          fontSize: 12,
+          fontWeight: FontWeight.bold,
+        ),
+      ),
+    );
+  }
+
+  /// 多个使用时，需要套在 wrap 里面
+  static Widget wrap(List<Widget> tags) {
+    return Wrap(
+      spacing: 8.0, // 标签之间的水平间距
+      runSpacing: 4.0, // 行与行之间的垂直间距
+      crossAxisAlignment: WrapCrossAlignment.start,
+      children: tags,
+    );
+  }
+}

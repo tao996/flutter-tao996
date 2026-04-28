@@ -16,14 +16,8 @@ class AssertUtil {
   }
 
   bool isEmpty(dynamic data) {
-    // 1. 处理 null 情况
-    if (data == null) {
+    if (data == null || data == 0 || data == "" || data == false) {
       return true;
-    }
-
-    // 2. 基础类型判断（修复 switch case 语法，兼容 Dart 类型规范）
-    if (data is int || data is double) {
-      return data == 0;
     }
 
     if (data is String) {

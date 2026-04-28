@@ -70,6 +70,7 @@ export 'src/ui/widgets/separator_line.dart';
 export 'src/ui/widgets/table.dart';
 export 'src/ui/widgets/tags.dart';
 export 'src/ui/widgets/text.dart';
+export 'src/ui/widgets/card.dart';
 
 // 工具
 export 'src/utils/function.dart';

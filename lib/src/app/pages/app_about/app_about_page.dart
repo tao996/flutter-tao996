@@ -23,7 +23,12 @@ class AppAboutArguments {
   final String weibo;
   final String facebook;
   final String twitter;
-  final String telegram;
+
+  ///  telegram 群
+  final String telegramGroup;
+
+  /// QQ 群
+  final String qqGroup;
 
   AppAboutArguments({
     this.logoAssets = 'assets/logo.jpg',
@@ -42,7 +47,8 @@ class AppAboutArguments {
     required this.weibo,
     required this.facebook,
     required this.twitter,
-    required this.telegram,
+    required this.telegramGroup,
+    required this.qqGroup,
   });
 }
 
@@ -147,6 +153,15 @@ class AppAboutPage extends StatelessWidget {
                         platform: ContactPlatform.github,
                       ),
                     ),
+                  if (args.qqGroup.isNotEmpty)
+                    _buildContactTile(
+                      context,
+                      'QQ 群',
+                      'packages/tao996/assets/icons/qq.svg',
+                      isCopy: true,
+                      onTap: () => c.contactService.copy(args.qqGroup),
+                    ),
+
                   if (args.wechat.isNotEmpty)
                     _buildContactTile(
                       context,
@@ -183,13 +198,13 @@ class AppAboutPage extends StatelessWidget {
                       ),
                     ),
 
-                  if (args.telegram.isNotEmpty)
+                  if (args.telegramGroup.isNotEmpty)
                     _buildContactTile(
                       context,
-                      'Telegram',
+                      'Telegram Group',
                       'packages/tao996/assets/icons/telegram.svg',
                       onTap: () => c.contactService.open(
-                        args.telegram,
+                        args.telegramGroup,
                         platform: ContactPlatform.telegram,
                       ),
                     ),
@@ -224,7 +239,7 @@ class AppAboutPage extends StatelessWidget {
             borderRadius: BorderRadius.circular(24), // 稍微方圆一点看起来更现代
             boxShadow: [
               BoxShadow(
-                color: Theme.of(context).colorScheme.primary.withOpacity(0.1),
+                color: Theme.of(context).colorScheme.primary.withAlpha(25),
                 spreadRadius: 8,
                 blurRadius: 15,
               ),

@@ -150,22 +150,23 @@ class NumberUtil {
         // 截断小数（不四舍五入）
         final num scaled = parsedNumber * pow(10, decimalDigits);
         final num truncated = scaled < 0 ? scaled.ceil() : scaled.floor();
-        formatted = (truncated / pow(10, decimalDigits)).toStringAsFixed(decimalDigits);
+        formatted = (truncated / pow(10, decimalDigits)).toStringAsFixed(
+          decimalDigits,
+        );
       }
       if (!allowTrailingZeros) {
         // 移除小数末尾的0和多余的小数点
         // 匹配：.000 -> 删除；.5000 -> .5；.50 -> .5
-        numberStr = formatted.replaceAllMapped(
-          RegExp(r'\.(\d*?[1-9])?0+$'),
-          (match) {
-            // 如果有非零数字，保留小数点和非零数字
-            if (match.group(1) != null) {
-              return '.${match.group(1)}';
-            }
-            // 全是0，去掉整个小数部分
-            return '';
-          },
-        );
+        numberStr = formatted.replaceAllMapped(RegExp(r'\.(\d*?[1-9])?0+$'), (
+          match,
+        ) {
+          // 如果有非零数字，保留小数点和非零数字
+          if (match.group(1) != null) {
+            return '.${match.group(1)}';
+          }
+          // 全是0，去掉整个小数部分
+          return '';
+        });
       } else {
         numberStr = formatted;
       }
@@ -304,6 +305,11 @@ class NumberUtil {
     return random.nextInt(max - min) + min;
   }
 
+  int nextInt(int num) {
+    final random = Random();
+    return random.nextInt(num);
+  }
+
   List<int> getInts(String value) {
     return value
         .split(',')
@@ -311,5 +317,62 @@ class NumberUtil {
         .map((e) => tu.data.getInt(e))
         .where((e) => e > 0)
         .toList();
+  }
+
+  /// 从列表中随机挑选指定数量的元素
+  /// [items] 源列表
+  ///
+  /// [length] 要挑选的个数，[minLength] 最少个数，[maxLength] 最多个数; [minLength] , [maxLength] 只有在 [length] == 0 时才有效
+  ///
+  /// [unique] 是否不重复（默认true）
+  List<int> randomPick(
+    List<int> items, {
+    bool unique = true,
+    int minLength = 0,
+    int maxLength = 0,
+    int length = 0,
+  }) {
+    // 边界处理：空列表直接返回空
+    if (items.isEmpty) return [];
+    if (length == 0) {
+      if (minLength > 0) {
+        if (maxLength > 0) {
+          length = getRandomInt(minLength, maxLength);
+        } else {
+          length = getRandomInt(minLength, items.length);
+        }
+      } else if (maxLength > 0) {
+        length = getRandomInt(0, maxLength);
+      }
+    }
+
+    // 边界处理：要取的数量不能小于0
+    if (length <= 0) return [];
+
+    final random = Random();
+    final List<int> result = [];
+
+    if (unique) {
+      // 不重复抽取
+      // 防止要取的数量 > 列表长度，避免死循环
+      final maxPick = items.length;
+      final pickCount = length > maxPick ? maxPick : length;
+
+      // 复制一份用于删除已选元素
+      final tempList = List<int>.from(items);
+
+      for (int i = 0; i < pickCount; i++) {
+        final index = random.nextInt(tempList.length);
+        result.add(tempList.removeAt(index));
+      }
+    } else {
+      // 可重复抽取
+      for (int i = 0; i < length; i++) {
+        final index = random.nextInt(items.length);
+        result.add(items[index]);
+      }
+    }
+
+    return result;
   }
 }

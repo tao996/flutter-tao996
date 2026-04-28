@@ -171,21 +171,26 @@ class MyDeleteButton extends StatelessWidget {
 
   final MyButtonType? type;
 
-  /// 是否需要确认对话框
   final bool confirm;
 
-  /// 提示的信息，默认为 “确定要删除当前记录吗？”
+  final String? title;
+
   final String? content;
 
-  /// 提示信息是否需要添加 “此操作无法撤销”
   final bool cancel;
 
+  /// [confirm] 是否需要确认对话框
+  ///
+  /// [title] 提示信息标题，默认为 `记录`， [content] 提示的信息，默认为 “确定要删除当前 [title] 吗？”
+  ///
+  /// [cancel] 提示信息是否需要添加 “此操作无法撤销”
   const MyDeleteButton({
     super.key,
     this.onPressed,
     this.confirm = true,
     this.cancel = false,
     this.content,
+    this.title,
     this.type,
   });
 
@@ -197,7 +202,9 @@ class MyDeleteButton extends StatelessWidget {
           ? () async {
               final text =
                   (content ??
-                      'deleteConfirmContent'.trParams({'title': 'record'.tr})) +
+                      'deleteConfirmContent'.trParams({
+                        'title': title ?? 'record'.tr,
+                      })) +
                   (cancel ? '' : 'youCannotUndoThis'.tr);
               await getIMessageService().deleteConfirm(
                 text,

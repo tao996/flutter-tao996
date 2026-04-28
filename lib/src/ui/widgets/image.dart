@@ -49,7 +49,7 @@ class _MyImageCacheState extends State<MyImageCache> {
 
   String imageUrl = '';
 
-  _MyImageCacheState() {}
+  _MyImageCacheState();
 
   @override
   void initState() {

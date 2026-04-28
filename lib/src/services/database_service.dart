@@ -208,7 +208,7 @@ class SqfliteDatabaseService implements IDatabaseService {
     if (printSQL) {
       _debugService.d(
         'delete from $table',
-        args: {'where': table, 'whereArgs': whereArgs},
+        args: {'where': where, 'whereArgs': whereArgs},
       );
     }
     return txn == null

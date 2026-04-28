@@ -50,21 +50,22 @@ class FormHelperUtil {
     required List<KV<T>> items,
     required void Function(bool selected, T item) onSelectionChanged,
     List<T>? values,
+    Widget? trailing,
   }) {
     return Wrap(
       spacing: 8.0,
       runSpacing: 8.0,
-      children: items.map((item) {
-        final isSelected = values != null && values.contains(item.value);
-        return FilterChip(
-          // avatar: item.iconData != null ? Icon(item.iconData) : null,
-          label: Text(item.label),
-          selected: isSelected,
-          onSelected: (selected) {
-            onSelectionChanged(selected, item.value);
-          },
-        );
-      }).toList(),
+      children: [
+        ...items.map((item) {
+          final isSelected = values?.contains(item.value) ?? false;
+          return FilterChip(
+            label: Text(item.label),
+            selected: isSelected,
+            onSelected: (selected) => onSelectionChanged(selected, item.value),
+          );
+        }),
+        ?trailing, // 直接在这里判断
+      ],
     );
   }
 

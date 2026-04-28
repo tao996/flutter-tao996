@@ -174,17 +174,6 @@ class MyText {
     );
   }
 
-  static Widget groupText(
-    String title, {
-    double horizontal = 18,
-    double vertical = 10,
-  }) {
-    return Padding(
-      padding: EdgeInsets.symmetric(horizontal: horizontal, vertical: vertical),
-      child: Text(title, style: TextStyle(fontWeight: FontWeight.bold)),
-    );
-  }
-
   static Widget warning(String text, {BuildContext? context}) {
     return Text(
       text,
@@ -227,6 +216,17 @@ class MyText {
     return Text(text, style: TextStyle(fontWeight: FontWeight.bold));
   }
 
+  static Widget groupText(
+    String title, {
+    double horizontal = 18,
+    double vertical = 10,
+  }) {
+    return Padding(
+      padding: EdgeInsets.symmetric(horizontal: horizontal, vertical: vertical),
+      child: Text(title, style: TextStyle(fontWeight: FontWeight.bold)),
+    );
+  }
+
   /// 分组标题
   static Widget sectionTitle(
     String title, {
@@ -235,56 +235,59 @@ class MyText {
     Widget? trailing,
     BuildContext? context,
   }) {
-    if (subTitle == null && trailing == null) {
-      return Padding(
-        padding: const EdgeInsets.symmetric(vertical: 16),
-        child: Row(
-          children: [
-            if (iconData != null)
-              Icon(iconData, size: 20, color: tu.colorScheme.primary),
-            if (iconData != null) const SizedBox(width: 8),
-            Text(
-              title,
-              style: tu.textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.bold,
-                letterSpacing: 1.2, // 稍微拉开字间距更有品质感
-              ),
-            ),
-          ],
-        ),
-      );
-    }
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.center, // 确保垂直居中
-      children: <Widget>[
-        if (iconData != null) ...[
-          Icon(iconData, size: 24),
-          const SizedBox(width: 16),
-        ], // 间距
-        Expanded(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: <Widget>[
-              Text(
-                title,
-                style: tu.textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.bold,
-                  color: tu.colorScheme.primary,
-                ),
-              ),
-              if (subTitle != null && subTitle.isNotEmpty)
+    // if (subTitle == null && trailing == null) {
+    //   return Padding(
+    //     padding: const EdgeInsets.symmetric(vertical: 16),
+    //     child: Row(
+    //       children: [
+    //         if (iconData != null)
+    //           Icon(iconData, size: 20, color: tu.colorScheme.primary),
+    //         if (iconData != null) const SizedBox(width: 8),
+    //         Text(
+    //           title,
+    //           style: tu.textTheme.titleMedium?.copyWith(
+    //             fontWeight: FontWeight.bold,
+    //             letterSpacing: 1.2, // 稍微拉开字间距更有品质感
+    //           ),
+    //         ),
+    //       ],
+    //     ),
+    //   );
+    // }
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.center, // 确保垂直居中
+        children: <Widget>[
+          if (iconData != null) ...[
+            Icon(iconData, size: 24),
+            const SizedBox(width: 16),
+          ], // 间距
+          Expanded(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: <Widget>[
                 Text(
-                  subTitle,
-                  style: TextStyle(fontSize: 12, color: MyColor.text(0.6)),
+                  title,
+                  style: tu.textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.bold,
+                    // color: tu.colorScheme.primary,
+                  ),
                 ),
-            ],
+                if (subTitle != null && subTitle.isNotEmpty)
+                  Text(
+                    subTitle,
+                    style: TextStyle(fontSize: 12, color: MyColor.text(0.6)),
+                  ),
+              ],
+            ),
           ),
-        ),
 
-        // Trailing (右侧图标/Widget)
-        ?trailing,
-      ],
+          // Trailing (右侧图标/Widget)
+          ?trailing,
+        ],
+      ),
     );
   }
 

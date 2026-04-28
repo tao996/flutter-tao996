@@ -1,3 +1,4 @@
+import 'package:flutter/widgets.dart';
 import 'package:tao996/tao996.dart';
 
 class MockIMessageService implements IMessageService {
@@ -34,7 +35,7 @@ class MockIMessageService implements IMessageService {
 
   // 其他方法可以留空或抛出未实现异常，因为这个测试暂不涉及
   @override
-  Future<void> alert(String title, {String? content, dynamic icon}) async {}
+  Future<void> alert(String content, {String? title, Widget? icon}) async {}
 
   @override
   Future<bool?> confirm({

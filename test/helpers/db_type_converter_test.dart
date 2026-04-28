@@ -1,3 +1,5 @@
+// ignore_for_file: deprecated_member_use
+
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
@@ -405,12 +407,10 @@ void main() {
     const converter = JsonFontWeightConverter();
 
     test('converts FontWeight to int index', () {
-      // ignore: deprecated_member_use
       expect(
         converter.toJson(FontWeight.normal),
         equals(FontWeight.normal.index),
       );
-      // ignore: deprecated_member_use
       expect(converter.toJson(FontWeight.bold), equals(FontWeight.bold.index));
     });
 

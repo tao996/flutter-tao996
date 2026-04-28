@@ -83,12 +83,12 @@ class SmartDialogUtil {
     );
   }
 
-  Future<void> alert(String title, {String? content, Widget? icon}) {
+  Future<void> alert(String content, {String? title, Widget? icon}) {
     return Get.dialog(
       AlertDialog(
         icon: icon,
-        title: Text(title),
-        content: content == null ? null : Text(content),
+        title: Text(title ?? 'notice'.tr),
+        content: Text(content),
         actions: [
           TextButton(
             onPressed: () {

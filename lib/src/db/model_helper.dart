@@ -940,6 +940,17 @@ abstract class ModelHelper<T extends IModel<T>> {
     await execute(sql, mtn: mtn);
   }
 
+  Future<void> increases(
+    List<int> ids,
+    String field, {
+    int value = 1,
+    ModelTransaction? mtn,
+  }) async {
+    final sql =
+        'UPDATE $tableName SET $field=$field+$value WHERE id IN (${ids.join(',')})';
+    await execute(sql, mtn: mtn);
+  }
+
   /// 字段递减
   Future<void> decrease(
     int id,
@@ -948,6 +959,17 @@ abstract class ModelHelper<T extends IModel<T>> {
     ModelTransaction? mtn,
   }) async {
     final sql = 'UPDATE $tableName SET $field=$field-$value WHERE id=$id';
+    await execute(sql, mtn: mtn);
+  }
+
+  Future<void> decreases(
+    List<int> ids,
+    String field, {
+    int value = 1,
+    ModelTransaction? mtn,
+  }) async {
+    final sql =
+        'UPDATE $tableName SET $field=$field-$value WHERE id IN (${ids.join(',')})';
     await execute(sql, mtn: mtn);
   }
 

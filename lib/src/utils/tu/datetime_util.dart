@@ -240,6 +240,18 @@ Z: 解析时区偏移。intl 包的 DateFormat 能够识别 RFC 822 格式中的
       return '${minutes}m';
     }
   }
+
+  /// 获取两个时间之间的年份，通常用来计算年龄
+  int getAge(DateTime? birthday, DateTime? overday) {
+    if (birthday != null) {
+      if (overday != null) {
+        return overday.year - birthday.year;
+      } else {
+        return DateTime.now().year - birthday.year;
+      }
+    }
+    return 0;
+  }
 }
 
 extension DateTimeExt on DateTime {

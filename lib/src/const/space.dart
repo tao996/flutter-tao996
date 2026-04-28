@@ -1,4 +1,6 @@
 // 约定基础间距单位
+import 'package:flutter/widgets.dart';
+
 class MySpace {
   // 基础单位：4.0 是一个很好的选择，因为它适用于 4-point 或 8-point 网格系统
   static const double unit = 4.0;
@@ -37,6 +39,16 @@ class MySpace {
   static const double iconSizeMedium = 6 * unit; // 24.0
 
   static const double rowLeftText = 25 * unit;
+
+  static const EdgeInsetsGeometry contentPaddingZero = EdgeInsets.all(0);
+  static const EdgeInsetsGeometry contentPadding8 = EdgeInsets.only(
+    left: 8,
+    right: 8,
+  );
+  static const EdgeInsetsGeometry cardMargin = EdgeInsets.symmetric(
+    horizontal: 12,
+    vertical: 6,
+  );
 }
 
 // 为任何数字类型 (int, double) 添加一个属性来计算间距

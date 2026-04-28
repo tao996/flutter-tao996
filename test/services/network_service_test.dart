@@ -118,9 +118,6 @@ void main() {
 // Test-only implementation that doesn't require platform channels
 class TestNetworkService extends INetworkService {
   @override
-  RxList<NetworkState> state = RxList<NetworkState>();
-
-  @override
   void dispose() {}
 
   @override

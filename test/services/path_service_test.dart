@@ -101,7 +101,7 @@ void main() {
     group('getDownloadsDirectoryPath', () {
       test('returns Directory or null', () async {
         final result = await pathService.getDownloadsDirectoryPath();
-        expect(result == null || result is Directory, isTrue);
+        expect(result == null, isTrue);
       });
 
       test('returns correct path when available', () async {

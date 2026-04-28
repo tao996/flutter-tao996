@@ -1,13 +1,13 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import '../../tao996.dart';
 
 abstract class ILocaleService {
-  Future<void> changeLocale(String locale);
-
   // 获取地区 ，zh_CN, en_US 等
   Locale? get locale;
+  String get localLanguage;
 
   /// 获取系统语言，由小写字母组成，如 en, zh
   String languageCode();
@@ -23,8 +23,11 @@ PlatformDispatcher.instance.locale 在 Flutter 中返回的是当前用户界面
 2.国家/地区代码 (countryCode, 可选): 一个由两个大写字母组成的 ISO 3166-1 alpha-2 国家/地区代码。
 如 US, CN
  */
+
 class LocaleService implements ILocaleService {
   final ISettingsService settingsService = getISettingsService();
+
+  /// zh_CN
   Locale? _locale;
 
   /// 默认的地区
@@ -41,41 +44,34 @@ class LocaleService implements ILocaleService {
     Get.updateLocale(_locale!);
   }
 
+  /// 修改語言
   @override
-  Future<void> changeLocale(String language) async {
-    final ll = language.split('_');
-    if (ll.length != 2 && language != 'system') {
-      throw Exception('errorLanguageData'.tr);
+  void changeLanguage(String newLang) {
+    if (kDebugMode) {
+      dprint('修改显示语言: $newLang');
     }
-    settingsService.language = language;
-    if (ll.length == 2) {
-      _locale = Locale(language.split('_').first, language.split('_').last);
-      await Get.updateLocale(_locale!);
+    if (newLang == 'system') {
+      Get.updateLocale(Get.deviceLocale ?? const Locale('en', 'US'));
     } else {
-      _locale = Get.deviceLocale;
+      final ll = newLang.split('_');
+      if (ll.length != 2) {
+        throw Exception('errorLanguageData'.tr);
+      }
+      Get.updateLocale(Locale(ll.first, ll.last));
     }
-    return;
+    settingsService.language = newLang;
   }
 
   @override
   Locale get locale => _locale!;
 
+  /// 语言 zh_CN
+  @override
+  String get localLanguage => _locale?.toString() ?? defaultLocalLanguage;
+
+  /// 语言 zh，注意不是 zh_CN
   @override
   String languageCode() {
     return _locale!.languageCode;
-  }
-
-  /// 修改語言
-  @override
-  void changeLanguage(String newLang) {
-    dprint('changeLanguage: $newLang');
-    if (newLang == 'system') {
-      Get.updateLocale(Get.deviceLocale ?? const Locale('en', 'US'));
-    } else {
-      Get.updateLocale(
-        Locale(newLang.split('_').first, newLang.split('_').last),
-      );
-    }
-    getISettingsService().language = newLang;
   }
 }

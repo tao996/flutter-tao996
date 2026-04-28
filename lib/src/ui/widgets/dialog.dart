@@ -34,6 +34,10 @@ class MyDialog {
     );
   }
 
+  static void close() {
+    Get.back();
+  }
+
   /// 全屏对话框，如果你需要在高度/宽度上尽可能小，则需要将 Column/Row 的 mainAxisSize: MainAxisSize.min;
   /// [num] 默认与1，会与 [horizontalPadding]，[verticalPadding] 相乘
   static Future<dynamic> fullScreenDialog(
@@ -118,56 +122,62 @@ class MyDialog {
 
   /// 一个适用于表单的通用对话框
   /// [title] 对话框标题， [onSubmit] 点击保存按钮，你需要自己手动关闭对话框；
-  /// [deleteHint] 删除确认提示语，如果设置则会显示 “删除按钮”
-  static Future<dynamic> form(
+  /// [onDelete] 如果设置则会显示 “删除按钮”
+  static Future<void> form(
     BuildContext context, {
     required String title,
     required List<Widget> children,
-    String? deleteHint,
     required void Function() onSubmit,
     bool fullScreen = false,
+    void Function()? onDelete,
+    GlobalKey<FormState>? formKey,
   }) async {
     final length = children.length;
-    return await MyDialog.open(
+    final child = Column(
+      mainAxisSize: MainAxisSize.min,
+      children: List.generate(length + 2, (index) {
+        if (index == 0) {
+          return MyDialog.title(title);
+        }
+        if (index == length + 1) {
+          /// 操作按钮
+          return MyPadding(
+            vertical: 16,
+            child: Row(
+              mainAxisAlignment: onDelete == null
+                  ? MainAxisAlignment.end
+                  : MainAxisAlignment.spaceBetween,
+              // mainAxisSize: MainAxisSize.min,
+              children: [
+                if (onDelete != null)
+                  MyDeleteButton(
+                    onPressed: () {
+                      onDelete.call();
+                    },
+                  ),
+                // 保存按钮
+                MySaveButton(
+                  onPressed: () {
+                    if (formKey != null) {
+                      if (formKey.currentState!.validate()) {
+                        onSubmit.call();
+                      }
+                    } else {
+                      onSubmit.call();
+                    }
+                  },
+                ),
+              ],
+            ),
+          );
+        }
+        return children[index - 1];
+      }),
+    );
+    await MyDialog.open(
       context,
       fullScreen: fullScreen,
-      child: MyBodyPadding(
-        Column(
-          mainAxisSize: MainAxisSize.min,
-          children: List.generate(length + 2, (index) {
-            if (index == 0) {
-              return MyDialog.title(title, replace: true);
-            }
-            if (index == length + 1) {
-              /// 操作按钮
-              return MyPadding(
-                vertical: 16,
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  // mainAxisSize: MainAxisSize.min,
-                  children: [
-                    MyCancelButton(),
-                    if (deleteHint != null && deleteHint.isNotEmpty)
-                      MyDeleteButton(
-                        onPressed: () {
-                          getIMessageService().deleteConfirm(
-                            deleteHint,
-                            yes: () {
-                              goBackWithResult('delete');
-                            },
-                          );
-                        },
-                      ),
-                    // 保存按钮
-                    MySaveButton(onPressed: onSubmit),
-                  ],
-                ),
-              );
-            }
-            return children[index - 1];
-          }),
-        ),
-      ),
+      child: MyBodyPadding(Form(key: formKey, child: child)),
     );
   }
 

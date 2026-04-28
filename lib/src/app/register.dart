@@ -23,7 +23,7 @@ Future<GetIt> registerTao996Dependencies(List<String> packages) async {
   final LogService logService = LogService();
   tu.get.putService<ILogService>(logService);
   if (kDebugMode) {
-    debugPrint('日志目录：${(await LogService.getLogDir()).path}');
+    debugPrint('日志/配置目录：${(await LogService.getLogDir()).path}');
   }
   tu.get.putService<IDebugService>(DebugService());
   tu.get.lazyPutService<TranslationService>(() => TranslationService());

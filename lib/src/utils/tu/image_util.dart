@@ -200,11 +200,11 @@ class ImageUtil {
       children: [
         // 左侧：图片预览
         MyEvents.inkWell(
-          onTap: () {
-            if (imagePath != null && imagePath.isNotEmpty) {
-              open(imagePath);
-            }
-          },
+          onTap: imagePath != null && imagePath.isNotEmpty
+              ? () {
+                  open(imagePath);
+                }
+              : null,
           child: _buildImageWidget(
             imagePath: imagePath,
             imageUrl: imageUrl,

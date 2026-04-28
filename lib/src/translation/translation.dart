@@ -7,6 +7,9 @@ import 'package:get/get.dart';
 import 'package:tao996/src/translation/dict.dart';
 import 'package:tao996/tao996.dart';
 
+/// 默认语言
+const defaultLocalLanguage = 'en_US';
+
 /// 系统语言
 List<KV<String>> kvLanguages = [
   KV(label: 'systemLanguage'.tr, value: 'system'),
@@ -85,8 +88,17 @@ class TranslationService extends Translations {
     });
   }
 
+  /// 获取当前语言的翻译
+  Map<String, String> getKeys({String? locale}) {
+    locale ??= getILocaleService().localLanguage;
+    return _keys[locale] ?? {};
+  }
+
   // 将翻译添加到语言上
-  void addKeys(Map<String, String> newKeys, {String locale = 'zh_CN'}) {
+  void addKeys(
+    Map<String, String> newKeys, {
+    String locale = defaultLocalLanguage,
+  }) {
     if (_keys.containsKey(locale)) {
       _keys[locale]!.addAll(newKeys);
     } else {
@@ -96,7 +108,10 @@ class TranslationService extends Translations {
 
   /// 加载翻译文件 [jsonPth] `lib/extensions/app_beian/i18n/zh_CN.json`
   /// 你只能在 debug 模式下使用此方法
-  Future<void> addJsonFile(String jsonPth, {String locale = 'zh_CN'}) async {
+  Future<void> addJsonFile(
+    String jsonPth, {
+    String locale = defaultLocalLanguage,
+  }) async {
     if (!kDebugMode) {
       throw Exception('loadJsonKeys 只能在 debug 模式下运行');
     }
@@ -115,30 +130,3 @@ class TranslationService extends Translations {
     );
   }
 }
-
-/*
-带参数的翻译
-'message': '同步了 @count 个订阅',
-使用
- 'message'.trParams({'count': })
-
-class ChildTranslation extends MyTranslation {
-    @override
-    Map<String, Map<String, String>> get keys => {
-        ...super.keys,
-        'zh_CN': {
-            ...(super.keys['zh_CN'] ?? {}),
-            'submit': '提交',
-        },
-    };
-}
-
-// 使用服务
-class AppTranslation {
-  static const Map<String, Map<String, String>> keys = {
-    'zh_CN': {'appTitle': 'TAO996 DEMO'},
-  };
-}
-getTranslationService().addKeys(AppTranslation.keys);
-dprint(getTranslationService().keys);
- */

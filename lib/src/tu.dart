@@ -27,6 +27,8 @@ import 'package:tao996/src/utils/tu/nav_util.dart';
 
 import 'package:uuid/uuid.dart';
 
+import 'utils/tu/array_util.dart';
+
 class _TUtils {
   const _TUtils();
   final uuid = const Uuid();
@@ -53,6 +55,7 @@ class _TUtils {
   final assert1 = const AssertUtil();
   final sd = const SmartDialogUtil();
   final image = const ImageUtil();
+  final array = const ArrayUtil();
 
   final api = const ApiUtil();
   final nav = const NavUtil();
