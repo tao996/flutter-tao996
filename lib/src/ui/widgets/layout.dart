@@ -3,15 +3,18 @@ import 'package:tao996/tao996.dart';
 
 class MyLayout {
   static Widget get height8 => const SizedBox(height: 8);
+
   static Widget get height => const SizedBox(height: 16);
+
   static Widget get height24 => const SizedBox(height: 24);
 
   static Widget get width8 => const SizedBox(width: 8);
+
   static Widget get width => const SizedBox(width: 16);
 
   static Widget get emptyWidget => const SizedBox.shrink();
-  static Widget miniColumn(
-    List<Widget> children, {
+
+  static Widget miniColumn(List<Widget> children, {
     MainAxisAlignment mainAxisAlignment = MainAxisAlignment.start,
     CrossAxisAlignment crossAxisAlignment = CrossAxisAlignment.start,
     TextDirection? textDirection,
@@ -19,8 +22,11 @@ class MyLayout {
     TextBaseline? textBaseline,
     double spacing = 0.0,
     bool block = false,
+    bool unfocusOnTap = false,
   }) {
-    final child = MyEvents.unfocusOnTap(
+    final child = unfocusOnTap ? Column(
+      mainAxisSize: MainAxisSize.min, children: children,) : MyEvents
+        .unfocusOnTap(
       Column(
         mainAxisSize: MainAxisSize.min,
         // 推荐：只占用所需的垂直空间
@@ -36,8 +42,7 @@ class MyLayout {
     return block ? MyBlockWidget(child) : child;
   }
 
-  static Widget miniRow(
-    List<Widget> children, {
+  static Widget miniRow(List<Widget> children, {
     MainAxisAlignment mainAxisAlignment = MainAxisAlignment.start,
     CrossAxisAlignment crossAxisAlignment = CrossAxisAlignment.start,
     TextDirection? textDirection,
@@ -57,10 +62,10 @@ class MyLayout {
     );
   }
 
-  static Widget miniListView(
-    int? itemCount,
-    Widget? Function(BuildContext, int) itemBuilder,
-  ) {
+  static Widget miniListView({
+    required int itemCount,
+    required Widget Function(BuildContext, int) itemBuilder,
+  }) {
     return ListView.builder(
       // 保持 shrinkWrap: true，让 ListView 根据内容高度收缩
       shrinkWrap: true,
@@ -74,8 +79,7 @@ class MyLayout {
   /// [crossAxisCount] 列数；[itemCount] 总记录数量;
   ///
   /// [crossAxisSpacing] 列间距；[mainAxisSpacing] 行间距; [childAspectRatio] 宽度比
-  static Widget gridView(
-    BuildContext context, {
+  static Widget gridView(BuildContext context, {
     required int crossAxisCount,
     required int itemCount,
     EdgeInsetsGeometry? padding,
@@ -144,10 +148,8 @@ class CustomEndFloatFabLocation extends FloatingActionButtonLocation {
 
   // 1. 实现 getOffsetX: 确定 FAB 的 X 坐标 (标准 endFloat 逻辑)
 
-  double getOffsetX(
-    ScaffoldPrelayoutGeometry scaffoldGeometry,
-    double adjustment,
-  ) {
+  double getOffsetX(ScaffoldPrelayoutGeometry scaffoldGeometry,
+      double adjustment,) {
     // 默认的右侧定位逻辑：Scaffold 宽度 - FAB 宽度 - 16.0 边距
     final double end = scaffoldGeometry.scaffoldSize.width;
     final double x =
@@ -158,10 +160,8 @@ class CustomEndFloatFabLocation extends FloatingActionButtonLocation {
   }
 
   // 2. 实现 getOffsetY: 确定 FAB 的 Y 坐标 (标准 endFloat 逻辑)
-  double getOffsetY(
-    ScaffoldPrelayoutGeometry scaffoldGeometry,
-    double adjustment,
-  ) {
+  double getOffsetY(ScaffoldPrelayoutGeometry scaffoldGeometry,
+      double adjustment,) {
     // 默认的底部定位逻辑：
     // 使用 contentBottom (内容区域的底部 Y 坐标) 减去 FAB 高度，再减去底部边距 (16.0)。
     // contentBottom 已经考虑了 bottomNavigationBar 和系统插边。
@@ -169,8 +169,8 @@ class CustomEndFloatFabLocation extends FloatingActionButtonLocation {
 
     final double standardY =
         contentBottom -
-        scaffoldGeometry.floatingActionButtonSize.height -
-        16.0; // 默认底部边距
+            scaffoldGeometry.floatingActionButtonSize.height -
+            16.0; // 默认底部边距
 
     // 扣除 adjustment
     return standardY;

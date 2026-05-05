@@ -93,7 +93,7 @@ final Map<String, Map<String, String>> words = {
     'toManage': '@title管理',
     'toList': '@title列表',
     'toSearch': '搜索@title',
-    'toSelect': '@title选择',
+    'toSelect': '选择@title',
     'toImport': '导入@title',
     'toComplete': '@title完成',
     'isNotExist': '@title不存在',

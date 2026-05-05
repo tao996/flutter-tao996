@@ -3,7 +3,7 @@ import 'package:tao996/tao996.dart';
 
 class DebugSettingController extends GetxController with MixinTao996Service {
   Future<void> clearSetting() async {
-    await messageService.confirm(
+    await tu.sd.confirm(
       title: '警告',
       content: '确定要重置 Preferences 数据吗?',
       yes: () async {

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:tao996/tao996.dart';
 
 // 标签管理器
 class MyTagsManager extends StatefulWidget {
@@ -124,8 +125,35 @@ class _MyTagsManagerState extends State<MyTagsManager> {
 //   );
 // }
 class MyTag {
+  /// 文本
+  static Widget text(
+    BuildContext context,
+    String text, {
+    void Function()? onPressed,
+  }) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+      child: MyEvents.inkWell(
+        onTap: onPressed,
+        child: Text(
+          text,
+          style: TextStyle(
+            color: Theme.of(context).colorScheme.primary, // 文字使用主色，保证可读性
+            fontSize: 14,
+            fontWeight: FontWeight.w600,
+            decoration: onPressed == null ? null : TextDecoration.underline,
+          ),
+        ),
+      ),
+    );
+  }
+
   /// 主色
-  static Widget primary(BuildContext context, String text) {
+  static Widget primary(
+    BuildContext context,
+    String text, {
+    void Function()? onPressed,
+  }) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
       decoration: BoxDecoration(
@@ -133,12 +161,16 @@ class MyTag {
         color: Theme.of(context).colorScheme.primary.withAlpha(25),
         borderRadius: BorderRadius.circular(6),
       ),
-      child: Text(
-        text,
-        style: TextStyle(
-          color: Theme.of(context).colorScheme.primary, // 文字使用主色，保证可读性
-          fontSize: 12,
-          fontWeight: FontWeight.w600,
+      child: MyEvents.inkWell(
+        onTap: onPressed,
+        child: Text(
+          text,
+          style: TextStyle(
+            color: Theme.of(context).colorScheme.primary, // 文字使用主色，保证可读性
+            fontSize: 14,
+            fontWeight: FontWeight.w600,
+            decoration: onPressed == null ? null : TextDecoration.underline,
+          ),
         ),
       ),
     );
@@ -187,7 +219,7 @@ class MyTag {
   static Widget wrap(List<Widget> tags) {
     return Wrap(
       spacing: 8.0, // 标签之间的水平间距
-      runSpacing: 4.0, // 行与行之间的垂直间距
+      runSpacing: 4, // 行与行之间的垂直间距
       crossAxisAlignment: WrapCrossAlignment.start,
       children: tags,
     );

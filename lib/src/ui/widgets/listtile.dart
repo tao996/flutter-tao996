@@ -12,4 +12,37 @@ class MyListTile {
       ),
     );
   }
+
+  static Widget build({
+    required String titleText,
+    Widget? leading,
+    Widget? subtitle,
+    Widget? trailing,
+    EdgeInsetsGeometry? contentPadding,
+    void Function()? onTitleTap,
+    void Function()? onTrailingTap,
+  }) {
+    return Card(
+      margin: MySpace.cardMargin,
+      child: ListTile(
+        contentPadding: contentPadding ?? MySpace.contentPadding8,
+        leading: leading,
+        // 点击名称
+        title: MyEvents.inkWell(
+          child: Text(
+            titleText,
+            softWrap: true,
+            style: TextStyle(
+              decoration: onTitleTap == null ? null : TextDecoration.underline,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+
+          onTap: onTitleTap,
+        ),
+        subtitle: subtitle,
+        trailing: trailing,
+      ),
+    );
+  }
 }

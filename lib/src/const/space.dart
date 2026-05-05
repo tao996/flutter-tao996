@@ -45,6 +45,10 @@ class MySpace {
     left: 8,
     right: 8,
   );
+  static const EdgeInsetsGeometry contentPaddingH16V8 = EdgeInsets.symmetric(
+    horizontal: 16,
+    vertical: 8,
+  );
   static const EdgeInsetsGeometry cardMargin = EdgeInsets.symmetric(
     horizontal: 12,
     vertical: 6,

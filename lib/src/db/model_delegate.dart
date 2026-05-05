@@ -293,8 +293,7 @@ class MyModelDelegate<T extends IModel<T>> extends AbstractListDelegate<T> {
     bool navBack = true,
   }) async {
     if (deleteConfirm) {
-      final ok =
-          await messageService.deleteConfirm(title ?? 'record'.tr) ?? false;
+      final ok = await tu.sd.deleteConfirm(name: title) ?? false;
       if (!ok) return 0;
     }
 

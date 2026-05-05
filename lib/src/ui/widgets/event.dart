@@ -6,6 +6,14 @@ class MyEvents {
     GestureLongPressCallback? onLongPress,
     required Widget child,
   }) {
+    if (onTap == null && onLongPress == null) {
+      return child;
+    }
+    // GestureDetector(
+    // 关键属性：让透明区域也能捕获点击
+    // behavior: HitTestBehavior.opaque,
+    // child: _buldFamily(context, gcFamily, state),
+    // ),
     return InkWell(
       onTap: onTap, // 处理简单的点击事件
       onDoubleTap: onLongPress,
@@ -19,6 +27,9 @@ class MyEvents {
     GestureLongPressCallback? onLongPress,
     required Widget child,
   }) {
+    if (onTap == null && onLongPress == null) {
+      return Tooltip(message: message, child: child);
+    }
     return Tooltip(
       message: message,
       child: InkWell(
@@ -46,8 +57,9 @@ class MyEvents {
       child: child,
     );
   }
+
   /// 移除焦点
-  static void unfocus(){
+  static void unfocus() {
     FocusManager.instance.primaryFocus?.unfocus();
   }
 }

@@ -172,7 +172,7 @@ class MyDeleteButton extends StatelessWidget {
   final MyButtonType? type;
 
   final bool confirm;
-
+  final String? btnText;
   final String? title;
 
   final String? content;
@@ -186,6 +186,7 @@ class MyDeleteButton extends StatelessWidget {
   /// [cancel] 提示信息是否需要添加 “此操作无法撤销”
   const MyDeleteButton({
     super.key,
+    this.btnText,
     this.onPressed,
     this.confirm = true,
     this.cancel = false,
@@ -197,7 +198,7 @@ class MyDeleteButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MyButton(
-      'delete'.tr,
+      btnText ?? 'delete'.tr,
       onPressed: confirm
           ? () async {
               final text =
@@ -206,12 +207,11 @@ class MyDeleteButton extends StatelessWidget {
                         'title': title ?? 'record'.tr,
                       })) +
                   (cancel ? '' : 'youCannotUndoThis'.tr);
-              await getIMessageService().deleteConfirm(
-                text,
+              await tu.sd.deleteConfirm(
+                content: text,
                 yes: () {
                   onPressed!();
                 },
-                textIsContent: true,
               );
             }
           : onPressed,
@@ -255,12 +255,11 @@ class MyDeleteIconButton extends StatelessWidget {
                   (content ??
                       'deleteConfirmContent'.trParams({'title': 'record'.tr})) +
                   (cancel ? '' : 'youCannotUndoThis'.tr);
-              await getIMessageService().deleteConfirm(
-                text,
+              await tu.sd.deleteConfirm(
+                content: text,
                 yes: () {
                   onPressed!();
                 },
-                textIsContent: true,
               );
             }
           : onPressed,

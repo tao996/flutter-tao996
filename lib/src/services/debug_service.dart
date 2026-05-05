@@ -42,6 +42,19 @@ abstract class IDebugMessageService {
   dynamic warning(String message);
 }
 
+/// 自定义异常，不会被记录到日志中
+class MyEasyException implements Exception {
+  final String message;
+  final int errorCode;
+
+  MyEasyException(this.message, {this.errorCode = 0});
+
+  @override
+  String toString() {
+    return message;
+  }
+}
+
 class DebugService implements IDebugService {
   final ILogService logService;
   final IDebugMessageService messageService;
@@ -147,6 +160,10 @@ class DebugService implements IDebugService {
     bool log = true, // 是否需要记录日志
     String? errorMessage,
   }) {
+    if (error is MyEasyException) {
+      log = false;
+      errorMessage ??= error.toString();
+    }
     if (errorMessage != null && errorMessage.isNotEmpty) {
       _message(errorMessage, false, log: false);
     }
