@@ -310,6 +310,11 @@ class NumberUtil {
     return random.nextInt(num);
   }
 
+  bool getRandomBool() {
+    final random = Random();
+    return random.nextBool();
+  }
+
   List<int> getInts(String value) {
     return value
         .split(',')

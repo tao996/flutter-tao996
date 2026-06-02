@@ -15,9 +15,13 @@ class TypeCastUtil {
         return decoded;
       }
     } on FormatException catch (e) {
-      debugPrint('Invalid JSON format: $e');
+      if (kDebugMode) {
+        debugPrint('Invalid JSON format: $e');
+      }
     } on TypeError catch (e) {
-      debugPrint('Type error during JSON decode: $e');
+      if (kDebugMode) {
+        debugPrint('Type error during JSON decode: $e');
+      }
     }
     return isList ? [] : {};
   }
@@ -43,7 +47,9 @@ class TypeCastUtil {
       if (throwOnError) {
         throw ArgumentError('Expected a List but got ${data.runtimeType}');
       }
-      debugPrint('Error: Expected a List but got ${data.runtimeType}');
+      if (kDebugMode) {
+        debugPrint('Error: Expected a List but got ${data.runtimeType}');
+      }
       return [];
     }
     try {

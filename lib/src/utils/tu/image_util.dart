@@ -159,6 +159,68 @@ class ImageUtil {
     );
   }
 
+  /// formInput 的左侧图片组件
+  Widget formInputAvatar({
+    String? imagePath,
+    String? imageUrl,
+    double width = 60,
+    double height = 60,
+    double borderRadius = 30,
+  }) {
+    return MyEvents.inkWell(
+      onTap: imagePath != null && imagePath.isNotEmpty
+          ? () {
+              open(imagePath);
+            }
+          : null,
+      child: _buildImageWidget(
+        imagePath: imagePath,
+        imageUrl: imageUrl,
+        width: width,
+        height: height,
+        borderRadius: borderRadius,
+      ),
+    );
+  }
+
+  Widget formInputButton({
+    void Function(String)? onUpload,
+    VoidCallback? onRemove,
+    bool enableCrop = false, // 是否启用裁剪
+    double? cropAspectRatioX = 1, // 裁剪比例 X（如 1 表示正方形）
+    double? cropAspectRatioY = 1, // 裁剪比例 Y（如 1 表示正方形）
+  }) {
+    return MyLayout.miniRow([
+      IconButton(
+        onPressed: () async {
+          // 图片选择
+          final path = await tu.file.taskPath(
+            source: ImagePickerSource.gallery,
+          );
+          if (path == null || path.isEmpty) {
+            return;
+          }
+
+          final croppedPath = await _cropImage(
+            path,
+            aspectRatioX: cropAspectRatioX,
+            aspectRatioY: cropAspectRatioY,
+          );
+          if (croppedPath != null && croppedPath.isNotEmpty) {
+            // 图片已裁剪
+            onUpload?.call(croppedPath);
+          }
+        },
+        icon: const Icon(Icons.upload),
+      ),
+      if (onRemove != null) ...[
+        const SizedBox(height: 8),
+
+        IconButton(onPressed: onRemove, icon: const Icon(Icons.delete_outline)),
+      ],
+    ]);
+  }
+
   /// 图片展示组件 - 左侧小图片，右侧上传/移除按钮
   /// 适用于单张图片的上传管理场景
   ///
@@ -179,9 +241,9 @@ class ImageUtil {
     void Function(String)? onUpload,
     VoidCallback? onRemove,
     VoidCallback? onPressed,
-    double width = 80,
-    double height = 80,
-    double borderRadius = 8,
+    double width = 60,
+    double height = 60,
+    double borderRadius = 30,
     String? uploadLabel,
     String? removeLabel,
     bool showUploadButton = true,

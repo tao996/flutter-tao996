@@ -287,26 +287,29 @@ class MyDialog {
     );
   }
 
+  /// [isScrollControlled] 默认允许 BottomSheet 占据大部分屏幕
   static Future<T?> showBottomSheet<T>(
     BuildContext context, {
     required Widget child,
     bool scrollView = false,
+    bool isScrollControlled = true,
   }) {
     return showModalBottomSheet(
       context: Get.context!,
-      isScrollControlled: true, // 允许 BottomSheet 占据大部分屏幕
-      builder: (context) => scrollView
-          ? SafeArea(
-              // 只关注底部安全区域（顶部由 Material 和 AppBar 的约束自然处理）
-              top: false,
-              left: false,
-              right: false,
-              bottom: true,
+      isScrollControlled: isScrollControlled,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (context) => SafeArea(
+        // 只关注底部安全区域（顶部由 Material 和 AppBar 的约束自然处理）
+        top: false,
+        left: false,
+        right: false,
+        bottom: true,
 
-              // 确保底部内容不被系统导航栏遮挡
-              child: SingleChildScrollView(child: child),
-            )
-          : child,
+        // 确保底部内容不被系统导航栏遮挡
+        child: scrollView ? SingleChildScrollView(child: child) : child,
+      ),
     );
   }
 

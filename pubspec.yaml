@@ -61,7 +61,7 @@ dependencies:
   
   # 图片裁剪和扩展功能
   extended_image: ^10.0.1
-  image: ^4.5.3  # 用于图片处理（裁剪、压缩等）
+  image: ^4.3.0  # 用于图片处理（裁剪、压缩等）
 
   mockito: any
 dev_dependencies:

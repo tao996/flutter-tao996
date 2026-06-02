@@ -79,11 +79,6 @@ export 'src/utils/json_util.dart';
 export 'src/utils/stack_util.dart';
 export 'src/utils/tr.dart';
 
-// ps
-export 'src/utils/ps/ps.dart';
-export 'src/utils/ps/models.dart';
-export 'src/utils/ps/painter.dart';
-
 export 'src/getx.dart';
 export 'src/tu.dart';
 export 'src/tu_headers.dart';

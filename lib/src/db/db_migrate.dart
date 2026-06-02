@@ -100,7 +100,7 @@ class MyDbMigrate {
               // 🎯 关键：在建表时立即记录版本，防止同步逻辑重复触发
               batch.insert('_module_versions', {
                 'module_id': module.id,
-                'version': module.version,
+                'version': 1, // 首次安装时版本只为 1
               });
 
               module.onCreate(batch);

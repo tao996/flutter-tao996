@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:tao996/tao996.dart';
 
@@ -52,7 +53,7 @@ class ColorUtil {
 
       if (parts.length != 3) return Colors.black; // 兜底处理
 
-    // 2. 构造颜色
+      // 2. 构造颜色
       // 现代写法 (3.27+)：Color.from(r: ..., g: ..., b: ..., a: ...)
       return Color.from(
         red: parts[0] / 255,
@@ -73,7 +74,9 @@ class ColorUtil {
         return rgbToColor(input, opacity: opacity);
       }
     } catch (e) {
-      debugPrint("解析颜色失败: $e");
+      if (kDebugMode) {
+        debugPrint("解析颜色失败: $e");
+      }
     }
     return Colors.transparent;
   }

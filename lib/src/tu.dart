@@ -21,13 +21,14 @@ import 'package:tao996/src/utils/tu/number_util.dart';
 import 'package:tao996/src/utils/tu/permission_util.dart';
 import 'package:tao996/src/utils/tu/smart_dialog_util.dart';
 import 'package:tao996/src/utils/tu/text_util.dart';
-import 'package:tao996/src/utils/tu/zip.dart';
+
 import 'package:tao996/src/utils/tu/url_util.dart';
 import 'package:tao996/src/utils/tu/nav_util.dart';
 
 import 'package:uuid/uuid.dart';
 
 import 'utils/tu/array_util.dart';
+import 'utils/tu/zip.dart';
 
 class _TUtils {
   const _TUtils();
@@ -45,6 +46,7 @@ class _TUtils {
   final number = const NumberUtil();
   final permission = const PermissionUtil();
   final url = const UrlUtil();
+  // achieve 版本太高，屏蔽掉
   final zip = const ZipUtil();
   final device = const DeviceUtil();
   final context = const ContextUtil();

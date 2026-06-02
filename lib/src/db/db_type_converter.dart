@@ -1,6 +1,7 @@
 // 封装工具类处理类型转换
 import 'dart:convert';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 import 'package:json_annotation/json_annotation.dart';
 import 'package:tao996/tao996.dart';
@@ -332,7 +333,9 @@ class JsonBoxShadowConverter implements JsonConverter<BoxShadow, String> {
         spreadRadius: (json['spread'] as num).toDouble(),
       );
     } catch (e) {
-      debugPrint("BoxShadow 解析失败: $e");
+      if (kDebugMode) {
+        debugPrint("BoxShadow 解析失败: $e");
+      }
       return const BoxShadow();
     }
   }

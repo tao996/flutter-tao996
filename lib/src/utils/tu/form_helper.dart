@@ -606,7 +606,7 @@ class FormHelperUtil {
                 ? const Icon(Icons.circle, size: 8, color: Colors.red)
                 : null,
           ),
-          MyText.h4(label),
+          MyText.h5(label),
         ],
       ),
       right: child,
